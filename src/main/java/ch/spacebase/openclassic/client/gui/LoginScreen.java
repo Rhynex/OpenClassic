@@ -18,15 +18,12 @@ import ch.spacebase.openclassic.api.gui.widget.PasswordTextBox;
 import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.cookie.Cookie;
-import ch.spacebase.openclassic.client.cookie.CookieList;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
+import ch.spacebase.openclassic.client.util.Storage;
+import ch.spacebase.openclassic.client.util.cookie.Cookie;
+import ch.spacebase.openclassic.client.util.cookie.CookieList;
 
-import org.lwjgl.input.Keyboard;
-
-import com.mojang.minecraft.SessionData;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -36,8 +33,6 @@ public class LoginScreen extends GuiScreen {
 	private String title = OpenClassic.getGame().getTranslator().translate("gui.login.enter");
 	
 	public void onOpen() {
-		Keyboard.enableRepeatEvents(true);
-		
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.login")));
 		this.attachWidget(new Button(4, this.getWidth() / 2 + 2, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.play-offline")));
@@ -78,11 +73,7 @@ public class LoginScreen extends GuiScreen {
 			this.getWidget(0, Button.class).setActive(false);
 		}
 	}
-
-	public void onClose() {
-		Keyboard.enableRepeatEvents(false);
-	}
-
+	
 	public void onButtonClick(Button button) {
 		if(button.getId() == 0) {
 			String user = this.getWidget(2, TextBox.class).getText();
@@ -113,13 +104,15 @@ public class LoginScreen extends GuiScreen {
 			}
 			
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("gui.login.logging-in"));
-			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().setProgress(-1);
+			OpenClassic.getClient().getProgressBar().setVisible(true);
 			if (!auth(user, pass)) {
 				this.title = Color.RED + OpenClassic.getGame().getTranslator().translate("gui.login.failed");
 				return;
 			}
 			
-			GeneralUtils.getMinecraft().setCurrentScreen(new MainMenuScreen());
+			OpenClassic.getClient().getProgressBar().setVisible(false);
+			OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
 		}
 		
 		if(button.getId() == 1) {
@@ -127,7 +120,7 @@ public class LoginScreen extends GuiScreen {
 		}
 		
 		if(button.getId() == 4) {
-			GeneralUtils.getMinecraft().setCurrentScreen(new MainMenuScreen());
+			OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
 		}
 	}
 
@@ -137,7 +130,7 @@ public class LoginScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 40);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.login.user"), (this.getWidth() / 2 - 104) - RenderHelper.getHelper().getStringWidth("Username"), this.getHeight() / 2 - 6);
@@ -178,13 +171,6 @@ public class LoginScreen extends GuiScreen {
 			result = HTTPUtil.fetchUrl("http://www.minecraft.net", "", "https://www.minecraft.net/login");
 
 		if (result.contains("Logged in as")) {
-			GeneralUtils.getMinecraft().data = new SessionData(result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | ")));
-			
-			try {
-				GeneralUtils.getMinecraft().data.haspaid = HTTPUtil.fetchUrl("http://www.minecraft.net/haspaid.jsp", "user=" + URLEncoder.encode(GeneralUtils.getMinecraft().data.username, "UTF-8")).equals("true");
-			} catch (UnsupportedEncodingException e) {
-			}
-
 			parseServers(HTTPUtil.rawFetchUrl("http://www.minecraft.net/classic/list", "", "http://www.minecraft.net"));
 			return true;
 		}
@@ -209,8 +195,10 @@ public class LoginScreen extends GuiScreen {
 			String max = data.substring(index, data.indexOf("</td>", index));
 
 			Server s = new Server(name, Integer.valueOf(users).intValue(), Integer.valueOf(max).intValue(), id);
-			SessionData.servers.add(s);
-			SessionData.serverInfo.add(s.name);
+			
+			if(s.getName() != null && s.getName().length() > 0) {
+				Storage.getServers().put(s.getName(), s);
+			}
 		}
 	}
 

@@ -1,324 +1,199 @@
 package ch.spacebase.openclassic.client.level;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.block.Block;
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.entity.BlockEntity;
-import ch.spacebase.openclassic.api.event.EventFactory;
-import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.level.Level;
+import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.ClassicClient;
+import ch.spacebase.openclassic.client.math.Tracer;
+import ch.spacebase.openclassic.client.mode.Multiplayer;
+import ch.spacebase.openclassic.client.particle.ParticleManager;
+import ch.spacebase.openclassic.client.player.OtherPlayer;
+import ch.spacebase.openclassic.client.render.LevelRenderer;
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 
-public class ClientLevel implements Level {
-
-	private com.mojang.minecraft.level.Level handle;
-	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
-	private boolean generating = false;
+public class ClientLevel extends ClassicLevel implements Level {
 	
-	private boolean physics = true;
-	public NBTData data;
+	private int[] blockers;
+	private LevelRenderer renderer;
+	private Tracer tracer;
+	private ParticleManager particles = new ParticleManager();
 	
-	public ClientLevel(com.mojang.minecraft.level.Level handle) {
-		this.handle = handle;
-	}
-	
-	public void tick() {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getController() != null) entity.getController().tick();
-		}
-	}
-	
-	@Override
-	public void addPlayer(Player player) {
+	public ClientLevel() {
+		super();
+		this.executor.shutdown();
+		this.tracer = new Tracer(this);
 	}
 
-	@Override
-	public void removePlayer(String player) {
+	public ClientLevel(LevelInfo info) {
+		super(info);
+		this.executor.shutdown();
+		this.blockers = new int[this.getWidth() * this.getHeight() * this.getDepth()];
+		this.tracer = new Tracer(this);
 	}
 
-	@Override
-	public boolean getPhysicsEnabled() {
-		return this.physics;
+	public void setWorldData(short width, short height, short depth, byte[] blocks) {
+		super.setWorldData(width, height, depth, blocks);
+		this.blockers = new int[blocks.length];
+		this.renderer = new LevelRenderer(this);
+		this.calcLight(0, 0, width, depth);
 	}
 
-	@Override
-	public void setPhysicsEnabled(boolean enabled) {
-		this.physics = enabled;
-	}
-
-	@Override
-	public List<Player> getPlayers() {
-		List<Player> result = new ArrayList<Player>();
-		result.add(GeneralUtils.getMinecraft().player.openclassic);
-		return result;
-	}
-
-	@Override
-	public String getName() {
-		return this.handle.name;
-	}
-
-	@Override
-	public String getAuthor() {
-		return this.handle.creator;
-	}
-
-	@Override
-	public long getCreationTime() {
-		return this.handle.createTime;
-	}
-
-	@Override
-	public Position getSpawn() {
-		return new Position(this, this.handle.xSpawn, this.handle.ySpawn, this.handle.zSpawn, (byte) this.handle.rotSpawn, (byte) 0);
-	}
-
-	@Override
-	public void setSpawn(Position pos) {
-		this.handle.setSpawnPos(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), pos.getYaw());
-	}
-
-	@Override
-	public short getWidth() {
-		return (short) this.handle.width;
-	}
-
-	@Override
-	public short getHeight() {
-		return (short) this.handle.depth;
-	}
-
-	@Override
-	public short getDepth() {
-		return (short) this.handle.height;
-	}
-
-	@Override
-	public short getWaterLevel() {
-		return (short) this.handle.getWaterLevel();
-	}
-
-	@Override
-	public byte[] getBlocks() {
-		return this.handle.blocks;
-	}
-
-	@Override
-	public byte getBlockIdAt(Position pos) {
-		return this.getBlockIdAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
-	}
-
-	@Override
-	public byte getBlockIdAt(int x, int y, int z) {
-		return (byte) this.handle.getTile(x, y, z);
-	}
-
-	@Override
-	public BlockType getBlockTypeAt(Position pos) {
-		return this.getBlockTypeAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
-	}
-
-	@Override
-	public BlockType getBlockTypeAt(int x, int y, int z) {
-		return Blocks.fromId(this.getBlockIdAt(x, y, z));
-	}
-
-	@Override
-	public Block getBlockAt(Position pos) {
-		return new Block(pos);
-	}
-
-	@Override
-	public Block getBlockAt(int x, int y, int z) {
-		return this.getBlockAt(new Position(this, x, y, z));
-	}
-
-	@Override
-	public boolean setBlockIdAt(Position pos, byte type) {
-		return this.setBlockIdAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), type, true);
-	}
-
-	@Override
-	public boolean setBlockIdAt(Position pos, byte type, boolean physics) {
-		return this.setBlockIdAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), type, physics);
-	}
-
-	@Override
-	public boolean setBlockIdAt(int x, int y, int z, byte type) {
-		return this.setBlockIdAt(x, y, z, type, true);
-	}
-
-	@Override
-	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
-		if(physics) {
-			return this.handle.setTile(x, y, z, type);
-		} else {
-			return this.handle.setTileNoUpdate(x, y, z, type);
-		}
-	}
-
-	@Override
-	public boolean setBlockAt(Position pos, BlockType type) {
-		return this.setBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), type, true);
-	}
-
-	@Override
-	public boolean setBlockAt(Position pos, BlockType type, boolean physics) {
-		return this.setBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), type, physics);
-	}
-
-	@Override
-	public boolean setBlockAt(int x, int y, int z, BlockType type) {
-		return this.setBlockAt(x, y, z, type, true);
-	}
-
-	@Override
-	public boolean setBlockAt(int x, int y, int z, BlockType type, boolean physics) {
-		return this.setBlockIdAt(x, y, z, type.getId(), physics);
-	}
-	
-	@Override
-	public int getHighestBlockY(int x, int z) {
-		for(int y = this.getHeight(); y >= 0; y--) {
-			if(this.getBlockIdAt(x, y, z) != 0) return y;
-		}
-		
-		return -1;
-	}
-
-	@Override
-	public boolean isHighest(int x, int y, int z) {
-		if(this.getHighestBlockY(x, z) <= y) return true;
-		return false;
-	}
-	
 	@Override
 	public boolean isLit(int x, int y, int z) {
-		return this.handle.isLit(x, y, z);
-	}
-
-	@Override
-	public boolean isGenerating() {
-		return this.generating;
-	}
-
-	@Override
-	public void setGenerating(boolean generating) {
-		this.generating = generating;
+		return y >= this.blockers[x + z * this.getWidth()];
 	}
 	
-	@Override
-	public boolean treePhysics() {
-		return this.handle.growTrees;
-	}
-
-	@Override
-	public void sendToAll(Message message) {
-		this.getPlayers().get(0).getSession().send(message);
-	}
-
-	@Override
-	public void sendToAllExcept(Player skip, Message message) {
-		if(skip.getPlayerId() != this.getPlayers().get(0).getPlayerId()) {
-			this.getPlayers().get(0).getSession().send(message);
-		}
-	}
-
-	public List<BlockEntity> getBlockEntities() {
-		return new ArrayList<BlockEntity>(this.entities);
-	}
-	
-	public BlockEntity getBlockEntityFromId(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity getBlockEntity(Position pos) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getPosition().equals(pos)) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity spawnBlockEntity(BlockEntity entity, Position pos) {
-		this.entities.add(entity);
-		entity.setPosition(pos);
-		
-		return entity;
-	}
-	
-	public void removeBlockEntity(BlockEntity entity) {
-		this.removeBlockEntity(entity.getEntityId());
-	}
-	
-	public void removeBlockEntity(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) {
-				if(entity.getController() != null) entity.getController().onDeath();
-				EventFactory.callEvent(new EntityDeathEvent(entity));
-				this.entities.remove(entity);
+	private void calcLight(int x, int z, int width, int depth) {
+		for(int xx = x; xx < x + width; xx++) {
+			for(int zz = z; zz < z + depth; zz++) {
+				int blocker = this.blockers[xx + zz * this.getWidth()];
+				int current = this.getHighestOpaque(xx, zz);
+				
+				if(current < 0) current = 0;
+				this.blockers[xx + zz * this.getWidth()] = current;
+				if(blocker != current) {
+					int bottom = blocker < current ? blocker : current;
+					int top = blocker > current ? blocker : current;
+					this.renderer.refresh(xx - 1, bottom - 1, zz - 1, xx + 1, top + 1, zz + 1);
+				}
 			}
 		}
 	}
 	
-	public com.mojang.minecraft.level.Level getHandle() {
-		return this.handle;
+	public int getHighestOpaque(int x, int z) {
+		for(int y = this.getHeight(); y >= 0; y--) {
+			if(this.getBlockTypeAt(x, y, z).isOpaque()) return y;
+		}
+		
+		return -1;
+	}
+	
+	public float getBrightness(int x, int y, int z) {
+		if(x < 0 || y < 0 || z < 0 || x >= this.getWidth() || y >= this.getHeight() || z >= this.getDepth()) return 1;
+		BlockType block = this.getBlockTypeAt(x, y, z);
+		return block == VanillaBlock.LAVA || block == VanillaBlock.STATIONARY_LAVA ? 100 : this.isLit(x, y, z) ? 1 : 0.6f;
+	}
+	
+	@Override
+	public void update(boolean rendering) {
+		if(rendering) {
+			this.renderer.update();
+		} else {
+			this.particles.update();
+			for(Player player : this.getPlayers()) {
+				if(player instanceof OtherPlayer) ((OtherPlayer) player).update();
+			}
+			
+			if(!(((ClassicClient) OpenClassic.getClient()).getMode() instanceof Multiplayer)) {
+				this.physics();
+			}
+		}
+	}
+	
+	@Override
+	public void render(float delta) {
+		this.renderer.render();
+		this.particles.render(delta);
+		for(Player player : this.getPlayers()) {
+			if(player instanceof OtherPlayer) ((OtherPlayer) player).render(delta);
+		}
+	}
+	
+	@Override
+	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
+		if(super.setBlockIdAt(x, y, z, type, physics)) {
+			this.calcLight(x, z, 1, 1);
+			this.renderer.refresh(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
+			return true;
+		}
+		
+		return false;
 	}
 
 	@Override
-	public void delayTick(Position pos, byte id) {
-		this.handle.addToTickNextTick(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), id);
+	public void addPlayer(Player player) {
+		if(player instanceof OtherPlayer) {
+			super.addPlayer(player);
+		}
+	}
+
+	public boolean contains(BoundingBox bb, BlockType... types) {
+		List<BlockType> list = Arrays.asList(types);
+		int x1 = bb.getX1() < 0 ? 0 : (int) bb.getX1();
+		int y1 = bb.getY1() < 0 ? 0 : (int) bb.getY1();
+		int z1 = bb.getZ1() < 0 ? 0 : (int) bb.getZ1();
+
+		for(int x = x1; x < Math.min(bb.getX2(), this.getWidth()); x++) {
+			for(int y = y1; y < Math.min(bb.getY2(), this.getHeight()); y++) {
+				for(int z = z1; z < Math.min(bb.getZ2(), this.getDepth()); z++) {
+					BlockType type = this.getBlockTypeAt(x, y, z);
+					if(list.contains(type)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+	
+	public List<BoundingBox> getBoxes(BoundingBox bb) {
+		List<BoundingBox> result = new ArrayList<BoundingBox>();
+		int x1 = (int) bb.getX1() - (bb.getX1() < 0 ? 1 : 0);
+		int y1 = (int) bb.getY1() - (bb.getY1() < 0 ? 1 : 0);
+		int z1 = (int) bb.getZ1() - (bb.getZ1() < 0 ? 1 : 0);
+
+		for(int x = x1; x < (int) bb.getX2() + 1; x++) {
+			for(int y = y1; y < (int) bb.getY2() + 1; y++) {
+				for(int z = z1; z < (int) bb.getZ2() + 1; z++) {
+					if(x >= 0 && y >= 0 && z >= 0 && x < this.getWidth() && y < this.getHeight() && z < this.getDepth()) {
+						BlockType type = this.getBlockTypeAt(x, y, z);
+						if(type != null && type != VanillaBlock.AIR) {
+							BoundingBox blockbb = type.getModel().getCollisionBox(x, y, z);
+							if (blockbb != null && bb.intersectsInner(blockbb)) {
+								result.add(blockbb);
+							}
+						}
+					} else if(y < this.getHeight()) {
+						BoundingBox blockbb = VanillaBlock.BEDROCK.getModel().getCollisionBox(x, y, z);
+						if (blockbb != null && bb.intersectsInner(blockbb)) {
+							result.add(blockbb);
+						}
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 	@Override
-	public boolean growTree(int x, int y, int z) {
-		return this.handle.maybeGrowTree(x, y, z);
+	public void sendToAll(Message message) {
 	}
 
 	@Override
-	public NBTData getData() {
-		return this.data;
+	public void sendToAllExcept(Player skip, Message message) {
 	}
-
-	@Override
-	public int getSkyColor() {
-		return this.handle.skyColor;
+	
+	public Tracer getTracer() {
+		return this.tracer;
 	}
-
-	@Override
-	public void setSkyColor(int color) {
-		this.handle.skyColor = color;
+	
+	public ParticleManager getParticleManager() {
+		return this.particles;
 	}
-
-	@Override
-	public int getFogColor() {
-		return this.handle.fogColor;
+	
+	public LevelRenderer getRenderer() {
+		return this.renderer;
 	}
-
-	@Override
-	public void setFogColor(int color) {
-		this.handle.fogColor = color;
-	}
-
-	@Override
-	public int getCloudColor() {
-		return this.handle.cloudColor;
-	}
-
-	@Override
-	public void setCloudColor(int color) {
-		this.handle.cloudColor = color;
-	}
-
+	
 }

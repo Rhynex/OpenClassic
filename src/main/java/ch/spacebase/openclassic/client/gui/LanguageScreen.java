@@ -5,7 +5,6 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,25 +30,21 @@ public class LanguageScreen extends GuiScreen {
 		this.getWidget(0, ButtonList.class).setContents(languages);
 	}
 
-	public final void onButtonClick(Button button) {
-		if (button.isActive()) {
-			if (button.getId() == 1) {
-				GeneralUtils.getMinecraft().setCurrentScreen(this.parent);
-			}
+	public void onButtonClick(Button button) {
+		if(button.getId() == 1) {
+			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
 	
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
-		if(button.isActive()) {
-			OpenClassic.getGame().getConfig().setValue("options.language", button.getText());
-		}
+		OpenClassic.getGame().getConfig().setValue("settings.language", button.getText());
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.language.select"), this.getWidth() / 2, 15, 16777215);
-		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("options.language")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
+		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("settings.language")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
 		super.render();
 	}
 }

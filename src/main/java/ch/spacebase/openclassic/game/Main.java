@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ch.spacebase.openclassic.client.MinecraftStandalone;
+import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.server.ClassicServer;
 
 public class Main {
@@ -19,7 +19,11 @@ public class Main {
 				}
 			}.start();
 		} else {
-			MinecraftStandalone.start(args);
+			new Thread("Client") {
+				public void run() {
+					new ClassicClient().start();
+				}
+			}.start();
 		}
 	}
 	

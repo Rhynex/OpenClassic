@@ -264,7 +264,7 @@ public abstract class ClassicGame implements Game {
 	
 	@Override
 	public String getLanguage() {
-		return this.config.getString("options.language", "English");
+		return this.config.getString("settings.language", "English");
 	}
 
 }

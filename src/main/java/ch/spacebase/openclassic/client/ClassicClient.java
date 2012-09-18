@@ -1,8 +1,12 @@
 package ch.spacebase.openclassic.client;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -11,19 +15,19 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.level.LevelIO;
-import com.mojang.minecraft.level.generator.LevelGenerator;
+import org.jboss.netty.util.ThreadNameDeterminer;
+import org.jboss.netty.util.ThreadRenamingRunnable;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
-import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
-import ch.spacebase.openclassic.api.block.model.CubeModel;
-import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
 import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
@@ -32,7 +36,6 @@ import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
 import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
-import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
@@ -47,25 +50,132 @@ import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.block.physics.TNTPhysics;
 import ch.spacebase.openclassic.client.command.ClientCommands;
+import ch.spacebase.openclassic.client.gui.LoginScreen;
+import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.input.ClientInputHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.mode.Mode;
+import ch.spacebase.openclassic.client.mode.Singleplayer;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.sound.ClientAudioManager;
+import ch.spacebase.openclassic.client.util.Directories;
+import ch.spacebase.openclassic.client.util.LWJGLNatives;
+import ch.spacebase.openclassic.client.util.Projection;
+import ch.spacebase.openclassic.client.util.Storage;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
+import de.matthiasmann.twl.utils.PNGDecoder;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class ClassicClient extends ClassicGame implements Client {
+
+	private boolean running = false;
+	private ClientProgressBar progress = new ClientProgressBar();
+	private boolean openclassicServer = false;
+	private String openclassicVersion = "";
+
+	private ClientAudioManager audio;
+	private GuiScreen currentScreen;
+	private Mode mode;
+	private int fps = 0;
 	
-	private final Minecraft mc;
-	
-	public ClassicClient(Minecraft mc) {
-		super(GeneralUtils.getMinecraftDirectory());
-		RenderHelper.setHelper(new ClientRenderHelper());
-		InputHelper.setHelper(new ClientInputHelper());
-		this.mc = mc;
+	public ClassicClient() {
+		super(Directories.getWorkingDirectory());
 	}
 	
-	public void init() {
+	public void start() {
+		this.running = true;
+		OpenClassic.setClient(this);
+		RenderHelper.setHelper(new ClientRenderHelper());
+		InputHelper.setHelper(new ClientInputHelper());
+		Storage.loadFavorites(this.getDirectory());
+		ThreadRenamingRunnable.setThreadNameDeterminer(new ThreadNameDeterminer() {
+			@Override
+			public String determineThreadName(String current, String proposed) throws Exception {
+				return "Client-" + proposed;
+			}
+		});
+		
+		this.setupLogger();
+		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.CLIENT_VERSION));
+		LWJGLNatives.load(new File(Directories.getWorkingDirectory(), "bin"));
+		this.audio = new ClientAudioManager();
+		
+		this.registerExecutor(null, new ClientCommands());
+		this.registerGenerator("flat", new FlatLandGenerator());
+		
+		this.getConfig().applyDefault("options.music", true);
+		this.getConfig().applyDefault("options.sound", true);
+		this.getConfig().applyDefault("options.show-info", false);
+		this.getConfig().applyDefault("options.view-bobbing", true);
+		this.getConfig().applyDefault("options.invert-mouse", false);
+		this.getConfig().applyDefault("options.view-distance", 0);
+		this.getConfig().applyDefault("options.smoothing", false);
+		this.getConfig().applyDefault("options.particles", true);
+		
+		this.getConfig().applyDefault("keys.playerlist", Keyboard.KEY_TAB);
+		this.getConfig().applyDefault("keys.forward", Keyboard.KEY_W);
+		this.getConfig().applyDefault("keys.back", Keyboard.KEY_S);
+		this.getConfig().applyDefault("keys.left", Keyboard.KEY_A);
+		this.getConfig().applyDefault("keys.right", Keyboard.KEY_D);
+		this.getConfig().applyDefault("keys.jump", Keyboard.KEY_SPACE);
+		this.getConfig().applyDefault("keys.select-block", Keyboard.KEY_B);
+		this.getConfig().applyDefault("keys.chat", Keyboard.KEY_T);
+		if(this.getConfig().contains("options.language")) {
+			this.getConfig().remove("options.language");
+		}
+		
+		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
+		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 13));
+		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
+		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
+		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
+		VanillaBlock.WATER.setPhysics(new LiquidPhysics((byte) 8));
+		VanillaBlock.LAVA.setPhysics(new LiquidPhysics((byte) 10));
+		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
+		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
+		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
+		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
+		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
+		
+		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
+		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
+		
+		this.setupGL();
+		ClientRenderHelper.getHelper().getTextureManager().pickMipmaps();
+		this.setCurrentScreen(new LoginScreen());
+
+		int frames = 0;
+		long lastfps = System.nanoTime() / 1000000;
+		long previousTime = System.nanoTime() / 1000000;
+		long passedTime = 0;
+		while(this.running && !Display.isCloseRequested()) {
+			float delta = passedTime / (float) Constants.TICK_MILLISECONDS;
+			this.render(delta);
+
+			long time = System.nanoTime() / 1000000; 
+			passedTime += (time - previousTime); 
+			previousTime = time;
+			if(time - lastfps > 1000) {
+				this.fps = frames;
+				frames = 0;
+				lastfps += 1000;
+			}
+
+			frames++;
+			while(passedTime > Constants.TICK_MILLISECONDS) { 
+				this.update();
+				passedTime -= Constants.TICK_MILLISECONDS;
+			}
+		}
+
+		this.shutdown();
+	}
+	
+	private void setupLogger() {
 		ConsoleHandler console = new ConsoleHandler();
 		console.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss")));
 
@@ -84,150 +194,291 @@ public class ClassicClient extends ClassicGame implements Client {
 			OpenClassic.getLogger().severe(this.getTranslator().translate("log.create-fail"));
 			e.printStackTrace();
 		}
+	}
 
-		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.CLIENT_VERSION));
+	private void setupGL() {
+		try {
+			Display.setDisplayMode(new DisplayMode(854, 480));
+			Display.setTitle("OpenClassic");
+			try {
+				Display.setIcon(new ByteBuffer[] { this.loadIcon(128) });
+			} catch(IOException e) {
+				System.out.println("Failed to load icon!");
+				e.printStackTrace();
+			}
+
+			Display.create();
+			Mouse.create();
+			Keyboard.create();
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}
+
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		glEnable(GL_TEXTURE_2D);
+		glShadeModel(GL_SMOOTH);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0);
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glEnable(GL_FOG);
+
+		this.updateFog();
+	}
+
+	private ByteBuffer loadIcon(int res) throws IOException {
+		InputStream in = this.getClass().getResourceAsStream("/icon-" + res + ".png");
+
+		try {
+			PNGDecoder decoder = new PNGDecoder(in);
+			ByteBuffer buffer = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
+			decoder.decode(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+			buffer.flip();
+			return buffer;
+		} finally {
+			in.close();
+		}
+	}
+
+	private void updateFog() { // TODO: Water/lava fog
+		float r = 255;
+		float g = 255;
+		float b = 255;
+		if(this.getLevel() != null) {
+			r = ((this.getLevel().getFogColor() >> 16) & 255) / 255f;
+			g = ((this.getLevel().getFogColor()) & 255) / 255f;
+			b = (this.getLevel().getFogColor() & 255) / 255f;
+		}
+
+		glClearColor(r, g, b, 255);
+
+		FloatBuffer fogColours = BufferUtils.createFloatBuffer(4);
+		fogColours.put(new float[] { r, g, b, 255 });
+		fogColours.flip();
+		glFog(GL_FOG_COLOR, fogColours);
+		glFogi(GL_FOG_MODE, GL_LINEAR);
+		glHint(GL_FOG_HINT, GL_NICEST);
+		glFogf(GL_FOG_START, 0);
+		glFogf(GL_FOG_END, 512 >> this.getConfig().getInteger("options.view-distance", 0));
+		glFogf(GL_FOG_DENSITY, 0.005f);
+	}
+
+	public void input() {
+		if(!Keyboard.isCreated()) return;	
+		if(this.mode != null && this.currentScreen == null) {
+			this.mode.pollInput();
+		}
 		
-		this.registerExecutor(null, new ClientCommands());
-		this.registerGenerator("normal", new LevelGenerator());
-		this.registerGenerator("flat", new FlatLandGenerator());
+		while(Keyboard.next()) {
+			if(Keyboard.getEventKeyState()) {
+				if(this.currentScreen != null) {
+					this.getCurrentScreen().onKeyPress(Keyboard.getEventCharacter(), Keyboard.getEventKey());
+				} else if(this.mode != null) {
+					this.mode.onKeyboard(Keyboard.getEventKey());
+				}
+			}
+		}
+
+		if(!Mouse.isCreated()) return;
+		while(Mouse.next()) {
+			if(Mouse.getEventDWheel() != 0 && this.mode != null && this.currentScreen == null) {
+				this.mode.onScroll(Mouse.getEventDWheel());
+			}
+
+			if(Mouse.getEventButtonState()) {
+				if(this.currentScreen != null) {
+					this.getCurrentScreen().onMouseClick(RenderHelper.getHelper().getRenderMouseX(), RenderHelper.getHelper().getRenderMouseY(), Mouse.getEventButton());
+				} else if(this.mode != null) {
+					this.mode.onClick(Mouse.getEventX(), Mouse.getEventY(), Mouse.getEventButton());
+				}
+			}
+		}
 		
-		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
-		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 13));
-		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
-		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
-		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
-		VanillaBlock.WATER.setPhysics(new LiquidPhysics((byte) 8));
-		VanillaBlock.LAVA.setPhysics(new LiquidPhysics((byte) 10));
-		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
-		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
-		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
-		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
-		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
-		VanillaBlock.TNT.setPhysics(new TNTPhysics());
+		if(this.currentScreen == null) {
+			Mouse.setGrabbed(true);
+			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+		} else {
+			Mouse.setGrabbed(false);
+		}
+	}
+
+	public void update() {
+		this.input();
+		if(this.mode != null) this.mode.update();
+		this.audio.update((ClientPlayer) this.getPlayer());	
+		if(this.getCurrentScreen() != null) this.getCurrentScreen().update();
+	}
+
+	public void render(float delta) {
+		if(this.mode != null) this.mode.renderUpdate(delta);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glLoadIdentity();
+
+		this.updateFog();
+		glPushMatrix();
+		Projection.perspective();
+		if(this.mode != null) this.mode.renderPerspective(delta);
 		
-		Blocks.register(new CustomBlock((byte) 50, StepSound.STONE, new CubeModel(new Texture("/rock.png", true, 16, 16), 0)));
-		
-		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
-		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
+		glPopMatrix();
+		glPushMatrix();
+		Projection.ortho();
+
+		int width = Display.getWidth() * 240 / Display.getHeight();
+		int height = Display.getHeight() * 240 / Display.getHeight();
+		if(this.mode != null) this.mode.renderOrtho(width, height);
+		if(this.getCurrentScreen() != null) this.getCurrentScreen().render();
+
+		this.progress.render();
+		glPopMatrix();
+		Display.update();
+		Display.sync(Display.getDesktopDisplayMode().getFrequency());
+	}
+
+	public int getFps() {
+		return this.fps;
 	}
 
 	@Override
 	public void shutdown() {
-		this.mc.shutdown();
+		this.running = false;
+		if(this.mode != null) this.mode.unload();
+		Storage.saveFavorites();
+		this.audio.cleanup();
+		Display.destroy();
+		Mouse.destroy();
+		Keyboard.destroy();
+		System.exit(0);
 	}
 
 	@Override
 	public Level createLevel(LevelInfo info, Generator generator) {
-		if(generator instanceof LevelGenerator) {
-			((LevelGenerator) generator).setInfo(info.getName(), this.mc.data != null ? this.mc.data.username : "unknown", info.getWidth(), info.getHeight(), info.getDepth());
-		}
-		
-		com.mojang.minecraft.level.Level level = new com.mojang.minecraft.level.Level();
-		level.name = info.getName();
-		level.creator = this.mc.data != null ? this.mc.data.username : "unknown";
-		level.createTime = System.currentTimeMillis();
-		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
-		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-		generator.generate(level.openclassic, data);
-		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-				
-		if(level.openclassic.getSpawn() == null) {
-			level.openclassic.setSpawn(generator.findSpawn(level.openclassic));
-		}
-
-		if(info.getSpawn() != null) level.openclassic.setSpawn(info.getSpawn());
-		level.openclassic.data = new NBTData(level.name);
-		level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
-
-		this.mc.mode.prepareLevel(level);
-		this.mc.setLevel(level);
-		EventFactory.callEvent(new LevelCreateEvent(level.openclassic));
-		return level.openclassic;
+		ClientLevel level = new ClientLevel(info);
+		byte blocks[] = new byte[level.getWidth() * level.getHeight() * level.getDepth()];
+		generator.generate(level, blocks);
+		level.setWorldData(level.getWidth(), level.getHeight(), level.getDepth(), blocks);
+		EventFactory.callEvent(new LevelCreateEvent(level));
+		return level;
 	}
 
 	@Override
 	public boolean isRunning() {
-		return this.mc.running;
-	}
-
-	@Override
-	public Player getPlayer() {
-		return this.mc.player.openclassic;
-	}
-
-	@Override
-	public Level getLevel() {
-		if(this.mc.level == null) return null;
-		return this.mc.level.openclassic;
-	}
-
-	@Override
-	public Level openLevel(String name) {
-		if(this.mc.level != null && this.mc.level.name.equals(name)) return this.mc.level.openclassic;
-		return LevelIO.load(name).openclassic;
-	}
-
-	@Override
-	public void saveLevel() {
-		if(this.mc.level == null) return;
-		LevelIO.save(this.mc.level);
-	}
-	
-	@Override
-	public void exitLevel() {
-		this.exitLevel(true);
-	}
-	
-	@Override
-	public void exitLevel(boolean save) {
-		if(this.mc.level == null) return;
-		
-		if(save) this.saveLevel();
-		this.mc.stopGame(true);
+		return this.running;
 	}
 
 	@Override
 	public AudioManager getAudioManager() {
-		return this.mc.audio;
+		return this.audio;
 	}
-	
-	public Minecraft getMinecraft() {
-		return this.mc;
+
+	@Override
+	public Player getPlayer() {
+		return this.mode == null ? null : this.mode.getPlayer();
+	}
+
+	@Override
+	public Level getLevel() {
+		return this.mode == null ? null : this.mode.getLevel();
+	}
+
+	@Override
+	public Level openLevel(String name) {
+		try {
+			Level level = OpenClassicLevelFormat.load(name, ClientLevel.class, false);
+			if(this.mode != null) this.mode.unload();
+			this.mode = new Singleplayer((ClientLevel) level);
+			return level;
+		} catch (IOException e) {
+			System.out.println("Failed to load level!");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public void saveLevel() {
+		if(this.mode == null || this.mode.getLevel() == null) return;
+		try {
+			OpenClassicLevelFormat.save(this.mode.getLevel());
+		} catch (IOException e) {
+			System.out.println("Failed to save level!");
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void setCurrentScreen(GuiScreen screen) {
-		this.mc.setCurrentScreen(screen);
+		if(this.currentScreen != null) {
+			this.currentScreen.onClose();
+			this.currentScreen.clearWidgets();
+		}
+
+		this.currentScreen = screen;
+		if(this.currentScreen != null) {
+			this.currentScreen.open(Display.getWidth(), Display.getHeight());
+		}
 	}
 
 	@Override
 	public GuiScreen getCurrentScreen() {
-		return this.mc.currentScreen;
+		return this.currentScreen;
 	}
 
 	@Override
 	public boolean isInGame() {
-		return this.mc.ingame;
+		return this.mode != null && this.mode.isInGame();
 	}
 
 	@Override
 	public MainScreen getMainScreen() {
-		return this.mc.hud;
+		return this.mode == null ? null : this.mode.getMainScreen();
+	}
+
+	@Override
+	public void exitLevel() {
+		this.exitLevel(true);
+	}
+
+	@Override
+	public void exitLevel(boolean save) {
+		if(this.mode == null) return;
+		if(save) this.saveLevel();
+		this.setMode(null);
 	}
 
 	@Override
 	public boolean isConnectedToOpenClassic() {
-		return this.mc.openclassicServer;
+		return this.openclassicServer;
 	}
 
-	@Override
-	public ProgressBar getProgressBar() {
-		return this.mc.progressBar;
+	public void setOpenClassicServer(boolean openclassic, String version) {
+		this.openclassicServer = openclassic;
+		this.openclassicVersion = version;
 	}
 
 	@Override
 	public String getServerVersion() {
-		return this.mc.openclassicVersion;
+		return this.openclassicVersion;
+	}
+
+	@Override
+	public ProgressBar getProgressBar() {
+		return this.progress;
+	}
+
+	public Mode getMode() {
+		return this.mode;
+	}
+
+	public void setMode(Mode mode) {
+		if(this.mode != null) this.mode.unload();
+		this.mode = mode;
+		if(this.mode == null) {
+			this.setCurrentScreen(new MainMenuScreen());
+		}
 	}
 	
 	private static class DateOutputFormatter extends Formatter {

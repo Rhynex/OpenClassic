@@ -3,6 +3,9 @@ package ch.spacebase.openclassic.client.gui;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.HeartbeatManager;
@@ -11,14 +14,14 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.ClassicClient;
+import ch.spacebase.openclassic.client.mode.Multiplayer;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
+import ch.spacebase.openclassic.client.util.LoginInfo;
 import ch.spacebase.openclassic.client.util.Server;
+import ch.spacebase.openclassic.client.util.Storage;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.ui.SettingsFrame;
-
-import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.SessionData;
 
 public class ServerListScreen extends GuiScreen {
 
@@ -34,7 +37,12 @@ public class ServerListScreen extends GuiScreen {
 	public void onOpen() {
 		this.clearWidgets();
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this, true));
-		this.getWidget(0, ButtonList.class).setContents(SessionData.serverInfo);
+		List<String> content = new ArrayList<String>();
+		for(String cont : Storage.getServers().keySet()) {
+			content.add(cont);
+		}
+		
+		this.getWidget(0, ButtonList.class).setContents(content);
 
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 206, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")));
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 102, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
@@ -136,16 +144,29 @@ public class ServerListScreen extends GuiScreen {
 		}
 		
 		if(button.getId() == 8) {
-			Minecraft mc = GeneralUtils.getMinecraft();
-			String page = HTTPUtil.fetchUrl(HeartbeatManager.getURL(), "", "http://www.minecraft.net/classic/list/");
-			mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
-			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
-			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));
-			mc.server = HTTPUtil.getParameterOffPage(page, "server");
-			mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(page, "port"));
+			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
+			OpenClassic.getClient().getProgressBar().setProgress(-1);
+			OpenClassic.getClient().getProgressBar().setVisible(true);
 
-			mc.initGame();
-			mc.setCurrentScreen(null);
+			String play = HTTPUtil.fetchUrl(HeartbeatManager.getURL(), "", "http://www.minecraft.net/classic/list");
+			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
+			
+			if (mppass.length() > 0) {
+				String user = HTTPUtil.getParameterOffPage(play, "username");
+				LoginInfo.setName(user);
+				LoginInfo.setKey(mppass);
+				
+				OpenClassic.getClient().getProgressBar().setText("Logging in...");
+				Multiplayer mode = new Multiplayer(HTTPUtil.getParameterOffPage(play, "server"), Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port")));
+				((ClassicClient) OpenClassic.getClient()).setMode(mode);
+				if(mode.getSession().isConnected()) {
+					OpenClassic.getClient().setCurrentScreen(null);
+				}
+			} else {
+				OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.failed"), OpenClassic.getGame().getTranslator().translate("connecting.probably-down")));
+				OpenClassic.getClient().getProgressBar().setVisible(false);
+			}
 		}
 	}
 	
@@ -158,13 +179,13 @@ public class ServerListScreen extends GuiScreen {
 
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
-		Server server = SessionData.servers.get(list.getCurrentPage() * 5 + button.getId());
+		Server server = Storage.getServers().get(button.getText());
 		
 		if (this.select) {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.select = false;
 			
-			SessionData.favorites.put(server.name, server.getUrl());
+			Storage.getFavorites().put(server.getName(), server.getUrl());
 		} else {
 			this.joinServer(server);
 		}
@@ -172,26 +193,34 @@ public class ServerListScreen extends GuiScreen {
 
 	private void joinServer(Server server) {
 		if(server != null) {
-			Minecraft mc = GeneralUtils.getMinecraft();
-			
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
-			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().setProgress(-1);
+			OpenClassic.getClient().getProgressBar().setVisible(true);
 
-			String page = HTTPUtil.fetchUrl(server.getUrl(), "", "http://www.minecraft.net/classic/list/");
-			mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
-			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
-			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));
-			mc.server = HTTPUtil.getParameterOffPage(page, "server");
-			mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(page, "port"));
-
-			mc.initGame();
-			mc.setCurrentScreen(null);
+			String play = HTTPUtil.fetchUrl(server.getUrl(), "", "http://www.minecraft.net/classic/list");
+			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
+			
+			if (mppass.length() > 0) {
+				String user = HTTPUtil.getParameterOffPage(play, "username");
+				LoginInfo.setName(user);
+				LoginInfo.setKey(mppass);
+				
+				OpenClassic.getClient().getProgressBar().setText("Logging in...");
+				Multiplayer mode = new Multiplayer(HTTPUtil.getParameterOffPage(play, "server"), Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port")));
+				((ClassicClient) OpenClassic.getClient()).setMode(mode);
+				if(mode.getSession().isConnected()) {
+					OpenClassic.getClient().setCurrentScreen(null);
+				}
+			} else {
+				OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.failed"), OpenClassic.getGame().getTranslator().translate("connecting.probably-down")));
+				OpenClassic.getClient().getProgressBar().setVisible(false);
+			}
 		}
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 15);
 
 		super.render();

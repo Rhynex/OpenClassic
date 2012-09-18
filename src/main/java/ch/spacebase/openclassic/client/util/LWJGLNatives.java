@@ -6,9 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ch.spacebase.openclassic.api.OpenClassic;
 
-import com.mojang.minecraft.Minecraft;
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.client.ClassicClient;
 
 public class LWJGLNatives {
 
@@ -35,7 +35,7 @@ public class LWJGLNatives {
 			load(dir.getPath(), "jinput-raw.dll", "86");
 			load(dir.getPath(), "jinput-dx8_64.dll", "64");
 			load(dir.getPath(), "jinput-dx8.dll", "86");
-		} else if(os.contains("macos")) {
+		} else if(os.contains("mac")) {
 			load(dir.getPath(), "openal.dylib", "both");
 			load(dir.getPath(), "liblwjgl.jnilib", "both");
 			load(dir.getPath(), "libjinput-osx.jnilib", "both");
@@ -58,7 +58,7 @@ public class LWJGLNatives {
 		}
 		
 		try {
-			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
+			InputStream in = ClassicClient.class.getResourceAsStream("/" + lib);
 			System.out.println("Writing " + lib + " to " + file.getPath());
 			copy(in, file);
 			in.close();

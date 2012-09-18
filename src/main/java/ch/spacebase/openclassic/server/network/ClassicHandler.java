@@ -18,7 +18,6 @@ import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.server.ClassicServer;
-import ch.spacebase.openclassic.server.player.ServerSession;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 
 public class ClassicHandler extends SimpleChannelUpstreamHandler {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
@@ -12,8 +13,7 @@ import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
 import ch.spacebase.openclassic.api.command.annotation.Command;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 
 // TODO: Translate descriptions
 public class ClientCommands extends CommandExecutor {
@@ -140,11 +140,11 @@ public class ClientCommands extends CommandExecutor {
 		Player player = (Player) sender;
 		if(player.getPlaceMode() != VanillaBlock.BEDROCK.getId()) {
 			player.setPlaceMode(VanillaBlock.BEDROCK.getId());
-			GeneralUtils.getMinecraft().player.userType = Constants.OP;
+			((ClientPlayer) player).setOp(true);
 			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("solid.enable", sender.getLanguage()));
 		} else {
 			player.setPlaceMode(0);
-			GeneralUtils.getMinecraft().player.userType = Constants.NOT_OP;
+			((ClientPlayer) player).setOp(false);
 			player.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("solid.disable", sender.getLanguage()));
 		}
 	}

@@ -2,9 +2,9 @@ package ch.spacebase.openclassic.client.input;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 
 import ch.spacebase.openclassic.api.input.InputHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class ClientInputHelper extends InputHelper {
 
@@ -30,7 +30,13 @@ public class ClientInputHelper extends InputHelper {
 
 	@Override
 	public void grabMouse() {
-		GeneralUtils.getMinecraft().grabMouse();
+		Mouse.setGrabbed(true);
+		Mouse.setCursorPosition(Display.getX() + Display.getWidth() / 2, Display.getY() + Display.getHeight() / 2);
+	}
+
+	@Override
+	public void enableRepeatEvents(boolean enabled) {
+		Keyboard.enableRepeatEvents(enabled);
 	}
 	
 }

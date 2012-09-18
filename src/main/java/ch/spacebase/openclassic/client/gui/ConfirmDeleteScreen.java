@@ -14,21 +14,24 @@ public class ConfirmDeleteScreen extends GuiScreen {
 
 	private GuiScreen parent;
 	private File file;
-
-	public ConfirmDeleteScreen(GuiScreen parent, File file) {
+	private File nbt;
+	
+	public ConfirmDeleteScreen(GuiScreen parent, File file, File nbt) {
 		this.parent = parent;
 		this.file = file;
+		this.nbt = nbt;
 	}
 
 	public void onOpen() {
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 102, this.getHeight() / 6 + 132, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.yes")));
-		this.attachWidget(new Button(0, this.getWidth() / 2 + 2, this.getHeight() / 6 + 132, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.no")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 + 2, this.getHeight() / 6 + 132, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.no")));
 	}
 
 	public void onButtonClick(Button button) {
-		if (button.getId() == 0) {
+		if(button.getId() == 0) {
 			try {
+				if(this.nbt.exists()) this.nbt.delete();
 				this.file.delete();
 			} catch(SecurityException e) {
 				e.printStackTrace();
@@ -39,7 +42,7 @@ public class ConfirmDeleteScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		
 		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.level"), this.file.getName().substring(0, this.file.getName().indexOf("."))), this.getWidth() / 2, (this.getHeight() / 2) - 32);
 		super.render();

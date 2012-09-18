@@ -22,6 +22,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.util.ThreadNameDeterminer;
+import org.jboss.netty.util.ThreadRenamingRunnable;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.HeartbeatManager;
@@ -54,9 +56,9 @@ import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.server.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ClassicPipelineFactory;
@@ -147,6 +149,12 @@ public class ClassicServer extends ClassicGame implements Server {
 		
 		OpenClassic.setServer(this);
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.server"), Constants.SERVER_VERSION));
+		ThreadRenamingRunnable.setThreadNameDeterminer(new ThreadNameDeterminer() {
+			@Override
+			public String determineThreadName(String current, String proposed) throws Exception {
+				return "Server-" + proposed;
+			}
+		});
 		
 		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
 		this.bootstrap.setFactory(factory);
@@ -231,7 +239,7 @@ public class ClassicServer extends ClassicGame implements Server {
 			if(level.getPlayers().size() == 0 && !this.getDefaultLevel().getName().equals(level.getName())) {
 				this.unloadLevel(level.getName(), false);
 			} else {
-				((ServerLevel) level).tick();
+				((ServerLevel) level).update(false);
 			}
 		}
 		
@@ -503,7 +511,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		if(this.getLevel(name) != null) return this.getLevel(name);
 		
 		try {
-			Level level = OpenClassicLevelFormat.load(name, create);
+			Level level = OpenClassicLevelFormat.load(name, ServerLevel.class, create);
 			if(level == null) return null;
 			this.levels.add(level);
 			

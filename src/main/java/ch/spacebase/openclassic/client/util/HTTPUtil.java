@@ -18,7 +18,7 @@ public class HTTPUtil {
 
 	public static String fetchUrl(String url, String params, String referer) {
 		try {
-			URLConnection conn = makeConnection(url, params, referer, true);
+			URLConnection conn = makeConnection(url, params, referer);
 			InputStream in = conn.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
@@ -40,7 +40,7 @@ public class HTTPUtil {
 
 	public static String rawFetchUrl(String url, String params, String referer) {
 		try {
-			URLConnection conn = makeConnection(url, params, referer, true);
+			URLConnection conn = makeConnection(url, params, referer);
 			InputStream in = getInputStream(conn);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 	
@@ -59,9 +59,9 @@ public class HTTPUtil {
 		return "";
 	}
 	
-	private static InputStream getInputStream(URLConnection paramURLConnection) throws IOException {
-		InputStream stream = paramURLConnection.getInputStream();
-		String encoding = paramURLConnection.getContentEncoding();
+	private static InputStream getInputStream(URLConnection conn) throws IOException {
+		InputStream stream = conn.getInputStream();
+		String encoding = conn.getContentEncoding();
 		if (encoding != null) {
 			encoding = encoding.toLowerCase();
 
@@ -75,7 +75,7 @@ public class HTTPUtil {
 		return stream;
 	}
 
-	private static URLConnection makeConnection(String url, String params, String referer, boolean paramBoolean) throws IOException {
+	private static URLConnection makeConnection(String url, String params, String referer) throws IOException {
 		URLConnection conn = new URL(url).openConnection();
 		conn.addRequestProperty("Referer", referer);
 

@@ -5,13 +5,7 @@ import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-import com.mojang.minecraft.gui.LoadLevelScreen;
-import com.mojang.minecraft.gui.OptionsScreen;
 
-/**
- * @author Steveice10 <Steveice10@gmail.com>
- */
 public class MainMenuScreen extends GuiScreen {
 
 	private static final Texture logo = new Texture("/logo.png", true, 251, 48);
@@ -39,7 +33,7 @@ public class MainMenuScreen extends GuiScreen {
 		}
 
 		if (button.getId() == 2) {
-			OpenClassic.getClient().setCurrentScreen(new OptionsScreen(this, GeneralUtils.getMinecraft().settings));
+			OpenClassic.getClient().setCurrentScreen(new OptionsScreen(this));
 		}
 		
 		if (button.getId() == 3) {
@@ -60,8 +54,8 @@ public class MainMenuScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
-		RenderHelper.getHelper().drawTexture(logo, this.getWidth() / 2 - logo.getWidth() / 2, 20);
+		RenderHelper.getHelper().drawDefaultBG();
+		RenderHelper.getHelper().drawTexture(logo, this.getWidth() / 2 - logo.getWidth() / 2, 20, 1);
 		super.render();
 	}
 }

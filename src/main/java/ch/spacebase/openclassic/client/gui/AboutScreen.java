@@ -30,12 +30,12 @@ public class AboutScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
-		RenderHelper.getHelper().drawRotatedBlock(this.getWidth() / 2 - 10, (this.getHeight() / 2) - 56, VanillaBlock.STONE, 2);
+		RenderHelper.getHelper().drawDefaultBG();
+		RenderHelper.getHelper().drawRotatedBlock(this.getWidth() / 2 - 10, (this.getHeight() / 2) - 56, VanillaBlock.GRASS, 2);
 		
-		RenderHelper.getHelper().renderText("Minecraft Classic", this.getWidth() / 2, (this.getHeight() / 2) - 32);
-		RenderHelper.getHelper().renderText("Version " + Constants.CLIENT_VERSION, this.getWidth() / 2, (this.getHeight() / 2) - 21);
-		RenderHelper.getHelper().renderText("Modded By Steveice10 (Steveice10@gmail.com)", this.getWidth() / 2, (this.getHeight() / 2) - 10);
+		RenderHelper.getHelper().renderText("OpenClassic Version " + Constants.CLIENT_VERSION, this.getWidth() / 2, (this.getHeight() / 2) - 21);
+		RenderHelper.getHelper().renderText("Created By Steveice10 (Steveice10@gmail.com)", this.getWidth() / 2, (this.getHeight() / 2) - 10);
 		super.render();
 	}
+	
 }

@@ -14,9 +14,11 @@ import java.util.Random;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.sound.AudioManager;
+import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.math.Vector;
 import ch.spacebase.openclassic.api.player.Player;
-
-import com.mojang.minecraft.Minecraft;
+import ch.spacebase.openclassic.client.ClassicClient;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 
 import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
@@ -35,13 +37,10 @@ public class ClientAudioManager implements AudioManager {
 	private final Map<String, List<URL>> sounds = new HashMap<String, List<URL>>();
 	private final Map<String, List<URL>> music = new HashMap<String, List<URL>>();
 	
-	private SoundSystem system;
-	private Minecraft mc;
+	private SoundSystem system;;
 	public long lastBGM = System.currentTimeMillis();
 	
-	public ClientAudioManager(Minecraft mc) {
-		this.mc = mc;
-		
+	public ClientAudioManager() {
 		Class<? extends Library> lib = Library.class;
 		
 		if(SoundSystem.libraryCompatible(LibraryLWJGLOpenAL.class)) {
@@ -57,12 +56,19 @@ public class ClientAudioManager implements AudioManager {
 		} catch(SoundSystemException e) {
 			e.printStackTrace();
 		}
+		
+		// TODO: More sounds
+		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass1.ogg"), true);
+		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass2.ogg"), true);
+		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass3.ogg"), true);
+		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass4.ogg"), true);
 	}
 	
-	public void update(com.mojang.minecraft.player.Player player) {
+	public void update(ClientPlayer player) {
 		if(player != null && OpenClassic.getClient().isInGame()) {
-			this.system.setListenerPosition(player.x, player.y, player.z);
-			this.system.setListenerOrientation(0, 0, -1, (float) Math.sin(Math.toRadians(player.xRot)), (float) Math.sin(Math.toRadians(player.yRot)), 1);
+			Vector forward = MathHelper.toForwardVec(player.getPosition().getYaw(), player.getPosition().getPitch());
+			this.system.setListenerPosition(player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+			this.system.setListenerOrientation(forward.getX(), forward.getY(), forward.getZ(), (float) Math.sin(Math.toRadians(player.getPosition().getPitch())), (float) Math.sin(Math.toRadians(player.getPosition().getYaw())), 1);
 		} else {
 			this.system.setListenerPosition(0, 0, 0);
 			this.system.setListenerOrientation(0, 0, -1, 0, 1, 0);
@@ -94,7 +100,7 @@ public class ClientAudioManager implements AudioManager {
 	}
 	
 	private void download(URL url) {
-		File file = new File(this.mc.dir, "cache/" + (this.mc.server != null && !this.mc.server.equals("") ? this.mc.server : "local") + "/" + url.getFile());
+		File file = new File(OpenClassic.getClient().getDirectory(), "cache/music/" + url.getFile());
 		if(!file.exists()) {
 			if(!file.getParentFile().exists()) {
 				try {
@@ -123,7 +129,7 @@ public class ClientAudioManager implements AudioManager {
 				out = new DataOutputStream(new FileOutputStream(file));
 
 				int length = 0;
-				while (this.mc.running) {
+				while(OpenClassic.getClient().isRunning()) {
 					length = in.read(data);
 					if (length < 0) break;
 					out.write(data, 0, length);
@@ -146,7 +152,7 @@ public class ClientAudioManager implements AudioManager {
 	}
 	
 	public boolean playSound(String sound, float x, float y, float z, float volume, float pitch) {
-		if(!this.mc.settings.sound) return true;
+		if(!OpenClassic.getClient().getConfig().getBoolean("options.sound", true)) return true;
 		
 		List<URL> files = this.sounds.get(sound);
 		if(files != null) {
@@ -180,7 +186,7 @@ public class ClientAudioManager implements AudioManager {
 	}
 	
 	public boolean playMusic(String music, boolean loop) {
-		if(!this.mc.settings.music) return true;
+		if(!OpenClassic.getClient().getConfig().getBoolean("options.music", true)) return true;
 		
 		List<URL> files = this.music.get(music);
 		if(files != null) {

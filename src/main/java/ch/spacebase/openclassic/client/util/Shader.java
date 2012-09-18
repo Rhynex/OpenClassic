@@ -9,7 +9,7 @@ import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.ARBVertexShader;
 
-import com.mojang.minecraft.Minecraft;
+import ch.spacebase.openclassic.client.ClassicClient;
 
 
 public class Shader {
@@ -77,7 +77,7 @@ public class Shader {
 		String code = "";
 		
 		try {
-			reader = new BufferedReader(new InputStreamReader(Minecraft.class.getResourceAsStream("/" + name)));
+			reader = new BufferedReader(new InputStreamReader(ClassicClient.class.getResourceAsStream("/" + name)));
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				code += line + "\n";
