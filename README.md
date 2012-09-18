@@ -20,5 +20,4 @@ The source has a maven script for required dependencies, so just run 'mvn clean 
 <b>License</b>
 ---------
 
-The original Minecraft code is Copyright (C) 2009-2012 Mojang AB.
-The OpenClassic code is licensed under the <b>[MIT license](http://www.opensource.org/licenses/mit-license.html)</b>.
+OpenClassic is licensed under the <b>[MIT license](http://www.opensource.org/licenses/mit-license.html)</b>. Feel free to fork it or use it as a resource while developing.
