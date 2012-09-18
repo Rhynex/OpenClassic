@@ -127,6 +127,15 @@ public class ServerLevel implements Level {
 		}
 	}
 	
+	public void removePlayer(byte id) {
+		for(Player player : this.getPlayers()) {
+			if(player.getPlayerId() == id) {
+				this.players.remove(player);
+				this.sendToAllExcept(player, new PlayerDespawnMessage(player.getPlayerId()));
+			}
+		}
+	}
+	
 	public List<Player> getPlayers() {
 		return new ArrayList<Player>(this.players);
 	}
@@ -363,7 +372,12 @@ public class ServerLevel implements Level {
 	
 	@Override
 	public int getHighestBlockY(int x, int z) {
-		for(int y = this.getHeight(); y >= 0; y--) {
+		return this.getHighestBlockY(x, z, this.getHeight());
+	}
+	
+	@Override
+	public int getHighestBlockY(int x, int z, int max) {
+		for(int y = max; y >= 0; y--) {
 			if(this.getBlockIdAt(x, y, z) != 0) return y;
 		}
 		

@@ -36,7 +36,7 @@ public class ConfirmDeleteServerScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		
 		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), this.getWidth() / 2, (this.getHeight() / 2) - 32);
 		super.render();

@@ -83,7 +83,6 @@ public class TextureManager {
 		GL11.glGenTextures(this.textureBuffer);
 		int textureId = this.textureBuffer.get(0);
 		this.bindTexture(image, textureId);
-		this.textureImgs.put(textureId, image);
 		return textureId;
 	}
 
@@ -128,7 +127,8 @@ public class TextureManager {
 
 		buffer.flip();
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-	
+		this.textureImgs.put(textureId, image);
+		
 		if(this.settings.smoothing) {
 			switch(GeneralUtils.getMinecraft().mipmapMode) {
 			case 1:
@@ -148,5 +148,8 @@ public class TextureManager {
 
 	public void clear() {
 		this.textures.clear();
+		this.jarTexture.clear();
+		this.textureImgs.clear();
 	}
+	
 }

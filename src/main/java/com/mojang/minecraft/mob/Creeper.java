@@ -3,13 +3,13 @@ package com.mojang.minecraft.mob;
 import java.io.Serializable;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.mob.ai.BasicAttackAI;
 import com.mojang.minecraft.particle.TerrainParticle;
-import com.mojang.util.MathHelper;
 
 public class Creeper extends Mob {
 
@@ -50,7 +50,7 @@ public class Creeper extends Mob {
 				float particleX = (float) this.random.nextGaussian();
 				float particleY = (float) this.random.nextGaussian();
 				float particleZ = (float) this.random.nextGaussian();
-				float var6 = MathHelper.sqrt(particleX * particleX + particleY * particleY + particleZ * particleZ);
+				float var6 = (float) Math.sqrt(particleX * particleX + particleY * particleY + particleZ * particleZ);
 				float var7 = particleX / var6 / var6;
 				float var8 = particleY / var6 / var6;
 				float var9 = particleZ / var6 / var6;

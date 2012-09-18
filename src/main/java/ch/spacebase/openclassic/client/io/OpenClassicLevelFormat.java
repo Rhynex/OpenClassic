@@ -146,11 +146,11 @@ public class OpenClassicLevelFormat {
 		root.append(info);
 		
 		TagBuilder spawn = new TagBuilder("Spawn");
-		spawn.append("x", level.getSpawn().getX());
-		spawn.append("y", level.getSpawn().getY());
-		spawn.append("z", level.getSpawn().getZ());
-		spawn.append("yaw", level.getSpawn().getYaw());
-		spawn.append("pitch", level.getSpawn().getPitch());
+		spawn.append("x", (double) level.getSpawn().getX());
+		spawn.append("y", (double) level.getSpawn().getY());
+		spawn.append("z", (double) level.getSpawn().getZ());
+		spawn.append("yaw", (byte) level.getSpawn().getYaw());
+		spawn.append("pitch", (byte) level.getSpawn().getPitch());
 		root.append(spawn);
 		
 		TagBuilder map = new TagBuilder("Map");

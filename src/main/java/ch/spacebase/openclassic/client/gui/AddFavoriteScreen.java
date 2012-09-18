@@ -9,8 +9,6 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.SessionData;
 
-import org.lwjgl.input.Keyboard;
-
 /**
  * @author Steveice10 <Steveice10@gmail.com>
  */
@@ -27,8 +25,6 @@ public class AddFavoriteScreen extends GuiScreen {
 	}
 
 	public void onOpen() {
-		Keyboard.enableRepeatEvents(true);
-		
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
@@ -40,10 +36,6 @@ public class AddFavoriteScreen extends GuiScreen {
 		this.attachWidget(this.url);
 		
 		this.getWidget(0, Button.class).setActive(false);
-	}
-
-	public void onClose() {
-		Keyboard.enableRepeatEvents(false);
 	}
 
 	public void onButtonClick(Button button) {
@@ -69,7 +61,7 @@ public class AddFavoriteScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		
 		if(this.error) RenderHelper.getHelper().renderText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 40);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-name"), this.getWidth() / 2, this.getHeight() / 2 - 65);

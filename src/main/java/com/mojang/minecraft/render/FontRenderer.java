@@ -99,7 +99,7 @@ public final class FontRenderer {
 					int c = blue << 16 | var11 << 8 | var10;
 					if (shadow) {
 						c = (c & 16579836) >> 2;
-					}		
+					}
 
 					ShapeRenderer.instance.color(c);
 					count += 2;
@@ -140,20 +140,5 @@ public final class FontRenderer {
 
 			return width;
 		}
-	}
-
-	public static String removeBadCharacters(String string) {
-		char[] chars = string.toCharArray();
-		StringBuilder result = new StringBuilder();
-
-		for (int index = 0; index < chars.length; ++index) {
-			if (chars[index] == '&') {
-				index++;
-			} else {
-				result.append(chars[index]);
-			}
-		}
-
-		return result.toString();
 	}
 }

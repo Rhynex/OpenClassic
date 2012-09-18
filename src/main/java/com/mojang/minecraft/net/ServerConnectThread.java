@@ -23,6 +23,7 @@ public final class ServerConnectThread extends Thread {
 	private NetworkManager netManager;
 
 	public ServerConnectThread(NetworkManager netManager, String server, int port, String username, String key, Minecraft mc) {
+		super("Client-Server Connect Thread");
 		this.netManager = netManager;
 		this.server = server;
 		this.port = port;

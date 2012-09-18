@@ -4,6 +4,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.level.generator.Generator;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
@@ -11,7 +12,6 @@ import com.mojang.minecraft.ProgressBarDisplay;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.generator.algorithm.CombinedNoise;
 import com.mojang.minecraft.level.generator.algorithm.OctaveNoise;
-import com.mojang.util.MathHelper;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -20,9 +20,9 @@ public final class LevelGenerator extends Generator {
 	private ProgressBarDisplay progress;
 	private int width;
 	private int depth;
-	private int d;
+	private int height;
 	private Random rand = new Random();
-	private int g;
+	private int waterLevel;
 	private int[] h = new int[1048576];
 	
 	private String name;
@@ -50,8 +50,8 @@ public final class LevelGenerator extends Generator {
 		level.setGenerating(true);
 		
 		this.progress.setTitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
-		this.d = 64;
-		this.g = 32;
+		this.height = 64;
+		this.waterLevel = 32;
 		this.progress.setText(OpenClassic.getGame().getTranslator().translate("level.raising"));
 		CombinedNoise alg1 = new CombinedNoise(new OctaveNoise(this.rand, 8), new OctaveNoise(this.rand, 8));
 		CombinedNoise alg2 = new CombinedNoise(new OctaveNoise(this.rand, 8), new OctaveNoise(this.rand, 8));
@@ -105,7 +105,7 @@ public final class LevelGenerator extends Generator {
 		var42 = var9;
 		int var46 = this.width;
 		int var48 = this.depth;
-		var51 = this.d;
+		var51 = this.height;
 		OctaveNoise var53 = new OctaveNoise(this.rand, 8);
 
 		int var25;
@@ -118,7 +118,7 @@ public final class LevelGenerator extends Generator {
 
 			for (x = 0; x < var48; ++x) {
 				z = (int) (var53.compute(var24, x) / 24.0D) - 4;
-				var25 = (var23 = var42[var24 + x * var46] + this.g) + z;
+				var25 = (var23 = var42[var24 + x * var46] + this.waterLevel) + z;
 				var42[var24 + x * var46] = Math.max(var23, var25);
 				if (var42[var24 + x * var46] > var51 - 2) {
 					var42[var24 + x * var46] = var51 - 2;
@@ -151,7 +151,7 @@ public final class LevelGenerator extends Generator {
 		this.progress.setText(OpenClassic.getGame().getTranslator().translate("level.carving"));
 		var48 = this.width;
 		var51 = this.depth;
-		var54 = this.d;
+		var54 = this.height;
 		var24 = var48 * var51 * var54 / 256 / 64 << 1;
 
 		for (x = 0; x < var24; ++x) {
@@ -178,7 +178,7 @@ public final class LevelGenerator extends Generator {
 					float var43 = var55 + (this.rand.nextFloat() * 4.0F - 2.0F) * 0.2F;
 					float var50 = var59 + (this.rand.nextFloat() * 4.0F - 2.0F) * 0.2F;
 					float var33 = var56 + (this.rand.nextFloat() * 4.0F - 2.0F) * 0.2F;
-					float var34 = (this.d - var50) / this.d;
+					float var34 = (this.height - var50) / this.height;
 					var34 = 1.2F + (var34 * 3.5F + 1.0F) * var31;
 					var34 = MathHelper.sin(var32 * 3.1415927F / var26) * var34;
 
@@ -188,7 +188,7 @@ public final class LevelGenerator extends Generator {
 								float var38 = var35 - var43;
 								float var39 = var36 - var50;
 								float var40 = var37 - var33;
-								if (var38 * var38 + var39 * var39 * 2.0F + var40 * var40 < var34 * var34 && var35 >= 1 && var36 >= 1 && var37 >= 1 && var35 < this.width - 1 && var36 < this.d - 1 && var37 < this.depth - 1) {
+								if (var38 * var38 + var39 * var39 * 2.0F + var40 * var40 < var34 * var34 && var35 >= 1 && var36 >= 1 && var37 >= 1 && var35 < this.width - 1 && var36 < this.height - 1 && var37 < this.depth - 1) {
 									int var66 = (var36 * this.depth + var37) * this.width + var35;
 									if (data[var66] == VanillaBlock.STONE.getId()) {
 										data[var66] = 0;
@@ -209,13 +209,13 @@ public final class LevelGenerator extends Generator {
 		this.setProgress(0);
 
 		for (var54 = 0; var54 < this.width; ++var54) {
-			this.liquify(var54, this.d / 2 - 1, 0, 0, var51, data);
-			this.liquify(var54, this.d / 2 - 1, this.depth - 1, 0, var51, data);
+			this.liquify(var54, this.height / 2 - 1, 0, 0, var51, data);
+			this.liquify(var54, this.height / 2 - 1, this.depth - 1, 0, var51, data);
 		}
 
 		for (var54 = 0; var54 < this.depth; ++var54) {
-			this.liquify(0, this.d / 2 - 1, var54, 0, var51, data);
-			this.liquify(this.width - 1, this.d / 2 - 1, var54, 0, var51, data);
+			this.liquify(0, this.height / 2 - 1, var54, 0, var51, data);
+			this.liquify(this.width - 1, this.height / 2 - 1, var54, 0, var51, data);
 		}
 
 		var54 = this.width * this.depth / 8000;
@@ -226,7 +226,7 @@ public final class LevelGenerator extends Generator {
 			}
 
 			x = this.rand.nextInt(this.width);
-			z = this.g - 1 - this.rand.nextInt(2);
+			z = this.waterLevel - 1 - this.rand.nextInt(2);
 			var23 = this.rand.nextInt(this.depth);
 			if (data[(z * this.depth + var23) * this.width + x] == 0) {
 				this.liquify(x, z, var23, 0, var51, data);
@@ -235,7 +235,7 @@ public final class LevelGenerator extends Generator {
 
 		this.setProgress(100);
 		this.progress.setText(OpenClassic.getGame().getTranslator().translate("level.melting"));
-		var46 = this.width * this.depth * this.d / 20000;
+		var46 = this.width * this.depth * this.height / 20000;
 
 		for (var48 = 0; var48 < var46; ++var48) {
 			if (var48 % 100 == 0) {
@@ -243,7 +243,7 @@ public final class LevelGenerator extends Generator {
 			}
 
 			var51 = this.rand.nextInt(this.width);
-			var54 = (int) (this.rand.nextFloat() * this.rand.nextFloat() * (this.g - 3));
+			var54 = (int) (this.rand.nextFloat() * this.rand.nextFloat() * (this.waterLevel - 3));
 			var24 = this.rand.nextInt(this.depth);
 			if (data[(var54 * this.depth + var24) * this.width + var51] == 0) {
 				this.liquify(var51, var54, var24, 0, VanillaBlock.LAVA.getId(), data);
@@ -255,7 +255,7 @@ public final class LevelGenerator extends Generator {
 		var42 = var9;
 		var46 = this.width;
 		var48 = this.depth;
-		var51 = this.d;
+		var51 = this.height;
 		var53 = new OctaveNoise(this.rand, 8);
 		OctaveNoise var58 = new OctaveNoise(this.rand, 8);
 
@@ -319,13 +319,13 @@ public final class LevelGenerator extends Generator {
 
 		var42 = var9;
 		var46 = this.width;
-		var51 = this.width * this.depth * this.d / 2000;
+		var51 = this.width * this.depth * this.height / 2000;
 
 		for (var54 = 0; var54 < var51; ++var54) {
 			var24 = this.rand.nextInt(2);
 			this.setProgress(var54 * 50 / (var51 - 1) + 50);
 			x = this.rand.nextInt(this.width);
-			z = this.rand.nextInt(this.d);
+			z = this.rand.nextInt(this.height);
 			var23 = this.rand.nextInt(this.depth);
 
 			for (var25 = 0; var25 < 20; ++var25) {
@@ -352,7 +352,7 @@ public final class LevelGenerator extends Generator {
 		}
 
 		Level handle = ((ClientLevel) level).getHandle();
-		handle.waterLevel = this.g;
+		handle.waterLevel = this.waterLevel;
 		handle.createTime = System.currentTimeMillis();
 		handle.creator = author;
 		handle.name = name;
@@ -389,7 +389,7 @@ public final class LevelGenerator extends Generator {
 		byte var25 = (byte) var1;
 		var4 = this.width;
 		int var5 = this.depth;
-		int var6 = this.d;
+		int var6 = this.height;
 		int var7 = var4 * var5 * var6 / 256 / 64 * var2 / 100;
 
 		for (int var8 = 0; var8 < var7; ++var8) {
@@ -419,7 +419,7 @@ public final class LevelGenerator extends Generator {
 							float var22 = var19 - var9;
 							float var23 = var20 - var10;
 							float var24 = var21 - var11;
-							if (var22 * var22 + var23 * var23 * 2.0F + var24 * var24 < var18 * var18 && var19 >= 1 && var20 >= 1 && var21 >= 1 && var19 < this.width - 1 && var20 < this.d - 1 && var21 < this.depth - 1) {
+							if (var22 * var22 + var23 * var23 * 2.0F + var24 * var24 < var18 * var18 && var19 >= 1 && var20 >= 1 && var21 >= 1 && var19 < this.width - 1 && var20 < this.height - 1 && var21 < this.depth - 1) {
 								int var26 = (var20 * this.depth + var21) * this.width + var19;
 								if (data[var26] == VanillaBlock.STONE.getId()) {
 									data[var26] = var25;

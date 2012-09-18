@@ -2,6 +2,7 @@ package com.mojang.minecraft.item;
 
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.model.Quad;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.Entity;
@@ -10,7 +11,6 @@ import com.mojang.minecraft.item.TakeEntityAnim;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.player.Player;
 import com.mojang.minecraft.render.TextureManager;
-import com.mojang.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 public class Item extends Entity {
@@ -27,7 +27,7 @@ public class Item extends Entity {
 	private transient int count = 0;
 
 	public static void initModels() {
-		for (int id = 0; id < 256; ++id) {
+		for (int id = 1; id < 256; id++) {
 			if (Blocks.fromId(id) != null) {
 				Quad quad = Blocks.fromId(id).getModel().getQuads().size() >= 3 ? Blocks.fromId(id).getModel().getQuad(2) : Blocks.fromId(id).getModel().getQuad(Blocks.fromId(id).getModel().getQuads().size() - 1);
 				models[id] = new ItemModel(id, quad.getTexture().getId());

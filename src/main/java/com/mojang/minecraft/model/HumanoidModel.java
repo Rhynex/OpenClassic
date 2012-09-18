@@ -2,7 +2,7 @@ package com.mojang.minecraft.model;
 
 import com.mojang.minecraft.model.Model;
 import com.mojang.minecraft.model.ModelPart;
-import com.mojang.util.MathHelper;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 public class HumanoidModel extends Model {
 
@@ -20,25 +20,25 @@ public class HumanoidModel extends Model {
 
 	public HumanoidModel(float var1) {
 		this.head = new ModelPart(0, 0);
-		this.head.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1);
+		this.head.setBounds(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1);
 		this.headwear = new ModelPart(32, 0);
-		this.headwear.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1 + 0.5F);
+		this.headwear.setBounds(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1 + 0.5F);
 		this.body = new ModelPart(16, 16);
-		this.body.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, var1);
+		this.body.setBounds(-4.0F, 0.0F, -2.0F, 8, 12, 4, var1);
 		this.rightArm = new ModelPart(40, 16);
-		this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, var1);
-		this.rightArm.setRotationPoint(-5.0F, 2.0F, 0.0F);
+		this.rightArm.setBounds(-3.0F, -2.0F, -2.0F, 4, 12, 4, var1);
+		this.rightArm.setPosition(-5.0F, 2.0F, 0.0F);
 		this.leftArm = new ModelPart(40, 16);
 		this.leftArm.mirror = true;
-		this.leftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, var1);
-		this.leftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
+		this.leftArm.setBounds(-1.0F, -2.0F, -2.0F, 4, 12, 4, var1);
+		this.leftArm.setPosition(5.0F, 2.0F, 0.0F);
 		this.rightLeg = new ModelPart(0, 16);
-		this.rightLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, var1);
-		this.rightLeg.setRotationPoint(-2.0F, 12.0F, 0.0F);
+		this.rightLeg.setBounds(-2.0F, 0.0F, -2.0F, 4, 12, 4, var1);
+		this.rightLeg.setPosition(-2.0F, 12.0F, 0.0F);
 		this.leftLeg = new ModelPart(0, 16);
 		this.leftLeg.mirror = true;
-		this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, var1);
-		this.leftLeg.setRotationPoint(2.0F, 12.0F, 0.0F);
+		this.leftLeg.setBounds(-2.0F, 0.0F, -2.0F, 4, 12, 4, var1);
+		this.leftLeg.setPosition(2.0F, 12.0F, 0.0F);
 	}
 
 	public final void render(float var1, float var2, float var3, float var4, float var5, float var6) {

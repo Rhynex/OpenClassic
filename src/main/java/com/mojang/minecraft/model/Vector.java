@@ -1,7 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.util.MathHelper;
-
 public final class Vector {
 
 	public float x;
@@ -19,8 +17,8 @@ public final class Vector {
 	}
 
 	public final Vector normalize() {
-		float var1 = MathHelper.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-		return new Vector(this.x / var1, this.y / var1, this.z / var1);
+		float len = (float) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+		return new Vector(this.x / len, this.y / len, this.z / len);
 	}
 
 	public final Vector add(float x, float y, float z) {
@@ -28,7 +26,7 @@ public final class Vector {
 	}
 
 	public final float distance(Vector other) {
-		return MathHelper.sqrt(this.distanceSquared(other));
+		return (float) Math.sqrt(this.distanceSquared(other));
 	}
 
 	public final float distanceSquared(Vector other) {

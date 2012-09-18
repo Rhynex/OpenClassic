@@ -100,7 +100,7 @@ public class LoadLevelScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 15, 16777215);
 		super.render();
 	}

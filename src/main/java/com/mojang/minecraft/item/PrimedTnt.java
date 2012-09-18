@@ -1,6 +1,7 @@
 package com.mojang.minecraft.item;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.item.Item;
@@ -10,7 +11,6 @@ import com.mojang.minecraft.particle.SmokeParticle;
 import com.mojang.minecraft.particle.TerrainParticle;
 import com.mojang.minecraft.player.Player;
 import com.mojang.minecraft.render.TextureManager;
-import com.mojang.util.MathHelper;
 import java.util.Random;
 import org.lwjgl.opengl.GL11;
 
@@ -81,7 +81,7 @@ public class PrimedTnt extends Entity {
 					float var4 = (float) rand.nextGaussian();
 					float var5 = (float) rand.nextGaussian();
 					float var6 = (float) rand.nextGaussian();
-					float var7 = MathHelper.sqrt(var4 * var4 + var5 * var5 + var6 * var6);
+					float var7 = (float) Math.sqrt(var4 * var4 + var5 * var5 + var6 * var6);
 					float var8 = var4 / var7 / var7;
 					float var9 = var5 / var7 / var7;
 					var7 = var6 / var7 / var7;
@@ -104,10 +104,7 @@ public class PrimedTnt extends Entity {
 	public void render(TextureManager textures, float var2) {
 		float brightness = this.level.getBrightness((int) this.x, (int) this.y, (int) this.z);
 		GL11.glPushMatrix();
-		GL11.glTranslatef(this.xo + (this.x - this.xo) * var2 - 0.5F, this.yo + (this.y - this.yo) * var2 - 0.5F, this.zo + (this.z - this.zo) * var2 - 0.5F);
-		GL11.glColor4f(brightness, brightness, brightness, 1);
-		GL11.glPushMatrix();
-		VanillaBlock.TNT.getModel().renderPreview(-1);
+		VanillaBlock.TNT.getModel().renderAll(this.xo + (this.x - this.xo) * var2 - 0.5F, this.yo + (this.y - this.yo) * var2 - 0.5F, this.zo + (this.z - this.zo) * var2 - 0.5F, brightness);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glColor4f(1, 1, 1, ((this.life / 4 + 1) % 2) * 0.4F);
@@ -123,9 +120,8 @@ public class PrimedTnt extends Entity {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		VanillaBlock.TNT.getModel().renderPreview(-1);
+		VanillaBlock.TNT.getModel().renderAll(this.xo + (this.x - this.xo) * var2 - 0.5F, this.yo + (this.y - this.yo) * var2 - 0.5F, this.zo + (this.z - this.zo) * var2 - 0.5F, -1);
 		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glPopMatrix();
 		GL11.glPopMatrix();
 	}
 }

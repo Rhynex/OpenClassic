@@ -2,15 +2,17 @@ package com.mojang.minecraft.gui;
 
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.MainScreen;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.gui.Minimap;
+import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.ChatLine;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
 import com.mojang.minecraft.gui.ChatInputScreen;
 import com.mojang.minecraft.render.ShapeRenderer;
-import com.mojang.util.MathHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -31,20 +33,21 @@ public class HUDScreen extends MainScreen {
 		this.mc = mc;
 		this.width = width * 240 / height;
 		this.height = height * 240 / height;
+		this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
 	}
 
 	public void render(float renderPartialTicks, boolean focus, int mouseX, int mouseY) {
-		this.mc.renderer.reset();
+		this.mc.renderer.enableGuiMode();
 		RenderHelper.getHelper().bindTexture("/gui/gui.png", true);
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_BLEND);
 		
 		if(!this.mc.hideGui) {
-			RenderHelper.getHelper().drawImage(this.width / 2 - 91, this.height - 22, -90, 0, 0, 182, 22);
-			RenderHelper.getHelper().drawImage(this.width / 2 - 91 - 1 + this.mc.player.inventory.selected * 20, this.height - 22 - 1, -90, 0, 22, 24, 22);
+			ClientRenderHelper.getHelper().drawImage(this.width / 2 - 91, this.height - 22, -90, 0, 0, 182, 22);
+			ClientRenderHelper.getHelper().drawImage(this.width / 2 - 91 - 1 + this.mc.player.inventory.selected * 20, this.height - 22 - 1, -90, 0, 22, 24, 22);
 		
-			RenderHelper.getHelper().bindTexture("/gui/icons.png", true);
-			RenderHelper.getHelper().drawImage(this.width / 2 - 7, this.height / 2 - 7, -90, 0, 0, 16, 16);
+			ClientRenderHelper.getHelper().bindTexture("/gui/icons.png", true);
+			ClientRenderHelper.getHelper().drawImage(this.width / 2 - 7, this.height / 2 - 7, -90, 0, 0, 16, 16);
 		
 			boolean glow = this.mc.player.invulnerableTime / 3 % 2 != 0 && this.mc.player.invulnerableTime >= 10;
 			this.rand.setSeed((this.ticks * 312871L));
@@ -57,23 +60,23 @@ public class HUDScreen extends MainScreen {
 						heartY += this.rand.nextInt(2);
 					}
 	
-					RenderHelper.getHelper().drawImage(heartX, heartY, -90, 16 + (glow ? 9 : 0), 0, 9, 9);
+					ClientRenderHelper.getHelper().drawImage(heartX, heartY, -90, 16 + (glow ? 9 : 0), 0, 9, 9);
 					if (glow) {
 						if ((heart << 1) + 1 < this.mc.player.lastHealth) {
-							RenderHelper.getHelper().drawImage(heartX, heartY, -90, 70, 0, 9, 9);
+							ClientRenderHelper.getHelper().drawImage(heartX, heartY, -90, 70, 0, 9, 9);
 						}
 	
 						if ((heart << 1) + 1 == this.mc.player.lastHealth) {
-							RenderHelper.getHelper().drawImage(heartX, heartY, -90, 79, 0, 9, 9);
+							ClientRenderHelper.getHelper().drawImage(heartX, heartY, -90, 79, 0, 9, 9);
 						}
 					}
 	
 					if ((heart << 1) + 1 < this.mc.player.health) {
-						RenderHelper.getHelper().drawImage(heartX, heartY, -90, 52, 0, 9, 9);
+						ClientRenderHelper.getHelper().drawImage(heartX, heartY, -90, 52, 0, 9, 9);
 					}
 	
 					if ((heart << 1) + 1 == this.mc.player.health) {
-						RenderHelper.getHelper().drawImage(heartX, heartY, -90, 61, 0, 9, 9);
+						ClientRenderHelper.getHelper().drawImage(heartX, heartY, -90, 61, 0, 9, 9);
 					}
 				}
 	
@@ -83,9 +86,9 @@ public class HUDScreen extends MainScreen {
 	
 					for (int count = 0; count < var100 + var101; count++) {
 						if (count < var100) {
-							RenderHelper.getHelper().drawImage(this.width / 2 - 91 + (count << 3), this.height - 32 - 9, -90, 16, 18, 9, 9);
+							ClientRenderHelper.getHelper().drawImage(this.width / 2 - 91 + (count << 3), this.height - 32 - 9, -90, 16, 18, 9, 9);
 						} else {
-							RenderHelper.getHelper().drawImage(this.width / 2 - 91 + (count << 3), this.height - 32 - 9, -90, 25, 18, 9, 9);
+							ClientRenderHelper.getHelper().drawImage(this.width / 2 - 91 + (count << 3), this.height - 32 - 9, -90, 25, 18, 9, 9);
 						}
 					}
 				}
@@ -117,7 +120,7 @@ public class HUDScreen extends MainScreen {
 					GL11.glScalef(-1, -1, -1);
 					
 					ShapeRenderer.instance.begin();
-					Blocks.fromId(block).getModel().renderFullbright(-2, 0, 0);
+					Blocks.fromId(block).getModel().renderAll(-2, 0, 0, 1);
 					ShapeRenderer.instance.end();
 					
 					GL11.glPopMatrix();
@@ -199,7 +202,7 @@ public class HUDScreen extends MainScreen {
 	}
 
 	@Override
-	public String getClickedPlayer() {
+	public String getHoveredPlayer() {
 		return this.clickedPlayer;
 	}
 

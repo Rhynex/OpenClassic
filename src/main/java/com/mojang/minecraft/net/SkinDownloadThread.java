@@ -17,6 +17,7 @@ final class SkinDownloadThread extends Thread {
 	private NetworkPlayer player;
 
 	public SkinDownloadThread(NetworkPlayer player) {
+		super("Client-Skin Download Thread");
 		this.player = player;
 	}
 

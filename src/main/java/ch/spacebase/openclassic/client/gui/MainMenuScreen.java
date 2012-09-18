@@ -60,8 +60,8 @@ public class MainMenuScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
-		RenderHelper.getHelper().drawTexture(logo, this.getWidth() / 2 - logo.getWidth() / 2, 20);
+		RenderHelper.getHelper().drawDefaultBG();
+		RenderHelper.getHelper().drawTexture(logo, this.getWidth() / 2 - logo.getWidth() / 2, 20, 1);
 		super.render();
 	}
 }

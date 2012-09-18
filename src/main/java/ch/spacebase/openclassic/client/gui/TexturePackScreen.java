@@ -57,7 +57,7 @@ public class TexturePackScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), this.getWidth() / 2, 15, 16777215);
 		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!GeneralUtils.getMinecraft().settings.texturePack.equals("none") ? GeneralUtils.getMinecraft().settings.texturePack.substring(0, GeneralUtils.getMinecraft().settings.texturePack.indexOf('.')) : "Default")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
 		super.render();

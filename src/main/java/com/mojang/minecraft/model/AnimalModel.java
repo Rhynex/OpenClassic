@@ -2,7 +2,7 @@ package com.mojang.minecraft.model;
 
 import com.mojang.minecraft.model.Model;
 import com.mojang.minecraft.model.ModelPart;
-import com.mojang.util.MathHelper;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 public class AnimalModel extends Model {
 
@@ -14,23 +14,23 @@ public class AnimalModel extends Model {
 	public ModelPart leg4;
 
 	public AnimalModel(int var1, float var2) {
-		this.head.addBox(-4.0F, -4.0F, -8.0F, 8, 8, 8, 0.0F);
-		this.head.setRotationPoint(0.0F, (18 - var1), -6.0F);
+		this.head.setBounds(-4.0F, -4.0F, -8.0F, 8, 8, 8, 0.0F);
+		this.head.setPosition(0.0F, (18 - var1), -6.0F);
 		this.body = new ModelPart(28, 8);
-		this.body.addBox(-5.0F, -10.0F, -7.0F, 10, 16, 8, 0.0F);
-		this.body.setRotationPoint(0.0F, (17 - var1), 2.0F);
+		this.body.setBounds(-5.0F, -10.0F, -7.0F, 10, 16, 8, 0.0F);
+		this.body.setPosition(0.0F, (17 - var1), 2.0F);
 		this.leg1 = new ModelPart(0, 16);
-		this.leg1.addBox(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
-		this.leg1.setRotationPoint(-3.0F, (24 - var1), 7.0F);
+		this.leg1.setBounds(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
+		this.leg1.setPosition(-3.0F, (24 - var1), 7.0F);
 		this.leg2 = new ModelPart(0, 16);
-		this.leg2.addBox(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
-		this.leg2.setRotationPoint(3.0F, (24 - var1), 7.0F);
+		this.leg2.setBounds(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
+		this.leg2.setPosition(3.0F, (24 - var1), 7.0F);
 		this.leg3 = new ModelPart(0, 16);
-		this.leg3.addBox(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
-		this.leg3.setRotationPoint(-3.0F, (24 - var1), -5.0F);
+		this.leg3.setBounds(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
+		this.leg3.setPosition(-3.0F, (24 - var1), -5.0F);
 		this.leg4 = new ModelPart(0, 16);
-		this.leg4.addBox(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
-		this.leg4.setRotationPoint(3.0F, (24 - var1), -5.0F);
+		this.leg4.setBounds(-2.0F, 0.0F, -2.0F, 4, var1, 4, 0.0F);
+		this.leg4.setPosition(3.0F, (24 - var1), -5.0F);
 	}
 
 	public final void render(float var1, float var2, float var3, float var4, float var5, float var6) {

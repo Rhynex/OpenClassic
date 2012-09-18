@@ -83,7 +83,7 @@ public final class OptionsScreen extends GuiScreen {
 		if(GeneralUtils.getMinecraft().ingame) {
 			RenderHelper.getHelper().color(0, 0, this.getWidth(), this.getHeight(), 1610941696, -1607454624);
 		} else {
-			RenderHelper.getHelper().drawDirtBG();
+			RenderHelper.getHelper().drawDefaultBG();
 		}
 		
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.options.title"), this.getWidth() / 2, 20);

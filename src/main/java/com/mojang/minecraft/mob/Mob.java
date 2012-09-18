@@ -1,5 +1,6 @@
 package com.mojang.minecraft.mob;
 
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.Entity;
@@ -8,7 +9,6 @@ import com.mojang.minecraft.mob.ai.AI;
 import com.mojang.minecraft.mob.ai.BasicAI;
 import com.mojang.minecraft.model.ModelManager;
 import com.mojang.minecraft.render.TextureManager;
-import com.mojang.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 public class Mob extends Entity {
@@ -121,7 +121,7 @@ public class Mob extends Entity {
 		this.aiStep();
 		float xDistance = this.x - this.xo;
 		float zDistance = this.z - this.zo;
-		float xzDistance = MathHelper.sqrt(xDistance * xDistance + zDistance * zDistance);
+		float xzDistance = (float) Math.sqrt(xDistance * xDistance + zDistance * zDistance);
 		float yaw = this.yBodyRot;
 		float animStep = 0.0F;
 		this.oRun = this.run;
@@ -355,7 +355,7 @@ public class Mob extends Entity {
 	}
 
 	public void knockback(Entity entity, int damage, float xDistance, float zDistance) {
-		float var5 = MathHelper.sqrt(xDistance * xDistance + zDistance * zDistance);
+		float var5 = (float) Math.sqrt(xDistance * xDistance + zDistance * zDistance);
 		float var6 = 0.4F;
 		this.xd /= 2.0F;
 		this.yd /= 2.0F;

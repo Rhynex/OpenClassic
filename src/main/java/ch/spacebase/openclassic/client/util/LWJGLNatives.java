@@ -35,7 +35,7 @@ public class LWJGLNatives {
 			load(dir.getPath(), "jinput-raw.dll", "86");
 			load(dir.getPath(), "jinput-dx8_64.dll", "64");
 			load(dir.getPath(), "jinput-dx8.dll", "86");
-		} else if(os.contains("macos")) {
+		} else if(os.contains("mac")) {
 			load(dir.getPath(), "openal.dylib", "both");
 			load(dir.getPath(), "liblwjgl.jnilib", "both");
 			load(dir.getPath(), "libjinput-osx.jnilib", "both");

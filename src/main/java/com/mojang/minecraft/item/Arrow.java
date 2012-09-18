@@ -1,5 +1,6 @@
 package com.mojang.minecraft.item;
 
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.Entity;
@@ -9,7 +10,6 @@ import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.player.Player;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.ShapeRenderer;
-import com.mojang.util.MathHelper;
 import java.util.List;
 import org.lwjgl.opengl.GL11;
 
@@ -58,7 +58,7 @@ public class Arrow extends Entity {
 		this.yd = var7 * var8;
 		this.zd = var10 * var6 * var8;
 		this.setPos(x, y, z);
-		float var15 = MathHelper.sqrt(this.xd * this.xd + this.zd * this.zd);
+		float var15 = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
 		this.yRotO = this.yRot = (float) (Math.atan2(this.xd, this.zd) * 180.0D / 3.1415927410125732D);
 		this.xRotO = this.xRot = (float) (Math.atan2(this.yd, var15) * 180.0D / 3.1415927410125732D);
 		this.makeStepSound = false;
@@ -87,7 +87,7 @@ public class Arrow extends Entity {
 			this.yd *= 0.998F;
 			this.zd *= 0.998F;
 			this.yd -= 0.02F * this.gravity;
-			int var1 = (int) (MathHelper.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd) / 0.2F + 1.0F);
+			int var1 = (int) ((float) Math.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd) / 0.2F + 1.0F);
 			float var2 = this.xd / var1;
 			float var3 = this.yd / var1;
 			float var4 = this.zd / var1;
@@ -125,7 +125,7 @@ public class Arrow extends Entity {
 			}
 
 			if (!this.hasHit) {
-				float var9 = MathHelper.sqrt(this.xd * this.xd + this.zd * this.zd);
+				float var9 = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
 				this.yRot = (float) (Math.atan2(this.xd, this.zd) * 180.0D / 3.1415927410125732D);
 
 				for (this.xRot = (float) (Math.atan2(this.yd, var9) * 180.0D / 3.1415927410125732D); this.xRot - this.xRotO < -180.0F; this.xRotO -= 360.0F) {

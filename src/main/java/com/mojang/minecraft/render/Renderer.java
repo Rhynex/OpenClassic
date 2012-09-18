@@ -8,7 +8,7 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.render.HeldBlock;
-import com.mojang.util.MathHelper;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import java.nio.FloatBuffer;
 import java.util.Random;
 import org.lwjgl.BufferUtils;
@@ -33,18 +33,18 @@ public final class Renderer {
 		this.heldBlock = new HeldBlock();
 	}
 
-	public Vector a(float var1) {
-		float x = this.mc.player.xo + (this.mc.player.x - this.mc.player.xo) * var1;
-		float y = this.mc.player.yo + (this.mc.player.y - this.mc.player.yo) * var1;
-		float z = this.mc.player.zo + (this.mc.player.z - this.mc.player.zo) * var1;
+	public Vector getPlayerVector(float delta) {
+		float x = this.mc.player.xo + (this.mc.player.x - this.mc.player.xo) * delta;
+		float y = this.mc.player.yo + (this.mc.player.y - this.mc.player.yo) * delta;
+		float z = this.mc.player.zo + (this.mc.player.z - this.mc.player.zo) * delta;
 		return new Vector(x, y, z);
 	}
 
-	public void hurtEffect(float offset) {
-		float effect = this.mc.player.hurtTime - offset;
+	public void hurtEffect(float delta) {
+		float effect = this.mc.player.hurtTime - delta;
 		if (this.mc.player.health <= 0) {
-			offset += this.mc.player.deathTime;
-			GL11.glRotatef(40.0F - 8000.0F / (offset + 200.0F), 0, 0, 1);
+			delta += this.mc.player.deathTime;
+			GL11.glRotatef(40.0F - 8000.0F / (delta + 200.0F), 0, 0, 1);
 		}
 
 		if (effect >= 0) {
@@ -55,10 +55,10 @@ public final class Renderer {
 		}
 	}
 
-	public void applyBobbing(float offset) {
-		float dist = this.mc.player.walkDist + (this.mc.player.walkDist - this.mc.player.walkDistO) * offset;
-		float bob = this.mc.player.oBob + (this.mc.player.bob - this.mc.player.oBob) * offset;
-		float tilt = this.mc.player.oTilt + (this.mc.player.tilt - this.mc.player.oTilt) * offset;
+	public void applyBobbing(float delta) {
+		float dist = this.mc.player.walkDist + (this.mc.player.walkDist - this.mc.player.walkDistO) * delta;
+		float bob = this.mc.player.oBob + (this.mc.player.bob - this.mc.player.oBob) * delta;
+		float tilt = this.mc.player.oTilt + (this.mc.player.tilt - this.mc.player.oTilt) * delta;
 		GL11.glTranslatef(MathHelper.sin(dist * (float) Math.PI) * bob * 0.5F, -Math.abs(MathHelper.cos(dist * (float) Math.PI) * bob), 0);
 		GL11.glRotatef(MathHelper.sin(dist * (float) Math.PI) * bob * 3.0F, 0, 0, 1);
 		GL11.glRotatef(Math.abs(MathHelper.cos(dist * (float) Math.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
@@ -82,7 +82,7 @@ public final class Renderer {
 		}
 	}
 
-	public final void reset() {
+	public final void enableGuiMode() {
 		int width = this.mc.width * 240 / this.mc.height;
 		int height = this.mc.height * 240 / this.mc.height;
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
@@ -94,7 +94,7 @@ public final class Renderer {
 		GL11.glTranslatef(0.0F, 0.0F, -200.0F);
 	}
 
-	public void renderFog() {
+	public void updateFog() {
 		GL11.glFog(GL11.GL_FOG_COLOR, this.getParamBuffer(this.fogRed, this.fogBlue, this.fogGreen, 1));
 		GL11.glNormal3f(0, -1, 0);
 		GL11.glColor4f(1, 1, 1, 1);

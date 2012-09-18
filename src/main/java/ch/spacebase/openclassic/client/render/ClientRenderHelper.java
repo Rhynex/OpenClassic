@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.render;
 
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import org.lwjgl.opengl.Display;
@@ -41,7 +42,7 @@ public class ClientRenderHelper extends RenderHelper {
 	
 	private int binded = -1;
 	
-	public void drawDirtBG() {
+	public void drawDefaultBG() {
 		this.bindTexture("/dirt.png", true);
 
 		int width = Display.getWidth() * 240 / Display.getHeight();
@@ -56,29 +57,51 @@ public class ClientRenderHelper extends RenderHelper {
 		ShapeRenderer.instance.end();
 	}
 	
-	public void renderText(String text, int x, int y) {
+	public void renderText(String text, float x, float y) {
 		this.renderText(text, x, y, true);
 	}
 	
-	public void renderText(String text, int x, int y, boolean xCenter) {
+	public void renderText(String text, float x, float y, boolean xCenter) {
 		this.renderText(text, x, y, 16777215, xCenter);
 	}
 	
-	public void renderText(String text, int x, int y, int color) {
+	public void renderText(String text, float x, float y, int color) {
 		this.renderText(text, x, y, color, true);
 	}
 	
-	public void renderText(String text, int x, int y, int color, boolean xCenter) {
+	public void renderText(String text, float x, float y, int color, boolean xCenter) {
 		FontRenderer renderer = ((ClassicClient) OpenClassic.getClient()).getMinecraft().fontRenderer;
 		
 		if(xCenter) {
-			renderer.renderWithShadow(text, x - renderer.getWidth(text) / 2, y, color);
+			renderer.renderWithShadow(text, (int) x - renderer.getWidth(text) / 2, (int) y, color);
 		} else {
-			renderer.renderWithShadow(text, x, y, color);
+			renderer.renderWithShadow(text, (int) x, (int) y, color);
 		}
 	}
 	
-	public void drawBox(int x1, int y1, int x2, int y2, int color) {
+	public void renderTextNoShadow(String text, float x, float y) {
+		this.renderText(text, x, y, true);
+	}
+	
+	public void renderTextNoShadow(String text, float x, float y, boolean xCenter) {
+		this.renderText(text, x, y, 16777215, xCenter);
+	}
+	
+	public void renderTextNoShadow(String text, float x, float y, int color) {
+		this.renderText(text, x, y, color, true);
+	}
+	
+	public void renderTextNoShadow(String text, float x, float y, int color, boolean xCenter) {
+		FontRenderer renderer = ((ClassicClient) OpenClassic.getClient()).getMinecraft().fontRenderer;
+		
+		if(xCenter) {
+			renderer.renderNoShadow(text, (int) x - renderer.getWidth(text) / 2, (int) y, color);
+		} else {
+			renderer.renderNoShadow(text, (int) x, (int) y, color);
+		}
+	}
+	
+	public void drawBox(float x1, float y1, float x2, float y2, int color) {
 		float alpha = (color >>> 24) / 255F;
 		float red = (color >> 16 & 255) / 255F;
 		float green = (color >> 8 & 255) / 255F;
@@ -170,12 +193,12 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 
 	@Override
-	public void drawQuad(Quad quad, int x, int y, int z) {
+	public void drawQuad(Quad quad, float x, float y, float z) {
 		this.drawQuad(quad, x, y, z, 1);
 	}
 	
 	@Override // TODO: Custom block's custom textures mess up other textures sometimes?
-	public void drawQuad(Quad quad, int x, int y, int z, float brightness) {
+	public void drawQuad(Quad quad, float x, float y, float z, float brightness) {
 		ShapeRenderer.instance.begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
 		if(id == null || id.intValue() != this.binded) {
@@ -186,12 +209,12 @@ public class ClientRenderHelper extends RenderHelper {
 			ShapeRenderer.instance.color(brightness, brightness, brightness);
 		}
 		
-		int y1 = quad.getTexture().getY1();
-		int y2 = quad.getTexture().getY2();
+		float y1 = quad.getTexture().getY1();
+		float y2 = quad.getTexture().getY2();
 		
 		if(quad.getParent() instanceof CuboidModel && !(quad.getParent() instanceof LiquidModel) && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
-			y1 = (int) (y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
-			y2 = (int) (y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+			y1 = y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight();
+			y2 = y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight();
 		}
 		
 		float width = quad.getTexture().getParent().getWidth();
@@ -203,14 +226,44 @@ public class ClientRenderHelper extends RenderHelper {
 		
 		ShapeRenderer.instance.end();
 	}
+
+	@Override
+	public void drawScaledQuad(Quad quad, float x, float y, float z, float scale, float brightness) {
+		ShapeRenderer.instance.begin();
+		int id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
+		if(id == -1 || id != this.binded) {
+			this.bindTexture(quad.getTexture().getParent().getTexture(), quad.getTexture().getParent().isInJar());
+		}
+
+		if(brightness >= 0) {
+			ShapeRenderer.instance.color(brightness, brightness, brightness);
+		}
+
+		float y1 = quad.getTexture().getY1();
+		float y2 = quad.getTexture().getY2();
+
+		if(quad.getParent() instanceof CuboidModel && !(quad.getParent() instanceof LiquidModel) && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
+			y1 = y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight();
+			y2 = y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight();
+		}
+
+		float width = quad.getTexture().getParent().getWidth();
+		float height = quad.getTexture().getParent().getHeight();
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX() * scale, y + quad.getVertex(0).getY() * scale, z + quad.getVertex(0).getZ() * scale, quad.getTexture().getX2() / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX() * scale, y + quad.getVertex(1).getY() * scale, z + quad.getVertex(1).getZ() * scale, quad.getTexture().getX2() / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX() * scale, y + quad.getVertex(2).getY() * scale, z + quad.getVertex(2).getZ() * scale, quad.getTexture().getX1() / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX() * scale, y + quad.getVertex(3).getY() * scale, z + quad.getVertex(3).getZ() * scale, quad.getTexture().getX1() / width, y2 / height);
+		
+		ShapeRenderer.instance.end();
+	}
 	
 	public void drawCracks(Quad quad, int x, int y, int z, int crackTexture) {
 		ShapeRenderer.instance.begin();
 		this.bindTexture(VanillaBlock.TERRAIN.getTexture(), true);
 		
 		SubTexture texture = quad.getTexture().getParent().getSubTexture(crackTexture);
-		int y1 = texture.getY1();
-		int y2 = texture.getY2();
+		float y1 = texture.getY1();
+		float y2 = texture.getY2();
 		
 		if(quad.getParent() instanceof CuboidModel && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
 			y1 = (int) (y1 + quad.getVertex(0).getY() * texture.getParent().getSubTextureHeight());
@@ -226,18 +279,18 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	@Override
-	public void drawTexture(Texture texture, int x, int y) {
-		this.drawTexture(texture, x, y, 0);
+	public void drawTexture(Texture texture, float x, float y, float brightness) {
+		this.drawTexture(texture, x, y, 0, brightness);
 	}
 	
 	@Override
-	public void drawTexture(Texture texture, int x, int y, int z) {
+	public void drawTexture(Texture texture, float x, float y, float z, float brightness) {
 		ShapeRenderer.instance.begin();
 		if(GeneralUtils.getMinecraft().textureManager.textures.get(texture.getTexture()) == null || GeneralUtils.getMinecraft().textureManager.textures.get(texture.getTexture()) != GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)) {
 			this.bindTexture(texture.getTexture(), texture.isInJar());
 		}
 		
-		this.glColor(1, 1, 1, 1);
+		ShapeRenderer.instance.color(brightness, brightness, brightness);
 		ShapeRenderer.instance.vertexUV(x, y, z, 0, 0);
 		ShapeRenderer.instance.vertexUV(x, y + texture.getHeight(), z, 0, texture.getHeight() / texture.getHeight());
 		ShapeRenderer.instance.vertexUV(x + texture.getWidth(), y + texture.getHeight(), z, texture.getWidth() / texture.getWidth(), texture.getHeight() / texture.getHeight());
@@ -247,22 +300,31 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	@Override
-	public void drawSubTex(SubTexture texture, int x, int y) {
-		this.drawSubTex(texture, x, y, 0);
+	public void drawSubTex(SubTexture texture, float x, float y, float brightness) {
+		this.drawSubTex(texture, x, y, 0, brightness);
 	}
 	
 	@Override
-	public void drawSubTex(SubTexture texture, int x, int y, int z) {
+	public void drawSubTex(SubTexture texture, float x, float y, float z, float brightness) {
+		this.drawSubTex(texture, x, y, z, 1, brightness, brightness, brightness);
+	}
+
+	@Override
+	public void drawSubTex(SubTexture texture, float x, float y, float z, float scale, float r, float g, float b) {
 		ShapeRenderer.instance.begin();
-		if(GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture()) == null || GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture()) != GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)) {
+		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture());
+		if(id == null || id.intValue() != this.binded) {
 			this.bindTexture(texture.getParent().getTexture(), texture.getParent().isInJar());
 		}
 		
-		this.glColor(1, 1, 1, 1);
+		if(r >= 0 && g >= 0 && b >= 0) {
+			ShapeRenderer.instance.color(r, g, b);
+		}
+		
 		ShapeRenderer.instance.vertexUV(x, y, z, texture.getX1() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
-		ShapeRenderer.instance.vertexUV(x, y + texture.getY2() - texture.getY1(), z, texture.getX1() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
-		ShapeRenderer.instance.vertexUV(x + texture.getX2() - texture.getX1(), y + (texture.getY2() - texture.getY1()), z, texture.getX2() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
-		ShapeRenderer.instance.vertexUV(x + texture.getX2() - texture.getX1(), y, z, texture.getX2() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
+		ShapeRenderer.instance.vertexUV(x, y + ((texture.getY2() - texture.getY1()) * scale), z, texture.getX1() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
+		ShapeRenderer.instance.vertexUV(x + ((texture.getX2() - texture.getX1()) * scale), y + ((texture.getY2() - texture.getY1()) * scale), z, texture.getX2() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
+		ShapeRenderer.instance.vertexUV(x + ((texture.getX2() - texture.getX1()) * scale), y, z, texture.getX2() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
 		
 		ShapeRenderer.instance.end();
 	}
@@ -315,41 +377,6 @@ public class ClientRenderHelper extends RenderHelper {
 		return main == VanillaBlock.LAVA || main == VanillaBlock.STATIONARY_LAVA ? 100 : ((ClientLevel) OpenClassic.getClient().getLevel()).getHandle().getBrightness(x, y, z);
 	}
 	
-	@Override
-	public void renderPreview(Model model, float brightness) {
-		ShapeRenderer.instance.begin();
-
-		for (int side = 0; side < model.getQuads().size(); ++side) {
-			if (side == 0) {
-				ShapeRenderer.instance.glNormal3f(0, 1, 0);
-			}
-
-			if (side == 1) {
-				ShapeRenderer.instance.glNormal3f(0, -1, 0);
-			}
-
-			if (side == 2) {
-				ShapeRenderer.instance.glNormal3f(0, 0, 1);
-			}
-
-			if (side == 3) {
-				ShapeRenderer.instance.glNormal3f(0, 0, -1);
-			}
-
-			if (side == 4) {
-				ShapeRenderer.instance.glNormal3f(1, 0, 0);
-			}
-
-			if (side == 5) {
-				ShapeRenderer.instance.glNormal3f(-1, 0, 0);
-			}
-
-			model.getQuad(side).render(0, 0, 0, brightness);
-		}
-
-		ShapeRenderer.instance.end();
-	}
-	
 	public void spawnDestructionParticles(BlockType block, Level level, int x, int y, int z, ParticleManager particles) {
 		for (int xMod = 0; xMod < 4; ++xMod) {
 			for (int yMod = 0; yMod < 4; ++yMod) {
@@ -397,7 +424,7 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 
 	@Override
-	public int getStringWidth(String string) {
+	public float getStringWidth(String string) {
 		return GeneralUtils.getMinecraft().fontRenderer.getWidth(string);
 	}
 	
@@ -422,9 +449,36 @@ public class ClientRenderHelper extends RenderHelper {
 			GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
 			GL11.glScalef(-1, -1, -1);
 			ShapeRenderer.instance.begin();
-			block.getModel().renderFullbright(-2, 0, 0);
+			block.getModel().renderAll(-2, 0, 0, 1);
 			ShapeRenderer.instance.end();
 			GL11.glPopMatrix();
+		}
+	}
+
+	@Override
+	public void drawImage(BufferedImage image, int x, int y) {
+		this.drawImage(image, x, y, 0);
+	}
+	
+	@Override
+	public void drawImage(BufferedImage image, int x, int y, int z) {
+		GeneralUtils.getMinecraft().textureManager.bindTexture(image);
+		
+		this.glColor(1, 1, 1, 1);
+		ShapeRenderer.instance.begin();
+		ShapeRenderer.instance.vertexUV(x, y, z, 0, 0);
+		ShapeRenderer.instance.vertexUV(x, y + image.getHeight(), z, 0, image.getHeight() / image.getHeight());
+		ShapeRenderer.instance.vertexUV(x + image.getWidth(), y + image.getHeight(), z, image.getWidth() / image.getWidth(), image.getHeight() / image.getHeight());
+		ShapeRenderer.instance.vertexUV(x + image.getWidth(), y, z, image.getWidth() / image.getWidth(), 0);
+		ShapeRenderer.instance.end();
+	}
+
+	@Override
+	public void setCulling(boolean enabled) {
+		if(enabled) {
+			GL11.glEnable(GL11.GL_CULL_FACE);
+		} else {
+			GL11.glDisable(GL11.GL_CULL_FACE);
 		}
 	}
 	

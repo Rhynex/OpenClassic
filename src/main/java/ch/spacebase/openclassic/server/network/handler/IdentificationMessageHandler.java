@@ -181,7 +181,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		}
 		
 		player.sendLevel(player.getPosition().getLevel());
-		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
+		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
 		
 		session.setState(State.GAME);
 		OpenClassic.getServer().broadcastMessage(EventFactory.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());

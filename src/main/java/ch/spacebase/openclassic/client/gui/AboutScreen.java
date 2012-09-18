@@ -30,7 +30,7 @@ public class AboutScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().drawRotatedBlock(this.getWidth() / 2 - 10, (this.getHeight() / 2) - 56, VanillaBlock.STONE, 2);
 		
 		RenderHelper.getHelper().renderText("Minecraft Classic", this.getWidth() / 2, (this.getHeight() / 2) - 32);

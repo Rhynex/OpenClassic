@@ -93,22 +93,22 @@ public class ClientPlayer implements Player {
 	}
 
 	@Override
-	public void moveTo(double x, double y, double z) {
+	public void moveTo(float x, float y, float z) {
 		this.moveTo(this.handle.level.openclassic, x, y, z, (byte) 0, (byte) 0);
 	}
 
 	@Override
-	public void moveTo(double x, double y, double z, byte yaw, byte pitch) {
+	public void moveTo(float x, float y, float z, float yaw, float pitch) {
 		this.moveTo(this.handle.level.openclassic, x, y, z, yaw, pitch);
 	}
 
 	@Override
-	public void moveTo(Level level, double x, double y, double z) {
+	public void moveTo(Level level, float x, float y, float z) {
 		this.moveTo(level, x, y, z, (byte) 0, (byte) 0);
 	}
 
 	@Override
-	public void moveTo(Level level, double x, double y, double z, byte yaw, byte pitch) {
+	public void moveTo(Level level, float x, float y, float z, float yaw, float pitch) {
 		PlayerTeleportEvent event = EventFactory.callEvent(new PlayerTeleportEvent(this, this.getPosition(), new Position(level, x, y, z, yaw, pitch)));
 		if(event.isCancelled()) {
 			return;
@@ -119,7 +119,7 @@ public class ClientPlayer implements Player {
 			GeneralUtils.getMinecraft().setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
 		}
 		
-		this.handle.moveTo((float) event.getTo().getX(), (float) event.getTo().getY(), (float) event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
+		this.handle.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
 	}
 
 	@Override

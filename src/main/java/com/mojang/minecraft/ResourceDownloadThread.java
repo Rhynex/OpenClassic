@@ -26,7 +26,7 @@ public final class ResourceDownloadThread extends Thread {
 
 	public ResourceDownloadThread(File location, Minecraft mc, ProgressBarDisplay progress) {
 		this.mc = mc;
-		this.setName("Resource download thread");
+		this.setName("Client-Resource Download Thread");
 		this.setDaemon(true);
 		
 		this.resource = new File(location, "resources/");
@@ -115,7 +115,7 @@ public final class ResourceDownloadThread extends Thread {
 			int done = 0;
 			while (this.running) {
 				length = in.read(data);
-				if (length < 0) return;
+				if (length < 0) break;
 
 				out.write(data, 0, length);
 				done += length;

@@ -42,6 +42,9 @@ public class ClientLevel implements Level {
 	@Override
 	public void removePlayer(String player) {
 	}
+	
+	public void removePlayer(byte id) {
+	}
 
 	@Override
 	public boolean getPhysicsEnabled() {
@@ -186,7 +189,12 @@ public class ClientLevel implements Level {
 	
 	@Override
 	public int getHighestBlockY(int x, int z) {
-		for(int y = this.getHeight(); y >= 0; y--) {
+		return this.getHighestBlockY(x, z, this.getHeight());
+	}
+	
+	@Override
+	public int getHighestBlockY(int x, int z, int max) {
+		for(int y = max; y >= 0; y--) {
 			if(this.getBlockIdAt(x, y, z) != 0) return y;
 		}
 		
@@ -212,11 +220,6 @@ public class ClientLevel implements Level {
 	@Override
 	public void setGenerating(boolean generating) {
 		this.generating = generating;
-	}
-	
-	@Override
-	public boolean treePhysics() {
-		return this.handle.growTrees;
 	}
 
 	@Override

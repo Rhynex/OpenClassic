@@ -51,7 +51,7 @@ public class IndevLevelFormat {
 		level.setAuthor(author);
 		level.setCreationTime(created);
 		level.setWorldData(width, height, depth, blocks);
-		level.setSpawn(new Position(level, x, y, z));
+		level.setSpawn(new Position(level, (float) x, (float) y, (float) z));
 		
 		in.close();	
 		return level;

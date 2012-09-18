@@ -12,10 +12,6 @@ public class Vertex {
 		this(new Vector(x, y, z), u, v);
 	}
 
-	public Vertex create(float u, float v) {
-		return new Vertex(this, u, v);
-	}
-
 	private Vertex(Vertex vert, float u, float v) {
 		this.vector = vert.vector;
 		this.u = u;
@@ -27,4 +23,9 @@ public class Vertex {
 		this.u = u;
 		this.v = v;
 	}
+	
+	public Vertex create(float u, float v) {
+		return new Vertex(this, u, v);
+	}
+	
 }

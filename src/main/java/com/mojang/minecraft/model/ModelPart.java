@@ -27,7 +27,7 @@ public final class ModelPart {
 		this.v = v;
 	}
 
-	public final void addBox(float x1, float y1, float z1, int x2, int y2, int z2, float var7) {
+	public final void setBounds(float x1, float y1, float z1, int x2, int y2, int z2, float var7) {
 		this.vertices = new Vertex[8];
 		this.quads = new Quad[6];
 		float var8 = x1 + x2;
@@ -82,7 +82,7 @@ public final class ModelPart {
 
 	}
 
-	public final void setRotationPoint(float x, float y, float z) {
+	public final void setPosition(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;

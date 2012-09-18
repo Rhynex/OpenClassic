@@ -16,7 +16,7 @@ import com.mojang.minecraft.model.HumanoidModel;
 import com.mojang.minecraft.player.InputHandler;
 import com.mojang.minecraft.player.Inventory;
 import com.mojang.minecraft.render.TextureManager;
-import com.mojang.util.MathHelper;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.List;
@@ -77,7 +77,7 @@ public class Player extends Mob {
 		this.oBob = this.bob;
 		this.input.updateMovement();
 		super.aiStep();
-		float bob = MathHelper.sqrt(this.xd * this.xd + this.zd * this.zd);
+		float bob = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
 		float tilt = (float) Math.atan((-this.yd * 0.2F)) * 15.0F;
 		if (bob > 0.1F) {
 			bob = 0.1F;
@@ -193,7 +193,7 @@ public class Player extends Mob {
 	
 	public void moveRelative(float relX, float relZ, float var3) {
 		if(GeneralUtils.getMinecraft().settings.speed && this.speedHack &&  GeneralUtils.getMinecraft().hacks) {
-			super.moveRelative(relX, relZ, var3, 2.5F);
+			super.moveRelative(relX, relZ, 2.5F);
 		} else {
 			super.moveRelative(relX, relZ, var3);
 		}
@@ -208,7 +208,7 @@ public class Player extends Mob {
 			return;
 		}
 		
-		super.moveTo((float) event.getTo().getX(), (float) event.getTo().getY(), (float) event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
+		super.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
 	}
 	
 	public static class PlayerAI extends BasicAI implements Serializable {

@@ -32,5 +32,10 @@ public class ClientInputHelper extends InputHelper {
 	public void grabMouse() {
 		GeneralUtils.getMinecraft().grabMouse();
 	}
+
+	@Override
+	public void enableRepeatEvents(boolean enabled) {
+		Keyboard.enableRepeatEvents(enabled);
+	}
 	
 }

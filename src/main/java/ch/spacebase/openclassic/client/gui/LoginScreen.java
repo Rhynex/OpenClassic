@@ -24,8 +24,6 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
 
-import org.lwjgl.input.Keyboard;
-
 import com.mojang.minecraft.SessionData;
 
 /**
@@ -36,8 +34,6 @@ public class LoginScreen extends GuiScreen {
 	private String title = OpenClassic.getGame().getTranslator().translate("gui.login.enter");
 	
 	public void onOpen() {
-		Keyboard.enableRepeatEvents(true);
-		
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.login")));
 		this.attachWidget(new Button(4, this.getWidth() / 2 + 2, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.play-offline")));
@@ -77,10 +73,6 @@ public class LoginScreen extends GuiScreen {
 		} else {
 			this.getWidget(0, Button.class).setActive(false);
 		}
-	}
-
-	public void onClose() {
-		Keyboard.enableRepeatEvents(false);
 	}
 
 	public void onButtonClick(Button button) {
@@ -137,7 +129,7 @@ public class LoginScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 40);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.login.user"), (this.getWidth() / 2 - 104) - RenderHelper.getHelper().getStringWidth("Username"), this.getHeight() / 2 - 6);

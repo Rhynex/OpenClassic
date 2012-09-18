@@ -15,8 +15,6 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.SessionData;
 import com.mojang.minecraft.gui.ErrorScreen;
 
-import org.lwjgl.input.Keyboard;
-
 /**
  * @author Steveice10 <Steveice10@gmail.com>
  */
@@ -29,8 +27,6 @@ public class ServerURLScreen extends GuiScreen {
 	}
 
 	public void onOpen() {
-		Keyboard.enableRepeatEvents(true);
-		
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.servers.connect")));
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
@@ -38,10 +34,6 @@ public class ServerURLScreen extends GuiScreen {
 		this.getWidget(2, TextBox.class).setFocus(true);
 		
 		this.getWidget(0, Button.class).setActive(false);
-	}
-
-	public void onClose() {
-		Keyboard.enableRepeatEvents(false);
 	}
 
 	public void onButtonClick(Button button) {
@@ -86,7 +78,7 @@ public class ServerURLScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 40);
 		super.render();

@@ -30,7 +30,7 @@ public final class ErrorScreen extends GuiScreen {
 	}
 
 	public final void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 90);
 		RenderHelper.getHelper().renderText(this.message, this.getWidth() / 2, 110);
 		super.render();

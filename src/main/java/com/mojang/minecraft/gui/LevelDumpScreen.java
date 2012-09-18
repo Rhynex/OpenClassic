@@ -11,8 +11,6 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.level.LevelIO;
 
-import org.lwjgl.input.Keyboard;
-
 public final class LevelDumpScreen extends GuiScreen {
 
 	private GuiScreen parent;
@@ -23,8 +21,6 @@ public final class LevelDumpScreen extends GuiScreen {
 	}
 
 	public final void onOpen() {
-		Keyboard.enableRepeatEvents(true);
-		
 		this.widget = new TextBox(0, this.getWidth() / 2 - 100, this.getHeight() / 2 - 30, this, 30);
 		
 		this.clearWidgets();
@@ -35,10 +31,6 @@ public final class LevelDumpScreen extends GuiScreen {
 		this.attachWidget(new Button(3, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
 		
 		this.getWidget(2, Button.class).setActive(false);
-	}
-
-	public final void onClose() {
-		Keyboard.enableRepeatEvents(false);
 	}
 
 	public final void onButtonClick(Button button) {
@@ -72,7 +64,7 @@ public final class LevelDumpScreen extends GuiScreen {
 	}
 
 	public final void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.level-dump.name"), this.getWidth() / 2, 40);
 
 		super.render();

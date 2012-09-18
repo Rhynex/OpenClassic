@@ -100,19 +100,19 @@ public class ServerPlayer implements Player {
 		this.moveTo(pos.getLevel(), pos.getX(), pos.getY(), pos.getZ(), pos.getYaw(), pos.getPitch());
 	}
 	
-	public void moveTo(double x, double y, double z) {
+	public void moveTo(float x, float y, float z) {
 		this.moveTo(this.pos.getLevel(), x, y, z);
 	}
 	
-	public void moveTo(double x, double y, double z, byte yaw, byte pitch) {
+	public void moveTo(float x, float y, float z, float yaw, float pitch) {
 		this.moveTo(this.pos.getLevel(), x, y, z, yaw, pitch);
 	}
 	
-	public void moveTo(Level level, double x, double y, double z) {
+	public void moveTo(Level level, float x, float y, float z) {
 		this.moveTo(this.pos.getLevel(), x, y, z, this.pos.getYaw(), this.pos.getPitch());
 	}
 	
-	public void moveTo(Level level, double x, double y, double z, byte yaw, byte pitch) {
+	public void moveTo(Level level, float x, float y, float z, float yaw, float pitch) {
 		Position to = new Position(level, x, y, z, yaw, pitch);
 		Level old = this.pos.getLevel();
 		
@@ -128,8 +128,8 @@ public class ServerPlayer implements Player {
 			this.session.send(new IdentificationMessage(Constants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.getGroup().hasPermission("openclassic.commands.solid") ? Constants.OP : Constants.NOT_OP));
 			this.sendLevel(this.pos.getLevel());
 		} else {
-			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
-			this.getPosition().getLevel().sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375, this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
+			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), (byte) this.getPosition().getYaw(), (byte) this.getPosition().getPitch()));
+			this.getPosition().getLevel().sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375, this.getPosition().getZ(), (byte) this.getPosition().getYaw(), (byte) this.getPosition().getPitch()));
 		}
 	}
 	
@@ -250,11 +250,11 @@ public class ServerPlayer implements Player {
 					session.send(new LevelFinalizeMessage(level.getWidth(), level.getHeight(), level.getDepth()));
 					moveTo(level.getSpawn());
 					
-					level.sendToAllExcept(player, new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
+					level.sendToAllExcept(player, new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
 					for (Player p : level.getPlayers()) {
 						if(p.getPlayerId() == getPlayerId()) continue;
 						
-						session.send(new PlayerSpawnMessage(p.getPlayerId(), p.getName(), p.getPosition().getX(), p.getPosition().getY(), p.getPosition().getZ(), p.getPosition().getYaw(), p.getPosition().getPitch()));
+						session.send(new PlayerSpawnMessage(p.getPlayerId(), p.getName(), p.getPosition().getX(), p.getPosition().getY(), p.getPosition().getZ(), (byte) p.getPosition().getYaw(), (byte) p.getPosition().getPitch()));
 					}
 					
 					if(hasCustomClient()) {
@@ -311,7 +311,7 @@ public class ServerPlayer implements Player {
 	@Override
 	public void showPlayer(Player player) {
 		this.hidden.remove(player.getName());
-		this.getSession().send(new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
+		this.getSession().send(new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
 	}
 
 	@Override

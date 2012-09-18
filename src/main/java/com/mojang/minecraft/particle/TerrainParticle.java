@@ -23,28 +23,28 @@ public class TerrainParticle extends Particle {
 		this.block = block;
 	}
 
-	public int getParticleTexture() {
+	public int getParticleId() {
 		return 1;
 	}
 
-	public void render(ShapeRenderer var1, float var2, float var3, float var4, float var5, float var6, float var7) {
-		float var8 = (this.tex % 16) / 16.0F + 0.02f;
+	public void render(ShapeRenderer renderer, float delta, float xMod, float yMod, float zMod, float yaw, float pitch) {
+		float var8 = (this.tex % 16) / 16 + 0.02f;
 		float var9 = var8 + 0.015609375F;
-		float var10 = (this.tex / 16f) / 16.0F;
+		float var10 = (this.tex / 16f) / 16;
 		if(this.block == VanillaBlock.GRAY_CLOTH || this.block == VanillaBlock.BLACK_CLOTH || this.block == VanillaBlock.WHITE_CLOTH) {
 			var10 -= 0.01f;
 		}
 		
 		float var11 = var10 + 0.015609375F;
 		float var12 = 0.1F * this.size;
-		float var13 = this.xo + (this.x - this.xo) * var2;
-		float var14 = this.yo + (this.y - this.yo) * var2;
-		float var15 = this.zo + (this.z - this.zo) * var2;
-		var2 = this.getBrightness(var2);
-		var1.color(var2 * this.rCol, var2 * this.gCol, var2 * this.bCol);
-		var1.vertexUV(var13 - var3 * var12 - var6 * var12, var14 - var4 * var12, var15 - var5 * var12 - var7 * var12, var8, var11);
-		var1.vertexUV(var13 - var3 * var12 + var6 * var12, var14 + var4 * var12, var15 - var5 * var12 + var7 * var12, var8, var10);
-		var1.vertexUV(var13 + var3 * var12 + var6 * var12, var14 + var4 * var12, var15 + var5 * var12 + var7 * var12, var9, var10);
-		var1.vertexUV(var13 + var3 * var12 - var6 * var12, var14 - var4 * var12, var15 + var5 * var12 - var7 * var12, var9, var11);
+		float var13 = this.xo + (this.x - this.xo) * delta;
+		float var14 = this.yo + (this.y - this.yo) * delta;
+		float var15 = this.zo + (this.z - this.zo) * delta;
+		delta = this.getBrightness(delta);
+		renderer.color(delta * this.rCol, delta * this.gCol, delta * this.bCol);
+		renderer.vertexUV(var13 - xMod * var12 - yaw * var12, var14 - yMod * var12, var15 - zMod * var12 - pitch * var12, var8, var11);
+		renderer.vertexUV(var13 - xMod * var12 + yaw * var12, var14 + yMod * var12, var15 - zMod * var12 + pitch * var12, var8, var10);
+		renderer.vertexUV(var13 + xMod * var12 + yaw * var12, var14 + yMod * var12, var15 + zMod * var12 + pitch * var12, var9, var10);
+		renderer.vertexUV(var13 + xMod * var12 - yaw * var12, var14 - yMod * var12, var15 + zMod * var12 - pitch * var12, var9, var11);
 	}
 }

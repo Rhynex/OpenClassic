@@ -1,7 +1,7 @@
 package com.mojang.minecraft.render.animation;
 
 import com.mojang.minecraft.render.animation.AnimatedTexture;
-import com.mojang.util.MathHelper;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 public final class LavaTexture extends AnimatedTexture {
 

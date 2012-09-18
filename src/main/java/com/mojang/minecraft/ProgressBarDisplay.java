@@ -48,14 +48,12 @@ public final class ProgressBarDisplay implements ProgressBar {
 	}
 
 	public void setProgress(int progress) {
-		if (!this.mc.running) {
-			return;
-		} else {
+		if (this.mc.running) {
 			if (System.currentTimeMillis() - this.start < 0 || System.currentTimeMillis() - this.start >= 20) {
 				this.start = System.currentTimeMillis();
 				int x = this.mc.width * 240 / this.mc.height;
 				int y = this.mc.height * 240 / this.mc.height;
-				ClientRenderHelper.getHelper().drawDirtBG();
+				ClientRenderHelper.getHelper().drawDefaultBG();
 				if (progress >= 0) {
 					int barX = x / 2 - 50;
 					int barY = y / 2 + 16;
@@ -97,5 +95,17 @@ public final class ProgressBarDisplay implements ProgressBar {
 	@Override
 	public int getProgress() {
 		return this.progress;
+	}
+
+	@Override
+	public boolean isVisible() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		// TODO Auto-generated method stub
+		
 	}
 }

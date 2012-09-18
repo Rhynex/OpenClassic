@@ -62,7 +62,7 @@ public class OpenClassicLevelFormat {
 		if(!levelFile.exists()) {
 			if(create) {
 				OpenClassic.getLogger().info("Level \"" + name + "\" was not found. Creating with default settings...");
-				return OpenClassic.getGame().createLevel(new LevelInfo(name, new Position(null, 0, 65, 0), (short) 256, (short) 64, (short) 256), new FlatLandGenerator());
+				return OpenClassic.getGame().createLevel(new LevelInfo(name, new Position(null, 64, 33, 64), (short) 128, (short) 64, (short) 128), new FlatLandGenerator());
 			} else {
 				return null;
 			}
@@ -84,7 +84,7 @@ public class OpenClassicLevelFormat {
 		double spawnZ = ((DoubleTag) spawn.get("z")).getValue();
 		byte spawnYaw = ((ByteTag) spawn.get("yaw")).getValue();
 		byte spawnPitch = ((ByteTag) spawn.get("pitch")).getValue();
-		level.setSpawn(new Position(level, spawnX, spawnY, spawnZ, spawnYaw, spawnPitch));
+		level.setSpawn(new Position(level, (float) spawnX, (float) spawnY, (float) spawnZ, spawnYaw, spawnPitch));
 		
 		short width = ((ShortTag) map.get("Width")).getValue();
 		short height = ((ShortTag) map.get("Height")).getValue();
@@ -107,7 +107,7 @@ public class OpenClassicLevelFormat {
 		level.setAuthor(IOUtils.readString(data));
 		level.setCreationTime(data.readLong());
 		
-		level.setSpawn(new Position(level, data.readDouble(), data.readDouble(), data.readDouble(), data.readByte(), data.readByte()));
+		level.setSpawn(new Position(level, (float) data.readDouble(), (float) data.readDouble(), (float) data.readDouble(), data.readByte(), data.readByte()));
 		
 		short width = data.readShort();
 		short height = data.readShort();
@@ -135,11 +135,11 @@ public class OpenClassicLevelFormat {
 		root.append(info);
 		
 		TagBuilder spawn = new TagBuilder("Spawn");
-		spawn.append("x", level.getSpawn().getX());
-		spawn.append("y", level.getSpawn().getY());
-		spawn.append("z", level.getSpawn().getZ());
-		spawn.append("yaw", level.getSpawn().getYaw());
-		spawn.append("pitch", level.getSpawn().getPitch());
+		spawn.append("x", (double) level.getSpawn().getX());
+		spawn.append("y", (double) level.getSpawn().getY());
+		spawn.append("z", (double) level.getSpawn().getZ());
+		spawn.append("yaw", (byte) level.getSpawn().getYaw());
+		spawn.append("pitch", (byte) level.getSpawn().getPitch());
 		root.append(spawn);
 		
 		TagBuilder map = new TagBuilder("Map");

@@ -20,7 +20,7 @@ public final class Chunk {
 	private int width;
 	private int height;
 	private int depth;
-	public boolean chunkDirty = false;
+	public boolean visible = false;
 	private boolean[] dirty = new boolean[2];
 	public boolean loaded;
 
@@ -40,10 +40,10 @@ public final class Chunk {
 		chunkUpdates++;
 		this.setAllDirty();
 
-		for (int count = 0; count < 2; ++count) {
+		for (int pass = 0; pass < 2; pass++) {
 			boolean continuing = false;
 			boolean cleaned = false;
-			GL11.glNewList(this.baseListId + count, 4864);
+			GL11.glNewList(this.baseListId + pass, GL11.GL_COMPILE);
 			ShapeRenderer.instance.begin();
 
 			for (int x = this.x; x < this.x + this.width; x++) {
@@ -54,8 +54,8 @@ public final class Chunk {
 							BlockType block = Blocks.fromId(type);
 							if(block == null) block = VanillaBlock.STONE;
 							
-							int updates = block.getId() == VanillaBlock.WATER.getId() || block.getId() == VanillaBlock.STATIONARY_WATER.getId() ? 1 : 0;
-							if (updates != count) {
+							int requiredPass = block.getId() == VanillaBlock.WATER.getId() || block.getId() == VanillaBlock.STATIONARY_WATER.getId() ? 1 : 0;
+							if (requiredPass != pass) {
 								continuing = true;
 							} else {
 								cleaned |= block.getModel().render(x, y, z, block.getId() == VanillaBlock.LAVA.getId() || block.getId() == VanillaBlock.STATIONARY_LAVA.getId() ? 100 : level.getBrightness(x, y, z));
@@ -68,7 +68,7 @@ public final class Chunk {
 			ShapeRenderer.instance.end();
 			GL11.glEndList();
 			if (cleaned) {
-				this.dirty[count] = false;
+				this.dirty[pass] = false;
 			}
 
 			if (!continuing) {
@@ -97,7 +97,7 @@ public final class Chunk {
 	}
 
 	public final int appendData(int[] data, int start, int var3) {
-		if (!this.chunkDirty) {
+		if (!this.visible) {
 			return start;
 		} else {
 			if (!this.dirty[var3]) {
@@ -109,7 +109,7 @@ public final class Chunk {
 	}
 
 	public final void clip(ClippingHelper check) {
-		this.chunkDirty = check.isBoxInFrustrum(this.x, this.y, this.z, this.x + this.width, this.y + this.height, this.z + this.depth);
+		this.visible = check.isBoxInFrustrum(this.x, this.y, this.z, this.x + this.width, this.y + this.height, this.z + this.depth);
 	}
 
 }

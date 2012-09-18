@@ -2,7 +2,7 @@ package com.mojang.minecraft.model;
 
 import com.mojang.minecraft.model.Model;
 import com.mojang.minecraft.model.ModelPart;
-import com.mojang.util.MathHelper;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 public final class SpiderModel extends Model {
 
@@ -19,37 +19,37 @@ public final class SpiderModel extends Model {
 	private ModelPart leg8;
 
 	public SpiderModel() {
-		this.head.addBox(-4.0F, -4.0F, -8.0F, 8, 8, 8, 0.0F);
-		this.head.setRotationPoint(0.0F, 0.0F, -3.0F);
+		this.head.setBounds(-4.0F, -4.0F, -8.0F, 8, 8, 8, 0.0F);
+		this.head.setPosition(0.0F, 0.0F, -3.0F);
 		this.neck = new ModelPart(0, 0);
-		this.neck.addBox(-3.0F, -3.0F, -3.0F, 6, 6, 6, 0.0F);
+		this.neck.setBounds(-3.0F, -3.0F, -3.0F, 6, 6, 6, 0.0F);
 		this.body = new ModelPart(0, 12);
-		this.body.addBox(-5.0F, -4.0F, -6.0F, 10, 8, 12, 0.0F);
-		this.body.setRotationPoint(0.0F, 0.0F, 9.0F);
+		this.body.setBounds(-5.0F, -4.0F, -6.0F, 10, 8, 12, 0.0F);
+		this.body.setPosition(0.0F, 0.0F, 9.0F);
 		this.leg1 = new ModelPart(18, 0);
-		this.leg1.addBox(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg1.setRotationPoint(-4.0F, 0.0F, 2.0F);
+		this.leg1.setBounds(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg1.setPosition(-4.0F, 0.0F, 2.0F);
 		this.leg2 = new ModelPart(18, 0);
-		this.leg2.addBox(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg2.setRotationPoint(4.0F, 0.0F, 2.0F);
+		this.leg2.setBounds(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg2.setPosition(4.0F, 0.0F, 2.0F);
 		this.leg3 = new ModelPart(18, 0);
-		this.leg3.addBox(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg3.setRotationPoint(-4.0F, 0.0F, 1.0F);
+		this.leg3.setBounds(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg3.setPosition(-4.0F, 0.0F, 1.0F);
 		this.leg4 = new ModelPart(18, 0);
-		this.leg4.addBox(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg4.setRotationPoint(4.0F, 0.0F, 1.0F);
+		this.leg4.setBounds(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg4.setPosition(4.0F, 0.0F, 1.0F);
 		this.leg5 = new ModelPart(18, 0);
-		this.leg5.addBox(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg5.setRotationPoint(-4.0F, 0.0F, 0.0F);
+		this.leg5.setBounds(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg5.setPosition(-4.0F, 0.0F, 0.0F);
 		this.leg6 = new ModelPart(18, 0);
-		this.leg6.addBox(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg6.setRotationPoint(4.0F, 0.0F, 0.0F);
+		this.leg6.setBounds(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg6.setPosition(4.0F, 0.0F, 0.0F);
 		this.leg7 = new ModelPart(18, 0);
-		this.leg7.addBox(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg7.setRotationPoint(-4.0F, 0.0F, -1.0F);
+		this.leg7.setBounds(-15.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg7.setPosition(-4.0F, 0.0F, -1.0F);
 		this.leg8 = new ModelPart(18, 0);
-		this.leg8.addBox(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
-		this.leg8.setRotationPoint(4.0F, 0.0F, -1.0F);
+		this.leg8.setBounds(-1.0F, -1.0F, -1.0F, 16, 2, 2, 0.0F);
+		this.leg8.setPosition(4.0F, 0.0F, -1.0F);
 	}
 
 	public final void render(float var1, float var2, float var3, float var4, float var5, float var6) {

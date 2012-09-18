@@ -22,12 +22,11 @@ public final class ParticleManager {
 		for (int index = 0; index < particles.length; ++index) {
 			this.particles[index] = new ArrayList<Particle>();
 		}
-
 	}
 
 	public final void spawnParticle(Particle particle) {
-		int texture = particle.getParticleTexture();
-		this.particles[texture].add(particle);
+		int id = particle.getParticleId();
+		this.particles[id].add(particle);
 	}
 
 	public final void tickParticles() {

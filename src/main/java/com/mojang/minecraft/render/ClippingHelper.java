@@ -1,6 +1,5 @@
 package com.mojang.minecraft.render;
 
-import com.mojang.util.MathHelper;
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -76,7 +75,7 @@ public final class ClippingHelper {
 	}
 
 	private static void normalize(float[][] var0, int var1) {
-		float var2 = MathHelper.sqrt(var0[var1][0] * var0[var1][0] + var0[var1][1] * var0[var1][1] + var0[var1][2] * var0[var1][2]);
+		float var2 = (float) Math.sqrt(var0[var1][0] * var0[var1][0] + var0[var1][1] * var0[var1][1] + var0[var1][2] * var0[var1][2]);
 		var0[var1][0] /= var2;
 		var0[var1][1] /= var2;
 		var0[var1][2] /= var2;

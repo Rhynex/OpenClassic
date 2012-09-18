@@ -4,6 +4,7 @@ import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.math.MathHelper;
 
 import com.mojang.minecraft.level.BlockMap;
 import com.mojang.minecraft.level.Level;
@@ -11,7 +12,6 @@ import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.net.PositionUpdate;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.TextureManager;
-import com.mojang.util.MathHelper;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -73,7 +73,7 @@ public abstract class Entity implements Serializable {
 				pos.setY(pos.getY() + 1);
 			}
 			
-			this.setPos((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
+			this.setPos(pos.getX(), pos.getY(), pos.getZ());
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
@@ -314,7 +314,7 @@ public abstract class Entity implements Serializable {
 			this.z = (this.bb.z0 + this.bb.z1) / 2.0F;
 			float xDiff = this.x - oldEntityX;
 			float zDiff = this.z - oldEntityZ;
-			this.walkDist = (float) (this.walkDist + MathHelper.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
+			this.walkDist = (float) (this.walkDist + (float) Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
 			if (this.makeStepSound) {
 				int id = this.level.getTile((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
 				if (this.walkDist > this.nextStep && id > 0) {
@@ -348,28 +348,21 @@ public abstract class Entity implements Serializable {
 		return this.level.containsLiquid(this.bb.grow(0.0F, -0.4F, 0.0F), VanillaBlock.LAVA);
 	}
 
-	public void moveRelative(float relX, float relZ, float var3) {
-		this.moveRelative(relX, relZ, var3, 1);
-	}
-	
-	public void moveRelative(float relX, float relZ, float var3, float speed) {
-		float var4 = MathHelper.sqrt(relX * relX + relZ * relZ);
+	public void moveRelative(float relX, float relZ, float speed) {
+		float var4 = (float) Math.sqrt(relX * relX + relZ * relZ);
 		if (var4 >= 0.01F) {
 			if (var4 < 1.0F) {
 				var4 = 1.0F;
 			}
 
-			var4 = var3 / var4;
+			var4 = speed / var4;
 			relX *= var4;
 			relZ *= var4;
-			var3 = MathHelper.sin(this.yRot * (float) Math.PI / 180);
+			speed = MathHelper.sin(this.yRot * (float) Math.PI / 180);
 			var4 = MathHelper.cos(this.yRot * (float) Math.PI / 180);
 			
-			relX *= speed;
-			relZ *= speed;
-			
-			this.xd += relX * var4 - relZ * var3;
-			this.zd += relZ * var4 + relX * var3;
+			this.xd += relX * var4 - relZ * speed;
+			this.zd += relZ * var4 + relX * speed;
 		}
 	}
 
@@ -409,14 +402,14 @@ public abstract class Entity implements Serializable {
 		float xDistance = this.x - other.x;
 		float yDistance = this.y - other.y;
 		float zDistance = this.z - other.z;
-		return MathHelper.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
+		return (float) Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
 	}
 
 	public float distanceTo(float x, float y, float z) {
 		float xDistance = this.x - x;
 		float yDistance = this.y - y;
 		float zDistance = this.z - z;
-		return MathHelper.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
+		return (float) Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
 	}
 
 	public float distanceToSqr(Entity other) {
@@ -434,7 +427,7 @@ public abstract class Entity implements Serializable {
 		float zDiff = entity.z - this.z;
 		float sqXZDiff = xDiff * xDiff + zDiff * zDiff;
 		if (sqXZDiff >= 0.01F) {
-			float xzDiff = MathHelper.sqrt(sqXZDiff);
+			float xzDiff = (float) Math.sqrt(sqXZDiff);
 			xDiff /= xzDiff;
 			zDiff /= xzDiff;
 			xDiff /= xzDiff;
@@ -446,7 +439,6 @@ public abstract class Entity implements Serializable {
 			this.push(-xDiff, 0.0F, -zDiff);
 			entity.push(xDiff, 0.0F, zDiff);
 		}
-
 	}
 
 	protected void push(float x, float y, float z) {
@@ -486,8 +478,8 @@ public abstract class Entity implements Serializable {
 	}
 
 	public boolean shouldRenderAtSqrDistance(float sqDistance) {
-		float sqSize = this.bb.getSize() * 64.0F;
-		return sqDistance < sqSize * sqSize;
+		float size = this.bb.getSize() * 64.0F;
+		return sqDistance < size * size;
 	}
 
 	public int getTexture() {

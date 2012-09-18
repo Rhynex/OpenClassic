@@ -35,8 +35,6 @@ public class ServerSession implements Session {
 
 	private final Channel channel;
 	private final Queue<Message> messageQueue = new ArrayDeque<Message>();
-	@SuppressWarnings("unused")
-	private int timeoutCounter = 0;
 	private State state = State.IDENTIFYING;
 	private ServerPlayer player;
 	private boolean pendingRemoval = false;

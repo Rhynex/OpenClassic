@@ -3,7 +3,6 @@ package com.mojang.minecraft.particle;
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.ShapeRenderer;
-import com.mojang.util.MathHelper;
 
 public class Particle extends Entity {
 
@@ -29,7 +28,7 @@ public class Particle extends Entity {
 		this.yd = var6 + (float) (Math.random() * 2.0D - 1.0D) * 0.4F;
 		this.zd = var7 + (float) (Math.random() * 2.0D - 1.0D) * 0.4F;
 		float var8 = (float) (Math.random() + Math.random() + 1.0D) * 0.15F;
-		float var2 = MathHelper.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
+		float var2 = (float) Math.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
 		this.xd = this.xd / var2 * var8 * 0.4F;
 		this.yd = this.yd / var2 * var8 * 0.4F + 0.1F;
 		this.zd = this.zd / var2 * var8 * 0.4F;
@@ -90,7 +89,7 @@ public class Particle extends Entity {
 		renderer.vertexUV(var13 + var3 * var12 - var6 * var12, var14 - var4 * var12, var15 + var5 * var12 - var7 * var12, var9, var11);
 	}
 
-	public int getParticleTexture() {
+	public int getParticleId() {
 		return 0;
 	}
 }

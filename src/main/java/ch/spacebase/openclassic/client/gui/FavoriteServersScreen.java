@@ -100,7 +100,7 @@ public class FavoriteServersScreen extends GuiScreen {
 	}
 
 	public void render() {
-		RenderHelper.getHelper().drawDirtBG();
+		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 15);
 
 		super.render();

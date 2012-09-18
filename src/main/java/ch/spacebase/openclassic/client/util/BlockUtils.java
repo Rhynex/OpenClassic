@@ -12,6 +12,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.Model;
 
 public class BlockUtils {
@@ -23,12 +24,12 @@ public class BlockUtils {
 		
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
-		Vector x1 = point.getXIntersection(other, model.getSelectionBox(x, y, z).getX1());
-		Vector x2 = point.getXIntersection(other, model.getSelectionBox(x, y, z).getX2());
-		Vector y1 = point.getYIntersection(other, model.getSelectionBox(x, y, z).getY1());
-		Vector y2 = point.getYIntersection(other, model.getSelectionBox(x, y, z).getY2());
-		Vector z1 = point.getZIntersection(other, model.getSelectionBox(x, y, z).getZ1());
-		Vector z2 = point.getZIntersection(other, model.getSelectionBox(x, y, z).getZ2());
+		Vector x1 = point.getXIntersection(other, model.getSelectionBox(0, 0, 0).getX1());
+		Vector x2 = point.getXIntersection(other, model.getSelectionBox(0, 0, 0).getX2());
+		Vector y1 = point.getYIntersection(other, model.getSelectionBox(0, 0, 0).getY1());
+		Vector y2 = point.getYIntersection(other, model.getSelectionBox(0, 0, 0).getY2());
+		Vector z1 = point.getZIntersection(other, model.getSelectionBox(0, 0, 0).getZ1());
+		Vector z2 = point.getZIntersection(other, model.getSelectionBox(0, 0, 0).getZ2());
 		if (!xIntersectsSelection(id, x1)) {
 			x1 = null;
 		}
@@ -115,12 +116,12 @@ public class BlockUtils {
 		
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
-		Vector x1 = point.getXIntersection(other, model.getCollisionBox(x, y, z).getX1());
-		Vector x2 = point.getXIntersection(other, model.getCollisionBox(x, y, z).getX2());
-		Vector y1 = point.getYIntersection(other, model.getCollisionBox(x, y, z).getY1());
-		Vector y2 = point.getYIntersection(other, model.getCollisionBox(x, y, z).getY2());
-		Vector z1 = point.getZIntersection(other, model.getCollisionBox(x, y, z).getZ1());
-		Vector z2 = point.getZIntersection(other, model.getCollisionBox(x, y, z).getZ2());
+		Vector x1 = point.getXIntersection(other, model.getCollisionBox(0, 0, 0).getX1());
+		Vector x2 = point.getXIntersection(other, model.getCollisionBox(0, 0, 0).getX2());
+		Vector y1 = point.getYIntersection(other, model.getCollisionBox(0, 0, 0).getY1());
+		Vector y2 = point.getYIntersection(other, model.getCollisionBox(0, 0, 0).getY2());
+		Vector z1 = point.getZIntersection(other, model.getCollisionBox(0, 0, 0).getZ1());
+		Vector z2 = point.getZIntersection(other, model.getCollisionBox(0, 0, 0).getZ2());
 		if (!xIntersects(id, x1)) {
 			x1 = null;
 		}
@@ -233,15 +234,15 @@ public class BlockUtils {
 	}
 	
 	public static AABB getSelectionBox(int id, int x, int y, int z) {
-		Model model = Blocks.fromId(id).getModel();
-		if(model.getSelectionBox(x, y, z) == null) return null;
-		return new AABB(x + model.getSelectionBox(x, y, z).getX1(), y + model.getSelectionBox(x, y, z).getY1(), z + model.getSelectionBox(x, y, z).getZ1(), x + model.getSelectionBox(x, y, z).getX2(), y + model.getSelectionBox(x, y, z).getY2(), z + model.getSelectionBox(x, y, z).getZ2());
+		BoundingBox bb = Blocks.fromId(id).getModel().getSelectionBox(x, y, z);
+		if(bb == null) return null;
+		return new AABB(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2());
 	}
 
 	public static AABB getCollisionBox(int id, int x, int y, int z) {
-		Model model = Blocks.fromId(id).getModel();
-		if(model.getCollisionBox(x, y, z) == null) return null;
-		return new AABB(x + model.getCollisionBox(x, y, z).getX1(), y + model.getCollisionBox(x, y, z).getY1(), z + model.getCollisionBox(x, y, z).getZ1(), x + model.getCollisionBox(x, y, z).getX2(), y + model.getCollisionBox(x, y, z).getY2(), z + model.getCollisionBox(x, y, z).getZ2());
+		BoundingBox bb = Blocks.fromId(id).getModel().getCollisionBox(x, y, z);
+		if(bb == null) return null;
+		return new AABB(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2());
 	}
 	
 	public static boolean canExplode(BlockType type) {

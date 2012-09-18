@@ -13,11 +13,14 @@ import java.util.LinkedList;
 import java.util.List;
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.Color;
+
 public class NetworkPlayer extends HumanoidMob {
 
 	public static final long serialVersionUID = 77479605454997290L;
 	private transient List<PositionUpdate> moveQueue = new LinkedList<PositionUpdate>();
 	private transient Minecraft minecraft;
+	public int playerId;
 	private int xp;
 	private int yp;
 	private int zp;
@@ -30,8 +33,9 @@ public class NetworkPlayer extends HumanoidMob {
 	public NetworkPlayer(Minecraft mc, int playerId, String name, int x, int y, int z, float yaw, float pitch) {
 		super(mc.level, x, y, z);
 		this.minecraft = mc;
+		this.playerId = playerId;
 		this.displayName = name;
-		this.name = FontRenderer.removeBadCharacters(name);;
+		this.name = Color.stripColor(name);
 		this.xp = x;
 		this.yp = y;
 		this.zp = z;
