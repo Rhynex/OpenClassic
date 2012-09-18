@@ -46,7 +46,7 @@ public class OtherPlayer implements Player {
 	public void render(float delta) {
 		double dist = this.pos.distanceSquared(OpenClassic.getClient().getPlayer().getPosition());
 		if(dist < 4096) {
-			this.model.renderAll(this.pos.getX() - 0.5f, this.pos.getY() - 0.95f, this.pos.getZ() - 0.5f, 1); // TODO: Create a proper model. Any help would be appreciated with this :p
+			this.model.renderAll(this.pos.getX() - 0.5f, this.pos.getY() - 0.95f, this.pos.getZ() - 0.5f, 1); // TODO: Create a proper model. Any help would be appreciated :p
 		
 			glPushMatrix();
 			glTranslatef(this.pos.getX(), this.pos.getY() + 1.4875f, this.pos.getZ());
