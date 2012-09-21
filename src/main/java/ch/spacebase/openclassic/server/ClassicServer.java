@@ -214,7 +214,7 @@ public class ClassicServer extends ClassicGame implements Server {
                     e.printStackTrace();
                 }
             }
-        }, 0, 1000 / Constants.TICKS_PER_SECOND, TimeUnit.MILLISECONDS);
+        }, 0, Constants.TICK_MILLISECONDS, TimeUnit.MILLISECONDS);
 		
 		this.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
 			@Override

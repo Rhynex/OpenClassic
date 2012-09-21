@@ -141,11 +141,11 @@ public class ClassicClient extends ClassicGame implements Client {
 		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
 		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
 		
+		this.setupGL();		
+		ClientRenderHelper.getHelper().getTextureManager().pickMipmaps();
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
 		
-		this.setupGL();
-		ClientRenderHelper.getHelper().getTextureManager().pickMipmaps();
 		this.setCurrentScreen(new LoginScreen());
 
 		int frames = 0;
@@ -388,8 +388,7 @@ public class ClassicClient extends ClassicGame implements Client {
 	public Level openLevel(String name) {
 		try {
 			Level level = OpenClassicLevelFormat.load(name, ClientLevel.class, false);
-			if(this.mode != null) this.mode.unload();
-			this.mode = new Singleplayer((ClientLevel) level);
+			this.setMode(new Singleplayer((ClientLevel) level));
 			return level;
 		} catch (IOException e) {
 			System.out.println("Failed to load level!");
