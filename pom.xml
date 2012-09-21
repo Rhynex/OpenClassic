@@ -44,6 +44,10 @@
 
 	<repositories>
     		<repository>
+        		<id>maven-central</id>
+        		<url>http://central.maven.org/maven2</url>
+    		</repository>
+    		<repository>
         		<id>libs-mvn-repo</id>
         		<url>https://github.com/Steveice10/libs-mvn-repo/raw/master/releases</url>
     		</repository>
