@@ -41,7 +41,7 @@ public class EmbeddedConsoleManager implements ConsoleManager {
 	}
 	
 	public List<String> getLog() {
-		return this.log;
+		return new ArrayList<String>(this.log);
 	}
 	
 	private class OutputHandler extends Handler {

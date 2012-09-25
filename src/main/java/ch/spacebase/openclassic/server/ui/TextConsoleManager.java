@@ -102,7 +102,7 @@ public class TextConsoleManager implements ConsoleManager {
 			String command;
 			while (running) {
 				try {
-					command = reader.readLine(">", null);
+					command = reader.readLine("", null);
 
 					if (command == null || command.trim().length() == 0) {
 						continue;

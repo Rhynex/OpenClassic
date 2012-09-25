@@ -19,7 +19,6 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -60,6 +59,7 @@ public class ClientSession implements Session {
 		ExecutorService boss = Executors.newCachedThreadPool();
 		ExecutorService worker = Executors.newCachedThreadPool();
 		ChannelFactory factory = new NioClientSocketChannelFactory(boss, worker);
+		System.out.println(host + ":" + port);
 		this.bootstrap.setFactory(factory);
 		this.bootstrap.setPipelineFactory(new ClassicPipelineFactory(this));
 		this.bootstrap.setOption("connectTimeoutMillis", 40000);

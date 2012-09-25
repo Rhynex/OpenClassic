@@ -122,6 +122,13 @@ public class ServerCommands extends CommandExecutor {
 		}
 	}
 	
+	@Command(aliases = {"mem"}, desc = "Displays the server's memory usage.", permission = "openclassic.commands.mem")
+	public void mem(Sender sender, String command, String args[]) {
+		long free = Runtime.getRuntime().freeMemory() / 1048576;
+		long max = Runtime.getRuntime().maxMemory() / 1048576;
+		sender.sendMessage(Color.AQUA.toString() + (max - free) + "MB / " + max + "MB");
+	}
+	
 	@Command(aliases = {"reload"}, desc = "Reloads OpenClassic.", permission = "openclassic.commands.reload")
 	public void reload(Sender sender, String command, String args[]) {
 		sender.sendMessage(Color.AQUA + OpenClassic.getGame().getTranslator().translate("reload.reloading", sender.getLanguage()));
