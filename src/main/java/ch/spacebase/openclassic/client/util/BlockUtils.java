@@ -24,12 +24,14 @@ public class BlockUtils {
 		
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
-		Vector x1 = point.getXIntersection(other, model.getSelectionBox(0, 0, 0).getX1());
-		Vector x2 = point.getXIntersection(other, model.getSelectionBox(0, 0, 0).getX2());
-		Vector y1 = point.getYIntersection(other, model.getSelectionBox(0, 0, 0).getY1());
-		Vector y2 = point.getYIntersection(other, model.getSelectionBox(0, 0, 0).getY2());
-		Vector z1 = point.getZIntersection(other, model.getSelectionBox(0, 0, 0).getZ1());
-		Vector z2 = point.getZIntersection(other, model.getSelectionBox(0, 0, 0).getZ2());
+		BoundingBox box = model.getSelectionBox(0, 0, 0);
+		if(box == null) return null;
+		Vector x1 = point.getXIntersection(other, box.getX1());
+		Vector x2 = point.getXIntersection(other, box.getX2());
+		Vector y1 = point.getYIntersection(other, box.getY1());
+		Vector y2 = point.getYIntersection(other, box.getY2());
+		Vector z1 = point.getZIntersection(other, box.getZ1());
+		Vector z2 = point.getZIntersection(other, box.getZ2());
 		if (!xIntersectsSelection(id, x1)) {
 			x1 = null;
 		}
@@ -116,12 +118,15 @@ public class BlockUtils {
 		
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
-		Vector x1 = point.getXIntersection(other, model.getCollisionBox(0, 0, 0).getX1());
-		Vector x2 = point.getXIntersection(other, model.getCollisionBox(0, 0, 0).getX2());
-		Vector y1 = point.getYIntersection(other, model.getCollisionBox(0, 0, 0).getY1());
-		Vector y2 = point.getYIntersection(other, model.getCollisionBox(0, 0, 0).getY2());
-		Vector z1 = point.getZIntersection(other, model.getCollisionBox(0, 0, 0).getZ1());
-		Vector z2 = point.getZIntersection(other, model.getCollisionBox(0, 0, 0).getZ2());
+		
+		BoundingBox box = model.getCollisionBox(0, 0, 0);
+		if(box == null) return null;
+		Vector x1 = point.getXIntersection(other, box.getX1());
+		Vector x2 = point.getXIntersection(other, box.getX2());
+		Vector y1 = point.getYIntersection(other, box.getY1());
+		Vector y2 = point.getYIntersection(other, box.getY2());
+		Vector z1 = point.getZIntersection(other, box.getZ1());
+		Vector z2 = point.getZIntersection(other, box.getZ2());
 		if (!xIntersects(id, x1)) {
 			x1 = null;
 		}

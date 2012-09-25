@@ -28,9 +28,9 @@ public class TerrainParticle extends Particle {
 	}
 
 	public void render(ShapeRenderer renderer, float delta, float xMod, float yMod, float zMod, float yaw, float pitch) {
-		float var8 = (this.tex % 16) / 16 + 0.02f;
+		float var8 = (this.tex % 16) / 16f + 0.02f;
 		float var9 = var8 + 0.015609375F;
-		float var10 = (this.tex / 16f) / 16;
+		float var10 = (this.tex / 16f) / 16f;
 		if(this.block == VanillaBlock.GRAY_CLOTH || this.block == VanillaBlock.BLACK_CLOTH || this.block == VanillaBlock.WHITE_CLOTH) {
 			var10 -= 0.01f;
 		}
