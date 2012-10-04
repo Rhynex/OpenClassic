@@ -220,6 +220,7 @@ connecting:
     check: Make sure the URL is correct and hasn't expired.
     probably-down: You failed to connect to the server. It's probably down!
     fail-connect: Failed to connect!
+    invalid-page: Invalid server page!
 http:
     downloading: Downloading %s...
     downloaded: Downloaded %s.

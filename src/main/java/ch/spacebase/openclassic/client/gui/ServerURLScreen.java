@@ -58,7 +58,13 @@ public class ServerURLScreen extends GuiScreen {
 				}
 				
 				mc.server = HTTPUtil.getParameterOffPage(play, "server");
-				mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));
+				try {
+					mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));
+				} catch(NumberFormatException e) {
+					mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
+					mc.server = null;
+					return;
+				}
 			} else {
 				OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.failed"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
 				return;

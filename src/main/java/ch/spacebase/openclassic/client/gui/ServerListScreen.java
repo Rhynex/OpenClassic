@@ -20,6 +20,7 @@ import ch.spacebase.openclassic.server.ui.SettingsFrame;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.SessionData;
+import com.mojang.minecraft.gui.ErrorScreen;
 
 public class ServerListScreen extends GuiScreen {
 
@@ -184,7 +185,13 @@ public class ServerListScreen extends GuiScreen {
 			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
 			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));
 			mc.server = HTTPUtil.getParameterOffPage(page, "server");
-			mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(page, "port"));
+			try {
+				mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(page, "port"));
+			} catch(NumberFormatException e) {
+				mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
+				mc.server = null;
+				return;
+			}
 
 			mc.initGame();
 			mc.setCurrentScreen(null);
