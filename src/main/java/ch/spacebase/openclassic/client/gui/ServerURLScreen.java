@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 
@@ -43,7 +44,7 @@ public class ServerURLScreen extends GuiScreen {
 			mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			mc.progressBar.setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			mc.progressBar.setProgress(0);
-			String play = HTTPUtil.fetchUrl(this.getWidget(2, TextBox.class).getText(), "", "http://www.minecraft.net/classic/list");
+			String play = HTTPUtil.fetchUrl(this.getWidget(2, TextBox.class).getText(), "", Constants.MINECRAFT_URL + "classic/list");
 			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 			
 			if (mppass.length() > 0) {
@@ -52,7 +53,7 @@ public class ServerURLScreen extends GuiScreen {
 				mc.data.key = mppass;
 				
 				try {
-					mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl("http://www.minecraft.net/haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
+					mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
 				} catch(UnsupportedEncodingException e) {
 				}
 				

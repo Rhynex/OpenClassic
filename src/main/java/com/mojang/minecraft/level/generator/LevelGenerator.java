@@ -36,6 +36,8 @@ public final class LevelGenerator extends Generator {
 		this.name = name;
 		this.author = author;
 		this.width = width;
+		this.height = height;
+		this.waterLevel = height / 2;
 		this.depth = depth;
 	}
 	
@@ -47,11 +49,8 @@ public final class LevelGenerator extends Generator {
 
 	@Override
 	public void generate(ch.spacebase.openclassic.api.level.Level level, byte data[]) {
-		level.setGenerating(true);
-		
+		level.setGenerating(true); 
 		this.progress.setTitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
-		this.height = 64;
-		this.waterLevel = 32;
 		this.progress.setText(OpenClassic.getGame().getTranslator().translate("level.raising"));
 		CombinedNoise alg1 = new CombinedNoise(new OctaveNoise(this.rand, 8), new OctaveNoise(this.rand, 8));
 		CombinedNoise alg2 = new CombinedNoise(new OctaveNoise(this.rand, 8), new OctaveNoise(this.rand, 8));

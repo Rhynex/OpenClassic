@@ -1,6 +1,7 @@
 package com.mojang.minecraft;
 
 import ch.spacebase.openclassic.api.Color;
+import ch.spacebase.openclassic.api.util.Constants;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.player.Player;
@@ -27,7 +28,7 @@ public final class SkinDownloadTask implements Runnable {
 					name = this.mc.data.username.substring(0, this.mc.data.username.indexOf('@'));
 				}
 
-				conn = (HttpURLConnection) new URL("http://www.minecraft.net/skin/" + Color.stripColor(name) + ".png").openConnection();
+				conn = (HttpURLConnection) new URL(Constants.MINECRAFT_URL + "skin/" + Color.stripColor(name) + ".png").openConnection();
 				conn.setDoInput(true);
 				conn.setDoOutput(false);
 				conn.connect();

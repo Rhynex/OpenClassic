@@ -1,6 +1,7 @@
 package com.mojang.minecraft.net;
 
 import ch.spacebase.openclassic.api.Color;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 
 import com.mojang.minecraft.net.NetworkPlayer;
@@ -23,7 +24,7 @@ final class SkinDownloadThread extends Thread {
 
 	public void run() {
 		try {
-			if(!Boolean.valueOf(HTTPUtil.fetchUrl("http://www.minecraft.net/haspaid.jsp", "user=" + URLEncoder.encode(this.player.name, "UTF-8"))))
+			if(!Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "haspaid.jsp", "user=" + URLEncoder.encode(this.player.name, "UTF-8"))))
 				return;
 		} catch(UnsupportedEncodingException e) {
 		}
@@ -31,7 +32,7 @@ final class SkinDownloadThread extends Thread {
 		HttpURLConnection conn = null;
 
 		try {
-			conn = (HttpURLConnection) (new URL("http://www.minecraft.net/skin/" + Color.stripColor(this.player.name) + ".png")).openConnection();
+			conn = (HttpURLConnection) (new URL(Constants.MINECRAFT_URL + "skin/" + Color.stripColor(this.player.name) + ".png")).openConnection();
 			conn.setDoInput(true);
 			conn.setDoOutput(false);
 			conn.connect();

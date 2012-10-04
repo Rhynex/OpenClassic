@@ -5,7 +5,6 @@ import ch.spacebase.openclassic.api.gui.MainScreen;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.gui.Minimap;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import com.mojang.minecraft.Minecraft;
@@ -33,7 +32,7 @@ public class HUDScreen extends MainScreen {
 		this.mc = mc;
 		this.width = width * 240 / height;
 		this.height = height * 240 / height;
-		this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
+		//this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
 	}
 
 	public void render(float renderPartialTicks, boolean focus, int mouseX, int mouseY) {

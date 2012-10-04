@@ -18,6 +18,7 @@ import ch.spacebase.openclassic.api.gui.widget.PasswordTextBox;
 import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.cookie.Cookie;
 import ch.spacebase.openclassic.client.cookie.CookieList;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
@@ -156,31 +157,32 @@ public class LoginScreen extends GuiScreen {
 		CookieHandler.setDefault(cookies);
 		String result = "";
 
-		HTTPUtil.fetchUrl("https://www.minecraft.net/login", "", "https://www.minecraft.net");
+		HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "login", "", Constants.MINECRAFT_URL);
 
 		try {
-			result = HTTPUtil.fetchUrl("https://www.minecraft.net/login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), "http://www.minecraft.net");
+			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), Constants.MINECRAFT_URL);
 		} catch (UnsupportedEncodingException e) {
 			System.out.println("UTF-8 not supported!");
 			return false;
 		}
 
-		Cookie cookie = cookies.getCookie("https://www.minecraft.net", "PLAY_SESSION");
+		Cookie cookie = cookies.getCookie(Constants.MINECRAFT_URL, "PLAY_SESSION");
 		if (cookie != null)
-			result = HTTPUtil.fetchUrl("http://www.minecraft.net", "", "https://www.minecraft.net/login");
+			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL, "", Constants.MINECRAFT_URL + "login");
 
 		if (result.contains("Logged in as")) {
 			GeneralUtils.getMinecraft().data = new SessionData(result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | ")));
 			
 			try {
-				GeneralUtils.getMinecraft().data.haspaid = HTTPUtil.fetchUrl("http://www.minecraft.net/haspaid.jsp", "user=" + URLEncoder.encode(GeneralUtils.getMinecraft().data.username, "UTF-8")).equals("true");
+				GeneralUtils.getMinecraft().data.haspaid = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "haspaid.jsp", "user=" + URLEncoder.encode(GeneralUtils.getMinecraft().data.username, "UTF-8")).equals("true");
 			} catch (UnsupportedEncodingException e) {
 			}
 
-			parseServers(HTTPUtil.rawFetchUrl("http://www.minecraft.net/classic/list", "", "http://www.minecraft.net"));
+			parseServers(HTTPUtil.rawFetchUrl(Constants.MINECRAFT_URL + "classic/list", "", Constants.MINECRAFT_URL));
 			return true;
 		}
-
+		
+		System.out.println(result);
 		return false;
 	}
 

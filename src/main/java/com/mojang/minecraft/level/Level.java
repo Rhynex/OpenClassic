@@ -113,6 +113,7 @@ public class Level implements Serializable {
 	public void setData(int width, int depth, int height, byte[] blocks) {
 		this.width = width;
 		this.height = height;
+		this.waterLevel = height / 2;
 		this.depth = depth;
 		this.blocks = blocks;
 		this.highest = new int[width * height];

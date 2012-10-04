@@ -11,6 +11,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
@@ -137,7 +138,7 @@ public class ServerListScreen extends GuiScreen {
 		
 		if(button.getId() == 8) {
 			Minecraft mc = GeneralUtils.getMinecraft();
-			String page = HTTPUtil.fetchUrl(HeartbeatManager.getURL(), "", "http://www.minecraft.net/classic/list/");
+			String page = HTTPUtil.fetchUrl(HeartbeatManager.getURL(), "", Constants.MINECRAFT_URL + "classic/list/");
 			mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
 			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
 			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));
@@ -178,7 +179,7 @@ public class ServerListScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			OpenClassic.getClient().getProgressBar().setProgress(0);
 
-			String page = HTTPUtil.fetchUrl(server.getUrl(), "", "http://www.minecraft.net/classic/list/");
+			String page = HTTPUtil.fetchUrl(server.getUrl(), "", Constants.MINECRAFT_URL + "classic/list/");
 			mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
 			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
 			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));

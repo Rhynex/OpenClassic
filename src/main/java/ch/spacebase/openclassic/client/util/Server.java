@@ -1,5 +1,7 @@
 package ch.spacebase.openclassic.client.util;
 
+import ch.spacebase.openclassic.api.util.Constants;
+
 public class Server {
 
 	public String name = "Unnamed";
@@ -15,7 +17,7 @@ public class Server {
 	}
 
 	public String getUrl() {
-		return "http://www.minecraft.net/classic/play/" + this.serverId;
+		return Constants.MINECRAFT_URL + "classic/play/" + this.serverId;
 	}
 
 }
