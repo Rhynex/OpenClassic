@@ -12,6 +12,7 @@ import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
+import ch.spacebase.openclassic.api.component.BasicComponentHolder;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.permissions.Group;
@@ -20,7 +21,7 @@ import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
-public class OtherPlayer implements Player {
+public class OtherPlayer extends BasicComponentHolder implements Player {
 
 	private static final float BOUNDING_WIDTH = 0.6f;
 	private static final float BOUNDING_HEIGHT = 1.8f;

@@ -1,6 +1,5 @@
 package ch.spacebase.openclassic.game.network.handler;
 
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +12,6 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.block.model.Quad;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerJoinEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerLoginEvent;
@@ -34,6 +32,7 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.Storage;
+import ch.spacebase.openclassic.game.component.player.ClientInfoComponent;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.network.ServerSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
@@ -44,7 +43,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 	@Override
 	public void handleClient(ClientSession session, ClientPlayer player, IdentificationMessage message) {
 		if(session.getState() == State.IDENTIFYING) {
-			PlayerLoginEvent event = EventFactory.callEvent(new PlayerLoginEvent(OpenClassic.getClient().getPlayer(), session.getAddress()));
+			PlayerLoginEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerLoginEvent(OpenClassic.getClient().getPlayer(), session.getAddress()));
 			if(event.getResult() != Result.ALLOWED) {
 				session.disconnect(String.format(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
 				return;
@@ -57,7 +56,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 				}
 			}
 
-			EventFactory.callEvent(new PlayerJoinEvent(OpenClassic.getClient().getPlayer(), "Joined"));
+			OpenClassic.getGame().getEventManager().dispatch(new PlayerJoinEvent(OpenClassic.getClient().getPlayer(), "Joined"));
 		}
 
 		OpenClassic.getClient().getProgressBar().setTitle(message.getUsernameOrServerName());
@@ -89,7 +88,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		if(session.getState() == State.GAME) return;
 		
 		String ip = session.getAddress().toString().replace("/", "").split(":")[0];
-		PlayerConnectEvent event = EventFactory.callEvent(new PlayerConnectEvent(message.getUsernameOrServerName(), session.getAddress()));
+		PlayerConnectEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerConnectEvent(message.getUsernameOrServerName(), session.getAddress()));
 		if(event.getResult() != PlayerConnectEvent.Result.ALLOWED) {
 			if(event.getKickMessage() == null || event.getKickMessage().equals("")) {
 				this.kickFromResult(message.getUsernameOrServerName(), ip, session, event.getResult());
@@ -167,7 +166,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		}
 
 		final ServerPlayer player = new ServerPlayer(message.getUsernameOrServerName(), OpenClassic.getServer().getDefaultLevel().getSpawn().clone(), session);
-		PlayerLoginEvent e = EventFactory.callEvent(new PlayerLoginEvent(player, session.getAddress(), result, msg));
+		PlayerLoginEvent e = OpenClassic.getGame().getEventManager().dispatch(new PlayerLoginEvent(player, session.getAddress(), result, msg));
 		if(e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
 			if(e.getKickMessage() == null || e.getKickMessage().equals("")) {
 				this.kickFromLoginResult(message.getUsernameOrServerName(), ip, session, e.getResult());
@@ -196,7 +195,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		session.send(new IdentificationMessage(Constants.PROTOCOL_VERSION, OpenClassic.getServer().getServerName(), OpenClassic.getServer().getMotd(), player.getGroup().hasPermission("openclassic.commands.solid") ? Constants.OP : Constants.NOT_OP));
 		if(message.getOpOrCustomClient() != 0) {
 			if(message.getOpOrCustomClient() == Constants.OPENCLASSIC_PROTOCOL_VERSION) {
-				player.getClientInfo().setCustom(true);
+				player.get(ClientInfoComponent.class).setCustom(true);
 				OpenClassic.getLogger().info(Color.GREEN + player.getName() + " is using the OpenClassic Client! Sending custom blocks...");
 				StringBuilder build = new StringBuilder();
 				for(Plugin plugin : OpenClassic.getServer().getPluginManager().getPlugins()) {
@@ -227,7 +226,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
 		
 		session.setState(State.GAME);
-		OpenClassic.getServer().broadcastMessage(EventFactory.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());
+		OpenClassic.getServer().broadcastMessage(OpenClassic.getGame().getEventManager().dispatch(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());
 	}
 
 	private void kickFromLoginResult(String user, String ip, Session session, PlayerLoginEvent.Result result) {

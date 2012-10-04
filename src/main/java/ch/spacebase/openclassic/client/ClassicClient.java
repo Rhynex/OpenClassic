@@ -36,8 +36,8 @@ import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
 import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
+import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.MainScreen;
 import ch.spacebase.openclassic.api.input.InputHelper;
@@ -50,6 +50,10 @@ import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.api.util.io.IOUtils;
+import ch.spacebase.openclassic.api.util.script.Function;
+import ch.spacebase.openclassic.api.util.script.Param;
+import ch.spacebase.openclassic.api.util.script.Scripting;
 import ch.spacebase.openclassic.client.command.ClientCommands;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
@@ -86,7 +90,23 @@ public class ClassicClient extends ClassicGame implements Client {
 		super(Directories.getWorkingDirectory());
 	}
 	
+	private void on(PlayerChatEvent event, String code) {
+		Function func = new Function(code, new Param("event", event));
+		Scripting.run(func);
+	}
+	
+	private void scriptTest() {
+		PlayerChatEvent event = new PlayerChatEvent(null, "bld");
+		System.out.println(IOUtils.readFile("/home/steven/Desktop/serverinfo.txt"));
+		System.out.println("--------------------------");
+		this.on(event, "if(event.getMessage().equals(\"bld\")) {" +
+						   "event.setMessage(\"c:\");" +
+					   "}");
+		System.out.println("RESULT: " + event.getMessage());
+	}
+	
 	public void start() {
+		this.scriptTest();
 		this.running = true;
 		OpenClassic.setClient(this);
 		RenderHelper.setHelper(new ClientRenderHelper());
@@ -141,11 +161,10 @@ public class ClassicClient extends ClassicGame implements Client {
 		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
 		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
 		
-		this.setupGL();		
+		this.setupGL();
 		ClientRenderHelper.getHelper().getTextureManager().pickMipmaps();
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
-		
 		this.setCurrentScreen(new LoginScreen());
 
 		int frames = 0;
@@ -157,7 +176,7 @@ public class ClassicClient extends ClassicGame implements Client {
 			this.render(delta);
 
 			long time = System.nanoTime() / 1000000; 
-			passedTime += (time - previousTime); 
+			passedTime += time - previousTime; 
 			previousTime = time;
 			if(time - lastfps > 1000) {
 				this.fps = frames;
@@ -360,7 +379,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		byte blocks[] = new byte[level.getWidth() * level.getHeight() * level.getDepth()];
 		generator.generate(level, blocks);
 		level.setWorldData(level.getWidth(), level.getHeight(), level.getDepth(), blocks);
-		EventFactory.callEvent(new LevelCreateEvent(level));
+		this.getEventManager().dispatch(new LevelCreateEvent(level));
 		return level;
 	}
 

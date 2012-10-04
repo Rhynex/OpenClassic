@@ -18,7 +18,7 @@ import ch.spacebase.openclassic.api.command.Command;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
 import ch.spacebase.openclassic.api.config.Configuration;
-import ch.spacebase.openclassic.api.event.EventFactory;
+import ch.spacebase.openclassic.api.event.EventManager;
 import ch.spacebase.openclassic.api.event.game.CommandNotFoundEvent;
 import ch.spacebase.openclassic.api.event.game.PreCommandEvent;
 import ch.spacebase.openclassic.api.level.generator.Generator;
@@ -38,6 +38,7 @@ public abstract class ClassicGame implements Game {
 	private final ClassicScheduler scheduler = new ClassicScheduler(this instanceof Client ? "Client" : "Server");
 	
 	private final PluginManager pluginManager = new PluginManager();
+	private final EventManager eventManager = new EventManager();
 	private final PackageManager pkgManager;
 	private final Translator translator = new Translator();
 	
@@ -115,7 +116,7 @@ public abstract class ClassicGame implements Game {
 	@Override
 	public void processCommand(Sender sender, String command) {
 		if(command.length() == 0) return;
-		PreCommandEvent event = EventFactory.callEvent(new PreCommandEvent(sender, command));
+		PreCommandEvent event = OpenClassic.getGame().getEventManager().dispatch(new PreCommandEvent(sender, command));
 		if(event.isCancelled()) {
 			return;
 		}
@@ -205,7 +206,7 @@ public abstract class ClassicGame implements Game {
 			break;
 		}
 		
-		CommandNotFoundEvent e = EventFactory.callEvent(new CommandNotFoundEvent(sender, command));
+		CommandNotFoundEvent e = OpenClassic.getGame().getEventManager().dispatch(new CommandNotFoundEvent(sender, command));
 		if(e.showMessage()) {
 			sender.sendMessage(Color.RED + this.translator.translate("command.unknown", sender.getLanguage()));
 		}
@@ -255,6 +256,11 @@ public abstract class ClassicGame implements Game {
 		for(Plugin plugin : this.pluginManager.getPlugins()) {
 			plugin.reload();
 		}
+	}
+	
+	@Override
+	public EventManager getEventManager() {
+		return this.eventManager;
 	}
 	
 	@Override

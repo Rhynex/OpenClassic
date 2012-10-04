@@ -23,7 +23,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.custom.CustomBlock;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent.Result;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
@@ -59,7 +58,6 @@ public class ClientSession implements Session {
 		ExecutorService boss = Executors.newCachedThreadPool();
 		ExecutorService worker = Executors.newCachedThreadPool();
 		ChannelFactory factory = new NioClientSocketChannelFactory(boss, worker);
-		System.out.println(host + ":" + port);
 		this.bootstrap.setFactory(factory);
 		this.bootstrap.setPipelineFactory(new ClassicPipelineFactory(this));
 		this.bootstrap.setOption("connectTimeoutMillis", 40000);
@@ -68,7 +66,7 @@ public class ClientSession implements Session {
 			this.channel = channel;
 			this.group.add(channel);
 			
-			PlayerConnectEvent event = EventFactory.callEvent(new PlayerConnectEvent(username, this.getAddress()));
+			PlayerConnectEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerConnectEvent(username, this.getAddress()));
 			if(event.getResult() != Result.ALLOWED) {
 				this.disconnect(String.format(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
 				return;

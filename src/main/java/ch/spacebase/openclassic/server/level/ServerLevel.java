@@ -23,7 +23,7 @@ public class ServerLevel extends ClassicLevel implements Level {
 		this.executor.shutdown();
 	}
 	
-	public void update(boolean rendering) {
+	public void update() {
 		for(Player player : this.getPlayers()) {
 			((ServerPlayer) player).tick();
 		}

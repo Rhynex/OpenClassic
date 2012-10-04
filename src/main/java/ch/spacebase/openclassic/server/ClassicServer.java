@@ -39,7 +39,6 @@ import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
 import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.command.Console;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
@@ -239,7 +238,7 @@ public class ClassicServer extends ClassicGame implements Server {
 			if(level.getPlayers().size() == 0 && !this.getDefaultLevel().getName().equals(level.getName())) {
 				this.unloadLevel(level.getName(), false);
 			} else {
-				((ServerLevel) level).update(false);
+				((ServerLevel) level).update();
 			}
 		}
 		
@@ -496,7 +495,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		}
 		
 		this.levels.add(level);
-		EventFactory.callEvent(new LevelCreateEvent(level));
+		this.getEventManager().dispatch(new LevelCreateEvent(level));
 		OpenClassic.getLogger().info("Level \"" + level.getName() + "\" was successfully created!");
 
 		return level;
@@ -521,7 +520,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				if(model.capacity() == model.size()) model.setSize(model.getSize() + 1);
 			}
 			
-			EventFactory.callEvent(new LevelLoadEvent(level));
+			this.getEventManager().dispatch(new LevelLoadEvent(level));
 			this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.load-success"), name));
 			return level;
 		} catch (IOException e) {
@@ -544,7 +543,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				return;
 			}
 			
-			if(EventFactory.callEvent(new LevelUnloadEvent(this.getLevel(name))).isCancelled()) {
+			if(this.getEventManager().dispatch(new LevelUnloadEvent(this.getLevel(name))).isCancelled()) {
 				return;
 			}
 			
@@ -595,7 +594,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		level.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.getName() + ".nbt");
 		
 		try {
-			if(EventFactory.callEvent(new LevelSaveEvent(level)).isCancelled()) {
+			if(this.getEventManager().dispatch(new LevelSaveEvent(level)).isCancelled()) {
 				return;
 			}
 			

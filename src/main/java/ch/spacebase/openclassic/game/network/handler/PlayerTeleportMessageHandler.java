@@ -1,8 +1,7 @@
 package ch.spacebase.openclassic.game.network.handler;
 
-
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.player.Player;
@@ -48,7 +47,7 @@ public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportM
 		} */
 		
 		player.teleported = false;
-		PlayerMoveEvent event = EventFactory.callEvent(new PlayerMoveEvent(player, player.getPosition(), to));
+		PlayerMoveEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerMoveEvent(player, player.getPosition(), to));
 		Position old = to;
 		to = event.getTo();
 		

@@ -20,7 +20,7 @@ public class Server {
 	}
 
 	public String getUrl() {
-		return "http://www.minecraft.net/classic/play/" + this.serverId;
+		return "http://minecraft.net/classic/play/" + this.serverId;
 	}
 
 }

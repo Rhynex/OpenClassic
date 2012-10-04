@@ -25,7 +25,6 @@ import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.entity.BlockEntity;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
@@ -35,7 +34,7 @@ import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.api.util.set.TripleIntHashMap;
+import ch.spacebase.openclassic.api.util.map.TripleIntHashMap;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 
@@ -114,7 +113,7 @@ public abstract class ClassicLevel implements Level {
         }, 0, 1000 / Constants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
 	}
 	
-	public abstract void update(boolean rendering);
+	public abstract void update();
 	
 	public abstract void render(float delta);
 	
@@ -256,7 +255,7 @@ public abstract class ClassicLevel implements Level {
 	public void setSpawn(Position spawn) {
 		Position old = this.spawn;
 		this.spawn = spawn;
-		EventFactory.callEvent(new SpawnChangeEvent(this, old));
+		OpenClassic.getGame().getEventManager().dispatch(new SpawnChangeEvent(this, old));
 	}
 
 	public short getWidth() {
@@ -412,7 +411,7 @@ public abstract class ClassicLevel implements Level {
 			return null;
 
 		int y = index / this.width / this.depth;
-		index -= y * this.width * this.depth;
+		index -= y * this.width * this.depth; // TODO: event system moving
 
 		int z = index / this.width;
 		int x = index - z * this.width;
@@ -475,7 +474,7 @@ public abstract class ClassicLevel implements Level {
 		for(BlockEntity entity : this.entities) {
 			if(entity.getEntityId() == id) {
 				if(entity.getController() != null) entity.getController().onDeath();
-				EventFactory.callEvent(new EntityDeathEvent(entity));
+				OpenClassic.getGame().getEventManager().dispatch(new EntityDeathEvent(entity));
 				this.entities.remove(entity);
 			}
 		}
@@ -484,7 +483,7 @@ public abstract class ClassicLevel implements Level {
 	private static boolean physicsAllowed(Block block) {
 		if(block.getType().getPhysics() == null) return false;
 		
-		BlockPhysicsEvent event = EventFactory.callEvent(new BlockPhysicsEvent(block));
+		BlockPhysicsEvent event = OpenClassic.getGame().getEventManager().dispatch(new BlockPhysicsEvent(block));
 		if(block.getType().getPhysics() instanceof FallingBlockPhysics) {
 			return OpenClassic.getGame().getConfig().getBoolean("physics.falling", true) && !event.isCancelled();
 		}

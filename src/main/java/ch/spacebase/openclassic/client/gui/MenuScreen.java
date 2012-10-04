@@ -1,7 +1,6 @@
 package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelUnloadEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
@@ -34,7 +33,7 @@ public final class MenuScreen extends GuiScreen {
 
 		if(button.getId() == 2) {
 			if(!(((ClassicClient) OpenClassic.getClient()).getMode() instanceof Multiplayer)) {
-				if(EventFactory.callEvent(new LevelUnloadEvent(OpenClassic.getClient().getLevel())).isCancelled()) {
+				if(OpenClassic.getGame().getEventManager().dispatch(new LevelUnloadEvent(OpenClassic.getClient().getLevel())).isCancelled()) {
 					return;
 				}
 				

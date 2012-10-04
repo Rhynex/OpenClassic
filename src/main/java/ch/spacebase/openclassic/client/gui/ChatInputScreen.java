@@ -1,7 +1,6 @@
 package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
@@ -10,7 +9,6 @@ import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.mode.Multiplayer;
 
 import org.lwjgl.input.Keyboard;
-
 
 public class ChatInputScreen extends GuiScreen {
 
@@ -25,7 +23,7 @@ public class ChatInputScreen extends GuiScreen {
 			String message = this.getWidget(0, TextBox.class).getText().trim();
 			if(message.length() > 0) {
 				if(((ClassicClient) OpenClassic.getClient()).getMode() instanceof Multiplayer) {
-					PlayerChatEvent event = EventFactory.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
+					PlayerChatEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
 					if(event.isCancelled()) return;
 					
 					((Multiplayer) ((ClassicClient) OpenClassic.getClient()).getMode()).getSession().send(new PlayerChatMessage((byte) -1, event.getMessage()));

@@ -11,8 +11,9 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.component.BasicComponentHolder;
+import ch.spacebase.openclassic.api.component.type.NBTComponent;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
@@ -29,20 +30,19 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.game.component.player.ClientInfoComponent;
+import ch.spacebase.openclassic.game.component.player.PlaceModeComponent;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.network.ServerSession;
 
-public class ServerPlayer implements Player {
+public class ServerPlayer extends BasicComponentHolder implements Player {
 	
 	private byte playerId;
 	private Position pos;
 	private String name;
 	private String displayName;
 	private ServerSession session;
-	private byte placeMode = 0;
 	//private int airTicks = 0;
-	private ClientInfo client = new ClientInfo(this);
-	private NBTData data;
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
 	
 	public boolean teleported = false;
@@ -53,12 +53,13 @@ public class ServerPlayer implements Player {
 		this.displayName = name;
 		this.pos = pos;
 		this.session = session;
-		this.data = new NBTData(this.name);
-		this.data.load(OpenClassic.getServer().getDirectory().getPath() + "/players/" + this.name + ".nbt");
 		
 		session.setPlayer(this);
-		
 		this.playerId = (byte) (((ClassicServer) OpenClassic.getGame()).getSessionRegistry().size());
+		
+		this.add(PlaceModeComponent.class);
+		this.add(ClientInfoComponent.class);
+		this.add(NBTComponent.class).load(this.name, OpenClassic.getServer().getDirectory().getPath() + "/players/" + this.name + ".nbt");
 	}
 	
 	public Session getSession() {
@@ -90,11 +91,11 @@ public class ServerPlayer implements Player {
 	}
 	
 	public byte getPlaceMode() {
-		return this.placeMode;
+		return this.get(PlaceModeComponent.class).getPlaceMode();
 	}
 	
 	public void setPlaceMode(int type) {
-		this.placeMode = (byte) type;
+		this.get(PlaceModeComponent.class).setPlaceMode((byte) type);
 	}
 	
 	public void moveTo(Position pos) {
@@ -117,7 +118,7 @@ public class ServerPlayer implements Player {
 		Position to = new Position(level, x, y, z, yaw, pitch);
 		Level old = this.pos.getLevel();
 		
-		PlayerTeleportEvent event = EventFactory.callEvent(new PlayerTeleportEvent(this, this.getPosition(), to));
+		PlayerTeleportEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerTeleportEvent(this, this.getPosition(), to));
 		if(event.isCancelled()) return;
 		
 		this.pos = event.getTo();
@@ -274,28 +275,24 @@ public class ServerPlayer implements Player {
 		});
 	}
 
-	public ClientInfo getClientInfo() {
-		return this.client;
-	}
-
 	@Override
 	public boolean hasCustomClient() {
-		return this.client.isCustom();
+		return this.get(ClientInfoComponent.class).isCustom();
 	}
 
 	@Override
 	public String getClientVersion() {
-		return this.client.getVersion();
+		return this.get(ClientInfoComponent.class).getVersion();
 	}
 	
 	@Override
 	public NBTData getData() {
-		return this.data;
+		return this.get(NBTComponent.class).getData();
 	}
 
 	@Override
 	public List<RemotePluginInfo> getPlugins() {
-		return this.client.getPlugins();
+		return this.get(ClientInfoComponent.class).getPlugins();
 	}
 
 	@Override
@@ -322,7 +319,8 @@ public class ServerPlayer implements Player {
 
 	@Override
 	public String getLanguage() {
-		return this.client.getLanguage().equals("") ? OpenClassic.getGame().getLanguage() : this.client.getLanguage();
+		ClientInfoComponent info = this.get(ClientInfoComponent.class);
+		return info.getLanguage().equals("") ? OpenClassic.getGame().getLanguage() : info.getLanguage();
 	}
 	
 }

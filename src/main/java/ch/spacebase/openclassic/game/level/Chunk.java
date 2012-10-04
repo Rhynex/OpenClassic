@@ -88,9 +88,9 @@ public class Chunk {
 	}
 	
 	public boolean isLit(int x, int y, int z) {
-		x -= this.worldX;
-		y -= this.worldY;
-		z -= this.worldZ;
+		x &= 0xF;
+		y &= 0xF;
+		z &= 0xF;
 		return y >= this.blockers[x + z * WIDTH];
 	}
 	
@@ -130,9 +130,9 @@ public class Chunk {
 	}
 	
 	public int coordsToBlockIndex(int x, int y, int z) {
-		x -= this.worldX;
-		y -= this.worldY;
-		z -= this.worldZ;
+		x &= 0xF;
+		y &= 0xF;
+		z &= 0xF;
 		if (x < 0 || 0 < 0 || z < 0 || x >=  WIDTH || y >= HEIGHT || z >= DEPTH)
 			return -1;
 

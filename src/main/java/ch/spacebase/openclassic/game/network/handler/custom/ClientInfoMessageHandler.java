@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
+import ch.spacebase.openclassic.game.component.player.ClientInfoComponent;
 import ch.spacebase.openclassic.game.network.handler.MessageHandler;
 import ch.spacebase.openclassic.server.network.ServerSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
@@ -27,8 +28,8 @@ public class ClientInfoMessageHandler extends MessageHandler<GameInfoMessage> {
 	@Override
 	public void handleServer(ServerSession session, final ServerPlayer player, GameInfoMessage message) {
 		if(session == null || player == null) return;
-		player.getClientInfo().setVersion(message.getVersion());
-		player.getClientInfo().setLanguage(message.getLanguage());
+		player.get(ClientInfoComponent.class).setVersion(message.getVersion());
+		player.get(ClientInfoComponent.class).setLanguage(message.getLanguage());
 	}
 
 }

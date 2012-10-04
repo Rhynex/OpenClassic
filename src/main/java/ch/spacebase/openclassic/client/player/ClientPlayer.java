@@ -13,6 +13,8 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
+import ch.spacebase.openclassic.api.component.BasicComponentHolder;
+import ch.spacebase.openclassic.api.component.type.NBTComponent;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.math.MathHelper;
@@ -27,10 +29,10 @@ import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.mode.Multiplayer;
 import ch.spacebase.openclassic.client.util.LoginInfo;
+import ch.spacebase.openclassic.game.component.player.PlaceModeComponent;
 
-public class ClientPlayer implements Player {
+public class ClientPlayer extends BasicComponentHolder implements Player {
 
-	private static final float EYE_HEIGHT = 1.62f;
 	private static final float BOUNDING_WIDTH = 0.6f;
 	private static final float BOUNDING_HEIGHT = 1.8f;
 
@@ -46,20 +48,19 @@ public class ClientPlayer implements Player {
 	private float bob = 0;
 	private float prevBob = 0;
 
-	private NBTData data = new NBTData("Player");
 	private QuickBar quickbar = new QuickBar();
 	private BoundingBox bb = new BoundingBox(BOUNDING_WIDTH / 2, 0, BOUNDING_WIDTH / 2, BOUNDING_WIDTH + BOUNDING_WIDTH / 2, BOUNDING_HEIGHT, BOUNDING_WIDTH + BOUNDING_WIDTH / 2);
 	private boolean op = false;
-	private byte placemode = 0;
 	
 	public ClientPlayer() {
-		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
+		this.add(NBTComponent.class).load("Player", OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
+		this.add(PlaceModeComponent.class);
 	}
 	
 	public void look(float delta) {
 		glRotatef(this.pos.getInterpolatedPitch(delta), 1, 0, 0);
 		glRotatef(this.pos.getInterpolatedYaw(delta), 0, 1, 0);
-		glTranslatef(-this.pos.getInterpolatedX(delta), -(this.pos.getInterpolatedY(delta) + EYE_HEIGHT), -this.pos.getInterpolatedZ(delta));
+		glTranslatef(-this.pos.getInterpolatedX(delta), -(this.pos.getInterpolatedY(delta) + Constants.EYE_HEIGHT), -this.pos.getInterpolatedZ(delta));
 		
 		if(OpenClassic.getClient().getConfig().getBoolean("options.view-bobbing", true)) {
 			float walkDist = this.walkDist + (this.walkDist - this.prevWalkDist) * delta;
@@ -300,12 +301,12 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public byte getPlaceMode() {
-		return this.placemode;
+		return this.get(PlaceModeComponent.class).getPlaceMode();
 	}
 
 	@Override
 	public void setPlaceMode(int type) {
-		this.placemode = (byte) type;
+		this.get(PlaceModeComponent.class).setPlaceMode((byte) type);
 	}
 
 	@Override
@@ -385,7 +386,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public NBTData getData() {
-		return this.data;
+		return this.get(NBTComponent.class).getData();
 	}
 
 	@Override

@@ -37,14 +37,13 @@ public class ServerURLScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().setVisible(true);
-			String play = HTTPUtil.fetchUrl(this.getWidget(2, TextBox.class).getText(), "", "http://www.minecraft.net/classic/list");
+			String play = HTTPUtil.fetchUrl(this.getWidget(2, TextBox.class).getText(), "", "http://minecraft.net/classic/list");
 			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 			
 			if (mppass.length() > 0) {
 				String user = HTTPUtil.getParameterOffPage(play, "username");
 				LoginInfo.setName(user);
 				LoginInfo.setKey(mppass);
-				
 				OpenClassic.getClient().getProgressBar().setText("Logging in...");
 				Multiplayer mode = new Multiplayer(HTTPUtil.getParameterOffPage(play, "server"), Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port")));
 				((ClassicClient) OpenClassic.getClient()).setMode(mode);

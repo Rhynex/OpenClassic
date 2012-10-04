@@ -72,7 +72,7 @@ public class FavoriteServersScreen extends GuiScreen {
 		OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 		OpenClassic.getClient().getProgressBar().setProgress(-1);
 		OpenClassic.getClient().getProgressBar().setVisible(true);
-		String play = HTTPUtil.fetchUrl(url, "", "http://www.minecraft.net/classic/list");
+		String play = HTTPUtil.fetchUrl(url, "", "http://minecraft.net/classic/list");
 		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 		
 		if(mppass.length() > 0) {

@@ -84,18 +84,14 @@ public class ClientLevel extends ClassicLevel implements Level {
 	}
 	
 	@Override
-	public void update(boolean rendering) {
-		if(rendering) {
-			this.renderer.update();
-		} else {
-			this.particles.update();
-			for(Player player : this.getPlayers()) {
-				if(player instanceof OtherPlayer) ((OtherPlayer) player).update();
-			}
-			
-			if(!(((ClassicClient) OpenClassic.getClient()).getMode() instanceof Multiplayer)) {
-				this.physics();
-			}
+	public void update() {
+		this.particles.update();
+		for(Player player : this.getPlayers()) {
+			if(player instanceof OtherPlayer) ((OtherPlayer) player).update();
+		}
+		
+		if(!(((ClassicClient) OpenClassic.getClient()).getMode() instanceof Multiplayer)) {
+			this.physics();
 		}
 	}
 	

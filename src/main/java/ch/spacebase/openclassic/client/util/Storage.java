@@ -35,7 +35,6 @@ public class Storage {
 	
 	public static void loadFavorites(File dir) {
 		favoriteStore = new File(dir, "favorites.txt");
-		
 		if(!favoriteStore.exists()) {
 			try {
 				favoriteStore.createNewFile();

@@ -1,6 +1,6 @@
 package ch.spacebase.openclassic.game.network.handler.custom;
 
-import ch.spacebase.openclassic.api.event.EventFactory;
+import ch.spacebase.openclassic.api.OpenClassic;
 
 import ch.spacebase.openclassic.api.event.player.CustomMessageEvent;
 import ch.spacebase.openclassic.api.network.msg.custom.CustomMessage;
@@ -15,13 +15,13 @@ public class CustomMessageHandler extends MessageHandler<CustomMessage> {
 	@Override
 	public void handleClient(ClientSession session, ClientPlayer player, CustomMessage message) {
 		if(session == null || player == null) return;
-		EventFactory.callEvent(new CustomMessageEvent(player, message));
+		OpenClassic.getGame().getEventManager().dispatch(new CustomMessageEvent(player, message));
 	}
 	
 	@Override
 	public void handleServer(ServerSession session, ServerPlayer player, CustomMessage message) {
 		if(session == null || player == null) return;
-		EventFactory.callEvent(new CustomMessageEvent(player, message));
+		OpenClassic.getGame().getEventManager().dispatch(new CustomMessageEvent(player, message));
 	}
 
 }

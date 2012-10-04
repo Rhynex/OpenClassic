@@ -157,21 +157,21 @@ public class LoginScreen extends GuiScreen {
 		CookieHandler.setDefault(cookies);
 		String result = "";
 
-		HTTPUtil.fetchUrl("https://www.minecraft.net/login", "", "https://www.minecraft.net");
+		HTTPUtil.fetchUrl("https://minecraft.net/login", "", "https://minecraft.net");
 
 		try {
-			result = HTTPUtil.fetchUrl("https://www.minecraft.net/login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), "http://www.minecraft.net");
+			result = HTTPUtil.fetchUrl("https://minecraft.net/login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), "http://minecraft.net");
 		} catch (UnsupportedEncodingException e) {
 			System.out.println("UTF-8 not supported!");
 			return false;
 		}
 
-		Cookie cookie = cookies.getCookie("https://www.minecraft.net", "PLAY_SESSION");
+		Cookie cookie = cookies.getCookie("https://minecraft.net", "PLAY_SESSION");
 		if (cookie != null)
-			result = HTTPUtil.fetchUrl("http://www.minecraft.net", "", "https://www.minecraft.net/login");
+			result = HTTPUtil.fetchUrl("http://minecraft.net", "", "https://minecraft.net/login");
 
 		if (result.contains("Logged in as")) {
-			parseServers(HTTPUtil.rawFetchUrl("http://www.minecraft.net/classic/list", "", "http://www.minecraft.net"));
+			parseServers(HTTPUtil.rawFetchUrl("http://minecraft.net/classic/list", "", "http://minecraft.net"));
 			return true;
 		}
 

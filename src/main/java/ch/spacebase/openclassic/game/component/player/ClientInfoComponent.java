@@ -1,27 +1,28 @@
-package ch.spacebase.openclassic.server.player;
+package ch.spacebase.openclassic.game.component.player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.component.Component;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 
-public class ClientInfo {
+public class ClientInfoComponent extends Component {
 
-	private Player player;
 	private boolean custom;
 	private String version;
 	private String language = "";
 	private List<RemotePluginInfo> plugins = new ArrayList<RemotePluginInfo>();
+
+	@Override
+	public boolean canDetach() {
+		return false;
+	}
 	
-	public ClientInfo(Player player) {
-		this.player = player;
+	@Override
+	public boolean canTick() {
+		return false;
 	}
-
-	public Player getPlayer() {
-		return this.player;
-	}
-
+	
 	public boolean isCustom() {
 		return this.custom;
 	}

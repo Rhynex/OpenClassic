@@ -149,7 +149,7 @@ public class ServerListScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().setVisible(true);
 
-			String play = HTTPUtil.fetchUrl(HeartbeatManager.getURL(), "", "http://www.minecraft.net/classic/list");
+			String play = HTTPUtil.fetchUrl(HeartbeatManager.getURL(), "", "http://minecraft.net/classic/list");
 			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 			
 			if (mppass.length() > 0) {
@@ -198,7 +198,7 @@ public class ServerListScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().setVisible(true);
 
-			String play = HTTPUtil.fetchUrl(server.getUrl(), "", "http://www.minecraft.net/classic/list");
+			String play = HTTPUtil.fetchUrl(server.getUrl(), "", "http://minecraft.net/classic/list");
 			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 			
 			if (mppass.length() > 0) {

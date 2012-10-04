@@ -48,7 +48,7 @@ public abstract class Mode {
 	
 	public void update() {
 		this.player.update();
-		this.level.update(false);
+		this.level.update();
 		Intersection inter = this.level.getTracer().trace(this.player.getPosition().toPosVector().add(0, 1.65f, 0), this.player.getPosition().toDirVector(), 50);
 		if(inter.isHit()) {
 			BlockFace face = null;
@@ -190,7 +190,7 @@ public abstract class Mode {
 	public void renderUpdate(float delta) {
 		this.updateAnimation(Animation.LAVA);
 		this.updateAnimation(Animation.WATER);
-		this.level.update(true);
+		this.level.getRenderer().update();
 	}
 	
 	public void renderPerspective(float delta) {

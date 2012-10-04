@@ -2,7 +2,6 @@ package ch.spacebase.openclassic.game.network.handler;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.player.Session.State;
@@ -44,7 +43,7 @@ public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> 
 		if(chat.startsWith("/")) {
 			((ClassicServer) OpenClassic.getGame()).processCommand(player, chat.substring(1, chat.length()));
 		} else {
-			PlayerChatEvent event = EventFactory.callEvent(new PlayerChatEvent(player, chat));
+			PlayerChatEvent event = OpenClassic.getGame().getEventManager().dispatch(new PlayerChatEvent(player, chat));
 			if(event.isCancelled()) return;
 			
 			OpenClassic.getServer().sendToAll(new PlayerChatMessage(player.getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));

@@ -45,6 +45,7 @@ public class ClassicHandler extends SimpleChannelHandler {
 			OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", "You lost connection!"));
 		}
 		
+		OpenClassic.getClient().getProgressBar().setVisible(false);
 		OpenClassic.getLogger().info("Channel disconnected: " + channel + ".");
 	}
 

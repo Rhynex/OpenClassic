@@ -1,11 +1,11 @@
 package ch.spacebase.openclassic.game.network.handler;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.entity.BlockEntity.BlockRemoveCause;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
 import ch.spacebase.openclassic.api.event.entity.EntityBlockRemoveEvent;
@@ -39,7 +39,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		Block block = player.getPosition().getLevel().getBlockAt(message.getX(), message.getY(), message.getZ());
 		if(block != null && block.isEntity() && !message.isPlacing()) {
 			if(block.getBlockEntity().getController() != null) {
-				if(EventFactory.callEvent(new EntityBlockRemoveEvent(block.getBlockEntity(), BlockRemoveCause.PLAYER, block)).isCancelled() || !block.getBlockEntity().getController().onBlockRemoval(BlockRemoveCause.PLAYER, block)) {
+				if(OpenClassic.getGame().getEventManager().dispatch(new EntityBlockRemoveEvent(block.getBlockEntity(), BlockRemoveCause.PLAYER, block)).isCancelled() || !block.getBlockEntity().getController().onBlockRemoval(BlockRemoveCause.PLAYER, block)) {
 					session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
 					return;
 				}
@@ -50,7 +50,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		if(message.isPlacing() && player.getPlaceMode() != 0 && type != 0) type = player.getPlaceMode();
 		
 		if(!message.isPlacing()) {
-			if(EventFactory.callEvent(new BlockBreakEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {
+			if(OpenClassic.getGame().getEventManager().dispatch(new BlockBreakEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {
 				session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
 				return;
 			}
@@ -58,7 +58,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		
 		player.getPosition().getLevel().setBlockIdAt(message.getX(), message.getY(), message.getZ(), type);
 		if(message.isPlacing()) {
-			if(EventFactory.callEvent(new BlockPlaceEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {
+			if(OpenClassic.getGame().getEventManager().dispatch(new BlockPlaceEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {
 				if(player.getPosition().getLevel().getBlockIdAt(message.getX(), message.getY(), message.getZ()) == type) {
 					player.getPosition().getLevel().setBlockAt(message.getX(), message.getY(), message.getZ(), old);
 				}
