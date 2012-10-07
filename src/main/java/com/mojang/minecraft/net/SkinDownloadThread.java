@@ -23,12 +23,6 @@ final class SkinDownloadThread extends Thread {
 	}
 
 	public void run() {
-		try {
-			if(!Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "haspaid.jsp", "user=" + URLEncoder.encode(this.player.name, "UTF-8"))))
-				return;
-		} catch(UnsupportedEncodingException e) {
-		}
-		
 		HttpURLConnection conn = null;
 
 		try {

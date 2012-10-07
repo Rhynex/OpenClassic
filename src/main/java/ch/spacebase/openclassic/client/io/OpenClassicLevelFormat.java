@@ -88,9 +88,9 @@ public class OpenClassicLevelFormat {
 		level.creator = ((StringTag) info.get("Author")).getValue();
 		level.createTime = ((LongTag) info.get("CreationTime")).getValue();
 		
-		level.xSpawn = ((DoubleTag) spawn.get("x")).getValue().shortValue();
-		level.ySpawn = ((DoubleTag) spawn.get("y")).getValue().shortValue();
-		level.zSpawn = ((DoubleTag) spawn.get("z")).getValue().shortValue();
+		level.xSpawn = ((DoubleTag) spawn.get("x")).getValue().intValue();
+		level.ySpawn = ((DoubleTag) spawn.get("y")).getValue().intValue();
+		level.zSpawn = ((DoubleTag) spawn.get("z")).getValue().intValue();
 		level.rotSpawn = ((ByteTag) spawn.get("yaw")).getValue();
 		
 		short width = ((ShortTag) map.get("Width")).getValue();

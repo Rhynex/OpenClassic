@@ -31,7 +31,7 @@ public class TerrainParticle extends Particle {
 		float var8 = (this.tex % 16) / 16f + 0.02f;
 		float var9 = var8 + 0.015609375F;
 		float var10 = (this.tex / 16f) / 16f;
-		if(this.block == VanillaBlock.GRAY_CLOTH || this.block == VanillaBlock.BLACK_CLOTH || this.block == VanillaBlock.WHITE_CLOTH) {
+		if(this.block == VanillaBlock.BROWN_MUSHROOM || this.block == VanillaBlock.GRAY_CLOTH || this.block == VanillaBlock.BLACK_CLOTH || this.block == VanillaBlock.WHITE_CLOTH) {
 			var10 -= 0.01f;
 		}
 		
