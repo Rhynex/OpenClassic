@@ -2,15 +2,10 @@ package com.mojang.minecraft.net;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.util.HTTPUtil;
-
 import com.mojang.minecraft.net.NetworkPlayer;
 
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-
 import javax.imageio.ImageIO;
 
 final class SkinDownloadThread extends Thread {

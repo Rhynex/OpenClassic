@@ -224,8 +224,8 @@ public class Level implements Serializable {
 			int var8 = this.getTile(var4, var5, var6);
 			this.setTileNoNeighborChange(var1, var2, var3, var8);
 			this.setTileNoNeighborChange(var4, var5, var6, var7);
-			this.updateNeighborsAt(var1, var2, var3, var8);
-			this.updateNeighborsAt(var4, var5, var6, var7);
+			this.updateNeighborsAt(var1, var2, var3);
+			this.updateNeighborsAt(var4, var5, var6);
 		}
 	}
 
@@ -259,7 +259,7 @@ public class Level implements Serializable {
 		if (this.networkMode) {
 			return false;
 		} else if (this.setTileNoNeighborChange(x, y, z, type)) {
-			this.updateNeighborsAt(x, y, z, type);
+			this.updateNeighborsAt(x, y, z);
 			return true;
 		} else {
 			return false;
@@ -268,21 +268,21 @@ public class Level implements Serializable {
 
 	public boolean netSetTile(int x, int y, int z, int type) {
 		if (this.netSetTileNoNeighborChange(x, y, z, type)) {
-			this.updateNeighborsAt(x, y, z, type);
+			this.updateNeighborsAt(x, y, z);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public void updateNeighborsAt(int x, int y, int z, int type) {
+	public void updateNeighborsAt(int x, int y, int z) {
 		if(this.openclassic.getPhysicsEnabled()) {
-			this.a(x - 1, y, z, x, y, z, type);
-			this.a(x + 1, y, z, x, y, z, type);
-			this.a(x, y - 1, z, x, y, z, type);
-			this.a(x, y + 1, z, x, y, z, type);
-			this.a(x, y, z - 1, x, y, z, type);
-			this.a(x, y, z + 1, x, y, z, type);
+			this.a(x - 1, y, z, x, y, z);
+			this.a(x + 1, y, z, x, y, z);
+			this.a(x, y - 1, z, x, y, z);
+			this.a(x, y + 1, z, x, y, z);
+			this.a(x, y, z - 1, x, y, z);
+			this.a(x, y, z + 1, x, y, z);
 		}
 	}
 
@@ -299,9 +299,9 @@ public class Level implements Serializable {
 		}
 	}
 
-	private void a(int x, int y, int z, int nx, int nz, int ny, int tile) {
+	private void a(int x, int y, int z, int nx, int nz, int ny) {
 		if (x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.depth && z < this.height) {
-			BlockType type = Blocks.fromId(tile);
+			BlockType type = Blocks.fromId(this.getTile(x, y, z));
 			if (type != null) {
 				if(type.getPhysics() != null) {
 					type.getPhysics().onNeighborChange(this.openclassic.getBlockAt(x, y, z), this.openclassic.getBlockAt(nx, ny, nz));
