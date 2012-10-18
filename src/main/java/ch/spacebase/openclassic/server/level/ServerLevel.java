@@ -8,13 +8,14 @@ import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 
 public class ServerLevel extends ClassicLevel implements Level {
 	
-	public ServerLevel() {
-		super();
+	public ServerLevel(String name) {
+		super(name);
 		this.executor.shutdown();
 	}
 	
@@ -42,7 +43,7 @@ public class ServerLevel extends ClassicLevel implements Level {
 	public boolean isLit(int x, int y, int z) {
 		boolean lit = false;
 		
-		for(int curr = y; curr <= this.getHeight(); curr++) {
+		for(int curr = y; curr <= Constants.COLUMN_HEIGHT; curr++) {
 			if(!this.canLightPass(this.getBlockAt(x, curr, z))) lit = false;
 		}
 		

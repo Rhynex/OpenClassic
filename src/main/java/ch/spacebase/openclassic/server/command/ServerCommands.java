@@ -420,7 +420,7 @@ public class ServerCommands extends CommandExecutor {
 		}
 	}
 	
-	@Command(aliases = {"createlevel"}, desc = "Creates a level.", permission = "openclassic.commands.createlevel", min = 5, usage = "<name> <width> <height> <depth> <type>")
+	@Command(aliases = {"createlevel"}, desc = "Creates a level.", permission = "openclassic.commands.createlevel", min = 2, usage = "<name> <type>")
 	public void createlevel(Sender sender, String command, String args[]) {
 		Level level = OpenClassic.getServer().loadLevel(args[0], false);
 		if(level != null) {
@@ -428,25 +428,12 @@ public class ServerCommands extends CommandExecutor {
 			return;
 		}
 		
-		if(!OpenClassic.getGame().isGenerator(args[4])) {
+		if(!OpenClassic.getGame().isGenerator(args[1])) {
 			sender.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("level.invalid-type", sender.getLanguage()));
 			return;
 		}
 		
-		short width = 0;
-		short height = 0;
-		short depth = 0;
-		
-		try {
-			width = Short.parseShort(args[1]);
-			height = Short.parseShort(args[2]);
-			depth = Short.parseShort(args[3]);
-		} catch(NumberFormatException e) {
-			sender.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("level.invalid-dim", sender.getLanguage()));
-			return;
-		}
-		
-		Level lvl = OpenClassic.getGame().createLevel(new LevelInfo(args[0], null, width, height, depth), OpenClassic.getGame().getGenerator(args[4]));
+		Level lvl = OpenClassic.getGame().createLevel(new LevelInfo(args[0], null, OpenClassic.getGame().getGenerator(args[1])));
 		((ServerLevel) lvl).setAuthor(sender.getName());
 		sender.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("level.create-success", sender.getLanguage()));
 	}

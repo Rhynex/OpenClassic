@@ -226,9 +226,9 @@ public abstract class ClassicGame implements Game {
 		return this.config;
 	}
 
-	public void registerGenerator(String name, Generator generator) {
+	public void registerGenerator(Generator generator) {
 		if(generator == null) return;
-		this.generators.put(name, generator);
+		this.generators.put(generator.getName(), generator);
 	}
 	
 	public Generator getGenerator(String name) {

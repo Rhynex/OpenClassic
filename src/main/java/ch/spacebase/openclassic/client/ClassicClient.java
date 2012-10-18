@@ -36,24 +36,17 @@ import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
 import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
-import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.MainScreen;
 import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
-import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.api.util.io.IOUtils;
-import ch.spacebase.openclassic.api.util.script.Function;
-import ch.spacebase.openclassic.api.util.script.Param;
-import ch.spacebase.openclassic.api.util.script.Scripting;
 import ch.spacebase.openclassic.client.command.ClientCommands;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
@@ -67,9 +60,10 @@ import ch.spacebase.openclassic.client.sound.ClientAudioManager;
 import ch.spacebase.openclassic.client.util.Directories;
 import ch.spacebase.openclassic.client.util.LWJGLNatives;
 import ch.spacebase.openclassic.client.util.Projection;
+import ch.spacebase.openclassic.client.util.ShaderManager;
 import ch.spacebase.openclassic.client.util.Storage;
 import ch.spacebase.openclassic.game.ClassicGame;
-import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 import de.matthiasmann.twl.utils.PNGDecoder;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -84,29 +78,16 @@ public class ClassicClient extends ClassicGame implements Client {
 	private ClientAudioManager audio;
 	private GuiScreen currentScreen;
 	private Mode mode;
+	
 	private int fps = 0;
+	private int columns = 0;
+	private String memory = "N/A";
 	
 	public ClassicClient() {
 		super(Directories.getWorkingDirectory());
 	}
 	
-	private void on(PlayerChatEvent event, String code) {
-		Function func = new Function(code, new Param("event", event));
-		Scripting.run(func);
-	}
-	
-	private void scriptTest() {
-		PlayerChatEvent event = new PlayerChatEvent(null, "bld");
-		System.out.println(IOUtils.readFile("/home/steven/Desktop/serverinfo.txt"));
-		System.out.println("--------------------------");
-		this.on(event, "if(event.getMessage().equals(\"bld\")) {" +
-						   "event.setMessage(\"c:\");" +
-					   "}");
-		System.out.println("RESULT: " + event.getMessage());
-	}
-	
 	public void start() {
-		this.scriptTest();
 		this.running = true;
 		OpenClassic.setClient(this);
 		RenderHelper.setHelper(new ClientRenderHelper());
@@ -125,7 +106,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.audio = new ClientAudioManager();
 		
 		this.registerExecutor(null, new ClientCommands());
-		this.registerGenerator("flat", new FlatLandGenerator());
+		this.registerGenerator(new FlatLandGenerator());
 		
 		this.getConfig().applyDefault("options.music", true);
 		this.getConfig().applyDefault("options.sound", true);
@@ -179,7 +160,14 @@ public class ClassicClient extends ClassicGame implements Client {
 			passedTime += time - previousTime; 
 			previousTime = time;
 			if(time - lastfps > 1000) {
+				this.memory = Runtime.getRuntime().freeMemory() / 1024 / 1024 + "/" + Runtime.getRuntime().maxMemory() / 1024 / 1024 + " free";
 				this.fps = frames;
+				if(this.getLevel() != null) {
+					this.columns = ((ClassicLevel) this.getLevel()).getColumns().size();
+				} else {
+					this.columns = 0;
+				}
+				
 				frames = 0;
 				lastfps += 1000;
 			}
@@ -245,7 +233,21 @@ public class ClassicClient extends ClassicGame implements Client {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glEnable(GL_FOG);
+		
+		float ambientLight[] = new float[] { 0.2f, 0.2f, 0.2f, 1 };
+		float diffuseLight[] = new float[] { 0.8f, 0.8f, 0.8f, 1 };
+		float specularLight[] = new float[] { 0.5f, 0.5f, 0.5f, 1 };
+		float position[] = new float[] { -1.5f, 1, 0, 1 };
+		
+	    glLight(GL_LIGHT1, GL_AMBIENT, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(ambientLight).flip());
+	    glLight(GL_LIGHT1, GL_DIFFUSE, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(diffuseLight).flip());
+	    glLight(GL_LIGHT1, GL_SPECULAR, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(specularLight).flip());
+	    glLight(GL_LIGHT1, GL_POSITION, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(position).flip());
 
+	    glEnable(GL_COLOR_MATERIAL);
+	    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	    
+		ShaderManager.setup();
 		this.updateFog();
 	}
 
@@ -367,6 +369,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(this.mode != null) this.mode.unload();
 		Storage.saveFavorites();
 		this.audio.cleanup();
+		ShaderManager.cleanup();
 		Display.destroy();
 		Mouse.destroy();
 		Keyboard.destroy();
@@ -374,12 +377,9 @@ public class ClassicClient extends ClassicGame implements Client {
 	}
 
 	@Override
-	public Level createLevel(LevelInfo info, Generator generator) {
+	public Level createLevel(LevelInfo info) {
 		ClientLevel level = new ClientLevel(info);
-		byte blocks[] = new byte[level.getWidth() * level.getHeight() * level.getDepth()];
-		generator.generate(level, blocks);
-		level.setWorldData(level.getWidth(), level.getHeight(), level.getDepth(), blocks);
-		this.getEventManager().dispatch(new LevelCreateEvent(level));
+		this.setMode(new Singleplayer(level));
 		return level;
 	}
 
@@ -405,26 +405,50 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public Level openLevel(String name) {
-		try {
-			Level level = OpenClassicLevelFormat.load(name, ClientLevel.class, false);
-			this.setMode(new Singleplayer((ClientLevel) level));
-			return level;
-		} catch (IOException e) {
-			System.out.println("Failed to load level!");
-			e.printStackTrace();
-			return null;
-		}
+		/* LevelFormat format = null;
+		File dir = new File(this.getDirectory(), "levels/" + name);
+		if(!dir.exists() || !dir.isDirectory()) {
+			File file = new File(this.getDirectory(), "levels/" + name + ".mine");
+			if(file.exists()) {
+				format = new MinecraftClassicLevelFormat(file);
+			}
+			
+			file = new File(this.getDirectory(), "levels/" + name + ".mclevel");
+			if(file.exists()) {
+				format = new MinecraftClassicLevelFormat(file);
+			}
+			
+			file = new File(this.getDirectory(), "levels/" + name + ".dat");
+			if(file.exists()) {
+				format = new MinecraftClassicLevelFormat(file);
+			}
+			
+			file = new File(this.getDirectory(), "levels/" + name + ".lvl");
+			if(file.exists()) {
+				format = new MCSharpLevelFormat(file);
+			}
+			
+			file = new File(this.getDirectory(), "levels/" + name + ".oclvl");
+			if(file.exists()) {
+				format = new OpenClassicOldLevelFormat(file);
+			}
+			
+			file = new File(this.getDirectory(), "levels/" + name + ".map");
+			if(file.exists()) {
+				format = new OpenClassicLegacyLevelFormat(file);
+			}
+		} TODO: someday */
+		
+		ClientLevel level = new ClientLevel(name, false);
+		this.setMode(new Singleplayer(level));
+		return level;
 	}
 
 	@Override
+	@Deprecated
 	public void saveLevel() {
 		if(this.mode == null || this.mode.getLevel() == null) return;
-		try {
-			OpenClassicLevelFormat.save(this.mode.getLevel());
-		} catch (IOException e) {
-			System.out.println("Failed to save level!");
-			e.printStackTrace();
-		}
+		this.mode.getLevel().save();
 	}
 
 	@Override
@@ -463,7 +487,7 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public void exitLevel(boolean save) {
 		if(this.mode == null) return;
-		if(save) this.saveLevel();
+		if(save && this.getLevel() != null) this.getLevel().save();
 		this.setMode(null);
 	}
 
@@ -525,6 +549,14 @@ public class ClassicClient extends ClassicGame implements Client {
 
 			return builder.toString();
 		}
+	}
+
+	public String getMemoryDisplay() {
+		return this.memory;
+	}
+	
+	public int getColumns() {
+		return this.columns;
 	}
 
 }

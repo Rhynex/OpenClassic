@@ -110,6 +110,8 @@ public class ClassicMainScreen extends MainScreen {
 		if(OpenClassic.getClient().getConfig().getBoolean("options.show-info", false)) {
 			RenderHelper.getHelper().renderText("FPS: " + ((ClassicClient) OpenClassic.getClient()).getFps(), 2, 12, false);
 			RenderHelper.getHelper().renderText("Position: " + OpenClassic.getClient().getPlayer().getPosition().getBlockX() + ", " + OpenClassic.getClient().getPlayer().getPosition().getBlockY() + ", " + OpenClassic.getClient().getPlayer().getPosition().getBlockZ(), 2, 22, false);
+			RenderHelper.getHelper().renderText("Columns: " + ((ClassicClient) OpenClassic.getClient()).getColumns(), 2, 32, false);
+			RenderHelper.getHelper().renderText("Memory: " + ((ClassicClient) OpenClassic.getClient()).getMemoryDisplay(), 2, 42, false);
 		}
 		
 		super.render();

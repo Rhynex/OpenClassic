@@ -5,15 +5,15 @@ import java.util.Comparator;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
-import ch.spacebase.openclassic.client.render.LevelSection;
+import ch.spacebase.openclassic.game.level.column.ClassicChunk;
 
-public class SectionSorter implements Comparator<LevelSection> {
+public class ChunkSorter implements Comparator<ClassicChunk> {
 
 	@Override
-	public int compare(LevelSection o1, LevelSection o2) {
+	public int compare(ClassicChunk o1, ClassicChunk o2) {
 		ClientPlayer player = (ClientPlayer) OpenClassic.getClient().getPlayer();
-		double dist1 = this.distanceSquared(o1.getX(), o1.getY(), o1.getZ(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
-		double dist2 = this.distanceSquared(o2.getX(), o2.getY(), o2.getZ(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+		double dist1 = this.distanceSquared(o1.getX(), o1.getY(), o1.getZ(), player.getPosition().getBlockX() >> 4, player.getPosition().getBlockY() >> 4, player.getPosition().getBlockZ() >> 4);
+		double dist2 = this.distanceSquared(o2.getX(), o2.getY(), o2.getZ(), player.getPosition().getBlockX() >> 4, player.getPosition().getBlockY() >> 4, player.getPosition().getBlockZ() >> 4);
 		if(dist1 > dist2) {
 			return -1;
 		} else if(dist1 < dist2) {

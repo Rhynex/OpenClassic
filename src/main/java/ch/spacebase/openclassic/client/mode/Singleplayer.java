@@ -1,14 +1,11 @@
 package ch.spacebase.openclassic.client.mode;
 
-import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.player.OtherPlayer;
 
 public class Singleplayer extends Mode {
 
 	public Singleplayer(ClientLevel level) {
 		this.setLevel(level);
-		this.getLevel().addPlayer(new OtherPlayer((byte) 0, "hi", this.getLevel().getSpawn().clone()));
 		this.getPlayer().moveTo(this.getLevel().getSpawn().clone());
 	}
 	
@@ -20,7 +17,7 @@ public class Singleplayer extends Mode {
 	
 	@Override
 	public void unload() {
-		OpenClassic.getClient().saveLevel();
+		this.getLevel().save();
 		super.unload();
 	}
 

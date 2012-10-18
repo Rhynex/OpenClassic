@@ -1,8 +1,6 @@
 package ch.spacebase.openclassic.client.network;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -10,8 +8,6 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPInputStream;
-
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -96,26 +92,29 @@ public class ClientSession implements Session {
 	public ClientLevel finalizeLevel(short width, short height, short depth) {
 		if(this.leveldata == null) return this.mode.getLevel();
 		
+		/* TODO: rework for inf worlds
 		try {
 			byte blocks[] = this.decompressLevel();
 			this.leveldata = null;
 			
-			ClientLevel level = new ClientLevel();
+			ClientLevel level = new ClientLevel("serverlevel", false);
 			level.setWorldData(width, height, depth, blocks);
 			return level;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
-		}
+		} */
+		
+		return null;
 	}
 	
-	private byte[] decompressLevel() throws IOException {
+	/* private byte[] decompressLevel() throws IOException {
 		DataInputStream in = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(this.leveldata.toByteArray())));
 		byte[] data = new byte[in.readInt()];
 		in.readFully(data);
 		in.close();
 		return data;
-	}
+	} */
 	
 	public Multiplayer getMode() {
 		return this.mode;

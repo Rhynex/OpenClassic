@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.ARBVertexShader;
@@ -26,7 +27,8 @@ public class Shader {
 	public void compileShader() {
 		String v = getCode(this.file + ".vert");
 		this.vert = ARBShaderObjects.glCreateShaderObjectARB(ARBVertexShader.GL_VERTEX_SHADER_ARB);
-		ByteBuffer b = ByteBuffer.wrap(v.getBytes());
+		ByteBuffer b = BufferUtils.createByteBuffer(v.getBytes().length);
+		b.put(v.getBytes());
 		b.rewind();
 		
 		ARBShaderObjects.glShaderSourceARB(this.vert, b);
@@ -34,7 +36,8 @@ public class Shader {
 		
 		String f = getCode(this.file + ".frag");
 		this.frag = ARBShaderObjects.glCreateShaderObjectARB(ARBFragmentShader.GL_FRAGMENT_SHADER_ARB);
-		b = ByteBuffer.wrap(f.getBytes());
+		b = BufferUtils.createByteBuffer(f.getBytes().length);
+		b.put(f.getBytes());
 		b.rewind();
 		
 		ARBShaderObjects.glShaderSourceARB(this.frag, b);
@@ -72,12 +75,12 @@ public class Shader {
 		return this.programId;
 	}
 	
-	private static String getCode(String name) {
+	private static String getCode(String file) {
 		BufferedReader reader = null;
 		String code = "";
 		
 		try {
-			reader = new BufferedReader(new InputStreamReader(ClassicClient.class.getResourceAsStream("/" + name)));
+			reader = new BufferedReader(new InputStreamReader(ClassicClient.class.getResourceAsStream(file)));
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				code += line + "\n";

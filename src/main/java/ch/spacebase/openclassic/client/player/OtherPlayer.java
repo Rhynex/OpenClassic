@@ -10,6 +10,7 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.component.BasicComponentHolder;
@@ -47,7 +48,7 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 	public void render(float delta) {
 		double dist = this.pos.distanceSquared(OpenClassic.getClient().getPlayer().getPosition());
 		if(dist < 4096) {
-			this.model.renderAll(this.pos.getX() - 0.5f, this.pos.getY() - 0.95f, this.pos.getZ() - 0.5f, 1); // TODO: Create a proper model. Any help would be appreciated :p
+			this.model.renderAll(VanillaBlock.STONE, this.pos.getX() - 0.5f, this.pos.getY() - 0.95f, this.pos.getZ() - 0.5f, 1); // TODO: Create a proper model. Any help would be appreciated :p
 		
 			glPushMatrix();
 			glTranslatef(this.pos.getX(), this.pos.getY() + 1.4875f, this.pos.getZ());

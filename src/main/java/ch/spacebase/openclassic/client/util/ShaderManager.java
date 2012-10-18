@@ -22,7 +22,7 @@ public class ShaderManager {
 		shaders.get(name).begin();
 	}
 	
-	public static void stop(String name) {
+	public static void end(String name) {
 		shaders.get(name).end();
 	}
 	

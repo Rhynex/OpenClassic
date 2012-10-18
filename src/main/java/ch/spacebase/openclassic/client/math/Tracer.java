@@ -4,6 +4,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.math.Vector;
+import ch.spacebase.openclassic.api.util.Constants;
 
 // Base tracer math borrowed from ArdorcraftAPI (https://github.com/rherlitz/ArdorCraft)
 public class Tracer {
@@ -32,12 +33,12 @@ public class Tracer {
 		if (curpos.getY() < 0) {
 			return inter;
 		}
-		if (curpos.getY() >= this.level.getHeight() && raydir.getY() >= 0) {
+		if (curpos.getY() >= Constants.COLUMN_HEIGHT && raydir.getY() >= 0) {
 			return inter;
 		}
 
-		if (curpos.getY() >= this.level.getHeight()) {
-			double diff = this.level.getHeight() - curpos.getY();
+		if (curpos.getY() >= Constants.COLUMN_HEIGHT) {
+			double diff = Constants.COLUMN_HEIGHT - curpos.getY();
 			double t = diff / raydir.getY();
 			this.newPos.set(raydir).multiply(t, t, t).add(curpos);
 			curpos = this.newPos;
@@ -142,7 +143,7 @@ public class Tracer {
 				if (this.tmax.getY() < this.tmax.getZ()) {
 					y = y + stepY;
 					modIterations++;
-					if (y >= this.level.getHeight()) {
+					if (y >= Constants.COLUMN_HEIGHT) {
 						return inter;
 					}
 					

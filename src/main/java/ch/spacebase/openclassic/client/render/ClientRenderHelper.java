@@ -117,12 +117,17 @@ public class ClientRenderHelper extends RenderHelper {
 		}
 		
 		if(brightness >= 0) {
-			ArrayRenderer.color(brightness, brightness, brightness);
+			ArrayRenderer.color(brightness, brightness, brightness, 1);
 		}
 		
 		float y1 = quad.getTexture().getY1();
 		float y2 = quad.getTexture().getY2();
 
+		if(quad.getParent() instanceof CuboidModel) {
+			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			ArrayRenderer.normal(face.getModX(), face.getModY(), face.getModZ());
+		}
+		
 		if(quad.getParent() instanceof CuboidModel && !(quad.getParent() instanceof LiquidModel) && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
 			y1 = y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight();
 			y2 = y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight();
@@ -261,7 +266,7 @@ public class ClientRenderHelper extends RenderHelper {
 			glTranslatef(-1.5f, 0.5f, 0.5f);
 			glScalef(-1, -1, -1);
 			ArrayRenderer.begin();
-			block.getModel().renderAll(-2, 0, 0, 1);
+			block.getModel().renderAll(block, -2, 0, 0, 1);
 			ArrayRenderer.end();
 			glEnable(GL_DEPTH_TEST);
 			glPopMatrix();

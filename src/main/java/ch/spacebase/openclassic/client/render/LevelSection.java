@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.render;
 
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.model.EmptyModel;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.client.level.ClientLevel;
@@ -57,9 +58,10 @@ public class LevelSection {
 		for(int x = this.x; x <= this.x + this.size; x++) {
 			for(int y = this.y; y <= this.y + this.size; y++) {
 				for(int z = this.z; z <= this.z + this.size; z++) {
-					if(!(this.level.getBlockTypeAt(x, y, z).getModel() instanceof EmptyModel)) {
+					BlockType type = this.level.getBlockTypeAt(x, y, z);
+					if(!(type.getModel() instanceof EmptyModel)) {
 						this.empty = false;
-						this.level.getBlockTypeAt(x, y, z).getModel().render(x, y, z, ((ClientLevel) this.level).getBrightness(x, y, z));
+						this.level.getBlockTypeAt(x, y, z).getModel().render(type, x, y, z, ((ClientLevel) this.level).getBrightness(x, y, z));
 					}
 				}
 			}

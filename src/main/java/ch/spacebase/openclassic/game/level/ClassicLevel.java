@@ -1,7 +1,8 @@
 package ch.spacebase.openclassic.game.level;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -30,33 +31,37 @@ import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
+import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.map.TripleIntHashMap;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.server.level.ServerLevel;
+import ch.spacebase.openclassic.game.level.column.ClassicColumn;
+import ch.spacebase.openclassic.game.level.column.ColumnManager;
+import ch.spacebase.openclassic.game.level.io.LevelFormat;
+import ch.spacebase.openclassic.game.level.io.OpenClassicLevelFormat;
 
 public abstract class ClassicLevel implements Level {
 
 	private static final Random rand = new Random();
 	
 	private long creationTime;
-	private short width;
-	private short height;
-	private short depth;
-	private byte[] blocks;
 	private Position spawn;
 	private String name;
 	private String author = "unknown";
-	private short waterLevel;
-	private boolean generating;
+	private Generator generator;
+	private long seed;
 	private int skyColor = 10079487;
 	private int fogColor = 16777215;
 	private int cloudColor = 16777215;
 	private List<Player> players = new ArrayList<Player>();
 	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
+	
+	private LevelFormat format; // TODO: changeable
+	private ColumnManager columns = new ColumnManager(this);
+	private NBTData data;
 
 	private boolean physics = OpenClassic.getGame().getConfig().getBoolean("physics.enabled", true);
 	private TripleIntHashMap<Integer> physicsQueue = new TripleIntHashMap<Integer>();
@@ -70,37 +75,63 @@ public abstract class ClassicLevel implements Level {
 		}
     });
 	
-	private NBTData data;
+	public ClassicLevel(String name) {
+		this(name, null);
+	}
 	
-	public ClassicLevel() {
-        this.executor.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                try {
-                    physics();
-                } catch (Exception e) {
-                    OpenClassic.getLogger().severe("Error while ticking physics: " + e);
-                    e.printStackTrace();
-                }
-            }
-        }, 0, 1000 / Constants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
+	public ClassicLevel(String name, LevelFormat format) {
+		this(name, format, false);
+	}
+	
+	public ClassicLevel(String name, boolean remote) {
+		this(name, null, remote);
+	}
+	
+	public ClassicLevel(String name, LevelFormat format, boolean remote) {
+		if(!remote) {
+			this.format = format != null ? format : new OpenClassicLevelFormat(new File(OpenClassic.getClient().getDirectory(), "levels/" + name));
+	        this.format.setLevel(this);
+			try {
+				this.format.loadData();
+			} catch (IOException e) {
+				OpenClassic.getLogger().severe("Failed to load data for level " + name + "!");
+				e.printStackTrace();
+			}
+        
+			this.executor.scheduleAtFixedRate(new Runnable() {
+	            public void run() {
+	                try {
+	                    physics();
+	                } catch (Exception e) {
+	                    OpenClassic.getLogger().severe("Error while ticking physics: " + e);
+	                    e.printStackTrace();
+	                }
+	            }
+	        }, 0, 1000 / Constants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	public ClassicLevel(LevelInfo info) {
 		this.name = info.getName();
 		this.author = "";
 		this.creationTime = System.currentTimeMillis();
-
-		this.spawn = info.getSpawn();
+		this.generator = info.getGenerator();
+		this.seed = new Random().nextLong();
+		
+		this.spawn = info.getSpawn() != null ? info.getSpawn() : info.getGenerator().findSpawn(this);
 		if(this.spawn != null) this.spawn.setLevel(this);
-
-		this.width = info.getWidth();
-		this.height = info.getHeight();
-		this.depth = info.getDepth();
-		this.waterLevel = (short) (this.height / 2);
-		this.blocks = new byte[this.width * this.depth * this.height];
+		
+		this.format = new OpenClassicLevelFormat(new File(OpenClassic.getClient().getDirectory(), "levels/" + this.name));
+        this.format.setLevel(this);
+		try {
+			this.format.saveData();
+		} catch (IOException e) {
+			OpenClassic.getLogger().severe("Failed to save data for level " + this.name + "!");
+			e.printStackTrace();
+		}
 		
 		this.data = new NBTData(this.name);
-		this.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.name + ".nbt");
+		this.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.name + "/data.nbt");
         this.executor.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 try {
@@ -113,7 +144,9 @@ public abstract class ClassicLevel implements Level {
         }, 0, 1000 / Constants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
 	}
 	
-	public abstract void update();
+	public void update() {
+		this.columns.update();
+	}
 	
 	public abstract void render(float delta);
 	
@@ -196,26 +229,13 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public void updatePhysics(int x, int y, int z) {
-		this.updatePhysics(x, y, z, true);
-	}
-	
-	public void updatePhysics(int x, int y, int z, boolean around) {
 		if(!this.physics) return;
 		
 		synchronized(this.physicsQueue) {
 			this.physicsQueue.put(x, y, z, this.getBlockTypeAt(x, y, z).getTickDelay());
-			
-			if(around) {
-				//this.physicsQueue.add(x + 1, y, z);
-				//this.physicsQueue.add(x - 1, y, z);
-				//this.physicsQueue.add(x, y + 1, z);
-				//this.physicsQueue.add(x, y - 1, z);
-				//this.physicsQueue.add(x, y, z + 1);
-				//this.physicsQueue.add(x, y, z - 1);
-			}
 		}
 	}
-
+	
 	public String getName() {
 		return this.name;
 	}
@@ -258,44 +278,13 @@ public abstract class ClassicLevel implements Level {
 		OpenClassic.getGame().getEventManager().dispatch(new SpawnChangeEvent(this, old));
 	}
 
-	public short getWidth() {
-		return this.width;
-	}
-
-	public short getHeight() {
-		return this.height;
-	}
-
-	public short getDepth() {
-		return this.depth;
-	}
-
-	public short getWaterLevel() {
-		return this.waterLevel;
-	}
-
-	public byte[] getBlocks() {
-		return Arrays.copyOf(this.blocks, this.blocks.length);
-	}
-
-	public void setWorldData(short width, short height, short depth, byte[] blocks) {
-		this.width = width;
-		this.height = height;
-		this.depth = depth;
-		this.waterLevel = (short) (this.height / 2);
-
-		this.blocks = blocks;
-	}
-
 	public byte getBlockIdAt(Position pos) {
 		return this.getBlockIdAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
 	}
 	
 	public byte getBlockIdAt(int x, int y, int z) {
-		if (x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth)
-			return 0;
-		
-		return blocks[coordsToBlockIndex(x, y, z)];
+		ClassicColumn col = this.getColumnFromBlock(x, z);
+		return col.getBlockAt(x, y, z);
 	}
 	
 	public BlockType getBlockTypeAt(Position pos) {
@@ -303,16 +292,11 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public BlockType getBlockTypeAt(int x, int y, int z) {
-		if (x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth)
-			return VanillaBlock.AIR;
-		
-		return Blocks.fromId(this.getBlockIdAt(x, y, z));
+		int type = this.getBlockIdAt(x, y, z);
+		return Blocks.fromId(type >= 0 ? type : 0);
 	}
 	
 	public Block getBlockAt(Position pos) {
-		if (pos.getBlockX() < 0 || pos.getBlockY() < 0 || pos.getBlockZ() < 0 || pos.getBlockX() >= this.width || pos.getBlockY() >= this.height || pos.getBlockZ() >= this.depth)
-			return null;
-		
 		return new Block(pos);
 	}
 	
@@ -333,17 +317,10 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
-		if (x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth)
-			return false;
-		
-		if(!this.generating && type == VanillaBlock.AIR.getId() && (x == 0 || x == this.getWidth() - 1 || z == 0 || z == this.getDepth() - 1) && y <= this.getWaterLevel() - 1 && y > this.getWaterLevel() - 3) {
-			type = VanillaBlock.WATER.getId();
-		}
-		
-		blocks[coordsToBlockIndex(x, y, z)] = type;
+		this.getColumnFromBlock(x, z).setBlockAt(x, y, z, type);
 		this.sendToAll(new BlockChangeMessage((short) x, (short) y, (short) z, type));
 		
-		if(physics && !this.generating) {
+		if(physics) {
 			for(BlockFace face : BlockFace.values()) {
 				Block block = this.getBlockAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
 				if(block != null && block.getType() != null && block.getType().getPhysics() != null) {
@@ -373,7 +350,7 @@ public abstract class ClassicLevel implements Level {
 	
 	@Override
 	public int getHighestBlockY(int x, int z) {
-		return this.getHighestBlockY(x, z, this.getHeight());
+		return this.getHighestBlockY(x, z, Constants.COLUMN_HEIGHT);
 	}
 	
 	@Override
@@ -389,54 +366,6 @@ public abstract class ClassicLevel implements Level {
 	public boolean isHighest(int x, int y, int z) {
 		if(this.getHighestBlockY(x, z) <= y) return true;
 		return false;
-	}
-	
-	public boolean isGenerating() {
-		return this.generating;
-	}
-	
-	public void setGenerating(boolean generating) {
-		this.generating = generating;
-	}
-	
-	public int coordsToBlockIndex(int x, int y, int z) {
-		if (x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth)
-			return -1;
-
-		return x + (z * this.width) + (y * this.width * this.depth);
-	}
-
-	public Position blockIndexToCoords(int index) {
-		if (index < 0)
-			return null;
-
-		int y = index / this.width / this.depth;
-		index -= y * this.width * this.depth; // TODO: event system moving
-
-		int z = index / this.width;
-		int x = index - z * this.width;
-
-		return new Position(this, x, y, z);
-	}
-	
-	public static int coordsToBlockIndex(int x, int y, int z, int width, int height, int depth) {
-		if (x < 0 || y < 0 || z < 0 || x >= width || y >= height || z >= depth)
-			return -1;
-
-		return x + (z * width) + (y * width * depth);
-	}
-
-	public static Position blockIndexToCoords(int index, ServerLevel level, int width, int height, int depth) {
-		if (index < 0)
-			return null;
-
-		int y = index / width / depth;
-		index -= y * width * depth;
-
-		int z = index / width;
-		int x = index - z * width;
-
-		return new Position(level, x, y, z);
 	}
 	
 	public List<BlockEntity> getBlockEntities() {
@@ -517,7 +446,7 @@ public abstract class ClassicLevel implements Level {
 
 	@Override
 	public void delayTick(Position pos, byte id) {
-		this.updatePhysics(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), false);
+		this.updatePhysics(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
 	}
 	
 	public boolean growTree(int x, int y, int z) {
@@ -536,11 +465,7 @@ public abstract class ClassicLevel implements Level {
 
 			for (int currX = x - leaf; currX <= x + leaf && freespace; ++currX) {
 				for (int currZ = z - leaf; currZ <= z + leaf && freespace; ++currZ) {
-					if (currX >= 0 && currY >= 0 && currZ >= 0 && currX < this.width && currY < this.depth && currZ < this.height) {
-						if (this.getBlockTypeAt(currX, currY, currZ) != VanillaBlock.AIR) {
-							freespace = false;
-						}
-					} else {
+					if (this.getBlockTypeAt(currX, currY, currZ) != VanillaBlock.AIR) {
 						freespace = false;
 					}
 				}
@@ -549,7 +474,7 @@ public abstract class ClassicLevel implements Level {
 
 		if (!freespace) {
 			return false;
-		} else if (this.getBlockTypeAt(x, y, z) == VanillaBlock.GRASS && y < this.depth - logHeight - 1) {
+		} else if (this.getBlockTypeAt(x, y, z) == VanillaBlock.GRASS && y < Constants.COLUMN_HEIGHT - logHeight - 1) {
 			this.setBlockAt(x, y - 1, z, VanillaBlock.DIRT);
 			for (int count = y - 3 + logHeight; count <= y + logHeight; ++count) {
 				int var8 = count - (y + logHeight);
@@ -609,6 +534,59 @@ public abstract class ClassicLevel implements Level {
 	@Override
 	public void setCloudColor(int color) {
 		this.cloudColor = color;
+	}
+	
+	public ClassicColumn getColumn(int x, int z) {
+		return this.columns.getColumn(x, z);
+	}
+	
+	public ClassicColumn getColumn(int x, int z, boolean load) {
+		return this.columns.getColumn(x, z);
+	}
+	
+	public ClassicColumn getColumnFromBlock(int x, int z) {
+		return this.getColumn(x >> 4, z >> 4);
+	}
+	
+	public boolean isColumnLoaded(int x, int z) {
+		return this.columns.isColumnLoaded(x, z);
+	}
+
+	public List<ClassicColumn> getColumns() {
+		return this.columns.getAll();
+	}
+	
+	public LevelFormat getFormat() {
+		return this.format;
+	}
+	
+	public Generator getGenerator() {
+		return this.generator;
+	}
+	
+	public void setGenerator(Generator gen) {
+		this.generator = gen;
+	}
+	
+	public long getSeed() {
+		return this.seed;
+	}
+	
+	public void setSeed(long seed) {
+		this.seed = seed;
+	}
+	
+	public void save() {
+		try {
+			this.format.saveData();
+		} catch (IOException e) {
+			OpenClassic.getLogger().severe("Failed to save data for level " + this.name + "!");
+			e.printStackTrace();
+		}
+		
+		for(ClassicColumn column : this.columns.getAll()) {
+			column.save();
+		}
 	}
 	
 }

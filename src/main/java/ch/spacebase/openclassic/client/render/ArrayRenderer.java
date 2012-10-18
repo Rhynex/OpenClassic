@@ -12,6 +12,9 @@ public class ArrayRenderer {
 	private static int vertices = 0;
 	private static float u;
 	private static float v;
+	private static float nx;
+	private static float ny;
+	private static float nz;
 	private static float r;
 	private static float g;
 	private static float b;
@@ -19,6 +22,7 @@ public class ArrayRenderer {
 	private static boolean colors = false;
 	private static boolean textures = false;
 	private static boolean alpha = false;
+	private static boolean normal = false;
 	private static int vertexSize = 3;
 	private static int length = 0;
 
@@ -33,15 +37,19 @@ public class ArrayRenderer {
 			vertexBuffer.flip();
 			
 			if (textures && colors) {
-				if(alpha) {
+				if(normal) {
 					glInterleavedArrays(GL_T2F_C4F_N3F_V3F, 0, vertexBuffer);
 				} else {
 					glInterleavedArrays(GL_T2F_C3F_V3F, 0, vertexBuffer);
 				}
 			} else if (textures) {
-				glInterleavedArrays(GL_T2F_V3F, 0, vertexBuffer);
+				if(normal) {
+					glInterleavedArrays(GL_T2F_N3F_V3F, 0, vertexBuffer);
+				} else {
+					glInterleavedArrays(GL_T2F_V3F, 0, vertexBuffer);
+				}
 			} else if (colors) {
-				if(alpha) {
+				if(normal) {
 					glInterleavedArrays(GL_C4F_N3F_V3F, 0, vertexBuffer);
 				} else {
 					glInterleavedArrays(GL_C3F_V3F, 0, vertexBuffer);
@@ -57,6 +65,10 @@ public class ArrayRenderer {
 
 			if (colors) {
 				glEnableClientState(GL_COLOR_ARRAY);
+			}
+			
+			if(normal) {
+				glEnableClientState(GL_NORMAL_ARRAY);
 			}
 			
 			glDrawArrays(GL_QUADS, 0, vertices);
@@ -80,6 +92,7 @@ public class ArrayRenderer {
 		colors = false;
 		textures = false;
 		alpha = false;
+		normal = false;
 	}
 
 	public static void vertuv(float x, float y, float z, float u, float v) {
@@ -91,6 +104,21 @@ public class ArrayRenderer {
 		ArrayRenderer.u = u;
 		ArrayRenderer.v = v;
 		vert(x, y, z);
+	}
+	
+	public static void normal(float x, float y, float z) {
+		if(!normal) {
+			vertexSize += 4; // TODO: alpha :/
+		}
+		
+		normal = true;
+		if(!alpha) {
+			ArrayRenderer.a = 1 / 255f;
+		}
+		
+		ArrayRenderer.nx = x;
+		ArrayRenderer.ny = y;
+		ArrayRenderer.nz = z;
 	}
 
 	public static void vert(float x, float y, float z) {
@@ -105,11 +133,11 @@ public class ArrayRenderer {
 			vertexArray[length++] = b;
 		}
 		
-		if(alpha) {
+		if(normal) {
 			vertexArray[length++] = a;
-			vertexArray[length++] = 0;
-			vertexArray[length++] = 0;
-			vertexArray[length++] = 1;
+			vertexArray[length++] = nx;
+			vertexArray[length++] = ny;
+			vertexArray[length++] = nz;
 		}
 
 		vertexArray[length++] = x;
@@ -141,7 +169,8 @@ public class ArrayRenderer {
 	
 	public static void color(float r, float g, float b, float a) {
 		if(!alpha) {
-			vertexSize += 4;
+			alpha = true;
+			normal(0, 0, 1);
 		}
 		
 		alpha = true;

@@ -92,7 +92,7 @@ public class HeldBlock {
 		if(this.block != null) {
 			glScalef(0.4f, 0.4f, 0.4f);
 			glTranslatef(-0.5f, -0.5f, -0.5f);
-			this.block.getModel().renderAll(0, 0, 0, brightness);
+			this.block.getModel().renderAll(this.block, 0, 0, 0, brightness);
 		}
 		
 		glEnable(GL_DEPTH_TEST);

@@ -1,30 +1,20 @@
 package ch.spacebase.openclassic.server.player;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.zip.GZIPOutputStream;
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.component.BasicComponentHolder;
 import ch.spacebase.openclassic.api.component.type.NBTComponent;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelDataMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelFinalizeMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelInitializeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerSpawnMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session;
@@ -46,7 +36,7 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
 	
 	public boolean teleported = false;
-	private boolean sendingLevel = false;
+	//private boolean sendingLevel = false;
 	
 	public ServerPlayer(String name, Position pos, ServerSession session) {
 		this.name = name;
@@ -193,6 +183,7 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 	}
 	
 	public void sendLevel(final Level level) {
+		/* TODO: rework for inf worlds
 		final Player player = this;
 		OpenClassic.getGame().getScheduler().scheduleAsyncTask(OpenClassic.getGame(), new Runnable() {
 			@Override
@@ -272,7 +263,7 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 				
 				sendingLevel = false;
 			}
-		});
+		}); */
 	}
 
 	@Override

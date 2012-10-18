@@ -32,10 +32,19 @@ public class LoadLevelScreen extends GuiScreen {
 		this.attachWidget(new Button(3, this.getWidth() / 2 + 52, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
 
 		StringBuilder levels = new StringBuilder();
-		for(String file : (new File(OpenClassic.getClient().getDirectory(), "levels").list())) {
+		File dir = new File(OpenClassic.getClient().getDirectory(), "levels");
+		for(String file : dir.list()) {
+			File f = new File(dir, file);
+			if(f.isDirectory()) {
+				if(levels.length() != 0) levels.append("/");
+				levels.append(file);
+				continue;
+			}
+			
+			/* TODO: someday 
 			if(!file.endsWith(".map") && !file.endsWith(".mine") && !file.endsWith(".mclevel") && !file.endsWith(".oclvl") && !file.endsWith(".dat") && !file.endsWith(".lvl")) continue;
 			if(levels.length() != 0) levels.append("/");
-			levels.append(file.substring(0, file.indexOf(".")));
+			levels.append(file.substring(0, file.indexOf("."))); */
 		}
 
 		this.levels = levels.toString().split("/");
@@ -67,14 +76,14 @@ public class LoadLevelScreen extends GuiScreen {
 		if(this.delete) {
 			File file = null;
 			for(File f : (new File(OpenClassic.getClient().getDirectory(), "levels")).listFiles()) {
-				if(f != null && (f.getName().equals(button.getText() + ".mine") || f.getName().equals(button.getText() + ".map") || f.getName().equals(button.getText() + ".oclvl") || f.getName().equals(button.getText() + ".lvl") || f.getName().equals(button.getText() + ".dat") || f.getName().equals(button.getText() + ".mclevel"))) {
+				if(f != null && f.isDirectory() && f.getName().equals(button.getText())) { // TODO: someday ((f.isDirectory() && f.getName().equals(button.getText())) || f.getName().equals(button.getText() + ".mine") || f.getName().equals(button.getText() + ".map") || f.getName().equals(button.getText() + ".oclvl") || f.getName().equals(button.getText() + ".lvl") || f.getName().equals(button.getText() + ".dat") || f.getName().equals(button.getText() + ".mclevel"))) {
 					file = f;
 					break;
 				}
 			}
 
 			if(file == null) return;
-			OpenClassic.getClient().setCurrentScreen(new ConfirmDeleteScreen(this, file, new File(OpenClassic.getClient().getDirectory(), "levels/" + button.getText() + ".nbt")));
+			OpenClassic.getClient().setCurrentScreen(new ConfirmDeleteScreen(this, file));
 			this.delete = false;
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.load-level.title");
 		} else {

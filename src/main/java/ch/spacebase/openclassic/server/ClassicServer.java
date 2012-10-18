@@ -1,7 +1,6 @@
 package ch.spacebase.openclassic.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -41,12 +40,10 @@ import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.command.Console;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
-import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
 import ch.spacebase.openclassic.api.event.level.LevelUnloadEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
-import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.network.msg.PlayerDisconnectMessage;
 import ch.spacebase.openclassic.api.permissions.PermissionManager;
@@ -57,7 +54,6 @@ import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.game.ClassicGame;
-import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ClassicPipelineFactory;
@@ -155,7 +151,7 @@ public class ClassicServer extends ClassicGame implements Server {
 			}
 		});
 		
-		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
+		ChannelFactory factory = new NioServerSocketChannelFactory(this.executor, this.executor);
 		this.bootstrap.setFactory(factory);
 		
 		ChannelPipelineFactory pipelineFactory = new ClassicPipelineFactory();
@@ -178,8 +174,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.permManager.load();
 		
 		this.registerExecutor(null, new ServerCommands());
-		
-		this.registerGenerator("flat", new FlatLandGenerator());
+		this.registerGenerator(new FlatLandGenerator());
 		
 		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
 		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 12));
@@ -477,23 +472,8 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.getConfig().applyDefault("physics.grass", true);
 	}
 
-	public ServerLevel createLevel(LevelInfo info, Generator generator) {
+	public ServerLevel createLevel(LevelInfo info) {
 		ServerLevel level = new ServerLevel(info);
-		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
-		generator.generate(level, data);
-		level.setWorldData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-		
-		if(level.getSpawn() == null) {
-			level.setSpawn(generator.findSpawn(level));
-		}
-
-		try {
-			OpenClassicLevelFormat.save(level);
-		} catch (IOException e) {
-			OpenClassic.getLogger().severe("Failed to save newly created world!");
-			e.printStackTrace();
-		}
-		
 		this.levels.add(level);
 		this.getEventManager().dispatch(new LevelCreateEvent(level));
 		OpenClassic.getLogger().info("Level \"" + level.getName() + "\" was successfully created!");
@@ -505,30 +485,12 @@ public class ClassicServer extends ClassicGame implements Server {
 		return this.loadLevel(name, true);
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Level loadLevel(String name, boolean create) {
 		if(this.getLevel(name) != null) return this.getLevel(name);
-		
-		try {
-			Level level = OpenClassicLevelFormat.load(name, ServerLevel.class, create);
-			if(level == null) return null;
-			this.levels.add(level);
-			
-			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
-				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().levels;
-				model.add(model.size(), level.getName());
-				if(model.capacity() == model.size()) model.setSize(model.getSize() + 1);
-			}
-			
-			this.getEventManager().dispatch(new LevelLoadEvent(level));
-			this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.load-success"), name));
-			return level;
-		} catch (IOException e) {
-			OpenClassic.getLogger().severe(String.format(this.getTranslator().translate("level.load-fail"), name));
-			e.printStackTrace();
-		}
-		
-		return null;
+		ServerLevel level = new ServerLevel(name);
+		this.getEventManager().dispatch(new LevelLoadEvent(level));
+		this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.load-success"), name));
+		return level;
 	}
 	
 	public void unloadLevel(String name) {
@@ -552,7 +514,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				player.moveTo(this.getDefaultLevel().getSpawn());
 			}
 			
-			this.saveLevel(level);
+			level.save();
 			((ServerLevel) level).clearPhysics();
 			((ServerLevel) level).dispose();
 			this.levels.remove(level);
@@ -586,28 +548,19 @@ public class ClassicServer extends ClassicGame implements Server {
 	
 	public void saveLevels() {
 		for(Level level : this.levels) {
-			this.saveLevel(level);
+			level.save();
 		}
 	}
 	
+	@Deprecated
 	public void saveLevel(Level level) {
-		level.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.getName() + ".nbt");
-		
-		try {
-			if(this.getEventManager().dispatch(new LevelSaveEvent(level)).isCancelled()) {
-				return;
-			}
-			
-			OpenClassicLevelFormat.save(level);
-		} catch(IOException e) {
-			OpenClassic.getLogger().severe("Failed to save level " + level.getName() + "!");
-			e.printStackTrace();
-		}
+		level.save();
 	}
 	
+	@Deprecated
 	public void saveLevel(String name) {
 		if(this.getLevel(name) != null) {
-			this.saveLevel(this.getLevel(name));
+			this.getLevel(name).save();
 		}
 	}
 
