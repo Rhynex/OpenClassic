@@ -234,19 +234,6 @@ public class ClassicClient extends ClassicGame implements Client {
 		glCullFace(GL_BACK);
 		glEnable(GL_FOG);
 		
-		float ambientLight[] = new float[] { 0.2f, 0.2f, 0.2f, 1 };
-		float diffuseLight[] = new float[] { 0.8f, 0.8f, 0.8f, 1 };
-		float specularLight[] = new float[] { 0.5f, 0.5f, 0.5f, 1 };
-		float position[] = new float[] { -1.5f, 1, 0, 1 };
-		
-	    glLight(GL_LIGHT1, GL_AMBIENT, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(ambientLight).flip());
-	    glLight(GL_LIGHT1, GL_DIFFUSE, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(diffuseLight).flip());
-	    glLight(GL_LIGHT1, GL_SPECULAR, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(specularLight).flip());
-	    glLight(GL_LIGHT1, GL_POSITION, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(position).flip());
-
-	    glEnable(GL_COLOR_MATERIAL);
-	    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	    
 		ShaderManager.setup();
 		this.updateFog();
 	}
@@ -487,7 +474,13 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public void exitLevel(boolean save) {
 		if(this.mode == null) return;
-		if(save && this.getLevel() != null) this.getLevel().save();
+		if(this.getLevel() != null) {
+			((ClassicLevel) this.getLevel()).dispose();
+			if(save && this.mode instanceof Singleplayer) {
+				this.getLevel().save();
+			}
+		}
+		
 		this.setMode(null);
 	}
 

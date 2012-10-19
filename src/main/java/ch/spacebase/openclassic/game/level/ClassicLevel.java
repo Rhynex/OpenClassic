@@ -36,7 +36,7 @@ import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.api.util.map.TripleIntHashMap;
+import ch.spacebase.openclassic.api.util.storage.TripleIntHashMap;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.game.level.column.ClassicColumn;
 import ch.spacebase.openclassic.game.level.column.ColumnManager;
@@ -62,7 +62,7 @@ public abstract class ClassicLevel implements Level {
 	private LevelFormat format; // TODO: changeable
 	private ColumnManager columns = new ColumnManager(this);
 	private NBTData data;
-
+	
 	private boolean physics = OpenClassic.getGame().getConfig().getBoolean("physics.enabled", true);
 	private TripleIntHashMap<Integer> physicsQueue = new TripleIntHashMap<Integer>();
 	protected final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -541,6 +541,7 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public ClassicColumn getColumn(int x, int z, boolean load) {
+		if(!load && !this.isColumnLoaded(x, z)) return null;
 		return this.columns.getColumn(x, z);
 	}
 	
@@ -587,6 +588,21 @@ public abstract class ClassicLevel implements Level {
 		for(ClassicColumn column : this.columns.getAll()) {
 			column.save();
 		}
+	}
+	
+	public int getLightLevel(int x, int y, int z) {
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
+		return column != null ? column.getLightLevel(x, y, z) : 0;
+	}
+	
+	public int getLightLevel(int x, int y, int z, LightType type) {
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
+		return column != null ? column.getLightLevel(x, y, z, type) : 0;
+	}
+	
+	public float getBrightness(int x, int y, int z) {
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
+		return column != null ? column.getBrightness(x, y, z) : 0;
 	}
 	
 }

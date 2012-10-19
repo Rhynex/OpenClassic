@@ -26,7 +26,7 @@ public final class ErrorScreen extends GuiScreen {
 
 	public void onButtonClick(Button button) {
 		if(button.getId() == 0) {
-			((ClassicClient) OpenClassic.getClient()).setMode(null);
+			((ClassicClient) OpenClassic.getClient()).exitLevel();
 		}
 	}
 

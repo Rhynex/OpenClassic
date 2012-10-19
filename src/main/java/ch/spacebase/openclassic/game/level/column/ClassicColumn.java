@@ -11,6 +11,7 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
+import ch.spacebase.openclassic.game.level.LightType;
 
 public class ClassicColumn implements Column {
 
@@ -49,16 +50,35 @@ public class ClassicColumn implements Column {
 	}
 	
 	public byte getBlockAt(int x, int y, int z) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
+				return this.level.getBlockIdAt(x, y, z);
+			}
+
+			return 0;
+		}
+		
 		if(this.getChunkFromBlock(y) == null) return 0;
 		return this.getChunkFromBlock(y).getBlockAt(x, y, z);
 	}
 	
 	public void setBlockAt(int x, int y, int z, byte id) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
+				this.level.setBlockIdAt(x, y, z, id);
+			}
+			
+			return;
+		}
+		
 		if(this.getChunkFromBlock(y) == null) return;
 		this.getChunkFromBlock(y).setBlockAt(x, y, z, id);
 	}
 	
 	public int getHighestOpaque(int x, int z) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
+			return -1;
+		
 		for(int y = Constants.COLUMN_HEIGHT - 1; y >= 0; y--) {
 			BlockType type = this.getBlockAt(x, y, z) >= 0 ? Blocks.fromId(this.getBlockAt(x, y, z)) : null;
 			if(type != null && type.isOpaque()) return y;
@@ -106,6 +126,33 @@ public class ClassicColumn implements Column {
 	@Override
 	public String toString() {
 		return "Column{x=" + this.x + ",z=" + this.z + "}";
+	}
+
+	public float getBrightness(int x, int y, int z) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
+			return this.level.getBrightness(x, y, z);
+		
+		ClassicChunk chunk = this.getChunkFromBlock(y);
+		if(chunk == null) return 1;
+		return chunk.getBrightness(x, y, z);
+	}
+
+	public int getLightLevel(int x, int y, int z) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
+			return this.level.getLightLevel(x, y, z);
+		
+		ClassicChunk chunk = this.getChunkFromBlock(y);
+		if(chunk == null) return 15;
+		return chunk.getLightLevel(x, y, z);
+	}
+	
+	public int getLightLevel(int x, int y, int z, LightType type) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
+			return this.level.getLightLevel(x, y, z, type);
+		
+		ClassicChunk chunk = this.getChunkFromBlock(y);
+		if(chunk == null) return type == LightType.SKY ? 15 : 0;
+		return chunk.getLightLevel(x, y, z, type);
 	}
 	
 }

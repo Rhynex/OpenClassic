@@ -29,7 +29,7 @@ public final class MenuScreen extends GuiScreen {
 				}
 			}
 			
-			((ClassicClient) OpenClassic.getClient()).setMode(null);
+			((ClassicClient) OpenClassic.getClient()).exitLevel();
 		}
 		
 		if(button.getId() == 2) {

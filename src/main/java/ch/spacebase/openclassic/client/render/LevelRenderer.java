@@ -140,8 +140,6 @@ public class LevelRenderer {
         this.renderSky(player.getPosition().getX(), Math.max(Constants.COLUMN_HEIGHT + 27, player.getPosition().getY() + Constants.COLUMN_HEIGHT), player.getPosition().getZ());
 		glEnable(GL_TEXTURE_2D);
 
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT1);
 		for(ClassicColumn column : this.level.getColumns()) {
 			for(ClassicChunk chunk : column.getChunks()) {
 				if(!chunk.isEmpty() && chunk.getList() > 0 && Frustrum.isBoxInFrustrum(chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getWorldX() + Constants.CHUNK_WIDTH, chunk.getWorldY() + Constants.CHUNK_HEIGHT, chunk.getWorldZ() + Constants.CHUNK_DEPTH)) {
@@ -149,9 +147,6 @@ public class LevelRenderer {
 				}
 			}
 		}
-		
-		glDisable(GL_LIGHTING);
-		glDisable(GL_LIGHT1);
 	}
 	
 }

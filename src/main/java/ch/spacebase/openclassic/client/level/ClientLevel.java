@@ -53,10 +53,6 @@ public class ClientLevel extends ClassicLevel implements Level {
 		return this.getColumnFromBlock(x, z).getHighestOpaque(x, z);
 	}
 	
-	public float getBrightness(int x, int y, int z) {
-		return 1; // TODO: rework lighting
-	}
-	
 	@Override
 	public void update() {
 		super.update();

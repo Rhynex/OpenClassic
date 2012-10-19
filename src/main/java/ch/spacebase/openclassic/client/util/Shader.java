@@ -12,7 +12,6 @@ import org.lwjgl.opengl.ARBVertexShader;
 
 import ch.spacebase.openclassic.client.ClassicClient;
 
-
 public class Shader {
 	
 	private int programId;
@@ -66,6 +65,18 @@ public class Shader {
 		ARBShaderObjects.glDeleteObjectARB(this.frag);
 		ARBShaderObjects.glDeleteObjectARB(this.programId);
 	}
+	
+	public void setUniform(String name, int i) {
+		int loc = ARBShaderObjects.glGetUniformLocationARB(this.programId, name);
+		ARBShaderObjects.glUniform1iARB(loc, i);
+	}
+	
+	public void setUniform(String name, float f) {
+		int loc = ARBShaderObjects.glGetUniformLocationARB(this.programId, name);
+		ARBShaderObjects.glUniform1fARB(loc, f);
+	}
+	
+	// TODO: more
 	
 	public String getFile() {
 		return this.file;

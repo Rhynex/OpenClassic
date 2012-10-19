@@ -103,7 +103,10 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		CompoundTag root = (CompoundTag) in.readTag();
 		for(ClassicChunk chunk : column.getChunks()) {
 			CompoundTag tag = (CompoundTag) root.get(String.valueOf(chunk.getY()));
-			chunk.setBlocks(((ByteArrayTag) tag.get("Blocks")).getValue());
+			chunk.setBlocks(((ByteArrayTag) tag.get("Blocks")).getValue(), false);
+			byte skylight[] = ((ByteArrayTag) tag.get("SkyLight")).getValue();
+			byte blocklight[] = ((ByteArrayTag) tag.get("BlockLight")).getValue();
+			chunk.setLight(skylight, blocklight);
 		}
 		
 		in.close();
@@ -126,6 +129,8 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		for(ClassicChunk chunk : column.getChunks()) {
 			TagBuilder build = new TagBuilder(String.valueOf(chunk.getY()));
 			build.append("Blocks", chunk.getBlocks());
+			build.append("SkyLight", chunk.getSkyLight());
+			build.append("BlockLight", chunk.getBlockLight());
 			root.append(build.toCompoundTag());
 		}
 		

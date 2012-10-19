@@ -8,7 +8,8 @@ import java.util.List;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.api.util.map.DoubleIntHashMap;
+import ch.spacebase.openclassic.api.util.storage.DoubleIntHashMap;
+import ch.spacebase.openclassic.api.util.storage.TripleIntByteArray;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
@@ -46,7 +47,7 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 		Player player = OpenClassic.getClient().getPlayer();
 		int dist = getChunkDistance();
 		for(ClassicColumn column : this.loaded.values()) {
-			double coldist = distanceSquared(column.getX(), column.getZ(), player.getPosition().getBlockX() >> 4, player.getPosition().getBlockZ() >> 4);
+			int coldist = distanceSquared(column.getX(), column.getZ(), player.getPosition().getBlockX() >> 4, player.getPosition().getBlockZ() >> 4);
 			if(coldist > dist) {
 				this.unloadColumn(column.getX(), column.getZ());
 				continue;
@@ -62,7 +63,7 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 			if(count > 5) break;
 			for(int z = (player.getPosition().getBlockZ() >> 4) - loaddist; z < (player.getPosition().getBlockZ() >> 4) + loaddist; z++) {
 				if(count > 5) break;
-				double coldist = distanceSquared(x, z, player.getPosition().getBlockX() >> 4, player.getPosition().getBlockZ() >> 4);
+				int coldist = distanceSquared(x, z, player.getPosition().getBlockX() >> 4, player.getPosition().getBlockZ() >> 4);
 				if(coldist <= dist && !this.isColumnLoaded(x, z)) {
 					this.loadColumn(x, z);
 					count++;
@@ -88,23 +89,27 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 		}
 		
 		ClassicColumn column = null;
-		try {
-			column = this.level.getFormat().load(x, z);
-		} catch(IOException e) {
-			OpenClassic.getLogger().severe("Failed to load column (" + x + ", " + z + ")");
-			e.printStackTrace();
+		if(this.level.getFormat().exists(x, z)) {
+			try {
+				column = this.level.getFormat().load(x, z);
+			} catch(IOException e) {
+				OpenClassic.getLogger().severe("Failed to load column (" + x + ", " + z + ")");
+				e.printStackTrace();
+			}
 		}
 		
 		if(column == null) {
-			System.out.println("Generating (" + x + ", " + z + ")");
+			//System.out.println("Generating (" + x + ", " + z + ")");
 			column = new ClassicColumn(this.level, x, z);
-			for(ClassicChunk chunk : column.getChunks()) {
-				byte blocks[] = new byte[Constants.CHUNK_WIDTH * Constants.CHUNK_HEIGHT * Constants.CHUNK_DEPTH];
+			List<ClassicChunk> chunks = column.getChunks();
+			for(int count = chunks.size() - 1; count >= 0; count--) {
+				ClassicChunk chunk = chunks.get(count);
+				TripleIntByteArray blocks = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
 				this.level.getGenerator().generate(this.level.getSeed(), chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), blocks);
-				chunk.setBlocks(blocks);
+				chunk.setBlocks(blocks.get(), true);
 			}
 			
-			column.save();
+			//column.save();
 		}
 		
 		if(this.level instanceof ClientLevel) {
@@ -152,8 +157,8 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 		}
 	}
 	
-    private static double distanceSquared(float x1, float z1, float x2, float z2) {
-        return Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2);
+    private static int distanceSquared(float x1, float z1, float x2, float z2) {
+        return (int) (Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
     }
 	
 }

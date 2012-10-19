@@ -358,7 +358,7 @@ public class ClientRenderHelper extends RenderHelper {
 		if(brightness >= 0) {
 			ArrayRenderer.color(brightness, brightness, brightness);
 		}
-
+		
 		float y1 = quad.getTexture().getY1();
 		float y2 = quad.getTexture().getY2();
 

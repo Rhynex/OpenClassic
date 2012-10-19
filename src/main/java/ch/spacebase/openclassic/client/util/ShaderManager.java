@@ -8,6 +8,7 @@ public class ShaderManager {
 	private static final Map<String, Shader> shaders = new HashMap<String, Shader>();
 	
 	public static void setup() {
+		register("light", "/shaders/light");
 		// TODO: Register shaders when had.
 	}
 	
@@ -18,12 +19,8 @@ public class ShaderManager {
 		shaders.put(name, shad);
 	}
 	
-	public static void use(String name) {
-		shaders.get(name).begin();
-	}
-	
-	public static void end(String name) {
-		shaders.get(name).end();
+	public static Shader get(String name) {
+		return shaders.get(name);
 	}
 	
 	public static void cleanup() {
