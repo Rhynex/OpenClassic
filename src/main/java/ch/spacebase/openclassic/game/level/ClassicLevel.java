@@ -224,6 +224,16 @@ public abstract class ClassicLevel implements Level {
 		}
 	}
 	
+	public boolean isLit(int x, int y, int z) {
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
+		return column != null ? column.isLit(x, y, z) : false;
+	}
+	
+	public float getBrightness(int x, int y, int z) {
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
+		return column != null ? column.getBrightness(x, y, z) : 0.6f;
+	}
+	
 	public void dispose() {
 		this.executor.shutdown();
 	}
@@ -588,21 +598,6 @@ public abstract class ClassicLevel implements Level {
 		for(ClassicColumn column : this.columns.getAll()) {
 			column.save();
 		}
-	}
-	
-	public int getLightLevel(int x, int y, int z) {
-		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
-		return column != null ? column.getLightLevel(x, y, z) : 0;
-	}
-	
-	public int getLightLevel(int x, int y, int z, LightType type) {
-		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
-		return column != null ? column.getLightLevel(x, y, z, type) : 0;
-	}
-	
-	public float getBrightness(int x, int y, int z) {
-		ClassicColumn column = this.getColumn(x >> 4, z >> 4, false);
-		return column != null ? column.getBrightness(x, y, z) : 0;
 	}
 	
 }

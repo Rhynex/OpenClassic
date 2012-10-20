@@ -8,7 +8,6 @@ public class ShaderManager {
 	private static final Map<String, Shader> shaders = new HashMap<String, Shader>();
 	
 	public static void setup() {
-		register("light", "/shaders/light");
 		// TODO: Register shaders when had.
 	}
 	

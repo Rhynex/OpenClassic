@@ -43,15 +43,6 @@ public class ClientLevel extends ClassicLevel implements Level {
 		this.tracer = new Tracer(this);
 		this.renderer = new LevelRenderer(this);
 	}
-
-	@Override
-	public boolean isLit(int x, int y, int z) {
-		return true; // TODO: rework lighting
-	}
-	
-	public int getHighestOpaque(int x, int z) {
-		return this.getColumnFromBlock(x, z).getHighestOpaque(x, z);
-	}
 	
 	@Override
 	public void update() {

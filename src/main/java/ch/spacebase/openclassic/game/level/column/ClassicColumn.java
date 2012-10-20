@@ -10,8 +10,8 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.api.util.storage.DoubleIntArray;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
-import ch.spacebase.openclassic.game.level.LightType;
 
 public class ClassicColumn implements Column {
 
@@ -19,6 +19,7 @@ public class ClassicColumn implements Column {
 	private int x;
 	private int z;
 	private ClassicChunk chunks[] = new ClassicChunk[Constants.COLUMN_HEIGHT >> 4];
+	private int heightmap[] = new int[Constants.CHUNK_WIDTH * Constants.CHUNK_DEPTH];
 	
 	public ClassicColumn(ClassicLevel level, int x, int z) {
 		this.level = level;
@@ -100,6 +101,32 @@ public class ClassicColumn implements Column {
 		return new ArrayList<ClassicChunk>(Arrays.asList(this.chunks));
 	}
 	
+	public boolean isLit(int x, int y, int z) {
+		return this.heightmap[(x - this.getWorldX()) + (z - this.getWorldZ()) * Constants.CHUNK_WIDTH] < y;
+	}
+	
+	public float getBrightness(int x, int y, int z) {
+		BlockType type = Blocks.fromId(this.getBlockAt(x, y, z));
+		return type.getBrightness() > 0 ? type.getBrightness() : this.isLit(x, y, z) ? 1 : 0.6f;
+	}
+	
+	public void updateHeightMap(int x1, int z1, int x2, int z2) {
+		/* TODO: make better
+		for(int x = x1; x <= x2; x++) {
+			for(int z = z1; z <= z2; z++) {
+				if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+					ClassicColumn column = this.level.getColumn(x >> 4, z >> 4, false);
+					if(column != null) column.updateHeightMap(x, z, x, z);
+					continue;
+				}
+				
+				int current = this.getHighestOpaque(x, z);
+				if(current < 0) current = 0;
+				this.heightmap[(x - this.getWorldX()) + (z - this.getWorldZ()) * Constants.CHUNK_WIDTH] = current;
+			}
+		} */
+	}
+	
 	public void save() {
 		try {
 			this.level.getFormat().save(this);
@@ -126,33 +153,6 @@ public class ClassicColumn implements Column {
 	@Override
 	public String toString() {
 		return "Column{x=" + this.x + ",z=" + this.z + "}";
-	}
-
-	public float getBrightness(int x, int y, int z) {
-		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
-			return this.level.getBrightness(x, y, z);
-		
-		ClassicChunk chunk = this.getChunkFromBlock(y);
-		if(chunk == null) return 1;
-		return chunk.getBrightness(x, y, z);
-	}
-
-	public int getLightLevel(int x, int y, int z) {
-		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
-			return this.level.getLightLevel(x, y, z);
-		
-		ClassicChunk chunk = this.getChunkFromBlock(y);
-		if(chunk == null) return 15;
-		return chunk.getLightLevel(x, y, z);
-	}
-	
-	public int getLightLevel(int x, int y, int z, LightType type) {
-		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
-			return this.level.getLightLevel(x, y, z, type);
-		
-		ClassicChunk chunk = this.getChunkFromBlock(y);
-		if(chunk == null) return type == LightType.SKY ? 15 : 0;
-		return chunk.getLightLevel(x, y, z, type);
 	}
 	
 }
