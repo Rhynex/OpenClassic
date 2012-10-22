@@ -21,3 +21,9 @@ The source has a maven script for required dependencies, so just run 'mvn clean 
 ---------
 
 OpenClassic is licensed under the <b>[MIT license](http://www.opensource.org/licenses/mit-license.html)</b>. Feel free to fork it or use it as a resource while developing.
+
+
+<b>Credits</b>
+---------
+
+OpenClassic uses a modified version of the amazing Good Morning Craft texture pack! Check it out <b>[here](http://www.minecraftforum.net/topic/262628-16x131-good-morning-craft-v40-010812/)</b>!

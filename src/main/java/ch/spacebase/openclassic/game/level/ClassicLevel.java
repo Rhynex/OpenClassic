@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Block;
@@ -38,6 +40,7 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.storage.TripleIntHashMap;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.game.level.column.ClassicColumn;
 import ch.spacebase.openclassic.game.level.column.ColumnManager;
 import ch.spacebase.openclassic.game.level.io.LevelFormat;
@@ -63,6 +66,7 @@ public abstract class ClassicLevel implements Level {
 	private ColumnManager columns = new ColumnManager(this);
 	private NBTData data;
 	
+	private List<Explosion> explosions = new CopyOnWriteArrayList<Explosion>();
 	private boolean physics = OpenClassic.getGame().getConfig().getBoolean("physics.enabled", true);
 	private TripleIntHashMap<Integer> physicsQueue = new TripleIntHashMap<Integer>();
 	protected final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -146,6 +150,16 @@ public abstract class ClassicLevel implements Level {
 	
 	public void update() {
 		this.columns.update();
+		List<Explosion> remove = new ArrayList<Explosion>();
+		for(Explosion e : this.explosions) {
+			e.decrementTime();
+			if(e.getTime() <= 0) {
+				this.explode(e.getX(), e.getY(), e.getZ(), e.getPower());
+				remove.add(e);
+			}
+		}
+		
+		this.explosions.removeAll(remove);
 	}
 	
 	public abstract void render(float delta);
@@ -597,6 +611,52 @@ public abstract class ClassicLevel implements Level {
 		
 		for(ClassicColumn column : this.columns.getAll()) {
 			column.save();
+		}
+	}
+	
+	public void explode(int x, int y, int z, int power) {
+		if(OpenClassic.getGame() instanceof Client) {
+			OpenClassic.getClient().getAudioManager().playSound("generic.explode", x, y, z, 1, 1);
+		}
+		
+		this.setBlockAt(x, y, z, VanillaBlock.AIR);
+		int x1 = x - power - 1;
+		int x2 = x + power + 1;
+		int y1 = y - power - 1;
+		int y2 = y + power + 1;
+		int z1 = z - power - 1;
+		int z2 = z + power + 1;
+
+		for(int xx = x1; xx < x2; xx++) {
+			for(int yy = y2 - 1; yy >= y1; yy--) {
+				for(int zz = z1; zz < z2; zz++) {
+					float distx = xx + 0.5F - x;
+					float disty = yy + 0.5F - y;
+					float distz = zz + 0.5F - z;
+					BlockType block = this.getBlockTypeAt(xx, yy, zz);
+					if(block != null && block != VanillaBlock.AIR && distx * distx + disty * disty + distz * distz < power * power) {
+						if(block == VanillaBlock.TNT) {
+							boolean found = false;
+							for(Explosion e : this.explosions) {
+								if(e.getX() == xx && e.getY() == yy && e.getZ() == zz) {
+									found = true;
+								}
+							}
+							
+							if(!found) {
+								this.explosions.add(new Explosion(xx, yy, zz, 4));
+							}
+							
+							continue;
+						}
+						
+						this.setBlockAt(xx, yy, zz, VanillaBlock.AIR);
+						if(this instanceof ClientLevel && rand.nextInt(50) < 10) {
+							ClientRenderHelper.getHelper().spawnDestructionParticles(block, (ClientLevel) this, new Position(this, xx, yy, zz));
+						}
+					}
+				}
+			}
 		}
 	}
 	

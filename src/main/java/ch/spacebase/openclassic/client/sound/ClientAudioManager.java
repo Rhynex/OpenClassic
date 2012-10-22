@@ -62,6 +62,8 @@ public class ClientAudioManager implements AudioManager {
 		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass2.ogg"), true);
 		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass3.ogg"), true);
 		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass4.ogg"), true);
+		
+		this.registerSound("generic.explode", ClassicClient.class.getResource("/sounds/generic/explode.ogg"), true);
 	}
 	
 	public void update(ClientPlayer player) {

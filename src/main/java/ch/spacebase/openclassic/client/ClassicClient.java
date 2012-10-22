@@ -213,7 +213,7 @@ public class ClassicClient extends ClassicGame implements Client {
 				System.out.println("Failed to load icon!");
 				e.printStackTrace();
 			}
-
+			
 			Display.create();
 			Mouse.create();
 			Keyboard.create();

@@ -148,8 +148,13 @@ public abstract class Mode {
 			}
 		}
 		
-		if(Mouse.isButtonDown(2) && this.select.isValid()) {
+		if(Mouse.isButtonDown(2) && this.select.isValid()) { // TODO: make this interact button
 			byte block = this.select.getPosition().getLevel().getBlockIdAt(this.select.getPosition());
+			if(block == VanillaBlock.TNT.getId()) { // TODO: Move to physics - BlockPhysics.onInteracted?
+				this.getLevel().explode(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), 4);
+				return;
+			}
+			
 			if(block == VanillaBlock.DOUBLE_SLAB.getId()) block = VanillaBlock.SLAB.getId();
 			if(block == VanillaBlock.GRASS.getId()) block = VanillaBlock.DIRT.getId();
 			if(this.player.getQuickBar().contains(block)) {

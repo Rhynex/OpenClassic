@@ -10,7 +10,6 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.api.util.storage.DoubleIntArray;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class ClassicColumn implements Column {

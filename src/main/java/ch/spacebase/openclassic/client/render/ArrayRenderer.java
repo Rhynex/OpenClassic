@@ -6,7 +6,7 @@ import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
 
 public class ArrayRenderer {
-	
+
 	private static FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(524288);
 	private static int vertices = 0;
 	private static float u;
