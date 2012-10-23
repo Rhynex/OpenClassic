@@ -643,7 +643,7 @@ public abstract class ClassicLevel implements Level {
 					float disty = yy + 0.5F - y;
 					float distz = zz + 0.5F - z;
 					BlockType block = this.getBlockTypeAt(xx, yy, zz);
-					if(block != null && block != VanillaBlock.AIR && distx * distx + disty * disty + distz * distz < power * power) {
+					if(block != null && block != VanillaBlock.AIR && block != VanillaBlock.BEDROCK && block != VanillaBlock.OBSIDIAN && distx * distx + disty * disty + distz * distz < power * power) {
 						if(block == VanillaBlock.TNT) {
 							boolean found = false;
 							for(Explosion e : this.explosions) {
