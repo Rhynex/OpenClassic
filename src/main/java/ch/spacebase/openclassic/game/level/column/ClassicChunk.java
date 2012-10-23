@@ -10,6 +10,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.model.EmptyModel;
 import ch.spacebase.openclassic.api.level.column.Chunk;
+import ch.spacebase.openclassic.api.level.generator.biome.Biome;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.storage.TripleIntByteArray;
 
@@ -121,6 +122,11 @@ public class ClassicChunk implements Chunk {
 	
 	public void update() {
 		// TODO
+	}
+	
+	@Override
+	public Biome getBiome(int x, int y, int z) {
+		return this.getColumn().getLevel().getBiome(x, y, z);
 	}
 	
 	@Override

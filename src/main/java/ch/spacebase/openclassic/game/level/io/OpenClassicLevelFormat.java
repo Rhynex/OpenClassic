@@ -7,12 +7,15 @@ import java.io.IOException;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
+import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
 import ch.spacebase.openclassic.game.level.column.ClassicChunk;
 import ch.spacebase.openclassic.game.level.column.ClassicColumn;
 import ch.spacebase.opennbt.TagBuilder;
 import ch.spacebase.opennbt.stream.NBTInputStream;
 import ch.spacebase.opennbt.stream.NBTOutputStream;
 import ch.spacebase.opennbt.tag.ByteArrayTag;
+import ch.spacebase.opennbt.tag.ByteTag;
 import ch.spacebase.opennbt.tag.CompoundTag;
 import ch.spacebase.opennbt.tag.FloatTag;
 import ch.spacebase.opennbt.tag.LongTag;
@@ -91,6 +94,7 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		out.close();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public ClassicColumn load(int x, int z) throws IOException {
 		File file = this.getChunkFile(x, z);
@@ -104,6 +108,26 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		for(ClassicChunk chunk : column.getChunks()) {
 			CompoundTag tag = (CompoundTag) root.get(String.valueOf(chunk.getY()));
 			chunk.setBlocks(((ByteArrayTag) tag.get("Blocks")).getValue(), false);
+		}
+		
+		if(((ByteTag) root.get("HasBiomes")).getValue() == 1) {
+			CompoundTag biomes = (CompoundTag) root.get("Biomes");
+			String manager = ((StringTag) biomes.get("Manager")).getValue();
+			byte biomeData[] = ((ByteArrayTag) biomes.get("Data")).getValue();
+			
+			try {
+				Class<? extends BiomeManager> clazz = (Class<? extends BiomeManager>) Class.forName(manager);
+				BiomeManager man = clazz.getConstructor(int.class, int.class).newInstance(column.getX(), column.getZ());
+				man.deserialize(biomeData);
+				column.setBiomeManager(man);
+			} catch(Exception e) {
+				OpenClassic.getLogger().warning("Failed to load biomes!");
+				e.printStackTrace();
+				if(this.getLevel().getGenerator() instanceof BiomeGenerator) {
+					BiomeGenerator generator = (BiomeGenerator) this.getLevel().getGenerator();
+					column.setBiomeManager(generator.generateBiomes(this.getLevel(), x, z));
+				}
+			}
 		}
 		
 		in.close();
@@ -127,6 +151,15 @@ public class OpenClassicLevelFormat extends LevelFormat {
 			TagBuilder build = new TagBuilder(String.valueOf(chunk.getY()));
 			build.append("Blocks", chunk.getBlocks());
 			root.append(build.toCompoundTag());
+		}
+		
+		if(column.getBiomeManager() != null) {
+			root.append("HasBiomes", (byte) 1);
+			TagBuilder biomes = new TagBuilder("Biomes");
+			biomes.append("Manager", column.getBiomeManager().getClass().getName());
+			biomes.append("Data", column.getBiomeManager().serialize());
+		} else {
+			root.append("HasBiomes", (byte) 0);
 		}
 		
 		out.writeTag(root.toCompoundTag());

@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL11.*;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
-import ch.spacebase.openclassic.client.render.ArrayRenderer;
+import ch.spacebase.openclassic.client.render.Renderer;
 import ch.spacebase.openclassic.client.util.Projection;
 
 public class ClientProgressBar implements ProgressBar {
@@ -69,18 +69,18 @@ public class ClientProgressBar implements ProgressBar {
 				int x = width / 2 - 50;
 				int y = height / 2 + 16;
 				glDisable(GL_TEXTURE_2D);
-				ArrayRenderer.begin();
-				ArrayRenderer.color(8421504);
-				ArrayRenderer.vert(x, y, 0);
-				ArrayRenderer.vert(x, (y + 2), 0);
-				ArrayRenderer.vert((x + 100), (y + 2), 0);
-				ArrayRenderer.vert((x + 100), y, 0);
-				ArrayRenderer.color(8454016);
-				ArrayRenderer.vert(x, y, 0);
-				ArrayRenderer.vert(x, (y + 2), 0);
-				ArrayRenderer.vert((x + this.progress), (y + 2), 0);
-				ArrayRenderer.vert((x + this.progress), y, 0);
-				ArrayRenderer.end();
+				Renderer.begin();
+				Renderer.color(8421504);
+				Renderer.vert(x, y, 0);
+				Renderer.vert(x, (y + 2), 0);
+				Renderer.vert((x + 100), (y + 2), 0);
+				Renderer.vert((x + 100), y, 0);
+				Renderer.color(8454016);
+				Renderer.vert(x, y, 0);
+				Renderer.vert(x, (y + 2), 0);
+				Renderer.vert((x + this.progress), (y + 2), 0);
+				Renderer.vert((x + this.progress), y, 0);
+				Renderer.end();
 				glEnable(GL_TEXTURE_2D);
 			}
 			

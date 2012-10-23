@@ -24,7 +24,7 @@ public final class LevelCreateScreen extends GuiScreen {
 
 		this.clearWidgets();
 		this.attachWidget(new StateButton(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 48, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")));
-		this.getWidget(0, StateButton.class).setState("flat");
+		this.getWidget(0, StateButton.class).setState(OpenClassic.getGame().getGenerators().keySet().toArray(new String[OpenClassic.getGame().getGenerators().size()])[0]);
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 96, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.create")));
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
 		this.attachWidget(this.widget);

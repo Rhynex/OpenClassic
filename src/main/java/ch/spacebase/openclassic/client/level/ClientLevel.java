@@ -69,7 +69,7 @@ public class ClientLevel extends ClassicLevel implements Level {
 	@Override
 	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
 		if(super.setBlockIdAt(x, y, z, type, physics)) {
-			this.renderer.queue(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
+			if(!this.generating) this.renderer.queue(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
 			return true;
 		}
 		

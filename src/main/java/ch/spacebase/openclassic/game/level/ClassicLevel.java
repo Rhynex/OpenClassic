@@ -34,6 +34,9 @@ import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.Generator;
+import ch.spacebase.openclassic.api.level.generator.biome.Biome;
+import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
+import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.player.Player;
@@ -61,6 +64,7 @@ public abstract class ClassicLevel implements Level {
 	private int cloudColor = 16777215;
 	private List<Player> players = new ArrayList<Player>();
 	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
+	protected boolean generating = false;
 	
 	private LevelFormat format; // TODO: changeable
 	private ColumnManager columns = new ColumnManager(this);
@@ -307,7 +311,8 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public byte getBlockIdAt(int x, int y, int z) {
-		ClassicColumn col = this.getColumnFromBlock(x, z);
+		ClassicColumn col = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(col == null) return 0;
 		return col.getBlockAt(x, y, z);
 	}
 	
@@ -341,13 +346,15 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
-		this.getColumnFromBlock(x, z).setBlockAt(x, y, z, type);
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(column == null) return false;
+		column.setBlockAt(x, y, z, type);
 		this.sendToAll(new BlockChangeMessage((short) x, (short) y, (short) z, type));
 		
 		if(physics) {
 			for(BlockFace face : BlockFace.values()) {
 				Block block = this.getBlockAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
-				if(block != null && block.getType() != null && block.getType().getPhysics() != null) {
+				if(this.isColumnLoaded((x + face.getModX()) >> 4, (z + face.getModZ()) >> 4) && block != null && block.getType() != null && block.getType().getPhysics() != null) {
 					block.getType().getPhysics().onNeighborChange(block, this.getBlockAt(x, y, z));
 				}
 			}
@@ -477,46 +484,46 @@ public abstract class ClassicLevel implements Level {
 		int logHeight = rand.nextInt(3) + 4;
 		boolean freespace = true;
 
-		for (int currY = y; currY <= y + 1 + logHeight; currY++) {
+		for(int currY = y; currY <= y + 1 + logHeight; currY++) {
 			byte leaf = 1;
-			if (currY == y) {
+			if(currY == y) {
 				leaf = 0;
 			}
 
-			if (currY >= y + 1 + logHeight - 2) {
+			if(currY >= y + 1 + logHeight - 2) {
 				leaf = 2;
 			}
 
-			for (int currX = x - leaf; currX <= x + leaf && freespace; ++currX) {
-				for (int currZ = z - leaf; currZ <= z + leaf && freespace; ++currZ) {
-					if (this.getBlockTypeAt(currX, currY, currZ) != VanillaBlock.AIR) {
+			for(int currX = x - leaf; currX <= x + leaf && freespace; currX++) {
+				for(int currZ = z - leaf; currZ <= z + leaf && freespace; currZ++) {
+					if(this.getBlockTypeAt(currX, currY, currZ) != VanillaBlock.AIR) {
 						freespace = false;
 					}
 				}
 			}
 		}
 
-		if (!freespace) {
+		if(!freespace) {
 			return false;
-		} else if (this.getBlockTypeAt(x, y, z) == VanillaBlock.GRASS && y < Constants.COLUMN_HEIGHT - logHeight - 1) {
+		} else if(this.getBlockTypeAt(x, y - 1, z) == VanillaBlock.GRASS && y < Constants.COLUMN_HEIGHT - logHeight - 1) {
 			this.setBlockAt(x, y - 1, z, VanillaBlock.DIRT);
-			for (int count = y - 3 + logHeight; count <= y + logHeight; ++count) {
+			for(int count = y - 3 + logHeight; count <= y + logHeight; count++) {
 				int var8 = count - (y + logHeight);
 				int leafMax = 1 - var8 / 2;
 
-				for (int currX = x - leafMax; currX <= x + leafMax; ++currX) {
+				for(int currX = x - leafMax; currX <= x + leafMax; currX++) {
 					int diffX = currX - x;
 
-					for (int currZ = z - leafMax; currZ <= z + leafMax; ++currZ) {
+					for(int currZ = z - leafMax; currZ <= z + leafMax; currZ++) {
 						int diffZ = currZ - z;
-						if (Math.abs(diffX) != leafMax || Math.abs(diffZ) != leafMax || rand.nextInt(2) != 0 && var8 != 0) {
+						if(Math.abs(diffX) != leafMax || Math.abs(diffZ) != leafMax || rand.nextInt(2) != 0 && var8 != 0) {
 							this.setBlockAt(currX, count, currZ, VanillaBlock.LEAVES);
 						}
 					}
 				}
 			}
 
-			for (int count = 0; count < logHeight; ++count) {
+			for(int count = 0; count < logHeight; count++) {
 				this.setBlockAt(x, y + count, z, VanillaBlock.LOG);
 			}
 
@@ -658,6 +665,34 @@ public abstract class ClassicLevel implements Level {
 				}
 			}
 		}
+	}
+
+	public void setGenerating(boolean gen) {
+		this.generating = gen;
+	}
+	
+	public Biome getBiome(int x, int y, int z) {
+		if (y < 0 || y > Constants.COLUMN_HEIGHT) return null;
+		if (!(this.generator instanceof BiomeGenerator)) return null;
+		ClassicColumn column = this.getColumn(x << 4, z << 4, true);
+		BiomeManager manager = column.getBiomeManager();
+		if(manager != null) {
+			Biome biome = column.getBiomeManager().getBiome(x & 0xf, y & 0xf, z & 0xf);
+			if(biome != null) {
+				return biome;
+			}
+		}
+		
+		return ((BiomeGenerator) this.generator).getBiome(x, y, z, this.seed);
+	}
+	
+	public BiomeManager getBiomeManager(int x, int z) {
+		return this.getBiomeManager(x, z, false);
+	}
+	
+	public BiomeManager getBiomeManager(int x, int z, boolean load) {
+		ClassicColumn column = this.getColumn(x, z, load);
+		return column != null ? column.getBiomeManager() : null;
 	}
 	
 }

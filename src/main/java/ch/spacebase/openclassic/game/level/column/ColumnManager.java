@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.level.generator.Populator;
+import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.storage.DoubleIntHashMap;
@@ -99,24 +102,41 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 		}
 		
 		if(column == null) {
+			Random rand = new Random();
+			rand.setSeed(this.level.getSeed());
 			//System.out.println("Generating (" + x + ", " + z + ")");
+			this.level.setGenerating(true);
 			column = new ClassicColumn(this.level, x, z);
+			if(this.level.getGenerator() instanceof BiomeGenerator) {
+				BiomeGenerator generator = (BiomeGenerator) this.level.getGenerator();
+				column.setBiomeManager(generator.generateBiomes(this.level, x, z));
+			}
+			
 			List<ClassicChunk> chunks = column.getChunks();
 			for(int count = chunks.size() - 1; count >= 0; count--) {
 				ClassicChunk chunk = chunks.get(count);
 				TripleIntByteArray blocks = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
-				this.level.getGenerator().generate(this.level.getSeed(), chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), blocks);
+				this.level.getGenerator().generate(this.level, chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), blocks, rand);
 				chunk.setBlocks(blocks.get(), true);
 			}
 			
+			this.loaded.put(x, z, column);
+			for(ClassicChunk chunk : column.getChunks()) {
+				for(Populator pop : this.level.getGenerator().getPopulators(this.level)) {
+					pop.populate(this.level, chunk, rand);
+				}
+			}
+			
+			this.level.setGenerating(false);
 			//column.save();
+		} else {
+			this.loaded.put(x, z, column);
 		}
 		
 		if(this.level instanceof ClientLevel) {
 			((ClientLevel) this.level).getRenderer().queue(column);
 		}
 		
-		this.loaded.put(x, z, column);
 		return column;
 	}
 	

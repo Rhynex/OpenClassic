@@ -5,7 +5,7 @@ import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class ArrayRenderer {
+public class Renderer {
 
 	private static FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(524288);
 	private static int vertices = 0;
@@ -99,8 +99,8 @@ public class ArrayRenderer {
 		}
 
 		textures = true;
-		ArrayRenderer.u = u;
-		ArrayRenderer.v = v;
+		Renderer.u = u;
+		Renderer.v = v;
 		vert(x, y, z);
 	}
 
@@ -111,12 +111,12 @@ public class ArrayRenderer {
 
 		normal = true;
 		if(!alpha) {
-			ArrayRenderer.a = 1 / 255f;
+			Renderer.a = 1 / 255f;
 		}
 
-		ArrayRenderer.nx = x;
-		ArrayRenderer.ny = y;
-		ArrayRenderer.nz = z;
+		Renderer.nx = x;
+		Renderer.ny = y;
+		Renderer.nz = z;
 	}
 
 	public static void vert(float x, float y, float z) {
@@ -172,7 +172,7 @@ public class ArrayRenderer {
 		}
 
 		alpha = true;
-		ArrayRenderer.a = a;
+		Renderer.a = a;
 		color(r, g, b);
 	}
 
@@ -182,9 +182,9 @@ public class ArrayRenderer {
 		}
 
 		colors = true;
-		ArrayRenderer.r = r;
-		ArrayRenderer.g = g;
-		ArrayRenderer.b = b;
+		Renderer.r = r;
+		Renderer.g = g;
+		Renderer.b = b;
 	}
 
 }

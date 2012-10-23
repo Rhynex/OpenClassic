@@ -9,6 +9,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.level.column.Column;
+import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
@@ -18,6 +19,7 @@ public class ClassicColumn implements Column {
 	private int x;
 	private int z;
 	private ClassicChunk chunks[] = new ClassicChunk[Constants.COLUMN_HEIGHT >> 4];
+	private BiomeManager biomes;
 	private int heightmap[] = new int[Constants.CHUNK_WIDTH * Constants.CHUNK_DEPTH];
 	
 	public ClassicColumn(ClassicLevel level, int x, int z) {
@@ -147,6 +149,16 @@ public class ClassicColumn implements Column {
 		}
 		
 		// TODO
+	}
+	
+	@Override
+	public BiomeManager getBiomeManager() {
+		return this.biomes;
+	}
+
+	@Override
+	public void setBiomeManager(BiomeManager manager) {
+		this.biomes = manager;
 	}
 	
 	@Override
