@@ -106,6 +106,7 @@ public abstract class ClassicLevel implements Level {
 				e.printStackTrace();
 			}
         
+			this.columns.loadColumn(this.spawn.getBlockX() >> 4, this.spawn.getBlockZ() >> 4);
 			this.executor.scheduleAtFixedRate(new Runnable() {
 	            public void run() {
 	                try {
@@ -126,7 +127,7 @@ public abstract class ClassicLevel implements Level {
 		this.generator = info.getGenerator();
 		this.seed = new Random().nextLong();
 		
-		this.spawn = info.getSpawn() != null ? info.getSpawn() : info.getGenerator().findSpawn(this);
+		this.spawn = info.getSpawn() != null ? info.getSpawn() : info.getGenerator().findInitialSpawn(this);
 		if(this.spawn != null) this.spawn.setLevel(this);
 		
 		this.format = new OpenClassicLevelFormat(new File(OpenClassic.getClient().getDirectory(), "levels/" + this.name));
@@ -138,6 +139,7 @@ public abstract class ClassicLevel implements Level {
 			e.printStackTrace();
 		}
 		
+		this.columns.loadColumn(this.spawn.getBlockX() >> 4, this.spawn.getBlockZ() >> 4);
 		this.data = new NBTData(this.name);
 		this.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.name + "/data.nbt");
         this.executor.scheduleAtFixedRate(new Runnable() {

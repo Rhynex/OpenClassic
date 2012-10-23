@@ -35,6 +35,7 @@ public class ClientLevel extends ClassicLevel implements Level {
 		this.renderer = new LevelRenderer(this);
 		this.executor.shutdown();
 		this.tracer = new Tracer(this);
+		this.getRenderer().queue(this.getSpawn().getBlockX() >> 4, this.getSpawn().getBlockZ() >> 4);
 	}
 
 	public ClientLevel(LevelInfo info) {
@@ -42,6 +43,7 @@ public class ClientLevel extends ClassicLevel implements Level {
 		this.executor.shutdown();
 		this.tracer = new Tracer(this);
 		this.renderer = new LevelRenderer(this);
+		this.getRenderer().queue(this.getSpawn().getBlockX() >> 4, this.getSpawn().getBlockZ() >> 4);
 	}
 	
 	@Override

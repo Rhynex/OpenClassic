@@ -127,14 +127,18 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 				}
 			}
 			
-			this.level.setGenerating(false);
+			this.level.setGenerating(false);	
 			//column.save();
 		} else {
 			this.loaded.put(x, z, column);
 		}
 		
-		if(this.level instanceof ClientLevel) {
+		if(this.level instanceof ClientLevel && ((ClientLevel) this.level).getRenderer() != null) {
 			((ClientLevel) this.level).getRenderer().queue(column);
+		}
+		
+		if(this.level.getSpawn().getBlockX() >= x << 4 && this.level.getSpawn().getBlockX() <= (x << 4) + Constants.CHUNK_WIDTH && this.level.getSpawn().getBlockZ() >= z << 4 && this.level.getSpawn().getBlockZ() <= (z << 4) + Constants.CHUNK_DEPTH) {
+			this.level.setSpawn(this.level.getGenerator().adjustSpawn(this.level));
 		}
 		
 		return column;
