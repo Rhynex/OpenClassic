@@ -20,7 +20,7 @@ public class AboutScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 6 + 120 + 12, this, "Back to Menu"));
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 200, this.getHeight() / 6 + 264, this, "Back to Menu"));
 	}
 
 	public void onButtonClick(Button button) {
@@ -31,10 +31,10 @@ public class AboutScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().drawRotatedBlock(this.getWidth() / 2 - 10, (this.getHeight() / 2) - 56, VanillaBlock.GRASS, 2);
+		RenderHelper.getHelper().drawRotatedBlock(this.getWidth() / 2 - 10, (this.getHeight() / 2) - 112, VanillaBlock.GRASS, 2);
 		
-		RenderHelper.getHelper().renderText("OpenClassic Version " + Constants.CLIENT_VERSION, this.getWidth() / 2, (this.getHeight() / 2) - 21);
-		RenderHelper.getHelper().renderText("Created By Steveice10 (Steveice10@gmail.com)", this.getWidth() / 2, (this.getHeight() / 2) - 10);
+		RenderHelper.getHelper().renderText("OpenClassic Version " + Constants.CLIENT_VERSION, this.getWidth() / 2, (this.getHeight() / 2) - 42);
+		RenderHelper.getHelper().renderText("Created By Steveice10 (Steveice10@gmail.com)", this.getWidth() / 2, (this.getHeight() / 2) - 20);
 		super.render();
 	}
 	

@@ -20,13 +20,13 @@ public final class LevelCreateScreen extends GuiScreen {
 	}
 
 	public void onOpen() {
-		this.widget = new TextBox(0, this.getWidth() / 2 - 100, this.getHeight() / 2 - 45, this, 30);
+		this.widget = new TextBox(0, this.getWidth() / 2 - 200, this.getHeight() / 2 - 90, this, 30);
 
 		this.clearWidgets();
-		this.attachWidget(new StateButton(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 48, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")));
+		this.attachWidget(new StateButton(0, this.getWidth() / 2 - 200, this.getHeight() / 4 + 96, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")));
 		this.getWidget(0, StateButton.class).setState(OpenClassic.getGame().getGenerators().keySet().toArray(new String[OpenClassic.getGame().getGenerators().size()])[0]);
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 96, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.create")));
-		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 200, this.getHeight() / 4 + 192, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.create")));
+		this.attachWidget(new Button(2, this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
 		this.attachWidget(this.widget);
 
 		this.getWidget(1, Button.class).setActive(false);
@@ -60,7 +60,7 @@ public final class LevelCreateScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.level-create.name"), this.getWidth() / 2, 40);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.level-create.name"), this.getWidth() / 2, 80);
 
 		super.render();
 	}

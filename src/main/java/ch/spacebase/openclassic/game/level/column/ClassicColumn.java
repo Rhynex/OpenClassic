@@ -20,7 +20,7 @@ public class ClassicColumn implements Column {
 	private int z;
 	private ClassicChunk chunks[] = new ClassicChunk[Constants.COLUMN_HEIGHT >> 4];
 	private BiomeManager biomes;
-	private int heightmap[] = new int[Constants.CHUNK_WIDTH * Constants.CHUNK_DEPTH];
+	private int heightmap[] = new int[Constants.CHUNK_AREA];
 	
 	public ClassicColumn(ClassicLevel level, int x, int z) {
 		this.level = level;
@@ -64,17 +64,30 @@ public class ClassicColumn implements Column {
 		return this.getChunkFromBlock(y).getBlockAt(x, y, z);
 	}
 	
-	public void setBlockAt(int x, int y, int z, byte id) {
+	public byte getData(int x, int y, int z) {
 		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
 			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
-				this.level.setBlockIdAt(x, y, z, id);
+				return this.level.getData(x, y, z);
+			}
+
+			return 0;
+		}
+		
+		if(this.getChunkFromBlock(y) == null) return 0;
+		return this.getChunkFromBlock(y).getData(x, y, z);
+	}
+	
+	public void setBlockAt(int x, int y, int z, BlockType type) {
+		if(x < this.getWorldX() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
+				this.level.setBlockAt(x, y, z, type);
 			}
 			
 			return;
 		}
 		
 		if(this.getChunkFromBlock(y) == null) return;
-		this.getChunkFromBlock(y).setBlockAt(x, y, z, id);
+		this.getChunkFromBlock(y).setBlockAt(x, y, z, type);
 	}
 	
 	public int getHighestOpaque(int x, int z) {
@@ -82,7 +95,7 @@ public class ClassicColumn implements Column {
 			return -1;
 		
 		for(int y = Constants.COLUMN_HEIGHT - 1; y >= 0; y--) {
-			BlockType type = this.getBlockAt(x, y, z) >= 0 ? Blocks.fromId(this.getBlockAt(x, y, z)) : null;
+			BlockType type = this.getBlockAt(x, y, z) >= 0 ? Blocks.get(this.getBlockAt(x, y, z), this.getData(x, y, z)) : null;
 			if(type != null && type.isOpaque()) return y;
 		}
 		
@@ -107,8 +120,9 @@ public class ClassicColumn implements Column {
 	}
 	
 	public float getBrightness(int x, int y, int z) {
-		BlockType type = Blocks.fromId(this.getBlockAt(x, y, z));
-		return type.getBrightness() > 0 ? type.getBrightness() : this.isLit(x, y, z) ? 1 : 0.6f;
+		BlockType type = Blocks.get(this.getBlockAt(x, y, z), this.getData(x, y, z));
+		float brightness = this.isLit(x, y, z) ? 1 : 0.6f;
+		return type.getBrightness() > brightness ? type.getBrightness() : brightness;
 	}
 	
 	public void updateHeightMap(int x1, int z1, int x2, int z2) {

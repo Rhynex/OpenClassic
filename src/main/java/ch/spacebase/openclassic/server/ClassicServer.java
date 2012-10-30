@@ -1,6 +1,7 @@
 package ch.spacebase.openclassic.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import ch.spacebase.openclassic.api.HeartbeatManager;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Server;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.physics.CactusPhysics;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
 import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
@@ -176,13 +178,14 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.registerExecutor(null, new ServerCommands());
 		this.registerGenerator(new FlatLandGenerator());
 		
-		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
-		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 12));
+		VanillaBlock.CACTUS.setPhysics(new CactusPhysics());
+		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics(VanillaBlock.SAND));
+		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics(VanillaBlock.GRAVEL));
 		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
 		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
 		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
-		VanillaBlock.WATER.setPhysics(new LiquidPhysics((byte) 8));
-		VanillaBlock.LAVA.setPhysics(new LiquidPhysics((byte) 10));
+		VanillaBlock.WATER.setPhysics(new LiquidPhysics(VanillaBlock.WATER));
+		VanillaBlock.LAVA.setPhysics(new LiquidPhysics(VanillaBlock.LAVA));
 		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
 		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
 		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
@@ -261,7 +264,13 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.saveLevels();
 		
 		OpenClassic.getLogger().info("Saving data...");
-		this.getConfig().save();
+		try {
+			this.getConfig().save();
+		} catch (IOException e) {
+			OpenClassic.getLogger().severe("Failed to save config!");
+			e.printStackTrace();
+		}
+		
 		this.persistenceManager.save();
 		
 		OpenClassic.getLogger().info("Closing connections...");

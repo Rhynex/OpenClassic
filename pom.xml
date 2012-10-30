@@ -48,6 +48,10 @@
         		<url>http://central.maven.org/maven2</url>
     		</repository>
     		<repository>
+        		<id>slick</id>
+        		<url>http://slick.cokeandcode.com/mavenrepo</url>
+    		</repository>
+    		<repository>
         		<id>libs-mvn-repo</id>
         		<url>https://github.com/Steveice10/libs-mvn-repo/raw/master/releases</url>
     		</repository>
@@ -109,6 +113,12 @@
             		<groupId>jline</groupId>
             		<artifactId>jline</artifactId>
             		<version>1.0</version>
+			<scope>compile</scope>
+        	</dependency>
+        	<dependency>
+            		<groupId>slick</groupId>
+            		<artifactId>slick</artifactId>
+            		<version>274</version>
 			<scope>compile</scope>
         	</dependency>
   		<dependency>

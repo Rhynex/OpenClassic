@@ -24,9 +24,9 @@ public class ServerURLScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.servers.connect")));
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
-		this.attachWidget(new TextBox(2, this.getWidth() / 2 - 100, this.getHeight() / 2 - 10, this));
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, this, OpenClassic.getGame().getTranslator().translate("gui.servers.connect")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
+		this.attachWidget(new TextBox(2, this.getWidth() / 2 - 200, this.getHeight() / 2 - 20, this));
 		this.getWidget(2, TextBox.class).setFocus(true);
 		this.getWidget(0, Button.class).setActive(false);
 	}
@@ -69,7 +69,7 @@ public class ServerURLScreen extends GuiScreen {
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
 		
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 40);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 80);
 		super.render();
 	}
 }

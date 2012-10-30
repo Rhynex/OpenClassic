@@ -56,10 +56,10 @@ public class TextureManager {
 				BufferedImage img = null;
 				if(!jar) {
 					img = ImageIO.read(new FileInputStream(file));
-				} else if(OpenClassic.getClient().getConfig().getString("settings.texturepack", "none").equals("none")) {
+				} else if(OpenClassic.getClient().getConfig().getString("settings.resourcepack", "none").equals("none")) {
 					img = ImageIO.read(ClassicClient.class.getResourceAsStream(file));
 				} else {
-					ZipFile zip = new ZipFile(new File(OpenClassic.getClient().getDirectory(), "texturepacks/" + OpenClassic.getClient().getConfig().getString("settings.texturepack", "none")));
+					ZipFile zip = new ZipFile(new File(OpenClassic.getClient().getDirectory(), "resourcepacks/" + OpenClassic.getClient().getConfig().getString("settings.resourcepack", "none")));
 					if(zip.getEntry(file.startsWith("/") ? file.substring(1, file.length()) : file) != null) {
 						img = ImageIO.read(zip.getInputStream(zip.getEntry(file.startsWith("/") ? file.substring(1, file.length()) : file)));
 					} else {

@@ -67,7 +67,7 @@ public class Renderer {
 			if(normal) {
 				glEnableClientState(GL_NORMAL_ARRAY);
 			}
-
+			
 			glDrawArrays(GL_QUADS, 0, vertices);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			if (textures) {
@@ -106,7 +106,7 @@ public class Renderer {
 
 	public static void normal(float x, float y, float z) {
 		if(!normal) {
-			vertexSize += 4; // TODO: alpha :/
+			vertexSize += 4;
 		}
 
 		normal = true;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.CubeModel;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
@@ -48,7 +49,7 @@ public class BlockModelCodec extends MessageCodec<BlockModelMessage> {
 	public BlockModelMessage decode(ChannelBuffer buffer) throws IOException {
 		byte block = buffer.readByte();
 		String type = ChannelBufferUtils.readString(buffer);
-		Model model = type.equals("EmptyModel") ? new EmptyModel() : type.equals("TransparentModel") ? new LiquidModel("/terrain.png", 16) : (type.equals("CuboidModel") ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (type.equals("CubeModel") ? new CubeModel("/terrain.png", 16) : new Model()));
+		Model model = type.equals("EmptyModel") ? new EmptyModel() : type.equals("TransparentModel") ? new LiquidModel(BlockType.TERRAIN, 16) : (type.equals("CuboidModel") ? new CuboidModel(BlockType.TERRAIN, 16, 0, 0, 0, 1, 1, 1) : (type.equals("CubeModel") ? new CubeModel(BlockType.TERRAIN, 16) : new Model()));
 		model.clearQuads();
 		
 		float x1 = buffer.readFloat();

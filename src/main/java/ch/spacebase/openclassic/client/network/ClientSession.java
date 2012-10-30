@@ -18,7 +18,7 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent.Result;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
@@ -167,13 +167,13 @@ public class ClientSession implements Session {
 		((ClassicClient) OpenClassic.getClient()).setOpenClassicServer(false, "");
 		if(this.state != State.IDENTIFYING) {
 			for(BlockType block : Blocks.getBlocks()) {
-				if(block != null && block instanceof CustomBlock) {
+				if(block != null && !VanillaBlock.is(block)) {
 					Blocks.unregister(block.getId());
 				}
 			}
 		}
 		
-		for(CustomBlock block : Storage.getClientBlocks()) {
+		for(BlockType block : Storage.getClientBlocks()) {
 			Blocks.register(block);
 		}
 		

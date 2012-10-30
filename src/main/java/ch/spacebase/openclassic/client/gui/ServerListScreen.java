@@ -44,14 +44,14 @@ public class ServerListScreen extends GuiScreen {
 		
 		this.getWidget(0, ButtonList.class).setContents(content);
 
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 206, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")));
-		this.attachWidget(new Button(2, this.getWidth() / 2 - 102, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
-		this.attachWidget(new Button(3, this.getWidth() / 2 + 2, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.enter-url")));
-		this.attachWidget(new Button(4, this.getWidth() / 2 + 106, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
-		this.attachWidget(new Button(5, this.getWidth() / 2 - 206, this.getHeight() / 6 + 168, 100, 20, this, OpenClassic.getServer() != null && OpenClassic.getServer().isRunning() ? OpenClassic.getGame().getTranslator().translate("gui.servers.stop-server") : OpenClassic.getGame().getTranslator().translate("gui.servers.start-server")));
-		this.attachWidget(new Button(6, this.getWidth() / 2 - 102, this.getHeight() / 6 + 168, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.settings")));
-		this.attachWidget(new Button(7, this.getWidth() / 2 + 2, this.getHeight() / 6 + 168, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.console")));
-		this.attachWidget(new Button(8, this.getWidth() / 2 + 106, this.getHeight() / 6 + 168, 100, 20, this, OpenClassic.getServer() != null && OpenClassic.getServer().isRunning() && HeartbeatManager.getURL().equals("") ? OpenClassic.getGame().getTranslator().translate("gui.servers.awaiting") : OpenClassic.getGame().getTranslator().translate("gui.servers.connect")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 412, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")));
+		this.attachWidget(new Button(2, this.getWidth() / 2 - 204, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
+		this.attachWidget(new Button(3, this.getWidth() / 2 + 4, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.servers.enter-url")));
+		this.attachWidget(new Button(4, this.getWidth() / 2 + 212, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(new Button(5, this.getWidth() / 2 - 412, this.getHeight() / 6 + 336, 200, 40, this, OpenClassic.getServer() != null && OpenClassic.getServer().isRunning() ? OpenClassic.getGame().getTranslator().translate("gui.servers.stop-server") : OpenClassic.getGame().getTranslator().translate("gui.servers.start-server")));
+		this.attachWidget(new Button(6, this.getWidth() / 2 - 204, this.getHeight() / 6 + 336, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.servers.settings")));
+		this.attachWidget(new Button(7, this.getWidth() / 2 + 4, this.getHeight() / 6 + 336, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.servers.console")));
+		this.attachWidget(new Button(8, this.getWidth() / 2 + 212, this.getHeight() / 6 + 336, 200, 40, this, OpenClassic.getServer() != null && OpenClassic.getServer().isRunning() && HeartbeatManager.getURL().equals("") ? OpenClassic.getGame().getTranslator().translate("gui.servers.awaiting") : OpenClassic.getGame().getTranslator().translate("gui.servers.connect")));
 		if(OpenClassic.getServer() == null || !OpenClassic.getServer().isRunning()) {
 			this.getWidget(6, Button.class).setActive(false);
 			this.getWidget(7, Button.class).setActive(false);
@@ -221,7 +221,7 @@ public class ServerListScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 15);
+		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 30);
 
 		super.render();
 	}

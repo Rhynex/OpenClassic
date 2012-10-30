@@ -27,9 +27,9 @@ public class LoadLevelScreen extends GuiScreen {
 	public void onOpen() {
 		this.clearWidgets();
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this));
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 156, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.new")));
-		this.attachWidget(new Button(2, this.getWidth() / 2 - 52, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.delete")));
-		this.attachWidget(new Button(3, this.getWidth() / 2 + 52, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 312, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.new")));
+		this.attachWidget(new Button(2, this.getWidth() / 2 - 104, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.delete")));
+		this.attachWidget(new Button(3, this.getWidth() / 2 + 104, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
 
 		StringBuilder levels = new StringBuilder();
 		File dir = new File(OpenClassic.getClient().getDirectory(), "levels");
@@ -94,7 +94,7 @@ public class LoadLevelScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 15, 16777215);
+		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 30);
 		super.render();
 	}
 }

@@ -20,7 +20,7 @@ public class LanguageScreen extends GuiScreen {
 	public void onOpen() {
 		this.clearWidgets();
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this));
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 150, this.getHeight() / 6 + 312, 300, 40, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
 	
 		List<String> languages = new ArrayList<String>();
 		for(String language : OpenClassic.getGame().getTranslator().getLanguageNames()) {
@@ -43,8 +43,8 @@ public class LanguageScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.language.select"), this.getWidth() / 2, 15, 16777215);
-		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("settings.language")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.language.select"), this.getWidth() / 2, 15);
+		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("settings.language")), this.getWidth() / 2, this.getHeight() / 2 + 96);
 		super.render();
 	}
 }

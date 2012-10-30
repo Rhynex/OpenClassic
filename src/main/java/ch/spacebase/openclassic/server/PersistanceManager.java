@@ -1,20 +1,20 @@
 package ch.spacebase.openclassic.server;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import ch.spacebase.openclassic.api.config.Configuration;
-
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.asset.AssetSource;
+import ch.spacebase.openclassic.api.asset.text.YamlFile;
 
 public class PersistanceManager {
 	
-	private Configuration players = new Configuration(new File("players.yml"));
+	private YamlFile players;
 	
 	public void load() {
-		this.players.load();
-		
+		this.players = OpenClassic.getGame().getAssetManager().load("players.yml", AssetSource.FILE, YamlFile.class);
 		if(this.players.getNode("bans", null) == null) {
 			this.players.setValue("bans.exampleban", "reasonhere");
 		}
@@ -32,7 +32,12 @@ public class PersistanceManager {
 	}
 	
 	public void save() {
-		this.players.save();
+		try {
+			this.players.save();
+		} catch (IOException e) {
+			OpenClassic.getLogger().severe("Failed to save player file!");
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean isBanned(String player) {

@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.gui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +27,11 @@ public final class ControlsScreen extends GuiScreen {
 		List<String> keys = new ArrayList<String>();
 		keys.addAll(OpenClassic.getClient().getConfig().getKeys("keys"));
 		for(int count = 0; count < keys.size(); count++) {
-			this.attachWidget(new StateButton(count, this.getWidth() / 2 - 155 + count % 2 * 160, this.getHeight() / 6 + 24 * (count >> 1), 155, 20, this, this.getName("keys." + keys.get(count))));
+			this.attachWidget(new StateButton(count, this.getWidth() / 2 - 310 + (count % 2) * 320, this.getHeight() / 6 + 48 * (count >> 1), 310, 40, this, this.getName("keys." + keys.get(count))));
 			this.getWidget(count, StateButton.class).setState(Keyboard.getKeyName(OpenClassic.getClient().getConfig().getInteger("keys." + keys.get(count))));
 		}
 
-		this.attachWidget(new Button(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 168, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
+		this.attachWidget(new Button(200, this.getWidth() / 2 - 200, this.getHeight() / 6 + 336, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
 	}
 	
 	private String getName(String path) {
@@ -74,7 +75,12 @@ public final class ControlsScreen extends GuiScreen {
 			this.getWidget(this.binding, StateButton.class).setState(Keyboard.getKeyName(OpenClassic.getClient().getConfig().getInteger(this.getPath(this.getWidget(this.binding, Button.class).getText()))));
 			this.binding = -1;
 			
-			OpenClassic.getClient().getConfig().save();
+			try {
+				OpenClassic.getClient().getConfig().save();
+			} catch (IOException e) {
+				OpenClassic.getLogger().severe("Failed to save config!");
+				e.printStackTrace();
+			}
 		} else {
 			super.onKeyPress(c, key);
 		}
@@ -87,7 +93,7 @@ public final class ControlsScreen extends GuiScreen {
 			RenderHelper.getHelper().drawDefaultBG();
 		}
 		
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 20);
+		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 40);
 		super.render();
 	}
 }

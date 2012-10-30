@@ -58,10 +58,22 @@ public class ClientAudioManager implements AudioManager {
 		}
 		
 		// TODO: More sounds
+		this.registerSound("step.cloth", ClassicClient.class.getResource("/sounds/step/cloth1.ogg"), true);
+		this.registerSound("step.cloth", ClassicClient.class.getResource("/sounds/step/cloth2.ogg"), true);
+		this.registerSound("step.dirt", ClassicClient.class.getResource("/sounds/step/dirt1.ogg"), true);
+		this.registerSound("step.dirt", ClassicClient.class.getResource("/sounds/step/dirt2.ogg"), true);
 		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass1.ogg"), true);
 		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass2.ogg"), true);
-		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass3.ogg"), true);
-		this.registerSound("step.grass", ClassicClient.class.getResource("/sounds/step/grass4.ogg"), true);
+		this.registerSound("step.gravel", ClassicClient.class.getResource("/sounds/step/gravel1.ogg"), true);
+		this.registerSound("step.gravel", ClassicClient.class.getResource("/sounds/step/gravel2.ogg"), true);
+		this.registerSound("step.metal", ClassicClient.class.getResource("/sounds/step/metal1.ogg"), true);
+		this.registerSound("step.metal", ClassicClient.class.getResource("/sounds/step/metal2.ogg"), true);
+		this.registerSound("step.sand", ClassicClient.class.getResource("/sounds/step/sand1.ogg"), true);
+		this.registerSound("step.sand", ClassicClient.class.getResource("/sounds/step/sand2.ogg"), true);
+		this.registerSound("step.stone", ClassicClient.class.getResource("/sounds/step/stone1.ogg"), true);
+		this.registerSound("step.stone", ClassicClient.class.getResource("/sounds/step/stone2.ogg"), true);
+		this.registerSound("step.wood", ClassicClient.class.getResource("/sounds/step/wood1.ogg"), true);
+		this.registerSound("step.wood", ClassicClient.class.getResource("/sounds/step/wood2.ogg"), true);
 		
 		this.registerSound("generic.explode", ClassicClient.class.getResource("/sounds/generic/explode.ogg"), true);
 	}

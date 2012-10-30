@@ -58,7 +58,7 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 			glScalef(0.05f, -0.05f, 0.05f);
 			RenderHelper.getHelper().drawBox(-1 - RenderHelper.getHelper().getStringWidth(this.displayName) / 2, -1f, RenderHelper.getHelper().getStringWidth(this.displayName) / 2, 7.99f, Integer.MIN_VALUE);
 			if(this.name.equalsIgnoreCase("Notch") || this.name.equalsIgnoreCase("Steveice10")) {
-				RenderHelper.getHelper().renderTextNoShadow(this.displayName, 0, 0, 16776960, true);
+				RenderHelper.getHelper().renderTextNoShadow(Color.YELLOW + this.displayName, 0, 0, true);
 			} else {
 				RenderHelper.getHelper().renderTextNoShadow(this.displayName, 0, 0, true);
 			}
@@ -66,7 +66,7 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 			glDepthFunc(GL_GREATER);
 			glDepthMask(false);
 			RenderHelper.getHelper().drawBox(-1 - RenderHelper.getHelper().getStringWidth(this.displayName) / 2, -1f, RenderHelper.getHelper().getStringWidth(this.displayName) / 2, 7.99f, Integer.MIN_VALUE);
-			RenderHelper.getHelper().renderTextNoShadow(this.displayName, 0, 0, 5263440, true);
+			RenderHelper.getHelper().renderTextNoShadow(Color.DARK_GRAY + this.displayName, 0, 0, true);
 			glDepthMask(true);
 			glDepthFunc(GL_LEQUAL);
 			glPopMatrix();
@@ -144,12 +144,12 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 	}
 
 	@Override
-	public byte getPlaceMode() {
-		return 0;
+	public BlockType getPlaceMode() {
+		return null;
 	}
 
 	@Override
-	public void setPlaceMode(int type) {
+	public void setPlaceMode(BlockType type) {
 	}
 
 	@Override

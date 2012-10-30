@@ -9,7 +9,6 @@ import java.net.URL;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.network.msg.custom.block.QuadMessage;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
@@ -20,7 +19,7 @@ public class QuadMessageHandler extends MessageHandler<QuadMessage> {
 	@Override
 	public void handleClient(ClientSession session, final ClientPlayer player, QuadMessage message) {
 		if(session == null || player == null) return;
-		if(Blocks.fromId(message.getBlock()) == null || Blocks.fromId(message.getBlock()).getModel() == null) return;
+		if(Blocks.get(message.getBlock()) == null || Blocks.get(message.getBlock()).getModel() == null) return;
 		if(!message.getQuad().getTexture().getParent().isInJar()) {
 			File file = new File(OpenClassic.getClient().getDirectory(), "cache/" + session.getAddress().toString().replaceAll("/", "") + "/" + message.getBlock() + ".png");
 			if(!file.exists()) {
@@ -74,7 +73,7 @@ public class QuadMessageHandler extends MessageHandler<QuadMessage> {
 			message.getQuad().getTexture().getParent().setTexture(file.getPath());
 		}
 		
-		((CustomBlock) Blocks.fromId(message.getBlock())).getModel().addQuad(message.getQuad());
+		Blocks.get(message.getBlock()).getModel().addQuad(message.getQuad());
 	}
 
 }

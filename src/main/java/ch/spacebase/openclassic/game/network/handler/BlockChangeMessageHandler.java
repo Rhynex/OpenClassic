@@ -9,7 +9,7 @@ public class BlockChangeMessageHandler extends MessageHandler<BlockChangeMessage
 	@Override
 	public void handleClient(ClientSession session, ClientPlayer player, BlockChangeMessage message) {
 		if(session.getMode().getLevel() != null) {
-			session.getMode().getLevel().setBlockIdAt(message.getX(), message.getY(), message.getZ(), message.getBlock(), false);
+			// TODO: adjust for data session.getMode().getLevel().setBlockIdAt(message.getX(), message.getY(), message.getZ(), message.getBlock(), false);
 		}
 	}
 

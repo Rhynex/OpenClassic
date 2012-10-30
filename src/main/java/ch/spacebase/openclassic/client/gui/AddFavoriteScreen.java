@@ -26,12 +26,12 @@ public class AddFavoriteScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
 		
-		this.name = new TextBox(2, this.getWidth() / 2 - 100, this.getHeight() / 2 - 50, this);
+		this.name = new TextBox(2, this.getWidth() / 2 - 200, this.getHeight() / 2 - 100, this);
 		this.name.setFocus(true);
-		this.url = new TextBox(3, this.getWidth() / 2 - 100, this.getHeight() / 2 - 10, this);
+		this.url = new TextBox(3, this.getWidth() / 2 - 200, this.getHeight() / 2 - 20, this);
 		this.attachWidget(this.name);
 		this.attachWidget(this.url);
 		
@@ -63,9 +63,9 @@ public class AddFavoriteScreen extends GuiScreen {
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
 		
-		if(this.error) RenderHelper.getHelper().renderText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 40);
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-name"), this.getWidth() / 2, this.getHeight() / 2 - 65);
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, this.getHeight() / 2 - 25);
+		if(this.error) RenderHelper.getHelper().renderText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 80);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-name"), this.getWidth() / 2, this.getHeight() / 2 - 130);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, this.getHeight() / 2 - 50);
 		super.render();
 	}
 	

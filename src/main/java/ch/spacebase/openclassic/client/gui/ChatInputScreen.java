@@ -14,7 +14,7 @@ public class ChatInputScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new TextBox(0, 2, this.getHeight() - 14, this.getWidth() - 4, 12, this, true));
+		this.attachWidget(new TextBox(0, 4, this.getHeight() - 28, this.getWidth() - 8, 24, this, true));
 		this.getWidget(0, TextBox.class).setFocus(true);
 	}
 

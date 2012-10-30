@@ -51,7 +51,7 @@ public class LWJGLNatives {
 		File file = new File(dir + "/" + lib);
 		if(file.exists()) {
 			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
-				System.load(file.getPath());
+				//System.load(file.getPath());
 			}
 			
 			return;

@@ -31,9 +31,9 @@ public class FavoriteServersScreen extends GuiScreen {
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this));
 		this.getWidget(0, ButtonList.class).setContents(new ArrayList<String>(Storage.getFavorites().keySet()));
 
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 156, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
-		this.attachWidget(new Button(2, this.getWidth() / 2 - 52, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.remove")));
-		this.attachWidget(new Button(3, this.getWidth() / 2 + 52, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 312, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
+		this.attachWidget(new Button(2, this.getWidth() / 2 - 104, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.remove")));
+		this.attachWidget(new Button(3, this.getWidth() / 2 + 104, this.getHeight() / 6 + 288, 200, 40, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
 	}
 
 	public final void onButtonClick(Button button) {
@@ -94,7 +94,7 @@ public class FavoriteServersScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 15);
+		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 30);
 
 		super.render();
 	}

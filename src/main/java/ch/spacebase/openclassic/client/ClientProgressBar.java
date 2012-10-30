@@ -62,8 +62,8 @@ public class ClientProgressBar implements ProgressBar {
 		if(this.isVisible()) {
 			Projection.ortho();
 			ClientRenderHelper.getHelper().drawDefaultBG();
-			int width = Display.getWidth() * 240 / Display.getHeight();
-			int height = Display.getHeight() * 240 / Display.getHeight();
+			int width = Display.getWidth();// * 240 / Display.getHeight();
+			int height = Display.getHeight();// * 240 / Display.getHeight();
 			
 			if(this.getProgress() >= 0) {
 				int x = width / 2 - 50;

@@ -21,7 +21,7 @@ public final class ErrorScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 6 + 132, this, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")));
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 200, this.getHeight() / 6 + 264, this, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")));
 	}
 
 	public void onButtonClick(Button button) {
@@ -32,8 +32,8 @@ public final class ErrorScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 90);
-		RenderHelper.getHelper().renderText(this.message, this.getWidth() / 2, 110);
+		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 180);
+		RenderHelper.getHelper().renderText(this.message, this.getWidth() / 2, 220);
 		super.render();
 	}
 

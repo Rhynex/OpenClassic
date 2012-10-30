@@ -100,7 +100,7 @@ public class LevelRenderer {
 			int chunks = this.queue.size() < 6 ? this.queue.size() : 6;
 			for(int count = 0; count < chunks; count++) {
 				ClassicChunk chunk = this.queue.remove(Math.max(this.queue.size() - count - 1, 0));
-				glDeleteLists(chunk.getList(), 1);
+				if(chunk.getList() != -1) glDeleteLists(chunk.getList(), 2);
 				chunk.render();
 			}
 		}
@@ -144,6 +144,7 @@ public class LevelRenderer {
 			for(ClassicChunk chunk : column.getChunks()) {
 				if(!chunk.isEmpty() && chunk.getList() > 0 && Frustrum.isBoxInFrustrum(chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getWorldX() + Constants.CHUNK_WIDTH, chunk.getWorldY() + Constants.CHUNK_HEIGHT, chunk.getWorldZ() + Constants.CHUNK_DEPTH)) {
 					glCallList(chunk.getList());
+					glCallList(chunk.getList() + 1);
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.gui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +25,12 @@ public final class OptionsScreen extends GuiScreen {
 		List<String> keys = new ArrayList<String>();
 		keys.addAll(OpenClassic.getClient().getConfig().getKeys("options"));
 		for(int count = 0; count < keys.size(); count++) {
-			this.attachWidget(new StateButton(count, this.getWidth() / 2 - 155 + count % 2 * 160, this.getHeight() / 6 + 24 * (count >> 1), 155, 20, this, this.getName("options." + keys.get(count))));
+			this.attachWidget(new StateButton(count, this.getWidth() / 2 - 310 + count % 2 * 320, this.getHeight() / 6 + 48 * (count >> 1), 310, 40, this, this.getName("options." + keys.get(count))));
 			this.getWidget(count, StateButton.class).setState(this.getValue("options." + keys.get(count)));
 		}
 		
-		this.attachWidget(new Button(100, this.getWidth() / 2 - 100, this.getHeight() / 6 + 140, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")));
-		this.attachWidget(new Button(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 166, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
+		this.attachWidget(new Button(100, this.getWidth() / 2 - 200, this.getHeight() / 6 + 280, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")));
+		this.attachWidget(new Button(200, this.getWidth() / 2 - 200, this.getHeight() / 6 + 332, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
 	}
 	
 	private String getValue(String path) {
@@ -97,7 +98,12 @@ public final class OptionsScreen extends GuiScreen {
 		}
 		
 		if(path.equals("options.particles")) OpenClassic.getClient().getConfig().setValue(path, !OpenClassic.getClient().getConfig().getBoolean(path, true));
-		OpenClassic.getClient().getConfig().save();
+		try {
+			OpenClassic.getClient().getConfig().save();
+		} catch (IOException e) {
+			OpenClassic.getLogger().severe("Failed to save config!");
+			e.printStackTrace();
+		}
 	}
 
 	public void onButtonClick(Button button) {
@@ -124,7 +130,7 @@ public final class OptionsScreen extends GuiScreen {
 			RenderHelper.getHelper().drawDefaultBG();
 		}
 		
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.options.title"), this.getWidth() / 2, 20);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.options.title"), this.getWidth() / 2, 40);
 		super.render();
 	}
 }

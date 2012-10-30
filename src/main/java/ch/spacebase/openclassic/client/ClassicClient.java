@@ -23,11 +23,11 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.physics.CactusPhysics;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
 import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
@@ -42,6 +42,7 @@ import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
+import ch.spacebase.openclassic.api.level.generator.normal.NormalGenerator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
@@ -106,6 +107,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.audio = new ClientAudioManager();
 		
 		this.registerExecutor(null, new ClientCommands());
+		this.registerGenerator(new NormalGenerator());
 		this.registerGenerator(new FlatLandGenerator());
 		
 		this.getConfig().applyDefault("options.music", true);
@@ -129,13 +131,14 @@ public class ClassicClient extends ClassicGame implements Client {
 			this.getConfig().remove("options.language");
 		}
 		
-		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
-		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 13));
+		VanillaBlock.CACTUS.setPhysics(new CactusPhysics());
+		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics(VanillaBlock.SAND));
+		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics(VanillaBlock.GRAVEL));
 		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
 		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
 		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
-		VanillaBlock.WATER.setPhysics(new LiquidPhysics((byte) 8));
-		VanillaBlock.LAVA.setPhysics(new LiquidPhysics((byte) 10));
+		VanillaBlock.WATER.setPhysics(new LiquidPhysics(VanillaBlock.WATER));
+		VanillaBlock.LAVA.setPhysics(new LiquidPhysics(VanillaBlock.LAVA));
 		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
 		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
 		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
@@ -143,6 +146,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
 		
 		this.setupGL();
+		ClientRenderHelper.getHelper().setup();
 		ClientRenderHelper.getHelper().getTextureManager().pickMipmaps();
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
@@ -160,7 +164,9 @@ public class ClassicClient extends ClassicGame implements Client {
 			passedTime += time - previousTime; 
 			previousTime = time;
 			if(time - lastfps > 1000) {
-				this.memory = Runtime.getRuntime().freeMemory() / 1024 / 1024 + "/" + Runtime.getRuntime().maxMemory() / 1024 / 1024 + " free";
+				long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+				long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+				this.memory = (max - free) + "/" + max;
 				this.fps = frames;
 				if(this.getLevel() != null) {
 					this.columns = ((ClassicLevel) this.getLevel()).getColumns().size();
@@ -208,7 +214,7 @@ public class ClassicClient extends ClassicGame implements Client {
 			Display.setDisplayMode(new DisplayMode(854, 480));
 			Display.setTitle("OpenClassic");
 			try {
-				Display.setIcon(new ByteBuffer[] { this.loadIcon(128) });
+				Display.setIcon(new ByteBuffer[] { this.loadIcon() });
 			} catch(IOException e) {
 				System.out.println("Failed to load icon!");
 				e.printStackTrace();
@@ -238,8 +244,8 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.updateFog();
 	}
 
-	private ByteBuffer loadIcon(int res) throws IOException {
-		InputStream in = this.getClass().getResourceAsStream("/icon-" + res + ".png");
+	private ByteBuffer loadIcon() throws IOException {
+		InputStream in = this.getClass().getResourceAsStream("/icon.png");
 
 		try {
 			PNGDecoder decoder = new PNGDecoder(in);
@@ -335,11 +341,11 @@ public class ClassicClient extends ClassicGame implements Client {
 		glPushMatrix();
 		Projection.ortho();
 
-		int width = Display.getWidth() * 240 / Display.getHeight();
-		int height = Display.getHeight() * 240 / Display.getHeight();
+		int width = Display.getWidth();// * 240 / Display.getHeight();
+		int height = Display.getHeight();// * 240 / Display.getHeight();
 		if(this.mode != null) this.mode.renderOrtho(width, height);
 		if(this.getCurrentScreen() != null) this.getCurrentScreen().render();
-
+		
 		this.progress.render();
 		glPopMatrix();
 		Display.update();

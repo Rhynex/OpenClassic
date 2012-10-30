@@ -14,7 +14,6 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
@@ -64,7 +63,7 @@ public abstract class Mode {
 			this.select.set(null, null);
 		}
 		
-		this.held.update(Blocks.fromId(this.player.getPlaceMode() != 0 ? this.player.getPlaceMode() : this.player.getQuickBar().getBlock(this.player.getQuickBar().getSelected())));
+		this.held.update(this.player.getPlaceMode() != null ? this.player.getPlaceMode() : this.player.getQuickBar().getBlock(this.player.getQuickBar().getSelected()));
 		this.main.update();
 	}
 	
@@ -74,7 +73,7 @@ public abstract class Mode {
 		ByteBuffer buffer = BufferUtils.createByteBuffer(anim.getPixelData().length);
 		buffer.put(anim.getPixelData());
 		buffer.flip();
-		RenderHelper.getHelper().bindTexture("/terrain.png", true);
+		RenderHelper.getHelper().bindTexture("/level/terrain.png", true);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, anim.getTextureId() % 16 << 4, anim.getTextureId() / 16 << 4, 16, 16, 6408, 5121, buffer);
 	}
 	
@@ -126,9 +125,9 @@ public abstract class Mode {
 		if(Mouse.isButtonDown(1) && System.currentTimeMillis() - this.lastChange > 150 && this.select.isValid()) {			
 			this.lastChange = System.currentTimeMillis();
 			BlockType type = this.level.getBlockTypeAt(this.select.getPosition().getBlockX() + this.select.getFace().getModX(), this.select.getPosition().getBlockY() + this.select.getFace().getModY(), this.select.getPosition().getBlockZ() + this.select.getFace().getModZ());
-			BlockType placing = this.player.getPlaceMode() > 0 ? Blocks.fromId(this.player.getPlaceMode()) : Blocks.fromId(this.player.getQuickBar().getBlock(this.player.getQuickBar().getSelected()));
+			BlockType placing = this.player.getPlaceMode() != null ? this.player.getPlaceMode() : this.player.getQuickBar().getBlock(this.player.getQuickBar().getSelected());
 			BoundingBox collision = placing.getModel().getCollisionBox(this.select.getPosition().getBlockX() + this.select.getFace().getModX(), this.select.getPosition().getBlockY() + this.select.getFace().getModY(), this.select.getPosition().getBlockZ() + this.select.getFace().getModZ());
-			if(placing != VanillaBlock.AIR && (type == VanillaBlock.AIR || type.isLiquid())) {
+			if(placing != VanillaBlock.AIR && (type == VanillaBlock.AIR || type.isLiquid()) && !(placing.getPhysics() != null && !placing.getPhysics().canPlace(this.level.getBlockAt(this.select.getPosition().getBlockX() + this.select.getFace().getModX(), this.select.getPosition().getBlockY() + this.select.getFace().getModY(), this.select.getPosition().getBlockZ() + this.select.getFace().getModZ())))) {
 				if(collision != null) {
 					if(this.player.getBoundingBox().intersects(collision)) return;
 					for(Player player : this.level.getPlayers()) {
@@ -149,14 +148,14 @@ public abstract class Mode {
 		}
 		
 		if(Mouse.isButtonDown(2) && this.select.isValid()) { // TODO: make this interact button
-			byte block = this.select.getPosition().getLevel().getBlockIdAt(this.select.getPosition());
-			if(block == VanillaBlock.TNT.getId()) { // TODO: Move to physics - BlockPhysics.onInteracted?
+			BlockType block = this.select.getPosition().getLevel().getBlockTypeAt(this.select.getPosition());
+			if(block == VanillaBlock.TNT) { // TODO: Move to physics - BlockPhysics.onInteracted?
 				this.getLevel().explode(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), 4);
 				return;
 			}
 			
-			if(block == VanillaBlock.DOUBLE_SLAB.getId()) block = VanillaBlock.SLAB.getId();
-			if(block == VanillaBlock.GRASS.getId()) block = VanillaBlock.DIRT.getId();
+			if(block == VanillaBlock.DOUBLE_SLAB) block = VanillaBlock.SLAB;
+			if(block == VanillaBlock.GRASS) block = VanillaBlock.DIRT;
 			if(this.player.getQuickBar().contains(block)) {
 				this.player.getQuickBar().setSelected(this.player.getQuickBar().getSlot(block));
 			} else {

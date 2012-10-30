@@ -66,7 +66,7 @@ public abstract class ClassicLevel implements Level {
 	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
 	protected boolean generating = false;
 	
-	private LevelFormat format; // TODO: changeable
+	private LevelFormat format;
 	private ColumnManager columns = new ColumnManager(this);
 	private NBTData data;
 	
@@ -107,6 +107,7 @@ public abstract class ClassicLevel implements Level {
 			}
         
 			this.columns.loadColumn(this.spawn.getBlockX() >> 4, this.spawn.getBlockZ() >> 4);
+			this.setSpawn(this.getGenerator().adjustSpawn(this));
 			this.executor.scheduleAtFixedRate(new Runnable() {
 	            public void run() {
 	                try {
@@ -125,7 +126,7 @@ public abstract class ClassicLevel implements Level {
 		this.author = "";
 		this.creationTime = System.currentTimeMillis();
 		this.generator = info.getGenerator();
-		this.seed = new Random().nextLong();
+		this.seed = rand.nextLong();
 		
 		this.spawn = info.getSpawn() != null ? info.getSpawn() : info.getGenerator().findInitialSpawn(this);
 		if(this.spawn != null) this.spawn.setLevel(this);
@@ -140,6 +141,8 @@ public abstract class ClassicLevel implements Level {
 		}
 		
 		this.columns.loadColumn(this.spawn.getBlockX() >> 4, this.spawn.getBlockZ() >> 4);
+		this.setSpawn(this.getGenerator().adjustSpawn(this));
+		
 		this.data = new NBTData(this.name);
 		this.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.name + "/data.nbt");
         this.executor.scheduleAtFixedRate(new Runnable() {
@@ -256,6 +259,7 @@ public abstract class ClassicLevel implements Level {
 	
 	public void dispose() {
 		this.executor.shutdown();
+		this.columns.dispose();
 	}
 	
 	public void updatePhysics(int x, int y, int z) {
@@ -323,8 +327,11 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public BlockType getBlockTypeAt(int x, int y, int z) {
-		int type = this.getBlockIdAt(x, y, z);
-		return Blocks.fromId(type >= 0 ? type : 0);
+		ClassicColumn col = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(col == null) return VanillaBlock.AIR;
+		byte type = col.getBlockAt(x, y, z);
+		byte data = col.getData(x, y, z);
+		return Blocks.get(type >= 0 ? type : 0, data >= 0 ? data : 0);
 	}
 	
 	public Block getBlockAt(Position pos) {
@@ -335,34 +342,14 @@ public abstract class ClassicLevel implements Level {
 		return this.getBlockAt(new Position(this, x, y, z));
 	}
 	
-	public boolean setBlockIdAt(Position pos, byte type) {
-		return this.setBlockIdAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), type);
+	public byte getData(Position pos) {
+		return this.getData(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
 	}
 	
-	public boolean setBlockIdAt(Position pos, byte type, boolean physics) {
-		return this.setBlockIdAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), type, physics);
-	}
-	
-	public boolean setBlockIdAt(int x, int y, int z, byte type) {
-		return this.setBlockIdAt(x, y, z, type, true);
-	}
-	
-	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
-		ClassicColumn column = this.getColumn(x >> 4, z >> 4, !this.generating);
-		if(column == null) return false;
-		column.setBlockAt(x, y, z, type);
-		this.sendToAll(new BlockChangeMessage((short) x, (short) y, (short) z, type));
-		
-		if(physics) {
-			for(BlockFace face : BlockFace.values()) {
-				Block block = this.getBlockAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
-				if(this.isColumnLoaded((x + face.getModX()) >> 4, (z + face.getModZ()) >> 4) && block != null && block.getType() != null && block.getType().getPhysics() != null) {
-					block.getType().getPhysics().onNeighborChange(block, this.getBlockAt(x, y, z));
-				}
-			}
-		}
-		
-		return true;
+	public byte getData(int x, int y, int z) {
+		ClassicColumn col = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(col == null) return 0;
+		return col.getData(x, y, z);
 	}
 	
 	public boolean setBlockAt(Position pos, BlockType type) {
@@ -378,7 +365,22 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public boolean setBlockAt(int x, int y, int z, BlockType type, boolean physics) {
-		return this.setBlockIdAt(x, y, z, type.getId(), physics);
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(column == null) return false;
+		column.setBlockAt(x, y, z, type);
+		this.sendToAll(new BlockChangeMessage((short) x, (short) y, (short) z, type.getId())); // TODO: adjust for data
+		
+		if(physics) {
+			Block b = this.getBlockAt(x, y, z);
+			for(BlockFace face : BlockFace.values()) {
+				Block block = this.getBlockAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
+				if(this.isColumnLoaded((x + face.getModX()) >> 4, (z + face.getModZ()) >> 4) && block.getType() != null && block.getType().getPhysics() != null) {
+					block.getType().getPhysics().onNeighborChange(block, b);
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -478,7 +480,7 @@ public abstract class ClassicLevel implements Level {
 	}
 
 	@Override
-	public void delayTick(Position pos, byte id) {
+	public void delayTick(Position pos, BlockType type) {
 		this.updatePhysics(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
 	}
 	
@@ -676,7 +678,7 @@ public abstract class ClassicLevel implements Level {
 	public Biome getBiome(int x, int y, int z) {
 		if (y < 0 || y > Constants.COLUMN_HEIGHT) return null;
 		if (!(this.generator instanceof BiomeGenerator)) return null;
-		ClassicColumn column = this.getColumn(x << 4, z << 4, true);
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, true);
 		BiomeManager manager = column.getBiomeManager();
 		if(manager != null) {
 			Biome biome = column.getBiomeManager().getBiome(x & 0xf, y & 0xf, z & 0xf);
@@ -693,7 +695,7 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public BiomeManager getBiomeManager(int x, int z, boolean load) {
-		ClassicColumn column = this.getColumn(x, z, load);
+		ClassicColumn column = this.getColumn(x >> 4, z >> 4, load);
 		return column != null ? column.getBiomeManager() : null;
 	}
 	

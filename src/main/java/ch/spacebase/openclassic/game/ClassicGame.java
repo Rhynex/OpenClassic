@@ -14,10 +14,12 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.Game;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Server;
+import ch.spacebase.openclassic.api.asset.AssetManager;
+import ch.spacebase.openclassic.api.asset.AssetSource;
+import ch.spacebase.openclassic.api.asset.text.YamlFile;
 import ch.spacebase.openclassic.api.command.Command;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
-import ch.spacebase.openclassic.api.config.Configuration;
 import ch.spacebase.openclassic.api.event.EventManager;
 import ch.spacebase.openclassic.api.event.game.CommandNotFoundEvent;
 import ch.spacebase.openclassic.api.event.game.PreCommandEvent;
@@ -34,11 +36,12 @@ public abstract class ClassicGame implements Game {
 
 	private final File directory;
 	
-	private final Configuration config;
+	private final YamlFile config;
 	private final ClassicScheduler scheduler = new ClassicScheduler(this instanceof Client ? "Client" : "Server");
 	
 	private final PluginManager pluginManager = new PluginManager();
 	private final EventManager eventManager = new EventManager();
+	private final AssetManager assets;
 	private final PackageManager pkgManager;
 	private final Translator translator = new Translator();
 	
@@ -48,28 +51,24 @@ public abstract class ClassicGame implements Game {
 	
 	public ClassicGame(File directory) {
 		this.directory = directory;
-		this.translator.register(new Language("English", Main.class.getResourceAsStream("/lang/en_US.lang")));
-		this.translator.setDefault("English"); 
-		
-		File file = new File(this.getDirectory(), "config.yml");
-		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				OpenClassic.getLogger().severe(this.translator.translate("config.fail-load"));
-				e.printStackTrace();
-			}
-		}
-		
 		if(this instanceof Server) {
 			OpenClassic.setServer((Server) this);
 		} else {
 			OpenClassic.setClient((Client) this);
 		}
 		
+		this.assets = new AssetManager(directory);
+		this.config = this.assets.load("config.yml", AssetSource.FILE, YamlFile.class);
+		
+		this.translator.register(new Language("English", "/lang/en_US.lang", AssetSource.JAR));
+		this.translator.setDefault("English"); 
+		
 		this.pkgManager = new PackageManager();
-		this.config = new Configuration(file);
-		this.config.load();
+	}
+	
+	@Override
+	public AssetManager getAssetManager() {
+		return this.assets;
 	}
 	
 	@Override
@@ -222,7 +221,7 @@ public abstract class ClassicGame implements Game {
 	}
 
 	@Override
-	public Configuration getConfig() {
+	public YamlFile getConfig() {
 		return this.config;
 	}
 
@@ -250,8 +249,13 @@ public abstract class ClassicGame implements Game {
 
 	@Override
 	public void reload() {
-		this.config.save();
-		this.config.load();
+		try {
+			this.config.save();
+			this.config.load();
+		} catch(IOException e) {
+			OpenClassic.getLogger().severe("Failed to reload config!");
+			e.printStackTrace();
+		}
 		
 		for(Plugin plugin : this.pluginManager.getPlugins()) {
 			plugin.reload();

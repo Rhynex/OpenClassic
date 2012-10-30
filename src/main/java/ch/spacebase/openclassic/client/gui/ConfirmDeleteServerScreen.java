@@ -21,8 +21,8 @@ public class ConfirmDeleteServerScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 102, this.getHeight() / 6 + 132, 100, 20, this, "Yes"));
-		this.attachWidget(new Button(1, this.getWidth() / 2 + 2, this.getHeight() / 6 + 132, 100, 20, this, "No"));
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 204, this.getHeight() / 6 + 264, 200, 40, this, "Yes"));
+		this.attachWidget(new Button(1, this.getWidth() / 2 + 4, this.getHeight() / 6 + 264, 200, 40, this, "No"));
 	}
 
 	public void onButtonClick(Button button) {
@@ -37,7 +37,7 @@ public class ConfirmDeleteServerScreen extends GuiScreen {
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
 		
-		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), this.getWidth() / 2, (this.getHeight() / 2) - 32);
+		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), this.getWidth() / 2, (this.getHeight() / 2) - 64);
 		super.render();
 	}
 }

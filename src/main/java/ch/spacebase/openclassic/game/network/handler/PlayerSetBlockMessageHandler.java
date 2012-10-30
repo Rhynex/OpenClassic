@@ -18,6 +18,7 @@ import ch.spacebase.openclassic.server.player.ServerPlayer;
 
 public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockMessage> {
 
+	// TODO: adjust for data
 	@Override
 	public void handleServer(ServerSession session, ServerPlayer player, PlayerSetBlockMessage message) {
 		if(session == null || player == null) return;
@@ -47,18 +48,23 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		}
 		
 		byte type = (message.isPlacing()) ? message.getBlock() : 0;
-		if(message.isPlacing() && player.getPlaceMode() != 0 && type != 0) type = player.getPlaceMode();
+		if(message.isPlacing() && player.getPlaceMode() != null && type != 0) type = player.getPlaceMode().getId();
+		BlockType b = Blocks.get(type);
+		if(message.isPlacing() && !(b.getPhysics() != null && !b.getPhysics().canPlace(block))) {
+			session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
+			return;
+		}
 		
 		if(!message.isPlacing()) {
-			if(OpenClassic.getGame().getEventManager().dispatch(new BlockBreakEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {
+			if(OpenClassic.getGame().getEventManager().dispatch(new BlockBreakEvent(block, player, Blocks.get(message.getBlock()))).isCancelled()) {
 				session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
 				return;
 			}
 		}
 		
-		player.getPosition().getLevel().setBlockIdAt(message.getX(), message.getY(), message.getZ(), type);
+		// TODO: adjust for data player.getPosition().getLevel().setBlockIdAt(message.getX(), message.getY(), message.getZ(), type);
 		if(message.isPlacing()) {
-			if(OpenClassic.getGame().getEventManager().dispatch(new BlockPlaceEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {
+			if(OpenClassic.getGame().getEventManager().dispatch(new BlockPlaceEvent(block, player, Blocks.get(message.getBlock()))).isCancelled()) {
 				if(player.getPosition().getLevel().getBlockIdAt(message.getX(), message.getY(), message.getZ()) == type) {
 					player.getPosition().getLevel().setBlockAt(message.getX(), message.getY(), message.getZ(), old);
 				}

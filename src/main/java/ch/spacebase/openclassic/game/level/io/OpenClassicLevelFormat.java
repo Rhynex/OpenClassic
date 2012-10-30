@@ -107,7 +107,7 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		CompoundTag root = (CompoundTag) in.readTag();
 		for(ClassicChunk chunk : column.getChunks()) {
 			CompoundTag tag = (CompoundTag) root.get(String.valueOf(chunk.getY()));
-			chunk.setBlocks(((ByteArrayTag) tag.get("Blocks")).getValue(), false);
+			chunk.setStore(((ByteArrayTag) tag.get("Blocks")).getValue(), ((ByteArrayTag) tag.get("Data")).getValue());
 		}
 		
 		if(((ByteTag) root.get("HasBiomes")).getValue() == 1) {
@@ -149,7 +149,8 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		TagBuilder root = new TagBuilder("Chunk");
 		for(ClassicChunk chunk : column.getChunks()) {
 			TagBuilder build = new TagBuilder(String.valueOf(chunk.getY()));
-			build.append("Blocks", chunk.getBlocks());
+			build.append("Blocks", chunk.getBlockStore().getBlocks());
+			build.append("Data", chunk.getBlockStore().getData());
 			root.append(build.toCompoundTag());
 		}
 		
@@ -158,6 +159,7 @@ public class OpenClassicLevelFormat extends LevelFormat {
 			TagBuilder biomes = new TagBuilder("Biomes");
 			biomes.append("Manager", column.getBiomeManager().getClass().getName());
 			biomes.append("Data", column.getBiomeManager().serialize());
+			root.append(biomes.toCompoundTag());
 		} else {
 			root.append("HasBiomes", (byte) 0);
 		}

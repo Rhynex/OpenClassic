@@ -30,8 +30,8 @@ public class ConsoleScreen extends GuiScreen {
 	
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new TextBox(0, 2, this.getHeight() - 22, this.getWidth() - 58, 20, this));
-		this.attachWidget(new Button(1, this.getWidth() - 54, this.getHeight() - 22, 54, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(new TextBox(0, 4, this.getHeight() - 44, this.getWidth() - 116, 40, this));
+		this.attachWidget(new Button(1, this.getWidth() - 108, this.getHeight() - 44, 108, 40, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
 		this.getWidget(0, TextBox.class).setFocus(true);
 	}
 	
@@ -64,13 +64,13 @@ public class ConsoleScreen extends GuiScreen {
 	@Override
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().drawBox(1, 1, this.getWidth() - 1, this.getHeight() - 25, -6250336);
-		RenderHelper.getHelper().drawBox(2, 2, this.getWidth() - 2, this.getHeight() - 26, -16777216);
+		RenderHelper.getHelper().drawBox(2, 2, this.getWidth() - 2, this.getHeight() - 50, -6250336);
+		RenderHelper.getHelper().drawBox(4, 4, this.getWidth() - 4, this.getHeight() - 52, -16777216);
 		
 		if(this.handler != null) {
 			int count = 0;
 			for (String line : this.handler.getLog()) {
-				RenderHelper.getHelper().renderText(line, 4, 4 + count * 9, false);
+				RenderHelper.getHelper().renderText(line, 8, 8 + count * 18, false);
 				count++;
 			}
 		}

@@ -3,6 +3,8 @@ package ch.spacebase.openclassic.client.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.opengl.ARBShaderObjects;
+
 public class ShaderManager {
 
 	private static final Map<String, Shader> shaders = new HashMap<String, Shader>();
@@ -20,6 +22,10 @@ public class ShaderManager {
 	
 	public static Shader get(String name) {
 		return shaders.get(name);
+	}
+	
+	public static void unuse() {
+		ARBShaderObjects.glUseProgramObjectARB(0);
 	}
 	
 	public static void cleanup() {

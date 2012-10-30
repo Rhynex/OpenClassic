@@ -34,11 +34,11 @@ public class LoginScreen extends GuiScreen {
 	
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.login")));
-		this.attachWidget(new Button(4, this.getWidth() / 2 + 2, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.play-offline")));
-		this.attachWidget(new StateButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.login.remember")));
-		this.attachWidget(new TextBox(2, this.getWidth() / 2 - 100, this.getHeight() / 2 - 10, this, 64));
-		this.attachWidget(new PasswordTextBox(3, this.getWidth() / 2 - 100, this.getHeight() / 2 + 16, this, 64));
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, 196, 40, this, OpenClassic.getGame().getTranslator().translate("gui.login.login")));
+		this.attachWidget(new Button(4, this.getWidth() / 2 + 4, this.getHeight() / 4 + 240, 196, 40, this, OpenClassic.getGame().getTranslator().translate("gui.login.play-offline")));
+		this.attachWidget(new StateButton(1, this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, this, OpenClassic.getGame().getTranslator().translate("gui.login.remember")));
+		this.attachWidget(new TextBox(2, this.getWidth() / 2 - 200, this.getHeight() / 2 - 20, this, 64));
+		this.attachWidget(new PasswordTextBox(3, this.getWidth() / 2 - 200, this.getHeight() / 2 + 32, this, 64));
 		
 		this.getWidget(1, StateButton.class).setState(this.getLoginFile(false).exists() ? OpenClassic.getGame().getTranslator().translate("gui.yes") : OpenClassic.getGame().getTranslator().translate("gui.no"));
 		this.getWidget(2, TextBox.class).setFocus(true);
@@ -133,8 +133,8 @@ public class LoginScreen extends GuiScreen {
 		RenderHelper.getHelper().drawDefaultBG();
 		
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 40);
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.login.user"), (this.getWidth() / 2 - 104) - RenderHelper.getHelper().getStringWidth("Username"), this.getHeight() / 2 - 6);
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.login.pass"), (this.getWidth() / 2 - 104) - RenderHelper.getHelper().getStringWidth("Password"), this.getHeight() / 2 + 20);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.login.user"), (this.getWidth() / 2 - 208) - RenderHelper.getHelper().getStringWidth("Username"), this.getHeight() / 2 - 12);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.login.pass"), (this.getWidth() / 2 - 208) - RenderHelper.getHelper().getStringWidth("Password"), this.getHeight() / 2 + 40);
 		super.render();
 	}
 	

@@ -11,17 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.BlockType;
 
 public class Storage {
 
-	private static List<CustomBlock> clientBlocks = new ArrayList<CustomBlock>();
+	private static List<BlockType> clientBlocks = new ArrayList<BlockType>();
 	private static Map<String, String> favorites = new HashMap<String, String>();
 	public static File favoriteStore;
 	
 	private static final Map<String, Server> servers = new HashMap<String, Server>();
 	
-	public static List<CustomBlock> getClientBlocks() {
+	public static List<BlockType> getClientBlocks() {
 		return clientBlocks;
 	}
 	

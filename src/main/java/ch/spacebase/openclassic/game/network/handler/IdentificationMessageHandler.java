@@ -10,7 +10,7 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerJoinEvent;
@@ -50,8 +50,8 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			}
 
 			for(BlockType block : Blocks.getBlocks()) {
-				if(block != null && block instanceof CustomBlock) {
-					Storage.getClientBlocks().add((CustomBlock) block);
+				if(block != null && !VanillaBlock.is(block)) {
+					Storage.getClientBlocks().add(block);
 					Blocks.unregister(block.getId());
 				}
 			}
@@ -208,8 +208,8 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 				}
 
 				for(BlockType block : Blocks.getBlocks()) {
-					if(block instanceof CustomBlock) {
-						player.getSession().send(new CustomBlockMessage((CustomBlock) block));
+					if(!VanillaBlock.is(block)) {
+						player.getSession().send(new CustomBlockMessage(block));
 						player.getSession().send(new BlockModelMessage(block.getId(), block.getModel()));
 						for(Quad quad : block.getModel().getQuads()) {
 							player.getSession().send(new QuadMessage(block.getId(), quad));

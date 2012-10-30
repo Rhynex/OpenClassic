@@ -1,7 +1,6 @@
 package ch.spacebase.openclassic.client.render;
 
 import java.awt.image.BufferedImage;
-
 import org.lwjgl.opengl.Display;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -11,8 +10,8 @@ import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
+import ch.spacebase.openclassic.api.block.model.EmptyModel;
 import ch.spacebase.openclassic.api.block.model.LiquidModel;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
@@ -27,24 +26,29 @@ import ch.spacebase.openclassic.client.particle.TerrainParticle;
 public class ClientRenderHelper extends RenderHelper {
 	
 	private TextureManager manager = new TextureManager();
-	private TextRenderer text = new TextRenderer("/default.png");
+	//private TextRenderer text = new TextRenderer("/default.png");
+	private FontRenderer text;
 	private int binded = -1;
 	
 	public static ClientRenderHelper getHelper() {
 		return (ClientRenderHelper) helper;
 	}
 	
+	public void setup() {
+		this.text = new FontRenderer();
+	}
+	
 	public void drawDefaultBG() {
-		this.bindTexture("/dirt.png", true);
+		this.bindTexture("/gui/bg.png", true);
 
-		int width = Display.getWidth() * 240 / Display.getHeight();
-		int height = Display.getHeight() * 240 / Display.getHeight();
+		int width = Display.getWidth();// * 240 / Display.getHeight();
+		int height = Display.getHeight();// * 240 / Display.getHeight();
 
 		Renderer.begin();
 		Renderer.color(1, 1, 1);
-		Renderer.vertuv(0, height, 0, 0, height / 32);
-		Renderer.vertuv(width, height, 0, width / 32, height / 32);
-		Renderer.vertuv(width, 0, 0, width / 32, 0);
+		Renderer.vertuv(0, height, 0, 0, 1);
+		Renderer.vertuv(width, height, 0, 1, 1);
+		Renderer.vertuv(width, 0, 0, 1, 0);
 		Renderer.vertuv(0, 0, 0, 0, 0);
 		Renderer.end();
 	}
@@ -129,8 +133,8 @@ public class ClientRenderHelper extends RenderHelper {
 		}
 		
 		if(quad.getParent() instanceof CuboidModel && !(quad.getParent() instanceof LiquidModel) && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
-			y1 = y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight();
-			y2 = y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight();
+			y1 = y1 + quad.getVertex(0).getY() * (quad.getTexture().getY2() - quad.getTexture().getY1());
+			y2 = y1 + quad.getVertex(1).getY() * (quad.getTexture().getY2() - quad.getTexture().getY1());
 		}
 		
 		float width = quad.getTexture().getParent().getWidth();
@@ -194,21 +198,13 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	public boolean canRenderSide(BlockType block, int x, int y, int z, BlockFace face) {
-		if(block == null || block == VanillaBlock.AIR) return false;
-		if(block instanceof CustomBlock) {
-			block = ((CustomBlock) block).getFallback();
-		}
-		
+		if(block == null || block.getModel() instanceof EmptyModel) return false;
+		if(!OpenClassic.getClient().getLevel().isColumnLoaded((x + face.getModX()) >> 4, (z + face.getModZ()) >> 4)) return false;
 		BlockType relative = OpenClassic.getClient().getLevel().getBlockTypeAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
-		if(block instanceof VanillaBlock) {
-			switch((VanillaBlock) block) {
-			case GLASS: {
-				return relative == null || (relative != block && !this.isSolidTile(relative));
-			}
-			case WATER:
-			case LAVA:
-			case STATIONARY_WATER:
-			case STATIONARY_LAVA: {
+		if(VanillaBlock.is(block)) {
+			if(block == VanillaBlock.GLASS) {
+				return relative == null || (relative != block && !this.isOpaque(relative));
+			} else if(block == VanillaBlock.WATER || block == VanillaBlock.STATIONARY_WATER || block == VanillaBlock.LAVA || block == VanillaBlock.STATIONARY_LAVA) {
 				if(relative == null) {
 					return false;
 				}
@@ -217,17 +213,17 @@ public class ClientRenderHelper extends RenderHelper {
 					return false;
 				}
 				
-				return !this.isSolidTile(relative);
+				return !this.isOpaque(relative);
+			} else if(block == VanillaBlock.SLAB) {
+				return relative == null || face == BlockFace.UP || (!this.isOpaque(relative) && (face == BlockFace.DOWN || relative != VanillaBlock.SLAB));
+			} else if(block == VanillaBlock.CACTUS) {
+				return relative == null || (!this.isOpaque(relative) && relative != VanillaBlock.CACTUS);
 			}
-			case SLAB: {
-				return relative == null || face == BlockFace.UP || (!this.isSolidTile(relative) && (face == BlockFace.DOWN || relative != VanillaBlock.SLAB));
-			}
-			default:
-				return relative == null || !this.isSolidTile(relative);
-			}
+		} else {
+			// TODO: Custom canRenderSide for custom blocks?
 		}
 		
-		return true;
+		return relative == null || !this.isOpaque(relative);
 	}
 	
 	public static BlockType toMoving(BlockType block) {
@@ -237,9 +233,9 @@ public class ClientRenderHelper extends RenderHelper {
 		return block;
 	}
 	
-	private boolean isSolidTile(BlockType block) {
+	private boolean isOpaque(BlockType block) {
 		if(block == null) return false;
-		return block.isSolid();
+		return block.isOpaque() && block.isCube();
 	}
 	
 	public float getBrightness(BlockType main, int x, int y, int z) {
@@ -294,18 +290,10 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	public void renderText(String text, float x, float y, boolean xCenter) {
-		this.renderText(text, x, y, 16777215, xCenter);
-	}
-	
-	public void renderText(String text, float x, float y, int color) {
-		this.renderText(text, x, y, color, true);
-	}
-	
-	public void renderText(String text, float x, float y, int color, boolean xCenter) {
 		if(xCenter) {
-			this.text.render(text, x - this.text.getWidth(text) / 2, y, color);
+			this.text.render(text, x - this.text.getWidth(text) / 2, y);//, color);
 		} else {
-			this.text.render(text, x, y, color);
+			this.text.render(text, x, y);//, color);
 		}
 	}
 	
@@ -314,18 +302,10 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	public void renderTextNoShadow(String text, float x, float y, boolean xCenter) {
-		this.renderTextNoShadow(text, x, y, 16777215, xCenter);
-	}
-	
-	public void renderTextNoShadow(String text, float x, float y, int color) {
-		this.renderTextNoShadow(text, x, y, color, true);
-	}
-	
-	public void renderTextNoShadow(String text, float x, float y, int color, boolean xCenter) {
 		if(xCenter) {
-			this.text.render(text, x - this.text.getWidth(text) / 2, y, color, false);
+			this.text.render(text, x - this.text.getWidth(text) / 2, y, false);//, color);
 		} else {
-			this.text.render(text, x, y, color, false);
+			this.text.render(text, x, y, false);//, color);
 		}
 	}
 

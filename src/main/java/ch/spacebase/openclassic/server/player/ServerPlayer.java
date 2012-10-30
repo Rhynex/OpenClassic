@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.component.BasicComponentHolder;
 import ch.spacebase.openclassic.api.component.type.NBTComponent;
 import ch.spacebase.openclassic.api.data.NBTData;
@@ -80,12 +81,12 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 		this.displayName = name;
 	}
 	
-	public byte getPlaceMode() {
+	public BlockType getPlaceMode() {
 		return this.get(PlaceModeComponent.class).getPlaceMode();
 	}
 	
-	public void setPlaceMode(int type) {
-		this.get(PlaceModeComponent.class).setPlaceMode((byte) type);
+	public void setPlaceMode(BlockType type) {
+		this.get(PlaceModeComponent.class).setPlaceMode(type);
 	}
 	
 	public void moveTo(Position pos) {

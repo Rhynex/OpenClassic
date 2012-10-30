@@ -2,7 +2,6 @@ package ch.spacebase.openclassic.game.level.column;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -10,13 +9,11 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.level.generator.Populator;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.storage.DoubleIntHashMap;
-import ch.spacebase.openclassic.api.util.storage.TripleIntByteArray;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
-public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, data values for states (ex. water), finite liquid physics
+public class ColumnManager {
 
 	private static final int TINY_CHUNKS = 7;
 	private static final int SHORT_CHUNKS = 11;
@@ -24,28 +21,16 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 	private static final int FAR_CHUNKS = 27;
 	
 	private final DoubleIntHashMap<ClassicColumn> loaded = new DoubleIntHashMap<ClassicColumn>();
-	private final DoubleIntHashMap<ClassicColumn> unloadQueue = new DoubleIntHashMap<ClassicColumn>();
+	private final ColumnUnloadThread unload = new ColumnUnloadThread();
 	
 	private final ClassicLevel level;
 	
 	public ColumnManager(ClassicLevel level) {
 		this.level = level;
+		this.unload.start();
 	}
 	
 	public void update() {
-		// process unload queue
-		if(this.unloadQueue.size() > 0) {
-			Collection<ClassicColumn> queue = this.unloadQueue.values();
-			int count = 0;
-			for(ClassicColumn column : queue) {
-				if(count == 6) break;
-				column.save();
-				column.dispose();
-				this.unloadQueue.remove(column.getX(), column.getZ());
-				count++;
-			}
-		}
-		
 		// unload out of range columns, update in range columns
 		Player player = OpenClassic.getClient().getPlayer();
 		int dist = getChunkDistance();
@@ -80,13 +65,13 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 	}
 	
 	public boolean isUnloading(int x, int z) {
-		return this.unloadQueue.containsKey(x, z);
+		return this.unload.isUnloading(x, z);
 	}
 	
 	public ClassicColumn loadColumn(int x, int z) {
 		if(this.isColumnLoaded(x, z)) return this.loaded.get(x, z);
 		if(this.isUnloading(x, z)) {
-			ClassicColumn column = this.unloadQueue.remove(x, z);
+			ClassicColumn column = this.unload.pull(x, z);
 			this.loaded.put(x, z, column);
 			return column;
 		}
@@ -102,43 +87,53 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 		}
 		
 		if(column == null) {
+			column = new ClassicColumn(this.level, x, z);
+			this.loaded.put(x, z, column);
 			Random rand = new Random();
 			rand.setSeed(this.level.getSeed());
 			//System.out.println("Generating (" + x + ", " + z + ")");
 			this.level.setGenerating(true);
-			column = new ClassicColumn(this.level, x, z);
 			if(this.level.getGenerator() instanceof BiomeGenerator) {
 				BiomeGenerator generator = (BiomeGenerator) this.level.getGenerator();
-				column.setBiomeManager(generator.generateBiomes(this.level, x, z));
+				column.setBiomeManager(generator.generateBiomes(this.level, x << 4, z << 4));
 			}
 			
 			List<ClassicChunk> chunks = column.getChunks();
 			for(int count = chunks.size() - 1; count >= 0; count--) {
 				ClassicChunk chunk = chunks.get(count);
-				TripleIntByteArray blocks = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
-				this.level.getGenerator().generate(this.level, chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), blocks, rand);
-				chunk.setBlocks(blocks.get(), true);
+				this.level.getGenerator().generate(this.level, chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getBlockStore(), rand);
+				chunk.generated();
 			}
 			
-			this.loaded.put(x, z, column);
+			// TODO: fix cut off when adjacent chunks generate and destroy populator work (ex. cutoff trees)
 			for(ClassicChunk chunk : column.getChunks()) {
 				for(Populator pop : this.level.getGenerator().getPopulators(this.level)) {
 					pop.populate(this.level, chunk, rand);
 				}
 			}
 			
-			this.level.setGenerating(false);	
-			//column.save();
+			this.level.setGenerating(false);
 		} else {
 			this.loaded.put(x, z, column);
 		}
 		
 		if(this.level instanceof ClientLevel && ((ClientLevel) this.level).getRenderer() != null) {
 			((ClientLevel) this.level).getRenderer().queue(column);
-		}
-		
-		if(this.level.getSpawn().getBlockX() >= x << 4 && this.level.getSpawn().getBlockX() <= (x << 4) + Constants.CHUNK_WIDTH && this.level.getSpawn().getBlockZ() >= z << 4 && this.level.getSpawn().getBlockZ() <= (z << 4) + Constants.CHUNK_DEPTH) {
-			this.level.setSpawn(this.level.getGenerator().adjustSpawn(this.level));
+			if(this.isColumnLoaded(x - 1, z)) {
+				((ClientLevel) this.level).getRenderer().queue(this.getColumn(x - 1, z));
+			}
+			
+			if(this.isColumnLoaded(x + 1, z)) {
+				((ClientLevel) this.level).getRenderer().queue(this.getColumn(x + 1, z));
+			}
+			
+			if(this.isColumnLoaded(x, z - 1)) {
+				((ClientLevel) this.level).getRenderer().queue(this.getColumn(x, z - 1));
+			}
+			
+			if(this.isColumnLoaded(x, z + 1)) {
+				((ClientLevel) this.level).getRenderer().queue(this.getColumn(x, z + 1));
+			}
 		}
 		
 		return column;
@@ -147,7 +142,8 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 	public void unloadColumn(int x, int z) {
 		if(!this.isColumnLoaded(x, z)) return;
 		ClassicColumn column = this.loaded.get(x, z);
-		this.unloadQueue.put(x, z, column);
+		column.dispose();
+		this.unload.unload(column);
 		this.loaded.remove(x, z);
 		if(this.level instanceof ClientLevel) {
 			((ClientLevel) this.level).getRenderer().remove(column);
@@ -159,10 +155,13 @@ public class ColumnManager { // TODO: finish up inf worlds, brooler lighting, da
 		return this.loaded.get(x, z);
 	}
 	
+	public void dispose() {
+		this.unload.dispose();
+	}
+	
 	public List<ClassicColumn> getAll() {
 		List<ClassicColumn> result = new ArrayList<ClassicColumn>();
 		result.addAll(this.loaded.values());
-		result.removeAll(this.unloadQueue.values());
 		return result;
 	}
 	

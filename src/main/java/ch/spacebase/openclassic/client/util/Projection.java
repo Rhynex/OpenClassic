@@ -12,8 +12,8 @@ public class Projection {
 	private static final float FAR = 1000f;
 	
 	public static void ortho() {
-		int width = Display.getWidth() * 240 / Display.getHeight();
-		int height = Display.getHeight() * 240 / Display.getHeight();
+		int width = Display.getWidth();// * 240 / Display.getHeight();
+		int height = Display.getHeight();// * 240 / Display.getHeight();
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

@@ -300,13 +300,13 @@ public class ClientPlayer extends BasicComponentHolder implements Player {
 	}
 
 	@Override
-	public byte getPlaceMode() {
+	public BlockType getPlaceMode() {
 		return this.get(PlaceModeComponent.class).getPlaceMode();
 	}
 
 	@Override
-	public void setPlaceMode(int type) {
-		this.get(PlaceModeComponent.class).setPlaceMode((byte) type);
+	public void setPlaceMode(BlockType type) {
+		this.get(PlaceModeComponent.class).setPlaceMode(type);
 	}
 
 	@Override

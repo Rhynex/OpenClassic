@@ -1,19 +1,19 @@
 package ch.spacebase.openclassic.client.player;
 
-import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 
 public class QuickBar {
 
-	private byte slots[] = new byte[9];
+	private BlockType slots[] = new BlockType[9];
 	private int selected = 0;
 	
 	public QuickBar() {
 		int slot = 0;
-		for(VanillaBlock type : VanillaBlock.values()) {
+		for(BlockType type : VanillaBlock.getBlocks()) {
 			if(slot == 9) break;
 			if(type.isSelectable()) {
-				this.setBlock(slot, type.getId());
+				this.setBlock(slot, type);
 				slot++;
 			}
 		}
@@ -27,21 +27,21 @@ public class QuickBar {
 		this.selected = selected;
 	}
 	
-	public byte getBlock(int slot) {
+	public BlockType getBlock(int slot) {
 		return this.slots[slot];
 	}
 	
-	public void setBlock(int slot, byte block) {
-		if(Blocks.fromId(block) != null && Blocks.fromId(block).isSelectable()) {
+	public void setBlock(int slot, BlockType block) {
+		if(block != null && block.isSelectable()) {
 			this.slots[slot] = block;
 		}
 	}
 
-	public boolean contains(byte block) {
+	public boolean contains(BlockType block) {
 		return this.getSlot(block) != -1;
 	}
 	
-	public int getSlot(byte block) {
+	public int getSlot(BlockType block) {
 		for(int slot = 0; slot < this.slots.length; slot++) {
 			if(this.getBlock(slot) == block) return slot;
 		}

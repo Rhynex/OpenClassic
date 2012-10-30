@@ -1,16 +1,17 @@
 package ch.spacebase.openclassic.game.component.player;
 
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.component.Component;
 
 public class PlaceModeComponent extends Component {
 
-	private byte placemode = 0;
+	private BlockType placemode = null;
 	
-	public byte getPlaceMode() {
+	public BlockType getPlaceMode() {
 		return this.placemode;
 	}
 	
-	public void setPlaceMode(byte placemode) {
+	public void setPlaceMode(BlockType placemode) {
 		this.placemode = placemode;
 	}
 	

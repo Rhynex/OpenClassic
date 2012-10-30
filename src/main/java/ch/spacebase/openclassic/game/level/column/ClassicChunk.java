@@ -12,12 +12,16 @@ import ch.spacebase.openclassic.api.block.model.EmptyModel;
 import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.generator.biome.Biome;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.api.util.storage.TripleIntByteArray;
+import ch.spacebase.openclassic.api.util.storage.BlockStore;
 
 public class ClassicChunk implements Chunk {
 	
+	//private static final short EMPTY_ARRAY[] = new short[Constants.CHUNK_VOLUME];
+	
 	private ClassicColumn column;
-	private TripleIntByteArray blocks = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
+	private BlockStore blocks = new BlockStore(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
+	//private TripleIntByteArray blocks = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
+	//private TripleIntByteArray data = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
 	private int y;
 	
 	private int list = -1;
@@ -60,29 +64,60 @@ public class ClassicChunk implements Chunk {
 		if(x < this.getWorldX() || y < this.getWorldY() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= this.getWorldY() + Constants.CHUNK_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
 			return this.getColumn().getBlockAt(x, y, z);
 		
-		return this.blocks.get(x - this.getWorldX(), y - this.getWorldY(), z - this.getWorldZ());
+		//if(this.empty) return 0;
+		return this.blocks.getBlock(x, y, z);
 	}
 	
-	public void setBlockAt(int x, int y, int z, byte id) {
+	public byte getData(int x, int y, int z) {
+		if(x < this.getWorldX() || y < this.getWorldY() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= this.getWorldY() + Constants.CHUNK_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
+			return this.getColumn().getData(x, y, z);
+		
+		//if(this.empty) return 0;
+		return this.blocks.getData(x, y, z);
+	}
+	
+	public void setBlockAt(int x, int y, int z, BlockType type) {
+		if(type == null) return;
 		if(x < this.getWorldX() || y < this.getWorldY() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= this.getWorldY() + Constants.CHUNK_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
-			this.getColumn().setBlockAt(x, y, z, id);
+			this.getColumn().setBlockAt(x, y, z, type);
 			return;
 		}
 		
-		this.blocks.set(x - this.getWorldX(), y - this.getWorldY(), z - this.getWorldZ(), id);
+		/* if(this.empty && type != VanillaBlock.AIR) {
+			this.blocks.set(new short[EMPTY_ARRAY.length]);
+			this.empty = false;
+		}
+		
+		if(!this.empty && type == VanillaBlock.AIR && Arrays.equals(this.blocks.get(), EMPTY_ARRAY)) {
+			this.blocks.set(EMPTY_ARRAY);
+			this.empty = true;
+		} */
+		
+		if(this.empty) return;
+		this.blocks.set(x, y, z, type.getId(), type.getData());
 		this.column.updateHeightMap(x - 1, z - 1, x + 1, z + 1);
 	}
 	
 	public int blockIndex(int x, int y, int z) {
-		return this.blocks.toIndex(x, y, z);
+		return this.blocks.index(x, y, z);
 	}
 	
-	public byte[] getBlocks() {
-		return this.blocks.get();
+	public BlockStore getBlockStore() {
+		return this.blocks;
 	}
 	
-	public void setBlocks(byte blocks[], boolean calc) {
-		this.blocks.set(blocks);
+	public void setStore(byte blocks[], byte data[]) {
+		this.blocks.setBlocks(blocks);
+		this.blocks.setData(data);
+		this.column.updateHeightMap(this.getWorldX(), this.getWorldZ(), this.getWorldX() + Constants.CHUNK_WIDTH - 1, this.getWorldZ() + Constants.CHUNK_DEPTH - 1);
+	}
+	
+	public void generated() {
+		/* this.empty = Arrays.equals(this.blocks.get(), EMPTY_ARRAY);
+		if(this.empty) {
+			this.blocks.set(EMPTY_ARRAY);
+		} */
+		
 		this.column.updateHeightMap(this.getWorldX(), this.getWorldZ(), this.getWorldX() + Constants.CHUNK_WIDTH - 1, this.getWorldZ() + Constants.CHUNK_DEPTH - 1);
 	}
 	
@@ -95,29 +130,37 @@ public class ClassicChunk implements Chunk {
 	}
 	
 	public void render() {
+		//if(this.empty) return;
 		if(this.list == -1) {
-			this.list = glGenLists(1);
+			this.list = glGenLists(2);
 		}
 		
 		this.empty = true;
-		glNewList(this.list, GL_COMPILE);
-		for(int x = this.getWorldX(); x < this.getWorldX() + Constants.CHUNK_WIDTH; x++) {
-			for(int y = this.getWorldY(); y < this.getWorldY() + Constants.CHUNK_HEIGHT; y++) {
-				for(int z = this.getWorldZ(); z < this.getWorldZ() + Constants.CHUNK_DEPTH; z++) {
-					BlockType type = Blocks.fromId(this.getBlockAt(x, y, z));
-					if(!(type.getModel() instanceof EmptyModel)) {
-						this.empty = false;
-						type.getModel().render(type, x, y, z, this.column.getBrightness(x, y, z));
+		for(int pass = 0; pass < 2; pass++) {
+			glNewList(this.list + pass, GL_COMPILE);
+			for(int x = this.getWorldX(); x < this.getWorldX() + Constants.CHUNK_WIDTH; x++) {
+				for(int y = this.getWorldY(); y < this.getWorldY() + Constants.CHUNK_HEIGHT; y++) {
+					for(int z = this.getWorldZ(); z < this.getWorldZ() + Constants.CHUNK_DEPTH; z++) {
+						BlockType type = Blocks.get(this.getBlockAt(x, y, z), this.getData(x, y, z));
+						if(pass == 0 && !type.isOpaque()) continue;
+						if(pass == 1 && type.isOpaque()) continue;
+						if(!(type.getModel() instanceof EmptyModel)) {
+							type.getModel().render(type, x, y, z, this.column.getBrightness(x, y, z));
+							this.empty = false;
+						}
 					}
 				}
 			}
+			
+			glEndList();
 		}
-		
-		glEndList();
 	}
 	
 	public void dispose() {
-		glDeleteLists(this.list, 1);
+		if(this.list > -1) {
+			glDeleteLists(this.list, 2);
+			this.list = -1;
+		}
 	}
 	
 	public void update() {

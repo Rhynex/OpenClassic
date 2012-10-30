@@ -10,12 +10,8 @@ import org.jboss.netty.channel.ChannelFutureListener;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.event.player.PlayerKickEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
-import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDisconnectMessage;
@@ -78,13 +74,6 @@ public class ServerSession implements Session {
 	}
 
 	public void send(Message message) {
-		if(message instanceof BlockChangeMessage && !this.player.hasCustomClient()) {
-			BlockType block = Blocks.fromId(((BlockChangeMessage) message).getBlock());
-			if(block instanceof CustomBlock) {
-				message = new BlockChangeMessage(((BlockChangeMessage) message).getX(), ((BlockChangeMessage) message).getY(), ((BlockChangeMessage) message).getZ(), ((CustomBlock) block).getFallback().getId());
-			}
-		}
-		
 		if(!this.canSendPlayerMessage(message, this.player)) return;
 		if(message.getClass().getPackage().getName().contains("custom") && !this.player.hasCustomClient()) return;
 		this.channel.write(message);

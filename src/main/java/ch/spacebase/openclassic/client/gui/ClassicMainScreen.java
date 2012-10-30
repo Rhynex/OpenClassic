@@ -8,8 +8,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.MainScreen;
+import ch.spacebase.openclassic.api.level.generator.biome.Biome;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
@@ -95,23 +95,26 @@ public class ClassicMainScreen extends MainScreen {
 	}
 	
 	public void render() {
-		RenderHelper.getHelper().drawSubTex(GuiTextures.CROSSHAIR, this.width / 2 - 8, this.height / 2 - 8, 1);
-		RenderHelper.getHelper().drawSubTex(GuiTextures.QUICK_BAR, this.width / 2 - 91, this.height - 22, 0, 1);
-		RenderHelper.getHelper().drawSubTex(GuiTextures.SELECTION, this.width / 2 - 92 + this.mode.getPlayer().getQuickBar().getSelected() * 20, this.height - 23, 1);
+		RenderHelper.getHelper().drawSubTex(GuiTextures.CROSSHAIR, this.width / 2 - 16, this.height / 2 - 16, 1);
+		RenderHelper.getHelper().drawSubTex(GuiTextures.QUICK_BAR, this.width / 2 - 182, this.height - 44, 0, 1);
+		RenderHelper.getHelper().drawSubTex(GuiTextures.SELECTION, this.width / 2 - 184 + this.mode.getPlayer().getQuickBar().getSelected() * 40, this.height - 46, 1);
 		for(int slot = 0; slot < 9; slot++) {
-			int x = this.width / 2 - 90 + slot * 20;
-			int y = this.height - 11;
-			if(this.mode.getPlayer().getQuickBar().getBlock(slot) > 0) {
-				RenderHelper.getHelper().drawRotatedBlock(x, y, Blocks.fromId(this.mode.getPlayer().getQuickBar().getBlock(slot)));
+			int x = this.width / 2 - 170 + slot * 40;
+			int y = this.height - 22;
+			if(this.mode.getPlayer().getQuickBar().getBlock(slot) != null) {
+				RenderHelper.getHelper().drawRotatedBlock(x, y, this.mode.getPlayer().getQuickBar().getBlock(slot), 2);
 			}
 		}
 		
 		RenderHelper.getHelper().renderText(Constants.CLIENT_VERSION, 2, 2, false);
 		if(OpenClassic.getClient().getConfig().getBoolean("options.show-info", false)) {
-			RenderHelper.getHelper().renderText("FPS: " + ((ClassicClient) OpenClassic.getClient()).getFps(), 2, 12, false);
-			RenderHelper.getHelper().renderText("Position: " + OpenClassic.getClient().getPlayer().getPosition().getBlockX() + ", " + OpenClassic.getClient().getPlayer().getPosition().getBlockY() + ", " + OpenClassic.getClient().getPlayer().getPosition().getBlockZ(), 2, 22, false);
-			RenderHelper.getHelper().renderText("Columns: " + ((ClassicClient) OpenClassic.getClient()).getColumns(), 2, 32, false);
-			RenderHelper.getHelper().renderText("Memory: " + ((ClassicClient) OpenClassic.getClient()).getMemoryDisplay(), 2, 42, false);
+			RenderHelper.getHelper().renderText("FPS: " + ((ClassicClient) OpenClassic.getClient()).getFps(), 4, 24, false);
+			RenderHelper.getHelper().renderText("Position: " + OpenClassic.getClient().getPlayer().getPosition().getBlockX() + ", " + OpenClassic.getClient().getPlayer().getPosition().getBlockY() + ", " + OpenClassic.getClient().getPlayer().getPosition().getBlockZ(), 4, 44, false);
+			RenderHelper.getHelper().renderText("Columns: " + ((ClassicClient) OpenClassic.getClient()).getColumns(), 4, 64, false);
+			Biome b = OpenClassic.getClient().getLevel().getBiome(OpenClassic.getClient().getPlayer().getPosition().getBlockX(), OpenClassic.getClient().getPlayer().getPosition().getBlockY(), OpenClassic.getClient().getPlayer().getPosition().getBlockZ());
+			String biome = b != null ? b.getName() : "None";
+			RenderHelper.getHelper().renderText("Biome: " + biome, 4, 84, false);
+			RenderHelper.getHelper().renderText("Memory: " + ((ClassicClient) OpenClassic.getClient()).getMemoryDisplay(), 4, 104, false);
 		}
 		
 		super.render();
@@ -125,25 +128,25 @@ public class ClassicMainScreen extends MainScreen {
 
 		List<Chat> visible = this.getVisible(max, all);
 		if(visible.size() > 0) {
-			RenderHelper.getHelper().drawBox(2, this.height - 32, 377, this.height - 34 - Math.min(visible.size(), max) * 9, Integer.MIN_VALUE);
+			RenderHelper.getHelper().drawBox(4, this.height - 64, 754, this.height - 68 - Math.min(visible.size(), max) * 18, Integer.MIN_VALUE);
 			for(int count = 0; count < visible.size(); count++) {
-				RenderHelper.getHelper().renderText(visible.get(count).getMessage(), 4, this.height - 41 - count * 9, false);
+				RenderHelper.getHelper().renderText(visible.get(count).getMessage(), 8, this.height - 86 - count * 18, false);
 			}
 		}
 		
 		if(Keyboard.isKeyDown(OpenClassic.getClient().getConfig().getInteger("keys.playerlist", Keyboard.KEY_TAB)) && this.mode instanceof Multiplayer && this.mode.isInGame()) {
 			List<Player> players = this.mode.getLevel().getPlayers();
-			RenderHelper.getHelper().drawBox(this.width / 2 - 128, this.height / 2 - 80, this.width / 2 + 128, this.height / 2 + 68, Integer.MIN_VALUE);
-			RenderHelper.getHelper().renderText("Connected players:", this.width / 2 - RenderHelper.getHelper().getStringWidth("Connected players:") / 2, this.height / 2 - 64 - 12, false);
+			RenderHelper.getHelper().drawBox(this.width / 2 - 256, this.height / 2 - 160, this.width / 2 + 256, this.height / 2 + 136, Integer.MIN_VALUE);
+			RenderHelper.getHelper().renderText("Connected players:", this.width / 2 - RenderHelper.getHelper().getStringWidth("Connected players:") / 2, this.height / 2 - 152, false);
 			for(int count = 0; count < players.size(); count++) {
-				int x = this.width / 2 + count % 2 * 120 - 120;
-				int y = this.height / 2 - 64 + (count / 2 << 3);
+				int x = this.width / 2 + count % 2 * 240 - 240;
+				int y = this.height / 2 - 128 + (count / 2 << 3);
 				if(!Mouse.isGrabbed() && Mouse.getX() >= x && Mouse.getY() >= y && Mouse.getX() < x + 120 && Mouse.getY() < y + 8) {
 					this.hoveredPlayer = players.get(count).getName();
-					RenderHelper.getHelper().renderText(players.get(count).getName(), x + 2, y, false);
+					RenderHelper.getHelper().renderText(players.get(count).getName(), x + 4, y, false);
 				} else {
 					this.hoveredPlayer = null;
-					RenderHelper.getHelper().renderText(players.get(count).getName(), x, y, 15658734, false);
+					RenderHelper.getHelper().renderText(players.get(count).getName(), x, y, false);
 				}
 			}
 		}
