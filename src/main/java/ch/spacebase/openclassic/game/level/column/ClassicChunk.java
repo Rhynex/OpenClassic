@@ -16,12 +16,8 @@ import ch.spacebase.openclassic.api.util.storage.BlockStore;
 
 public class ClassicChunk implements Chunk {
 	
-	//private static final short EMPTY_ARRAY[] = new short[Constants.CHUNK_VOLUME];
-	
 	private ClassicColumn column;
 	private BlockStore blocks = new BlockStore(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
-	//private TripleIntByteArray blocks = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
-	//private TripleIntByteArray data = new TripleIntByteArray(Constants.CHUNK_WIDTH, Constants.CHUNK_HEIGHT, Constants.CHUNK_DEPTH);
 	private int y;
 	
 	private int list = -1;
@@ -64,7 +60,6 @@ public class ClassicChunk implements Chunk {
 		if(x < this.getWorldX() || y < this.getWorldY() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= this.getWorldY() + Constants.CHUNK_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
 			return this.getColumn().getBlockAt(x, y, z);
 		
-		//if(this.empty) return 0;
 		return this.blocks.getBlock(x, y, z);
 	}
 	
@@ -72,7 +67,6 @@ public class ClassicChunk implements Chunk {
 		if(x < this.getWorldX() || y < this.getWorldY() || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= this.getWorldY() + Constants.CHUNK_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH)
 			return this.getColumn().getData(x, y, z);
 		
-		//if(this.empty) return 0;
 		return this.blocks.getData(x, y, z);
 	}
 	
@@ -82,16 +76,6 @@ public class ClassicChunk implements Chunk {
 			this.getColumn().setBlockAt(x, y, z, type);
 			return;
 		}
-		
-		/* if(this.empty && type != VanillaBlock.AIR) {
-			this.blocks.set(new short[EMPTY_ARRAY.length]);
-			this.empty = false;
-		}
-		
-		if(!this.empty && type == VanillaBlock.AIR && Arrays.equals(this.blocks.get(), EMPTY_ARRAY)) {
-			this.blocks.set(EMPTY_ARRAY);
-			this.empty = true;
-		} */
 		
 		if(this.empty) return;
 		this.blocks.set(x, y, z, type.getId(), type.getData());
@@ -113,11 +97,6 @@ public class ClassicChunk implements Chunk {
 	}
 	
 	public void generated() {
-		/* this.empty = Arrays.equals(this.blocks.get(), EMPTY_ARRAY);
-		if(this.empty) {
-			this.blocks.set(EMPTY_ARRAY);
-		} */
-		
 		this.column.updateHeightMap(this.getWorldX(), this.getWorldZ(), this.getWorldX() + Constants.CHUNK_WIDTH - 1, this.getWorldZ() + Constants.CHUNK_DEPTH - 1);
 	}
 	
@@ -130,7 +109,6 @@ public class ClassicChunk implements Chunk {
 	}
 	
 	public void render() {
-		//if(this.empty) return;
 		if(this.list == -1) {
 			this.list = glGenLists(2);
 		}
@@ -144,8 +122,7 @@ public class ClassicChunk implements Chunk {
 						BlockType type = Blocks.get(this.getBlockAt(x, y, z), this.getData(x, y, z));
 						if(pass == 0 && !type.isOpaque()) continue;
 						if(pass == 1 && type.isOpaque()) continue;
-						if(!(type.getModel() instanceof EmptyModel)) {
-							type.getModel().render(type, x, y, z, this.column.getBrightness(x, y, z));
+						if(!(type.getModel() instanceof EmptyModel) && type.getModel().render(type, x, y, z, this.column.getBrightness(x, y, z))) {
 							this.empty = false;
 						}
 					}
