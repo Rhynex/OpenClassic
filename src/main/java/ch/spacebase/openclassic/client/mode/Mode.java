@@ -106,7 +106,7 @@ public abstract class Mode {
 		}
 		
 		if(Mouse.isButtonDown(0) && System.currentTimeMillis() - this.lastChange > 150 && this.select.isValid() && !(this.level.getBlockTypeAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ()) == VanillaBlock.BEDROCK && !this.player.isOp())) {
-			this.lastChange = System.currentTimeMillis();
+			this.setLastChange();
 			this.held.onBlock();
 			BlockType old = this.level.getBlockTypeAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ());
 			this.level.setBlockAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), VanillaBlock.AIR);
@@ -123,7 +123,7 @@ public abstract class Mode {
 		}
 		
 		if(Mouse.isButtonDown(1) && System.currentTimeMillis() - this.lastChange > 150 && this.select.isValid()) {			
-			this.lastChange = System.currentTimeMillis();
+			this.setLastChange();
 			BlockType type = this.level.getBlockTypeAt(this.select.getPosition().getBlockX() + this.select.getFace().getModX(), this.select.getPosition().getBlockY() + this.select.getFace().getModY(), this.select.getPosition().getBlockZ() + this.select.getFace().getModZ());
 			BlockType placing = this.player.getPlaceMode() != null ? this.player.getPlaceMode() : this.player.getQuickBar().getBlock(this.player.getQuickBar().getSelected());
 			BoundingBox collision = placing.getModel().getCollisionBox(this.select.getPosition().getBlockX() + this.select.getFace().getModX(), this.select.getPosition().getBlockY() + this.select.getFace().getModY(), this.select.getPosition().getBlockZ() + this.select.getFace().getModZ());
@@ -162,6 +162,10 @@ public abstract class Mode {
 				this.player.getQuickBar().setBlock(this.player.getQuickBar().getSelected(), block);
 			}
 		}
+	}
+	
+	public void setLastChange() {
+		this.lastChange = System.currentTimeMillis();
 	}
 	
 	public void onKeyboard(int key) {

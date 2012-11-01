@@ -306,6 +306,9 @@ public class ClassicClient extends ClassicGame implements Client {
 			if(Mouse.getEventButtonState()) {
 				if(this.currentScreen != null) {
 					this.getCurrentScreen().onMouseClick(RenderHelper.getHelper().getRenderMouseX(), RenderHelper.getHelper().getRenderMouseY(), Mouse.getEventButton());
+					if(this.currentScreen == null) {
+						this.mode.setLastChange();
+					}
 				} else if(this.mode != null) {
 					this.mode.onClick(Mouse.getEventX(), Mouse.getEventY(), Mouse.getEventButton());
 				}
