@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
 import ch.spacebase.openclassic.game.level.column.ClassicChunk;
@@ -105,9 +106,9 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		ClassicColumn column = new ClassicColumn(this.getLevel(), x, z);
 		NBTInputStream in = new NBTInputStream(new FileInputStream(file));
 		CompoundTag root = (CompoundTag) in.readTag();
-		for(ClassicChunk chunk : column.getChunks()) {
+		for(Chunk chunk : column.getChunks()) {
 			CompoundTag tag = (CompoundTag) root.get(String.valueOf(chunk.getY()));
-			chunk.setStore(((ByteArrayTag) tag.get("Blocks")).getValue(), ((ByteArrayTag) tag.get("Data")).getValue());
+			((ClassicChunk) chunk).setStore(((ByteArrayTag) tag.get("Blocks")).getValue(), ((ByteArrayTag) tag.get("Data")).getValue());
 		}
 		
 		if(((ByteTag) root.get("HasBiomes")).getValue() == 1) {
@@ -147,7 +148,7 @@ public class OpenClassicLevelFormat extends LevelFormat {
 		
 		NBTOutputStream out = new NBTOutputStream(new FileOutputStream(file));
 		TagBuilder root = new TagBuilder("Chunk");
-		for(ClassicChunk chunk : column.getChunks()) {
+		for(Chunk chunk : column.getChunks()) {
 			TagBuilder build = new TagBuilder(String.valueOf(chunk.getY()));
 			build.append("Blocks", chunk.getBlockStore().getBlocks());
 			build.append("Data", chunk.getBlockStore().getData());

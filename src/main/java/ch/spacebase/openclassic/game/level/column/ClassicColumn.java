@@ -6,8 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
 import ch.spacebase.openclassic.api.util.Constants;
@@ -49,6 +52,14 @@ public class ClassicColumn implements Column {
 	
 	public int getWorldZ() {
 		return this.z << 4;
+	}
+	
+	public Block getBlock(int x, int y, int z) {
+		return new Block(new Position(this.getLevel(), x, y, z));
+	}
+	
+	public Block getBlockRelative(int x, int y, int z) {
+		return this.getBlock(this.getWorldX() + x, y, this.getWorldZ() + z);
 	}
 	
 	public byte getBlockAt(int x, int y, int z) {
@@ -111,8 +122,8 @@ public class ClassicColumn implements Column {
 		return this.getChunk(y >> 4);
 	}
 	
-	public List<ClassicChunk> getChunks() {
-		return new ArrayList<ClassicChunk>(Arrays.asList(this.chunks));
+	public List<Chunk> getChunks() {
+		return new ArrayList<Chunk>(Arrays.asList(this.chunks));
 	}
 	
 	public boolean isLit(int x, int y, int z) {

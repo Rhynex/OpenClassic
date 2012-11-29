@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.level.column.Chunk;
+import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.level.generator.Populator;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
 import ch.spacebase.openclassic.api.player.Player;
@@ -98,15 +100,15 @@ public class ColumnManager {
 				column.setBiomeManager(generator.generateBiomes(this.level, x << 4, z << 4));
 			}
 			
-			List<ClassicChunk> chunks = column.getChunks();
+			List<Chunk> chunks = column.getChunks();
 			for(int count = chunks.size() - 1; count >= 0; count--) {
-				ClassicChunk chunk = chunks.get(count);
+				Chunk chunk = chunks.get(count);
 				this.level.getGenerator().generate(this.level, chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getBlockStore(), rand);
-				chunk.generated();
+				((ClassicChunk) chunk).generated();
 			}
 			
 			// TODO: fix cut off when adjacent chunks generate and destroy populator work (ex. cutoff trees)
-			for(ClassicChunk chunk : column.getChunks()) {
+			for(Chunk chunk : column.getChunks()) {
 				for(Populator pop : this.level.getGenerator().getPopulators(this.level)) {
 					pop.populate(this.level, chunk, rand);
 				}
@@ -159,8 +161,8 @@ public class ColumnManager {
 		this.unload.dispose();
 	}
 	
-	public List<ClassicColumn> getAll() {
-		List<ClassicColumn> result = new ArrayList<ClassicColumn>();
+	public List<Column> getAll() {
+		List<Column> result = new ArrayList<Column>();
 		result.addAll(this.loaded.values());
 		return result;
 	}

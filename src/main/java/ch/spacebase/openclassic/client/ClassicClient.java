@@ -156,33 +156,37 @@ public class ClassicClient extends ClassicGame implements Client {
 		long lastfps = System.nanoTime() / 1000000;
 		long previousTime = System.nanoTime() / 1000000;
 		long passedTime = 0;
-		while(this.running && !Display.isCloseRequested()) {
-			float delta = passedTime / (float) Constants.TICK_MILLISECONDS;
-			this.render(delta);
-
-			long time = System.nanoTime() / 1000000; 
-			passedTime += time - previousTime; 
-			previousTime = time;
-			if(time - lastfps > 1000) {
-				long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
-				long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
-				this.memory = (max - free) + "/" + max;
-				this.fps = frames;
-				if(this.getLevel() != null) {
-					this.columns = ((ClassicLevel) this.getLevel()).getColumns().size();
-				} else {
-					this.columns = 0;
+		try {
+			while(this.running && !Display.isCloseRequested()) {
+				float delta = passedTime / (float) Constants.TICK_MILLISECONDS;
+				this.render(delta);
+	
+				long time = System.nanoTime() / 1000000; 
+				passedTime += time - previousTime; 
+				previousTime = time;
+				if(time - lastfps > 1000) {
+					long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+					long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+					this.memory = (max - free) + "/" + max;
+					this.fps = frames;
+					if(this.getLevel() != null) {
+						this.columns = ((ClassicLevel) this.getLevel()).getColumns().size();
+					} else {
+						this.columns = 0;
+					}
+					
+					frames = 0;
+					lastfps += 1000;
 				}
-				
-				frames = 0;
-				lastfps += 1000;
+	
+				frames++;
+				while(passedTime > Constants.TICK_MILLISECONDS) { 
+					this.update();
+					passedTime -= Constants.TICK_MILLISECONDS;
+				}
 			}
-
-			frames++;
-			while(passedTime > Constants.TICK_MILLISECONDS) { 
-				this.update();
-				passedTime -= Constants.TICK_MILLISECONDS;
-			}
+		} catch(Throwable t) {
+			t.printStackTrace(); // TODO: good exception handling
 		}
 
 		this.shutdown();
@@ -269,7 +273,6 @@ public class ClassicClient extends ClassicGame implements Client {
 		}
 
 		glClearColor(r, g, b, 255);
-
 		FloatBuffer fogColours = BufferUtils.createFloatBuffer(4);
 		fogColours.put(new float[] { r, g, b, 255 });
 		fogColours.flip();
@@ -363,8 +366,8 @@ public class ClassicClient extends ClassicGame implements Client {
 	public void shutdown() {
 		this.running = false;
 		if(this.mode != null) this.mode.unload();
-		Storage.saveFavorites();
 		this.audio.cleanup();
+		Storage.saveFavorites();
 		ShaderManager.cleanup();
 		Display.destroy();
 		Mouse.destroy();

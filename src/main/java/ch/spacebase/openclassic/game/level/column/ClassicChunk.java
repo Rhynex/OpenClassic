@@ -6,6 +6,8 @@ import static org.lwjgl.opengl.GL11.glGenLists;
 import static org.lwjgl.opengl.GL11.glNewList;
 import static org.lwjgl.opengl.GL11.glDeleteLists;
 
+import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.model.EmptyModel;
@@ -54,6 +56,14 @@ public class ClassicChunk implements Chunk {
 	
 	public int getWorldZ() {
 		return this.getZ() << 4;
+	}
+	
+	public Block getBlock(int x, int y, int z) {
+		return new Block(new Position(this.column.getLevel(), x, y, z));
+	}
+	
+	public Block getBlockRelative(int x, int y, int z) {
+		return this.getBlock(this.getWorldX() + x, this.getWorldY() + y, this.getWorldZ() + z);
 	}
 	
 	public byte getBlockAt(int x, int y, int z) {

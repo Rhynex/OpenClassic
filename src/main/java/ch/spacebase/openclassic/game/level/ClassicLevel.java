@@ -33,6 +33,7 @@ import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
+import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.level.generator.biome.Biome;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
@@ -588,7 +589,7 @@ public abstract class ClassicLevel implements Level {
 		return this.columns.isColumnLoaded(x, z);
 	}
 
-	public List<ClassicColumn> getColumns() {
+	public List<Column> getColumns() {
 		return this.columns.getAll();
 	}
 	
@@ -620,7 +621,7 @@ public abstract class ClassicLevel implements Level {
 			e.printStackTrace();
 		}
 		
-		for(ClassicColumn column : this.columns.getAll()) {
+		for(Column column : this.columns.getAll()) {
 			column.save();
 		}
 	}

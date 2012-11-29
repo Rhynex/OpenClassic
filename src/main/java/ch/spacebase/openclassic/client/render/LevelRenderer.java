@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.level.column.Chunk;
+import ch.spacebase.openclassic.api.level.column.Column;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
@@ -44,8 +46,8 @@ public class LevelRenderer {
 	}
 	
 	public void queue(ClassicColumn column) {
-		for(ClassicChunk chunk : column.getChunks()) {
-			this.queue(chunk);
+		for(Chunk chunk : column.getChunks()) {
+			this.queue((ClassicChunk) chunk);
 		}
 	}
 	
@@ -72,14 +74,14 @@ public class LevelRenderer {
 	}
 	
 	public void queueAll() {
-		for(ClassicColumn column : this.level.getColumns()) {
-			this.queue(column);
+		for(Column column : this.level.getColumns()) {
+			this.queue((ClassicColumn) column);
 		}
 	}
 	
 	public void remove(ClassicColumn column) {
-		for(ClassicChunk chunk : column.getChunks()) {
-			this.remove(chunk);
+		for(Chunk chunk : column.getChunks()) {
+			this.remove((ClassicChunk) chunk);
 		}
 	}
 	
@@ -140,11 +142,12 @@ public class LevelRenderer {
         this.renderSky(player.getPosition().getX(), Math.max(Constants.COLUMN_HEIGHT + 27, player.getPosition().getY() + Constants.COLUMN_HEIGHT), player.getPosition().getZ());
 		glEnable(GL_TEXTURE_2D);
 
-		for(ClassicColumn column : this.level.getColumns()) {
-			for(ClassicChunk chunk : column.getChunks()) {
-				if(!chunk.isEmpty() && chunk.getList() > 0 && Frustrum.isBoxInFrustrum(chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getWorldX() + Constants.CHUNK_WIDTH, chunk.getWorldY() + Constants.CHUNK_HEIGHT, chunk.getWorldZ() + Constants.CHUNK_DEPTH)) {
-					glCallList(chunk.getList());
-					glCallList(chunk.getList() + 1);
+		for(Column column : this.level.getColumns()) {
+			for(Chunk chunk : column.getChunks()) {
+				ClassicChunk classic = (ClassicChunk) chunk;
+				if(!classic.isEmpty() && classic.getList() > 0 && Frustrum.isBoxInFrustrum(chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getWorldX() + Constants.CHUNK_WIDTH, chunk.getWorldY() + Constants.CHUNK_HEIGHT, chunk.getWorldZ() + Constants.CHUNK_DEPTH)) {
+					glCallList(classic.getList());
+					glCallList(classic.getList() + 1);
 				}
 			}
 		}

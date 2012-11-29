@@ -6,10 +6,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glTexSubImage2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.*;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockFace;
@@ -37,9 +34,13 @@ public abstract class Mode {
 	private ClientPlayer player;
 	private ClientLevel level;
 	private long lastChange = System.currentTimeMillis();
-	private Selection select = new Selection();
+	protected Selection select = new Selection();
 	private ClassicMainScreen main = new ClassicMainScreen(this);
 	private HeldBlock held = new HeldBlock();
+	
+	private boolean hitting;
+	private int soundCounter;
+	private int hitTime;
 	
 	public Mode() {
 		this.player = new ClientPlayer();
@@ -58,6 +59,7 @@ public abstract class Mode {
 				}
 			}
 			
+			if(!inter.getPosition().equals(this.select.getPosition())) this.selectionChanged();
 			this.select.set(inter.getPosition(), face);
 		} else {
 			this.select.set(null, null);
@@ -65,6 +67,21 @@ public abstract class Mode {
 		
 		this.held.update(this.player.getPlaceMode() != null ? this.player.getPlaceMode() : this.player.getQuickBar().getBlock(this.player.getQuickBar().getSelected()));
 		this.main.update();
+		if(OpenClassic.getClient().getCurrentScreen() == null && this.hitting && this.select.isValid()) {
+			this.hitTime++;
+			if(this.soundCounter % 4 == 0) {
+				StepSound sound = this.select.getPosition().getBlockType().getStepSound();
+				OpenClassic.getClient().getAudioManager().playSound(sound.getSound(), this.select.getPosition().getX(), this.select.getPosition().getY(), this.select.getPosition().getZ(), (sound.getVolume() + 1.0F) / 8F, sound.getPitch() * 0.5F);
+			}
+			
+			this.soundCounter++;
+			if(this.hitTime >= this.select.getPosition().getBlockType().getBreakTicks()) {
+				this.breakBlock();
+				this.hitTime = 0;
+				this.soundCounter = 0;
+				this.hitting = false;
+			}
+		}
 	}
 	
 	private void updateAnimation(Animation anim) {
@@ -105,21 +122,18 @@ public abstract class Mode {
 			}
 		}
 		
-		if(Mouse.isButtonDown(0) && System.currentTimeMillis() - this.lastChange > 150 && this.select.isValid() && !(this.level.getBlockTypeAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ()) == VanillaBlock.BEDROCK && !this.player.isOp())) {
-			this.setLastChange();
-			this.held.onBlock();
-			BlockType old = this.level.getBlockTypeAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ());
-			this.level.setBlockAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), VanillaBlock.AIR);
-			ClientRenderHelper.getHelper().spawnDestructionParticles(old, this.level, this.select.getPosition());
-			if (old.getStepSound() != StepSound.NONE) {
-				if(old.getStepSound() == StepSound.SAND) {
-					OpenClassic.getClient().getAudioManager().playSound(StepSound.GRAVEL.getSound(), this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), (StepSound.GRAVEL.getVolume() + 1) / 2f, StepSound.GRAVEL.getPitch() * 0.8f);
+		if(Mouse.isButtonDown(0)) {
+			if(System.currentTimeMillis() - this.lastChange > 150 && this.select.isValid()) {
+				this.setLastChange();
+				this.held.onBlock();
+				if(!(this.level.getBlockTypeAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ()) == VanillaBlock.BEDROCK && !this.player.isOp())) {
+					this.hit(true);
 				} else {
-					OpenClassic.getClient().getAudioManager().playSound(old.getStepSound().getSound(), this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), (old.getStepSound().getVolume() + 1) / 2f, old.getStepSound().getPitch() * 0.8f);
+					this.hit(false);
 				}
 			}
-			
-			this.onBreak(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), old);
+		} else {
+			this.hit(false);
 		}
 		
 		if(Mouse.isButtonDown(1) && System.currentTimeMillis() - this.lastChange > 150 && this.select.isValid()) {			
@@ -164,6 +178,36 @@ public abstract class Mode {
 		}
 	}
 	
+	public void hit(boolean hitting) {
+		if(!hitting) {
+			this.hitTime = 0;
+			this.soundCounter = 0;
+		}
+		
+		this.hitting = hitting;
+	}
+	
+	protected void selectionChanged() {
+		this.hitTime = 0;
+		this.soundCounter = 0;
+		this.hitting = false;
+	}
+	
+	public void breakBlock() {
+		BlockType old = this.level.getBlockTypeAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ());
+		this.level.setBlockAt(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), VanillaBlock.AIR);
+		ClientRenderHelper.getHelper().spawnDestructionParticles(old, this.level, this.select.getPosition());
+		if (old.getStepSound() != StepSound.NONE) {
+			if(old.getStepSound() == StepSound.SAND) {
+				OpenClassic.getClient().getAudioManager().playSound(StepSound.GRAVEL.getSound(), this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), (StepSound.GRAVEL.getVolume() + 1) / 2f, StepSound.GRAVEL.getPitch() * 0.8f);
+			} else {
+				OpenClassic.getClient().getAudioManager().playSound(old.getStepSound().getSound(), this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), (old.getStepSound().getVolume() + 1) / 2f, old.getStepSound().getPitch() * 0.8f);
+			}
+		}
+		
+		this.onBreak(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ(), old);
+	}
+	
 	public void setLastChange() {
 		this.lastChange = System.currentTimeMillis();
 	}
@@ -205,7 +249,19 @@ public abstract class Mode {
 		this.player.look(delta);
 		Frustrum.update();
 		this.level.render(delta);
+		glColor4f(1, 1, 1, 0.5f);
+		glPushMatrix();
+		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+		glDepthMask(false);
+		if(this.hitTime > 0 && this.hitting && this.select.isValid()) {
+			int tex = 240 + (int) (((this.hitTime + delta - 1) / this.select.getPosition().getBlockType().getBreakTicks()) * 10);
+			BlockType type = this.select.getPosition().getBlockType();
+			type.getModel().render(type, this.select.getPosition().getX(), this.select.getPosition().getY(), this.select.getPosition().getZ(), this.level.getBrightness(this.select.getPosition().getBlockX(), this.select.getPosition().getBlockY(), this.select.getPosition().getBlockZ()), BlockType.TERRAIN.getSubTexture(tex));
+		}
 		
+		glDepthMask(true);
+		glPopMatrix();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if(this.select.isValid()) {
 			this.select.render();
 		}

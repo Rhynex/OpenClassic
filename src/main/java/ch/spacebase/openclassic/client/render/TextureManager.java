@@ -129,6 +129,8 @@ public class TextureManager {
 				case FRAMEBUFFER:
 					EXTFramebufferObject.glGenerateMipmapEXT(GL_TEXTURE_2D);
 					break;
+				default:
+					break;
 			}
 		}
 	}
