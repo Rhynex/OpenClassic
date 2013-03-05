@@ -2,6 +2,8 @@
 <b><center><h1>OpenClassic</h></center></b>
 ==========
 
+<h1>No longer being developed as of March 5th, 2013.</h>
+
 A full client/server implementation of the OpenClassic API!
 
 
