@@ -59,7 +59,8 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			OpenClassic.getGame().getEventManager().dispatch(new PlayerJoinEvent(OpenClassic.getClient().getPlayer(), "Joined"));
 		}
 
-		OpenClassic.getClient().getProgressBar().setTitle(message.getUsernameOrServerName());
+		OpenClassic.getClient().getProgressBar().setTitle("Multiplayer");
+		OpenClassic.getClient().getProgressBar().setSubTitle(message.getUsernameOrServerName());
 		OpenClassic.getClient().getProgressBar().setText(message.getVerificationKeyOrMotd());
 		player.setOp(message.getOpOrCustomClient() == Constants.OP);
 		

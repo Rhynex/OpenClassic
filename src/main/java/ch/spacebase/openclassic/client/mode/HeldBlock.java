@@ -1,9 +1,11 @@
 package ch.spacebase.openclassic.client.mode;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL;
 
-import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.item.Item;
+import ch.spacebase.openclassic.api.item.Items;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
 public class HeldBlock {
@@ -12,7 +14,7 @@ public class HeldBlock {
 	private float prevpos;
 	private float off;
 	private boolean moving;
-	private BlockType block = VanillaBlock.STONE;
+	private Item held = Items.get(VanillaBlock.STONE.getId());
 	
 	public float getPos() {
 		return this.pos;
@@ -47,7 +49,7 @@ public class HeldBlock {
 		this.moving = true;
 	}
 	
-	public void update(BlockType held) {
+	public void update(Item held) {
 		this.prevpos = this.pos;
 		if(this.moving) {
 			this.off++;
@@ -57,7 +59,7 @@ public class HeldBlock {
 			}
 		}
 
-		float position = (held == this.block ? 1 : 0) - this.pos;
+		float position = (held == this.held ? 1 : 0) - this.pos;
 		if(position < -0.4f) {
 			position = -0.4f;
 		}
@@ -68,34 +70,35 @@ public class HeldBlock {
 
 		this.pos += position;
 		if(this.pos < 0.1f) {
-			this.block = held;
+			this.held = held;
 		}
 	}
 	
-	public void render(float brightness, float delta) {
+	public void render(float brightness, float delta) { 
+		if(this.held == null) return; // TODO: arm
+		float progress = this.prevpos + (this.pos - this.prevpos) * delta;
 		glPushMatrix();
-		float interpolated = this.prevpos + (this.pos - this.prevpos) * delta;
 		if(this.moving) {
 			float off = (this.off + delta) / 7f;
-			glTranslatef(-MathHelper.sin((float) Math.sqrt(off) * (float) Math.PI) * 0.4f, MathHelper.sin((float) Math.sqrt(off) * (float) Math.PI * 2) * 0.2f, -MathHelper.sin(off * (float) Math.PI) * 0.2f);
-		}
-
-		glTranslatef(0.56f, -0.52f - (1 - interpolated) * 0.6f, -0.72f);
-		glRotatef(45, 0, 1, 0);
-		glDisable(GL_DEPTH_TEST);
-		if(this.moving) {
-			float off =  (this.off + delta) / 7f;
-			glRotatef(MathHelper.sin((float) Math.sqrt(off) * (float) Math.PI) * 80, 0, 1, 0);
-			glRotatef(-MathHelper.sin(off * off * (float) Math.PI) * 20, 1, 0, 0);
-		}
-
-		if(this.block != null) {
-			glScalef(0.4f, 0.4f, 0.4f);
-			glTranslatef(-0.5f, -0.5f, -0.5f);
-			this.block.getModel().renderAll(this.block, 0, 0, 0, brightness);
+			float mz = MathHelper.sin(off * (float) Math.PI);
+			float mx = MathHelper.sin((float) Math.sqrt(off) * (float) Math.PI);
+			glTranslatef(-mx * 0.4f, MathHelper.sin((float) Math.sqrt(off) * (float) Math.PI * 2) * 0.2f, -mz * 0.2f);
 		}
 		
-		glEnable(GL_DEPTH_TEST);
+		glTranslatef(0.7f * 0.8f, -0.65f * 0.8f - (1 - progress) * 0.6f, -0.9f * 0.8f);
+		glRotatef(45f, 0, 1, 0);
+		glEnable(GL_RESCALE_NORMAL);
+		if(this.moving) {
+			float off = (this.off + delta) / 7f;
+			float yr = MathHelper.sin(off * off * (float) Math.PI);
+			float xzr = MathHelper.sin((float) Math.sqrt(off) * (float) Math.PI);
+			glRotatef(-yr * 20f, 0, 1, 0);
+			glRotatef(-xzr * 20f, 0, 0, 1);
+			glRotatef(-xzr * 80f, 1, 0, 0);
+		}
+		
+		glScalef(0.4f, 0.4f, 0.4f);
+		this.held.renderHeld(brightness);
 		glPopMatrix();
 	}
 	

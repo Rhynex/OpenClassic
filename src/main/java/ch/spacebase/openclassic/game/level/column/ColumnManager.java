@@ -2,28 +2,32 @@ package ch.spacebase.openclassic.game.level.column;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.column.Column;
-import ch.spacebase.openclassic.api.level.generator.Populator;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.storage.DoubleIntHashMap;
+import ch.spacebase.openclassic.api.util.storage.LongHash;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.game.util.ColumnHashSorter;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class ColumnManager {
-
-	private static final int TINY_CHUNKS = 7;
-	private static final int SHORT_CHUNKS = 11;
-	private static final int NORMAL_CHUNKS = 19;
-	private static final int FAR_CHUNKS = 27;
+	
+	private static final int TINY_CHUNKS = 4;
+	private static final int SHORT_CHUNKS = 6;
+	private static final int NORMAL_CHUNKS = 10;
+	private static final int FAR_CHUNKS = 14;
 	
 	private final DoubleIntHashMap<ClassicColumn> loaded = new DoubleIntHashMap<ClassicColumn>();
 	private final ColumnUnloadThread unload = new ColumnUnloadThread();
+	
+	private final List<Long> loadQueue = new ArrayList<Long>();
 	
 	private final ClassicLevel level;
 	
@@ -50,15 +54,26 @@ public class ColumnManager {
 		int count = 0;
 		int loaddist = (int) Math.sqrt(dist);
 		for(int x = (player.getPosition().getBlockX() >> 4) - loaddist; x < (player.getPosition().getBlockX() >> 4) + loaddist; x++) {
-			if(count > 5) break;
 			for(int z = (player.getPosition().getBlockZ() >> 4) - loaddist; z < (player.getPosition().getBlockZ() >> 4) + loaddist; z++) {
-				if(count > 5) break;
 				int coldist = distanceSquared(x, z, player.getPosition().getBlockX() >> 4, player.getPosition().getBlockZ() >> 4);
-				if(coldist <= dist && !this.isColumnLoaded(x, z)) {
-					this.loadColumn(x, z);
+				if(coldist <= dist && !this.isColumnLoaded(x, z) && !this.loadQueue.contains(LongHash.toLong(x, z))) {
+					this.loadQueue.add(LongHash.toLong(x, z));
 					count++;
 				}
 			}
+		}
+		
+		if(count > 0) {
+			try {
+				Collections.sort(this.loadQueue, new ColumnHashSorter());
+			} catch(IllegalArgumentException e) {
+				// silently catch comparison error...
+			}
+		}
+		
+		if(this.loadQueue.size() > 0) {
+			long hash = this.loadQueue.remove(0);
+			this.loadColumn(LongHash.getFirst(hash), LongHash.getSecond(hash));
 		}
 	}
 	
@@ -91,8 +106,6 @@ public class ColumnManager {
 		if(column == null) {
 			column = new ClassicColumn(this.level, x, z);
 			this.loaded.put(x, z, column);
-			Random rand = new Random();
-			rand.setSeed(this.level.getSeed());
 			//System.out.println("Generating (" + x + ", " + z + ")");
 			this.level.setGenerating(true);
 			if(this.level.getGenerator() instanceof BiomeGenerator) {
@@ -100,18 +113,12 @@ public class ColumnManager {
 				column.setBiomeManager(generator.generateBiomes(this.level, x << 4, z << 4));
 			}
 			
+			Random random = new Random(x * System.currentTimeMillis() + z * System.currentTimeMillis());
 			List<Chunk> chunks = column.getChunks();
 			for(int count = chunks.size() - 1; count >= 0; count--) {
 				Chunk chunk = chunks.get(count);
-				this.level.getGenerator().generate(this.level, chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getBlockStore(), rand);
+				this.level.getGenerator().generate(this.level, chunk.getWorldX(), chunk.getWorldY(), chunk.getWorldZ(), chunk.getBlockStore(), random);
 				((ClassicChunk) chunk).generated();
-			}
-			
-			// TODO: fix cut off when adjacent chunks generate and destroy populator work (ex. cutoff trees)
-			for(Chunk chunk : column.getChunks()) {
-				for(Populator pop : this.level.getGenerator().getPopulators(this.level)) {
-					pop.populate(this.level, chunk, rand);
-				}
 			}
 			
 			this.level.setGenerating(false);

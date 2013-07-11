@@ -1,0 +1,146 @@
+Custom Client Protocol:
+
+When the OpenClassic Client connects, it sends the client's OpenClassic protocol version in the unused OP field in the identification packet (0). When the server receives this packet, it checks for a matching version, and responds with packet 16, a packet 25 for each plugin installed on the server, and packets for all the custom blocks registered to the server. When the client recieves the packet 16, it sends it's own packet 16 to the server along with it's own set of packet 25s.
+
+PACKET SPECIFICATION:
+
+Packet 16 (Game Info):
+
+String - Game Version
+String - Language
+
+Sent by the server when the client's identification packet (0) has the unused OP variable in use and matching the server's OpenClassic protocol version. Sent by the client when receiving this packet.
+
+
+
+Packet 17 (Custom Block):
+
+Byte - Block ID.
+Byte - Whether the block is opaque (0 or 1)
+Byte - Whether the block is selectable in the block menu (0 or 1)
+String - Name of the StepSound to use.
+Byte - Whether the block is a liquid (0 or 1)
+Integer - The delay between each tick on the block
+Byte - The ID of the block's fallback (sent to vanilla clients, needed for completion)
+Byte - Whether the block is solid (0 or 1)
+
+Sent by the server after sending packet 16.
+
+
+
+Packet 18 (Block Model):
+
+Byte - Block ID
+String - Model Type (TransparentModel, CuboidModel, CubeModel, or Model)
+Float - First point X of the collision box.
+Float - Second point X of the collision box.
+Float - First point Y of the collision box.
+Float - Second point Y of the collision box.
+Float - First point Z of the collision box.
+Float - Second point Z of the collision box.
+Float - First point X of the selection box.
+Float - Second point X of the selection box.
+Float - First point Y of the selection box.
+Float - Second point Y of the selection box.
+Float - First point Z of the selection box.
+Float - Second point Z of the selection box.
+
+Sent by the server with a packet 17.
+
+
+
+Packet 19 (Quad):
+
+Byte - Block ID
+Integer - Quad ID
+Float - X of the first vertex
+Float - Y of the first vertex
+Float - Z of the first vertex
+Float - X of the second vertex
+Float - Y of the second vertex
+Float - Z of the second vertex
+Float - X of the third vertex
+Float - Y of the third vertex
+Float - Z of the third vertex
+Float - X of the fourth vertex
+Float - Y of the fourth vertex
+Float - Z of the fourth vertex
+String - Texture file of the quad.
+Byte - Whether the texture file is in the client jar (0 or 1)
+Integer - Width of the texture.
+Integer - Height of the texture.
+Integer - Width of each subtexture in the texture.
+Integer - Height of each subtexture in the texture.
+Integer - ID of the subtexture to use.
+
+Sent by the server with a packet 18.
+
+
+
+Packet 20 (Key Change):
+
+Integer - ID of the key.
+Byte - Whether the key is pressed (0 or 1)
+
+Sent by the client when a key is pressed/released.
+
+
+
+Packet 21 (Level Color):
+
+String - Variable to change (sky, fog, or cloud)
+Integer - New color
+
+Sent by the server to change a client's level environment.
+
+
+
+Packet 22 (Audio Register):
+
+String - Identifier of the audio to be registered.
+String - URL of the audio file.
+Byte - Whether the audio file is included with the client (0 or 1)
+Byte - Whether the audio is music (0 or 1)
+
+Sent by the server to register audio.
+
+
+
+Packet 23 (Audio Play):
+
+String - Identifier of the audio.
+Float - X to play at (sound only)
+Float - Y to play at (sound only)
+Float - Z to play at (sound only)
+Float - Volume to play at (sound only)
+Float - Pitch to play at (sound only)
+Byte - Whether the audio is music (0 or 1)
+Byte - Whether the audio is looping (0 or 1) (music only)
+
+Sent by the server to play audio.
+
+
+
+Packet 24 (Music Stop):
+
+String - Identifier of the music to be stopped (all_music for all music)
+
+Sent by the server to stop music.
+
+
+
+Packet 25 (Plugin):
+
+String - Plugin's name
+String - Plugin's version.
+
+Sent by the client after recieving packet 16, one for each plugin. Sent by the server after sending packet 16, one for each plugin.
+
+
+
+Packet 26 (Custom):
+
+String - Identifier of the message.
+Byte[] - Data contained in the message.
+
+Sent by the client/server with custom data (usually by plugin/extension).

@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.BlockFace;
+import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.component.BasicComponentHolder;
 import ch.spacebase.openclassic.api.component.type.NBTComponent;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
+import ch.spacebase.openclassic.api.inventory.PlayerInventory;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
@@ -22,7 +24,6 @@ import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.component.player.ClientInfoComponent;
-import ch.spacebase.openclassic.game.component.player.PlaceModeComponent;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.network.ServerSession;
 
@@ -33,6 +34,8 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 	private String name;
 	private String displayName;
 	private ServerSession session;
+	private int health = Constants.MAX_PLAYER_HEALTH;
+	private int air = Constants.MAX_PLAYER_AIR;
 	//private int airTicks = 0;
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
 	
@@ -48,7 +51,6 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 		session.setPlayer(this);
 		this.playerId = (byte) (((ClassicServer) OpenClassic.getGame()).getSessionRegistry().size());
 		
-		this.add(PlaceModeComponent.class);
 		this.add(ClientInfoComponent.class);
 		this.add(NBTComponent.class).load(this.name, OpenClassic.getServer().getDirectory().getPath() + "/players/" + this.name + ".nbt");
 	}
@@ -79,14 +81,6 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 	
 	public void setDisplayName(String name) {
 		this.displayName = name;
-	}
-	
-	public BlockType getPlaceMode() {
-		return this.get(PlaceModeComponent.class).getPlaceMode();
-	}
-	
-	public void setPlaceMode(BlockType type) {
-		this.get(PlaceModeComponent.class).setPlaceMode(type);
 	}
 	
 	public void moveTo(Position pos) {
@@ -313,6 +307,71 @@ public class ServerPlayer extends BasicComponentHolder implements Player {
 	public String getLanguage() {
 		ClientInfoComponent info = this.get(ClientInfoComponent.class);
 		return info.getLanguage().equals("") ? OpenClassic.getGame().getLanguage() : info.getLanguage();
+	}
+
+	@Override
+	public Position getSelectedBlock() {
+		return new Position(this.getPosition().getLevel(), 0, 0, 0); // TODO
+	}
+	
+	public Position getSelectedLiquid() {
+		return null;
+	}
+
+	@Override
+	public BlockFace getSelectedFace() {
+		return BlockFace.DOWN; // TODO
+	}
+
+	@Override
+	public BoundingBox getBoundingBox() {
+		return null; // TODO
+	}
+
+	@Override
+	public PlayerInventory getInventory() {
+		return null;
+	}
+
+	@Override
+	public int getHealth() {
+		return this.health;
+	}
+
+	@Override
+	public void setHealth(int health) {
+		this.health = health;
+	}
+
+	@Override
+	public void damage(int damage) {
+		this.health -= damage;
+		if(this.health <= 0) this.health = 0;
+	}
+	
+	@Override
+	public void heal(int health) {
+		this.health += health;
+		if(this.health > Constants.MAX_PLAYER_HEALTH) this.health = Constants.MAX_PLAYER_HEALTH;
+	}
+	
+	@Override
+	public boolean isDead() {
+		return false;
+	}
+
+	@Override
+	public void die() {
+	}
+	
+	@Override
+	public int getAir() {
+		return this.air;
+	}
+
+	@Override
+	public void setAir(int air) {
+		this.air = air;
 	}
 	
 }

@@ -175,15 +175,17 @@ gui:
     resource-packs:
         select: Select a resource pack.
         current: "Current Resource Pack: %s"
-    blocks:
-        select: Select a block.
+    inventory:
+        title: Inventory
+        crafting: Crafting
+        furnace: Furnace
+        chest: Chest
     error:
         main-menu: Main Menu
-    game-over:
+    gameover:
         respawn: Respawn
         main-menu: Main Menu
-        game-over: Game over!
-        score: "Score: %s"
+        title: Game over!
     options:
         hacks: Hacks...
         controls: Controls...
@@ -217,7 +219,7 @@ connecting:
     getting-info: Getting server info...
     check: Make sure the URL is correct and hasn't expired.
     probably-down: You failed to connect to the server. It's probably down!
-    fail-connect: Failed to connect!
+    failed: Failed to connect!
 http:
     downloading: Downloading %s...
     downloaded: Downloaded %s.

@@ -6,6 +6,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.util.GuiTextures;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 import ch.spacebase.openclassic.client.util.Projection;
@@ -13,6 +14,7 @@ import ch.spacebase.openclassic.client.util.Projection;
 public class ClientProgressBar implements ProgressBar {
 
 	private String title = "";
+	private String subtitle = "";
 	private String text = "";
 	private int progress = -1;
 	private boolean visible = false;
@@ -36,6 +38,16 @@ public class ClientProgressBar implements ProgressBar {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+	
+	@Override
+	public String getSubTitle() {
+		return this.subtitle;
+	}
+
+	@Override
+	public void setSubTitle(String subtitle) {
+		this.subtitle = subtitle;
+	}
 
 	@Override
 	public int getProgress() {
@@ -44,7 +56,11 @@ public class ClientProgressBar implements ProgressBar {
 
 	@Override
 	public void setProgress(int progress) {
+		int old = this.progress;
 		this.progress = progress;
+		if(this.isVisible() && this.progress != old) {
+			this.render();
+		}
 	}
 
 	@Override
@@ -60,32 +76,35 @@ public class ClientProgressBar implements ProgressBar {
 
 	public void render() {
 		if(this.isVisible()) {
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glLoadIdentity();
 			Projection.ortho();
 			ClientRenderHelper.getHelper().drawDefaultBG();
-			int width = Display.getWidth();// * 240 / Display.getHeight();
-			int height = Display.getHeight();// * 240 / Display.getHeight();
-			
+			int width = Display.getWidth();
+			int height = Display.getHeight();
+			int y = height - 60;
+			glDisable(GL_TEXTURE_2D);
+			Renderer.get().begin();
+			Renderer.get().color(8421504);
+			Renderer.get().vertex(0, y, 0);
+			Renderer.get().vertex(0, (y + 4), 0);
+			Renderer.get().vertex(width, (y + 4), 0);
+			Renderer.get().vertex(width, y, 0);
 			if(this.getProgress() >= 0) {
-				int x = width / 2 - 50;
-				int y = height / 2 + 16;
-				glDisable(GL_TEXTURE_2D);
-				Renderer.begin();
-				Renderer.color(8421504);
-				Renderer.vert(x, y, 0);
-				Renderer.vert(x, (y + 2), 0);
-				Renderer.vert((x + 100), (y + 2), 0);
-				Renderer.vert((x + 100), y, 0);
-				Renderer.color(8454016);
-				Renderer.vert(x, y, 0);
-				Renderer.vert(x, (y + 2), 0);
-				Renderer.vert((x + this.progress), (y + 2), 0);
-				Renderer.vert((x + this.progress), y, 0);
-				Renderer.end();
-				glEnable(GL_TEXTURE_2D);
+				Renderer.get().color(8454016);
+				Renderer.get().vertex(0, y, 0);
+				Renderer.get().vertex(0, (y + 4), 0);
+				Renderer.get().vertex(this.progress * 8.54f, (y + 4), 0);
+				Renderer.get().vertex(this.progress * 8.54f, y, 0);
 			}
 			
-			RenderHelper.getHelper().renderText(this.title, (width - RenderHelper.getHelper().getStringWidth(this.title)) / 2, height / 2 - 20, false);
-			RenderHelper.getHelper().renderText(this.text, (width - RenderHelper.getHelper().getStringWidth(this.text)) / 2, height / 2 + 4, false);
+			Renderer.get().end();
+			glEnable(GL_TEXTURE_2D);
+			ClientRenderHelper.getHelper().drawGreenBackground(0, height - 56, width, height - (height - 56));
+			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0, GuiTextures.LOGO.getWidth(), GuiTextures.LOGO.getHeight()), 0, 20, 0, 0.5625f, 1);
+			RenderHelper.getHelper().renderScaledText(this.title, width - 20 - ClientRenderHelper.getHelper().getStringWidth(this.subtitle), 30);
+			RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 32);
+			RenderHelper.getHelper().renderText(this.text, width / 2, height - 38);
 			Display.update();
 		}
 	}

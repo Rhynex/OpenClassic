@@ -40,11 +40,6 @@ public class LoadLevelScreen extends GuiScreen {
 				levels.append(file);
 				continue;
 			}
-			
-			/* TODO: someday 
-			if(!file.endsWith(".map") && !file.endsWith(".mine") && !file.endsWith(".mclevel") && !file.endsWith(".oclvl") && !file.endsWith(".dat") && !file.endsWith(".lvl")) continue;
-			if(levels.length() != 0) levels.append("/");
-			levels.append(file.substring(0, file.indexOf("."))); */
 		}
 
 		this.levels = levels.toString().split("/");
@@ -76,7 +71,7 @@ public class LoadLevelScreen extends GuiScreen {
 		if(this.delete) {
 			File file = null;
 			for(File f : (new File(OpenClassic.getClient().getDirectory(), "levels")).listFiles()) {
-				if(f != null && f.isDirectory() && f.getName().equals(button.getText())) { // TODO: someday ((f.isDirectory() && f.getName().equals(button.getText())) || f.getName().equals(button.getText() + ".mine") || f.getName().equals(button.getText() + ".map") || f.getName().equals(button.getText() + ".oclvl") || f.getName().equals(button.getText() + ".lvl") || f.getName().equals(button.getText() + ".dat") || f.getName().equals(button.getText() + ".mclevel"))) {
+				if(f != null && f.isDirectory() && f.getName().equals(button.getText())) {
 					file = f;
 					break;
 				}
@@ -87,7 +82,13 @@ public class LoadLevelScreen extends GuiScreen {
 			this.delete = false;
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.load-level.title");
 		} else {
+			OpenClassic.getClient().getProgressBar().setTitle("Singleplayer");
+			OpenClassic.getClient().getProgressBar().setSubTitle("Loading Level");
+			OpenClassic.getClient().getProgressBar().setText("Loading chunks...");
+			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().setVisible(true);
 			OpenClassic.getClient().openLevel(button.getText());
+			OpenClassic.getClient().getProgressBar().setVisible(false);
 			OpenClassic.getClient().setCurrentScreen(null);
 		}
 	}

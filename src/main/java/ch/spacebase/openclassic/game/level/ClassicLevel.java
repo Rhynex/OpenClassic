@@ -19,6 +19,7 @@ import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.complex.ComplexBlock;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
 import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
@@ -27,9 +28,7 @@ import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
 import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.entity.BlockEntity;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
-import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
@@ -52,8 +51,7 @@ import ch.spacebase.openclassic.game.level.io.OpenClassicLevelFormat;
 
 public abstract class ClassicLevel implements Level {
 
-	private static final Random rand = new Random();
-	
+	private Random rand = new Random();
 	private long creationTime;
 	private Position spawn;
 	private String name;
@@ -64,7 +62,6 @@ public abstract class ClassicLevel implements Level {
 	private int fogColor = 16777215;
 	private int cloudColor = 16777215;
 	private List<Player> players = new ArrayList<Player>();
-	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
 	protected boolean generating = false;
 	
 	private LevelFormat format;
@@ -127,7 +124,7 @@ public abstract class ClassicLevel implements Level {
 		this.author = "";
 		this.creationTime = System.currentTimeMillis();
 		this.generator = info.getGenerator();
-		this.seed = rand.nextLong();
+		this.seed = new Random().nextLong();
 		
 		this.spawn = info.getSpawn() != null ? info.getSpawn() : info.getGenerator().findInitialSpawn(this);
 		if(this.spawn != null) this.spawn.setLevel(this);
@@ -404,47 +401,6 @@ public abstract class ClassicLevel implements Level {
 		return false;
 	}
 	
-	public List<BlockEntity> getBlockEntities() {
-		return new ArrayList<BlockEntity>(this.entities);
-	}
-	
-	public BlockEntity getBlockEntityFromId(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity getBlockEntity(Position pos) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getPosition().equals(pos)) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity spawnBlockEntity(BlockEntity entity, Position pos) {
-		this.entities.add(entity);
-		entity.setPosition(pos);
-		
-		return entity;
-	}
-	
-	public void removeBlockEntity(BlockEntity entity) {
-		this.removeBlockEntity(entity.getEntityId());
-	}
-	
-	public void removeBlockEntity(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) {
-				if(entity.getController() != null) entity.getController().onDeath();
-				OpenClassic.getGame().getEventManager().dispatch(new EntityDeathEvent(entity));
-				this.entities.remove(entity);
-			}
-		}
-	}
-	
 	private static boolean physicsAllowed(Block block) {
 		if(block.getType().getPhysics() == null) return false;
 		
@@ -486,7 +442,7 @@ public abstract class ClassicLevel implements Level {
 	}
 	
 	public boolean growTree(int x, int y, int z) {
-		int logHeight = rand.nextInt(3) + 4;
+		int logHeight = this.rand.nextInt(3) + 4;
 		boolean freespace = true;
 
 		for(int currY = y; currY <= y + 1 + logHeight; currY++) {
@@ -521,7 +477,7 @@ public abstract class ClassicLevel implements Level {
 
 					for(int currZ = z - leafMax; currZ <= z + leafMax; currZ++) {
 						int diffZ = currZ - z;
-						if(Math.abs(diffX) != leafMax || Math.abs(diffZ) != leafMax || rand.nextInt(2) != 0 && var8 != 0) {
+						if(Math.abs(diffX) != leafMax || Math.abs(diffZ) != leafMax || this.rand.nextInt(2) != 0 && var8 != 0) {
 							this.setBlockAt(currX, count, currZ, VanillaBlock.LEAVES);
 						}
 					}
@@ -621,8 +577,12 @@ public abstract class ClassicLevel implements Level {
 			e.printStackTrace();
 		}
 		
+		int count = 0;
+		int total = this.columns.getAll().size();
 		for(Column column : this.columns.getAll()) {
 			column.save();
+			count++;
+			OpenClassic.getClient().getProgressBar().setProgress((int) (count / (float) total * 100));
 		}
 	}
 	
@@ -663,7 +623,7 @@ public abstract class ClassicLevel implements Level {
 						}
 						
 						this.setBlockAt(xx, yy, zz, VanillaBlock.AIR);
-						if(this instanceof ClientLevel && rand.nextInt(50) < 10) {
+						if(this instanceof ClientLevel && this.rand.nextInt(50) < 10) {
 							ClientRenderHelper.getHelper().spawnDestructionParticles(block, (ClientLevel) this, new Position(this, xx, yy, zz));
 						}
 					}
@@ -698,6 +658,36 @@ public abstract class ClassicLevel implements Level {
 	public BiomeManager getBiomeManager(int x, int z, boolean load) {
 		ClassicColumn column = this.getColumn(x >> 4, z >> 4, load);
 		return column != null ? column.getBiomeManager() : null;
+	}
+	
+	public boolean isComplex(Position pos) {
+		return this.isComplex(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+	}
+
+	public boolean isComplex(int x, int y, int z) {
+		ClassicColumn col = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(col == null) return false;
+		return col.isComplex(x, y, z);
+	}
+
+	public ComplexBlock getComplexBlock(Position pos) {
+		return this.getComplexBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+	}
+
+	public ComplexBlock getComplexBlock(int x, int y, int z) {
+		ClassicColumn col = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(col == null) return null;
+		return col.getComplexBlock(x, y, z);
+	}
+
+	public void setComplexBlock(Position pos, ComplexBlock complex) {
+		this.setComplexBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), complex);
+	}
+
+	public void setComplexBlock(int x, int y, int z, ComplexBlock complex) {
+		ClassicColumn col = this.getColumn(x >> 4, z >> 4, !this.generating);
+		if(col == null) return;
+		col.setComplexBlock(x, y, z, complex);
 	}
 	
 }

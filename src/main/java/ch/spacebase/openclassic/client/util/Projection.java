@@ -5,11 +5,13 @@ import static org.lwjgl.util.glu.GLU.gluPerspective;
 
 import org.lwjgl.opengl.Display;
 
+import ch.spacebase.openclassic.api.OpenClassic;
+
 public class Projection {
 
-	private static final float FOV = 70;
-	private static final float NEAR = 0.05f;
-	private static final float FAR = 1000f;
+	public static final float FOV = 70;
+	public static final float NEAR = 0.05f;
+	public static final float FAR = 1000f;
 	
 	public static void ortho() {
 		int width = Display.getWidth();// * 240 / Display.getHeight();
@@ -25,7 +27,7 @@ public class Projection {
 	public static void perspective() {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		gluPerspective(FOV, (float) Display.getWidth() / (float) Display.getHeight(), NEAR, FAR);
+		gluPerspective(FOV, (float) Display.getWidth() / (float) Display.getHeight(), NEAR, 256 >> OpenClassic.getGame().getConfig().getInteger("options.view-distance", 0));
 		glMatrixMode(GL_MODELVIEW);
 	}
 	

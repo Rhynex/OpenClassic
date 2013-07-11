@@ -10,7 +10,6 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 public final class OptionsScreen extends GuiScreen {
 
@@ -93,7 +92,6 @@ public final class OptionsScreen extends GuiScreen {
 		if(path.equals("options.view-distance")) OpenClassic.getClient().getConfig().setValue(path, OpenClassic.getClient().getConfig().getInteger(path, 0) + 1 & 3);
 		if(path.equals("options.smoothing")) {
 			OpenClassic.getClient().getConfig().setValue(path, !OpenClassic.getClient().getConfig().getBoolean(path, false));
-			ClientRenderHelper.getHelper().getTextureManager().clear();
 			if(OpenClassic.getClient().getLevel() != null) ((ClientLevel) OpenClassic.getClient().getLevel()).getRenderer().queueAll();
 		}
 		

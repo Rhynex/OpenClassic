@@ -8,19 +8,21 @@ import java.io.IOException;
 import java.net.URL;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.asset.AssetSource;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.network.msg.custom.block.QuadMessage;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.network.handler.MessageHandler;
 
+// TODO: rewrite
 public class QuadMessageHandler extends MessageHandler<QuadMessage> {
 
 	@Override
 	public void handleClient(ClientSession session, final ClientPlayer player, QuadMessage message) {
 		if(session == null || player == null) return;
 		if(Blocks.get(message.getBlock()) == null || Blocks.get(message.getBlock()).getModel() == null) return;
-		if(!message.getQuad().getTexture().getParent().isInJar()) {
+		if(message.getQuad().getTexture().getParent().getSource() != AssetSource.JAR) {
 			File file = new File(OpenClassic.getClient().getDirectory(), "cache/" + session.getAddress().toString().replaceAll("/", "") + "/" + message.getBlock() + ".png");
 			if(!file.exists()) {
 				if(!file.getParentFile().exists()) {
@@ -45,7 +47,7 @@ public class QuadMessageHandler extends MessageHandler<QuadMessage> {
 				DataOutputStream out = null;
 
 				try {
-					in = new DataInputStream((new URL(message.getQuad().getTexture().getParent().getTexture())).openStream());
+					in = new DataInputStream((new URL(message.getQuad().getTexture().getParent().getFile())).openStream());
 					out = new DataOutputStream(new FileOutputStream(file));
 
 					int length = 0;
@@ -69,8 +71,6 @@ public class QuadMessageHandler extends MessageHandler<QuadMessage> {
 
 				System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
 			}
-
-			message.getQuad().getTexture().getParent().setTexture(file.getPath());
 		}
 		
 		Blocks.get(message.getBlock()).getModel().addQuad(message.getQuad());

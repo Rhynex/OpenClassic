@@ -9,12 +9,14 @@ import static org.lwjgl.opengl.GL11.*;
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.component.BasicComponentHolder;
 import ch.spacebase.openclassic.api.data.NBTData;
+import ch.spacebase.openclassic.api.inventory.PlayerInventory;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
@@ -48,7 +50,7 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 	public void render(float delta) {
 		double dist = this.pos.distanceSquared(OpenClassic.getClient().getPlayer().getPosition());
 		if(dist < 4096) {
-			this.model.renderAll(VanillaBlock.STONE, this.pos.getX() - 0.5f, this.pos.getY() - 0.95f, this.pos.getZ() - 0.5f, 1); // TODO: Create a proper model. Any help would be appreciated :p
+			this.model.renderAll(VanillaBlock.STONE, this.pos.getX() - 0.5f, this.pos.getY() - 0.95f, this.pos.getZ() - 0.5f, 1); // TODO: Create a proper model.
 		
 			glPushMatrix();
 			glTranslatef(this.pos.getX(), this.pos.getY() + 1.4875f, this.pos.getZ());
@@ -144,15 +146,6 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 	}
 
 	@Override
-	public BlockType getPlaceMode() {
-		return null;
-	}
-
-	@Override
-	public void setPlaceMode(BlockType type) {
-	}
-
-	@Override
 	public void moveTo(Position pos) {
 		this.moveTo(pos.getLevel(), pos.getX(), pos.getY(), pos.getZ(), pos.getYaw(), pos.getPitch());
 	}
@@ -239,6 +232,61 @@ public class OtherPlayer extends BasicComponentHolder implements Player {
 	@Override
 	public boolean canSee(Player player) {
 		return true;
+	}
+
+	@Override
+	public Position getSelectedBlock() {
+		return null;
+	}
+
+	@Override
+	public BlockFace getSelectedFace() {
+		return null;
+	}
+
+	@Override
+	public PlayerInventory getInventory() {
+		return null;
+	}
+
+	@Override
+	public Position getSelectedLiquid() {
+		return null;
+	}
+
+	@Override
+	public int getHealth() {
+		return 20;
+	}
+
+	@Override
+	public void setHealth(int health) {
+	}
+
+	@Override
+	public void damage(int damage) {
+	}
+
+	@Override
+	public int getAir() {
+		return 0;
+	}
+
+	@Override
+	public void setAir(int air) {
+	}
+
+	@Override
+	public void heal(int health) {
+	}
+
+	@Override
+	public boolean isDead() {
+		return false;
+	}
+
+	@Override
+	public void die() {
 	}
 
 }

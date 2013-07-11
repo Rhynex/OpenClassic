@@ -57,7 +57,7 @@ public class ClientAudioManager implements AudioManager {
 			e.printStackTrace();
 		}
 		
-		// TODO: More sounds
+		// TODO: use asset system
 		this.registerSound("step.cloth", ClassicClient.class.getResource("/sounds/step/cloth1.ogg"), true);
 		this.registerSound("step.cloth", ClassicClient.class.getResource("/sounds/step/cloth2.ogg"), true);
 		this.registerSound("step.dirt", ClassicClient.class.getResource("/sounds/step/dirt1.ogg"), true);
@@ -76,6 +76,8 @@ public class ClientAudioManager implements AudioManager {
 		this.registerSound("step.wood", ClassicClient.class.getResource("/sounds/step/wood2.ogg"), true);
 		
 		this.registerSound("generic.explode", ClassicClient.class.getResource("/sounds/generic/explode.ogg"), true);
+		this.registerSound("generic.hurt", ClassicClient.class.getResource("/sounds/generic/hurt.ogg"), true);
+		this.registerSound("generic.click", ClassicClient.class.getResource("/sounds/generic/click.ogg"), true);
 	}
 	
 	public void update(ClientPlayer player) {

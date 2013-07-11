@@ -1,6 +1,5 @@
 package ch.spacebase.openclassic.server.level;
 
-import ch.spacebase.openclassic.api.entity.BlockEntity;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.network.msg.Message;
@@ -25,11 +24,7 @@ public class ServerLevel extends ClassicLevel implements Level {
 		for(Player player : this.getPlayers()) {
 			((ServerPlayer) player).tick();
 		}
-		
-		for(BlockEntity entity : this.getBlockEntities()) {
-			if(entity.getController() != null) entity.getController().tick();
-		}
-		
+
 		this.physics();
 	}
 	

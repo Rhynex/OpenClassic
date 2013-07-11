@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.complex.ComplexBlock;
 import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeGenerator;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
@@ -19,6 +20,8 @@ import ch.spacebase.opennbt.tag.ByteArrayTag;
 import ch.spacebase.opennbt.tag.ByteTag;
 import ch.spacebase.opennbt.tag.CompoundTag;
 import ch.spacebase.opennbt.tag.FloatTag;
+import ch.spacebase.opennbt.tag.IntTag;
+import ch.spacebase.opennbt.tag.ListTag;
 import ch.spacebase.opennbt.tag.LongTag;
 import ch.spacebase.opennbt.tag.StringTag;
 
@@ -131,6 +134,24 @@ public class OpenClassicLevelFormat extends LevelFormat {
 			}
 		}
 		
+		ListTag<CompoundTag> blocks = (ListTag<CompoundTag>) root.get("ComplexBlocks");
+		if(blocks != null) {
+			for(CompoundTag block : blocks) {
+				String name = ((StringTag) block.get("Class")).getValue();
+				int bx = ((IntTag) block.get("X")).getValue();
+				int by = ((IntTag) block.get("Y")).getValue();
+				int bz = ((IntTag) block.get("Z")).getValue();
+				try {
+					ComplexBlock b = (ComplexBlock) Class.forName(name).getConstructor(Position.class).newInstance(new Position(this.getLevel(), bx, by, bz));
+					b.read(block);
+					column.setComplexBlock(bx, by, bz, b);
+				} catch (Exception e) {
+					OpenClassic.getLogger().severe("Failed to load ComplexBlock " + name + " at (" + bx + ", " + by + ", " + bz + ")");
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		in.close();
 		return column;
 	}
@@ -165,7 +186,22 @@ public class OpenClassicLevelFormat extends LevelFormat {
 			root.append("HasBiomes", (byte) 0);
 		}
 		
-		out.writeTag(root.toCompoundTag());
+		ListTag<CompoundTag> complexBlocks = new ListTag<CompoundTag>("ComplexBlocks", CompoundTag.class);
+		for(ComplexBlock b : column.getComplexBlocks()) {
+			if(b == null) continue;
+			TagBuilder tile = new TagBuilder();
+			tile.append("Class", b.getClass().getName());
+			tile.append("X", b.getPosition().getBlockX());
+			tile.append("Y", b.getPosition().getBlockY());
+			tile.append("Z", b.getPosition().getBlockZ());
+			CompoundTag result = tile.toCompoundTag();
+			b.write(result);
+			complexBlocks.add(result);
+		}
+		
+		CompoundTag tag = root.toCompoundTag();
+		tag.put("ComplexBlocks", complexBlocks);
+		out.writeTag(tag);
 		out.close();
 	}
 	

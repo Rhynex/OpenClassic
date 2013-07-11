@@ -33,7 +33,8 @@ public class ServerURLScreen extends GuiScreen {
 
 	public void onButtonClick(Button button) {
 		if(button.getId() == 0) {
-			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+			OpenClassic.getClient().getProgressBar().setTitle("Multiplayer");
+			OpenClassic.getClient().getProgressBar().setSubTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().setVisible(true);

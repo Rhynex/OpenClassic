@@ -30,12 +30,10 @@ import ch.spacebase.openclassic.api.HeartbeatManager;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Server;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.physics.CactusPhysics;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
 import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
 import ch.spacebase.openclassic.api.block.physics.HalfStepPhysics;
-import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
 import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
@@ -178,19 +176,16 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.registerExecutor(null, new ServerCommands());
 		this.registerGenerator(new FlatLandGenerator());
 		
-		VanillaBlock.CACTUS.setPhysics(new CactusPhysics());
 		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics(VanillaBlock.SAND));
 		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics(VanillaBlock.GRAVEL));
 		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
 		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
 		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
-		VanillaBlock.WATER.setPhysics(new LiquidPhysics(VanillaBlock.WATER));
-		VanillaBlock.LAVA.setPhysics(new LiquidPhysics(VanillaBlock.LAVA));
 		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
 		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
 		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
 		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
-		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
+		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics(VanillaBlock.SLAB.getId()));
 		
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		

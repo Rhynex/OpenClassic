@@ -3,17 +3,22 @@ package ch.spacebase.openclassic.game.level.column;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.block.complex.ComplexBlock;
 import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.column.Column;
+import ch.spacebase.openclassic.api.level.generator.Populator;
 import ch.spacebase.openclassic.api.level.generator.biome.BiomeManager;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.api.util.storage.TripleIntHashMap;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class ClassicColumn implements Column {
@@ -24,6 +29,8 @@ public class ClassicColumn implements Column {
 	private ClassicChunk chunks[] = new ClassicChunk[Constants.COLUMN_HEIGHT >> 4];
 	private BiomeManager biomes;
 	private int heightmap[] = new int[Constants.CHUNK_AREA];
+	private TripleIntHashMap<ComplexBlock> complexBlocks = new TripleIntHashMap<ComplexBlock>();
+	private boolean populated;
 	
 	public ClassicColumn(ClassicLevel level, int x, int z) {
 		this.level = level;
@@ -173,7 +180,29 @@ public class ClassicColumn implements Column {
 			chunk.update();
 		}
 		
-		// TODO
+		for(Object block : this.complexBlocks.values()) {
+			if(block != null) ((ComplexBlock) block).tick();
+		}
+		
+		if(!this.populated) {
+			if(this.level.isColumnLoaded(this.x - 1, this.z) && this.level.isColumnLoaded(this.x + 1, this.z) && this.level.isColumnLoaded(this.x, this.z - 1) && this.level.isColumnLoaded(this.x, this.z + 1) && this.level.isColumnLoaded(this.x - 1, this.z - 1) && this.level.isColumnLoaded(this.x - 1, this.z + 1) && this.level.isColumnLoaded(this.x + 1, this.z - 1) && this.level.isColumnLoaded(this.x + 1, this.z + 1)) {
+				this.populate();
+			}
+		}
+	}
+	
+	public void populate() {
+		Random random = new Random(this.level.getSeed());
+		long xseed = random.nextLong() + 1;
+		long zseed = random.nextLong() + 1;
+		random.setSeed(this.x * xseed + this.z * zseed ^ this.level.getSeed());
+		for(Chunk chunk : this.getChunks()) {
+			for(Populator pop : this.level.getGenerator().getPopulators(this.level)) {
+				pop.populate(this.level, chunk, random);
+			}
+		}
+		
+		this.populated = true;
 	}
 	
 	@Override
@@ -189,6 +218,68 @@ public class ClassicColumn implements Column {
 	@Override
 	public String toString() {
 		return "Column{x=" + this.x + ",z=" + this.z + "}";
+	}
+
+	@Override
+	public boolean isComplex(Position pos) {
+		return this.isComplex(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+	}
+	
+	@Override
+	public boolean isComplex(int x, int y, int z) {
+		if(x < this.getWorldX() || y < 0 || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= Constants.COLUMN_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
+				return this.level.isComplex(x, y, z);
+			}
+
+			return false;
+		}
+		
+		return this.complexBlocks.get(x, y, z) != null;
+	}
+
+	@Override
+	public ComplexBlock getComplexBlock(Position pos) {
+		return this.getComplexBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+	}
+
+	@Override
+	public ComplexBlock getComplexBlock(int x, int y, int z) {
+		if(x < this.getWorldX() || y < 0 || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= Constants.COLUMN_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
+				return this.level.getComplexBlock(x, y, z);
+			}
+
+			return null;
+		}
+		
+		return this.complexBlocks.get(x, y, z);
+	}
+
+	@Override
+	public void setComplexBlock(Position pos, ComplexBlock complex) {
+		this.setComplexBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), complex);
+	}
+
+	@Override
+	public void setComplexBlock(int x, int y, int z, ComplexBlock complex) {
+		if(x < this.getWorldX() || y < 0 || z < this.getWorldZ() || x >= this.getWorldX() + Constants.CHUNK_WIDTH || y >= Constants.COLUMN_HEIGHT || z >= this.getWorldZ() + Constants.CHUNK_DEPTH) {
+			if(this.level.isColumnLoaded(x >> 4, z >> 4)) {
+				this.level.setComplexBlock(x, y, z, complex);
+			}
+
+			return;
+		}
+		
+		if(complex == null) {
+			this.complexBlocks.remove(x, y, z);
+		} else {
+			this.complexBlocks.put(x, y, z, complex);
+		}
+	}
+	
+	public Collection<ComplexBlock> getComplexBlocks() {
+		return this.complexBlocks.values();
 	}
 	
 }

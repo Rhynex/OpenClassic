@@ -23,7 +23,6 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().getId());
 		buffer.writeByte(message.getBlock().getData());
 		buffer.writeByte(message.getBlock().isOpaque() ? 1 : 0);
-		buffer.writeByte(message.getBlock().isSelectable() ? 1 : 0);
 		ChannelBufferUtils.writeString(buffer, message.getBlock().getStepSound().name());
 		buffer.writeByte(message.getBlock().isLiquid() ? 1 : 0);
 		buffer.writeInt(message.getBlock().getTickDelay());
@@ -37,7 +36,6 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		byte id = buffer.readByte();
 		byte data = buffer.readByte();
 		boolean opaque = buffer.readByte() == 1;
-		boolean selectable = buffer.readByte() == 1;
 		StepSound sound = StepSound.valueOf(ChannelBufferUtils.readString(buffer));
 		boolean liquid = buffer.readByte() == 1;
 		int delay = buffer.readInt();
@@ -46,7 +44,6 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		BlockType block = new BlockType(id, data, sound, null);
 		block.setLiquid(liquid);
 		block.setOpaque(opaque);
-		block.setSelectable(selectable);
 		block.setTickDelay(delay);
 		block.setBrightness(brightness);
 		

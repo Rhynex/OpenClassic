@@ -12,7 +12,7 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
-public final class ControlsScreen extends GuiScreen {
+public class ControlsScreen extends GuiScreen {
 
 	private GuiScreen parent;
 	private String title = "Controls";
@@ -41,8 +41,9 @@ public final class ControlsScreen extends GuiScreen {
 		if(path.equals("keys.left")) return "Left";
 		if(path.equals("keys.right")) return "Right";
 		if(path.equals("keys.jump")) return "Jump";
-		if(path.equals("keys.select-block")) return "Select Block";
+		if(path.equals("keys.inventory")) return "Inventory";
 		if(path.equals("keys.chat")) return "Chat";
+		if(path.equals("keys.togglefog")) return "Toggle Fog";
 		return path;
 	}
 	
@@ -53,8 +54,9 @@ public final class ControlsScreen extends GuiScreen {
 		if(name.equals("Left")) return "keys.left";
 		if(name.equals("Right")) return "keys.right";
 		if(name.equals("Jump")) return "keys.jump";
-		if(name.equals("Select Block")) return "keys.select-block";
+		if(name.equals("Inventory")) return "keys.inventory";
 		if(name.equals("Chat")) return "keys.chat";
+		if(name.equals("Toggle Fog")) return "keys.togglefog";
 		return name;
 	}
 

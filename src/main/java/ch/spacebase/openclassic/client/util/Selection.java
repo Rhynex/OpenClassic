@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL11.*;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockFace;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 
 public class Selection {
@@ -36,7 +37,15 @@ public class Selection {
 	}
 	
 	public boolean isValid() {
-		return this.pos != null && this.face != null && this.bb != null;
+		boolean valid = this.pos != null && this.face != null && this.bb != null;
+		if(valid && (this.pos.getBlockType() == VanillaBlock.AIR || this.pos.getBlockType().isLiquid())) {
+			this.pos = null;
+			this.face = null;
+			this.bb = null;
+			valid = false;
+		}
+		
+		return valid;
 	}
 
 	public void render() {

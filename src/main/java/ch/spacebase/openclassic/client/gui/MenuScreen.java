@@ -8,7 +8,7 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.mode.Multiplayer;
 
-public final class MenuScreen extends GuiScreen {
+public class MenuScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();

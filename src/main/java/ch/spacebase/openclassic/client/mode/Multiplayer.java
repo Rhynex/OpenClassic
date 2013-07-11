@@ -59,11 +59,7 @@ public class Multiplayer extends Mode {
 	}
 	
 	public void onBreak(int x, int y, int z, BlockType old) {
-		this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, false, this.getPlayer().getQuickBar().getBlock(this.getPlayer().getQuickBar().getSelected()).getId())); // TODO: adjust for data
-	}
-	
-	public void onPlace(int x, int y, int z, BlockType type) {
-		this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, true, type.getId()));
+		this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, false, (byte) this.getPlayer().getInventory().getHeldItem().getItem().getId())); // TODO: adjust for data
 	}
 
 	public ClientSession getSession() {

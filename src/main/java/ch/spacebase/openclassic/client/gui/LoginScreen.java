@@ -103,7 +103,8 @@ public class LoginScreen extends GuiScreen {
 				this.getLoginFile(false).delete();
 			}
 			
-			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("gui.login.logging-in"));
+			OpenClassic.getClient().getProgressBar().setTitle("Multiplayer");
+			OpenClassic.getClient().getProgressBar().setSubTitle(OpenClassic.getGame().getTranslator().translate("gui.login.logging-in"));
 			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().setVisible(true);
 			if (!auth(user, pass)) {

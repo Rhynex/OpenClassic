@@ -28,7 +28,7 @@ public class ColumnUnloadThread extends Thread {
 		while(this.running) {
 			if(this.queue.size() > 0) {
 				ClassicColumn column = this.queue.remove(this.queue.keySet().toArray(new Long[this.queue.size()])[0]);
-				column.save();
+				if(column != null) column.save();
 			}
 		}
 	}

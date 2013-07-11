@@ -5,7 +5,6 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,8 +60,6 @@ public class ResourcePackScreen extends GuiScreen {
 				OpenClassic.getLogger().severe("Failed to save config!");
 				e.printStackTrace();
 			}
-			
-			ClientRenderHelper.getHelper().getTextureManager().clear();
 		}
 	}
 

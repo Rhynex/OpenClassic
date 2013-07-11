@@ -131,8 +131,9 @@ public abstract class Particle {
 		return this.size;
 	}
 	
-	public void setSize(float size) {
+	public Particle setSize(float size) {
 		this.size = size;
+		return this;
 	}
 	
 	public Particle setPower(float power) {

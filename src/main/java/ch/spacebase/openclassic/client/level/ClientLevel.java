@@ -6,6 +6,7 @@ import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.level.Level;
@@ -85,17 +86,30 @@ public class ClientLevel extends ClassicLevel implements Level {
 		}
 	}
 
-	public boolean contains(BoundingBox bb, BlockType... types) {
-		List<BlockType> list = Arrays.asList(types);
-		int x1 = bb.getX1() < 0 ? 0 : (int) bb.getX1();
-		int y1 = bb.getY1() < 0 ? 0 : (int) bb.getY1();
-		int z1 = bb.getZ1() < 0 ? 0 : (int) bb.getZ1();
-
-		for(int x = x1; x < bb.getX2(); x++) {
-			for(int y = y1; y < bb.getY2(); y++) {
-				for(int z = z1; z < bb.getZ2(); z++) {
+	public boolean colliding(BoundingBox bb) {
+		for(int x = (int) Math.floor(bb.getX1()); x < bb.getX2(); x++) {
+			for(int y = (int) Math.floor(bb.getY1()); y < bb.getY2(); y++) {
+				for(int z = (int) Math.floor(bb.getZ1()); z < bb.getZ2(); z++) {
 					BlockType type = this.getBlockTypeAt(x, y, z);
-					if(list.contains(type)) {
+					BoundingBox collision = type.getModel().getCollisionBox(x, y, z);
+					if(collision != null && collision.intersectsInner(bb)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+	
+	public boolean containsAny(BoundingBox bb, BlockType... types) {
+		List<BlockType> blocks = Arrays.asList(types);
+		for(int x = (int) Math.floor(bb.getX1()); x < bb.getX2(); x++) {
+			for(int y = (int) Math.floor(bb.getY1()); y < bb.getY2(); y++) {
+				for(int z = (int) Math.floor(bb.getZ1()); z < bb.getZ2(); z++) {
+					BlockType type = this.getBlockTypeAt(x, y, z);
+					BoundingBox selection = type.getModel().getSelectionBox(x, y, z);
+					if(blocks.contains(Blocks.get(type.getId(), 0)) && selection != null && selection.intersectsInner(bb)) {
 						return true;
 					}
 				}

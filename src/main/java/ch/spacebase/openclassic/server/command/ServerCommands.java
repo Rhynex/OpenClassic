@@ -7,7 +7,6 @@ import java.util.List;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
 import ch.spacebase.openclassic.api.command.annotation.Command;
@@ -453,66 +452,6 @@ public class ServerCommands extends CommandExecutor {
 		}
 		
 		OpenClassic.getServer().unloadLevel(args[0]);
-	}
-	
-	@Command(aliases = {"solid", "bedrock"}, desc = "Toggles bedrock placement mode.", permission = "openclassic.commands.solid", senders = {Player.class})
-	public void solid(Sender sender, String command, String args[]) {
-		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.BEDROCK) {
-			player.setPlaceMode(VanillaBlock.BEDROCK);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("solid.enable", sender.getLanguage()));
-		} else {
-			player.setPlaceMode(null);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("solid.disable", sender.getLanguage()));
-		}
-	}
-	
-	@Command(aliases = {"water"}, desc = "Toggles water placement mode.", permission = "openclassic.commands.water", senders = {Player.class})
-	public void water(Sender sender, String command, String args[]) {
-		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.WATER) {
-			player.setPlaceMode(VanillaBlock.WATER);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("water.enable", sender.getLanguage()));
-		} else {
-			player.setPlaceMode(null);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("water.disable", sender.getLanguage()));
-		}
-	}
-	
-	@Command(aliases = {"stillwater"}, desc = "Toggles still water placement mode.", permission = "openclassic.commands.stillwater", senders = {Player.class})
-	public void still_water(Sender sender, String command, String args[]) {
-		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.STATIONARY_WATER) {
-			player.setPlaceMode(VanillaBlock.STATIONARY_WATER);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("stillwater.enable", sender.getLanguage()));
-		} else {
-			player.setPlaceMode(null);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("stillwater.disable", sender.getLanguage()));
-		}
-	}
-	
-	@Command(aliases = {"lava"}, desc = "Toggles lava placement mode.", permission = "openclassic.commands.lava", senders = {Player.class})
-	public void lava(Sender sender, String command, String args[]) {
-		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.LAVA) {
-			player.setPlaceMode(VanillaBlock.LAVA);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("lava.enable", sender.getLanguage()));
-		} else {
-			player.setPlaceMode(null);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("lava.disable", sender.getLanguage()));
-		}
-	}
-	
-	@Command(aliases = {"stilllava"}, desc = "Toggles still lava placement mode.", permission = "openclassic.commands.stilllava", senders = {Player.class})
-	public void still_lava(Sender sender, String command, String args[]) {
-		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.STATIONARY_LAVA) {
-			player.setPlaceMode(VanillaBlock.STATIONARY_LAVA);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("stilllava.enable", sender.getLanguage()));
-		} else {
-			player.setPlaceMode(null);
-			player.sendMessage(Color.GREEN + OpenClassic.getGame().getTranslator().translate("stilllava.disable", sender.getLanguage()));
-		}
 	}
 	
 	@Command(aliases = {"say"}, desc = "Sends a server message.", usage = "<message>", permission = "openclassic.commands.say")

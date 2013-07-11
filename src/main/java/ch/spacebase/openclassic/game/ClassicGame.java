@@ -17,12 +17,22 @@ import ch.spacebase.openclassic.api.Server;
 import ch.spacebase.openclassic.api.asset.AssetManager;
 import ch.spacebase.openclassic.api.asset.AssetSource;
 import ch.spacebase.openclassic.api.asset.text.YamlFile;
+import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.command.Command;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
 import ch.spacebase.openclassic.api.event.EventManager;
 import ch.spacebase.openclassic.api.event.game.CommandNotFoundEvent;
 import ch.spacebase.openclassic.api.event.game.PreCommandEvent;
+import ch.spacebase.openclassic.api.inventory.ItemStack;
+import ch.spacebase.openclassic.api.inventory.recipe.Fuel;
+import ch.spacebase.openclassic.api.inventory.recipe.RecipeManager;
+import ch.spacebase.openclassic.api.inventory.recipe.ShapedRecipe;
+import ch.spacebase.openclassic.api.inventory.recipe.ShapelessRecipe;
+import ch.spacebase.openclassic.api.inventory.recipe.SmeltingRecipe;
+import ch.spacebase.openclassic.api.item.VanillaItem;
+import ch.spacebase.openclassic.api.item.physics.AxePhysics;
 import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.pkg.PackageManager;
 import ch.spacebase.openclassic.api.plugin.Plugin;
@@ -30,6 +40,8 @@ import ch.spacebase.openclassic.api.plugin.PluginManager;
 import ch.spacebase.openclassic.api.scheduler.Scheduler;
 import ch.spacebase.openclassic.api.translate.Language;
 import ch.spacebase.openclassic.api.translate.Translator;
+import ch.spacebase.openclassic.game.block.complex.ClassicChest;
+import ch.spacebase.openclassic.game.block.complex.ClassicFurnace;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 
 public abstract class ClassicGame implements Game {
@@ -39,6 +51,7 @@ public abstract class ClassicGame implements Game {
 	private final YamlFile config;
 	private final ClassicScheduler scheduler = new ClassicScheduler(this instanceof Client ? "Client" : "Server");
 	
+	private final RecipeManager recipes = new RecipeManager();
 	private final PluginManager pluginManager = new PluginManager();
 	private final EventManager eventManager = new EventManager();
 	private final AssetManager assets;
@@ -59,16 +72,333 @@ public abstract class ClassicGame implements Game {
 		
 		this.assets = new AssetManager(directory);
 		this.config = this.assets.load("config.yml", AssetSource.FILE, YamlFile.class);
-		
 		this.translator.register(new Language("English", "/lang/en_US.lang", AssetSource.JAR));
 		this.translator.setDefault("English"); 
-		
 		this.pkgManager = new PackageManager();
+		this.registerRecipes();
+		VanillaBlock.FURNACE_EAST.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.FURNACE_WEST.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.FURNACE_NORTH.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.FURNACE_SOUTH.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.BURNING_FURNACE_EAST.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.BURNING_FURNACE_WEST.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.BURNING_FURNACE_NORTH.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.BURNING_FURNACE_SOUTH.setComplexBlock(ClassicFurnace.class);
+		VanillaBlock.CHEST_EAST.setComplexBlock(ClassicChest.class);
+		VanillaBlock.CHEST_WEST.setComplexBlock(ClassicChest.class);
+		VanillaBlock.CHEST_NORTH.setComplexBlock(ClassicChest.class);
+		VanillaBlock.CHEST_SOUTH.setComplexBlock(ClassicChest.class);
+	}
+	
+	private void registerRecipes() {
+		this.registerCrafting();
+		this.registerSmelting();
+		this.registerFuels();
+	}
+	
+	private void registerSmelting() {
+		this.getRecipeManager().registerSmelting(new SmeltingRecipe(VanillaBlock.IRON_ORE, new ItemStack(VanillaItem.IRON_INGOT)));
+		this.getRecipeManager().registerSmelting(new SmeltingRecipe(VanillaBlock.GOLD_ORE, new ItemStack(VanillaItem.GOLD_INGOT)));
+		this.getRecipeManager().registerSmelting(new SmeltingRecipe(VanillaBlock.SAND, new ItemStack(VanillaBlock.GLASS)));
+		this.getRecipeManager().registerSmelting(new SmeltingRecipe(VanillaItem.RAW_PORK, new ItemStack(VanillaItem.COOKED_PORK)));
+		this.getRecipeManager().registerSmelting(new SmeltingRecipe(VanillaBlock.COBBLESTONE, new ItemStack(VanillaBlock.STONE)));
+		this.getRecipeManager().registerSmelting(new SmeltingRecipe(VanillaItem.CLAY, new ItemStack(VanillaItem.BRICK)));
+	}
+	
+	private void registerFuels() {
+		for(BlockType block : AxePhysics.getBlocks()) {
+			this.getRecipeManager().registerFuel(new Fuel(block, 300));
+		}
+		
+		this.getRecipeManager().registerFuel(new Fuel(VanillaItem.STICK, 100));
+		this.getRecipeManager().registerFuel(new Fuel(VanillaItem.COAL, 1600));
+		this.getRecipeManager().registerFuel(new Fuel(VanillaItem.LAVA_BUCKET, 20000));
+	}
+	
+	private void registerCrafting() {
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.WORKBENCH), new String[] {
+			"XX",
+			"XX"
+		}, 'X', VanillaBlock.WOOD));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.BOOKSHELF), new String[] {
+			"###",
+			"XXX",
+			"###"
+		}, '#', VanillaBlock.WOOD, 'X', VanillaItem.BOOK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.CLAY_BLOCK), new String[] {
+			"##",
+			"##"
+		}, '#', VanillaItem.CLAY));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.BRICK_BLOCK), new String[] {
+			"##",
+			"##"
+		}, '#', VanillaItem.BRICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.WHITE_CLOTH), new String[] {
+			"##",
+			"##"
+		}, '#', VanillaItem.STRING));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.TNT), new String[] {
+			"X#X",
+			"#X#",
+			"X#X"
+		}, 'X', VanillaItem.GUNPOWDER, '#', VanillaBlock.SAND));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.SLAB, 3), new String[] {
+			"###"
+		}, '#', VanillaBlock.COBBLESTONE));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.WOOD, 4), new String[] {
+			"X"
+		}, 'X', VanillaBlock.LOG));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.IRON_BLOCK, 1), new String[] {
+			"XXX",
+			"XXX",
+			"XXX"
+		}, 'X', VanillaItem.IRON_INGOT));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.GOLD_BLOCK, 1), new String[] {
+			"XXX",
+			"XXX",
+			"XXX"
+		}, 'X', VanillaItem.GOLD_INGOT));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.LAPIS_LAZULI_BLOCK, 1), new String[] {
+			"XXX",
+			"XXX",
+			"XXX"
+		}, 'X', VanillaItem.LAPIS_LAZULI));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaBlock.DIAMOND_BLOCK, 1), new String[] {
+			"XXX",
+			"XXX",
+			"XXX"
+		}, 'X', VanillaItem.DIAMOND));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.PAPER, 3), new String[] {
+			"###"
+		}, '#', VanillaItem.REEDS));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.BOOK), new String[] {
+			"#",
+			"#",
+			"#"
+		}, '#', VanillaItem.PAPER));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.STICK, 4), new String[] {
+			"X",
+			"X"
+		}, 'X', VanillaBlock.WOOD));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.BUCKET), new String[] {
+			"X X",
+			" X "
+		}, 'X', VanillaItem.IRON_INGOT));
+		this.registerWool();
+		this.registerTools();
+	}
+	
+	private void registerWool() {
+		ShapelessRecipe recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.RED_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.ORANGE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.ORANGE_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.YELLOW_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.YELLOW_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.LIME_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.LIME_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.GREEN_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.GREEN_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.AQUA_GREEN_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.AQUA_GREEN_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.LIGHT_BLUE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.LIGHT_BLUE_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.BLUE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.LAPIS_LAZULI));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.PURPLE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.PURPLE_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.MAGENTA_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.MAGENTA_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.PINK_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.PINK_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.BROWN_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.COCOA_BEANS));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.BLACK_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.BLACK_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.DARK_GRAY_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.DARK_GRAY_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaBlock.GRAY_CLOTH));
+		recipe.addItem(new ItemStack(VanillaBlock.WHITE_CLOTH));
+		recipe.addItem(new ItemStack(VanillaItem.GRAY_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.RED_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaBlock.ROSE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.YELLOW_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaBlock.DANDELION));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.PINK_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.ORANGE_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.YELLOW_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.LIME_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		recipe.addItem(new ItemStack(VanillaItem.GREEN_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.DARK_GRAY_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.BLACK_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.GRAY_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.DARK_GRAY_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.GRAY_DYE, 3));
+		recipe.addItem(new ItemStack(VanillaItem.BLACK_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.LIGHT_BLUE_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.LAPIS_LAZULI));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.AQUA_GREEN_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.LAPIS_LAZULI));
+		recipe.addItem(new ItemStack(VanillaItem.GREEN_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.PURPLE_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.LAPIS_LAZULI));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.MAGENTA_DYE, 2));
+		recipe.addItem(new ItemStack(VanillaItem.PURPLE_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.PINK_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.MAGENTA_DYE, 3));
+		recipe.addItem(new ItemStack(VanillaItem.LAPIS_LAZULI));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.PINK_DYE));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.MAGENTA_DYE, 4));
+		recipe.addItem(new ItemStack(VanillaItem.LAPIS_LAZULI));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.RED_DYE));
+		recipe.addItem(new ItemStack(VanillaItem.BONE_MEAL));
+		this.getRecipeManager().registerCrafting(recipe);
+		recipe = new ShapelessRecipe(new ItemStack(VanillaItem.BONE_MEAL, 3));
+		recipe.addItem(new ItemStack(VanillaItem.BONE));
+		this.getRecipeManager().registerCrafting(recipe);
+		
+	}
+	
+	private void registerTools() {
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.WOODEN_PICKAXE), new String[] {
+			"XXX",
+			" # ",
+			" # "
+		}, 'X', VanillaBlock.WOOD, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.WOODEN_AXE), new String[] {
+			"XX",
+			"X#",
+			" #"
+		}, 'X', VanillaBlock.WOOD, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.WOODEN_SHOVEL), new String[] {
+			"X",
+			"#",
+			"#"
+		}, 'X', VanillaBlock.WOOD, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.STONE_PICKAXE), new String[] {
+			"XXX",
+			" # ",
+			" # "
+		}, 'X', VanillaBlock.COBBLESTONE, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.STONE_AXE), new String[] {
+			"XX",
+			"X#",
+			" #"
+		}, 'X', VanillaBlock.COBBLESTONE, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.STONE_SHOVEL), new String[] {
+			"X",
+			"#",
+			"#"
+		}, 'X', VanillaBlock.COBBLESTONE, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.IRON_PICKAXE), new String[] {
+			"XXX",
+			" # ",
+			" # "
+		}, 'X', VanillaItem.IRON_INGOT, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.IRON_AXE), new String[] {
+			"XX",
+			"X#",
+			" #"
+		}, 'X', VanillaItem.IRON_INGOT, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.IRON_SHOVEL), new String[] {
+			"X",
+			"#",
+			"#"
+		}, 'X', VanillaItem.IRON_INGOT, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.GOLD_PICKAXE), new String[] {
+			"XXX",
+			" # ",
+			" # "
+		}, 'X', VanillaItem.GOLD_INGOT, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.GOLD_AXE), new String[] {
+			"XX",
+			"X#",
+			" #"
+		}, 'X', VanillaItem.GOLD_INGOT, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.GOLD_SHOVEL), new String[] {
+			"X",
+			"#",
+			"#"
+		}, 'X', VanillaItem.GOLD_INGOT, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.DIAMOND_PICKAXE), new String[] {
+			"XXX",
+			" # ",
+			" # "
+		}, 'X', VanillaItem.DIAMOND, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.DIAMOND_AXE), new String[] {
+			"XX",
+			"X#",
+			" #"
+		}, 'X', VanillaItem.DIAMOND, '#', VanillaItem.STICK));
+		this.getRecipeManager().registerCrafting(new ShapedRecipe(new ItemStack(VanillaItem.DIAMOND_SHOVEL), new String[] {
+			"X",
+			"#",
+			"#"
+		}, 'X', VanillaItem.DIAMOND, '#', VanillaItem.STICK));
 	}
 	
 	@Override
 	public AssetManager getAssetManager() {
 		return this.assets;
+	}
+	
+	@Override
+	public RecipeManager getRecipeManager() {
+		return this.recipes;
 	}
 	
 	@Override

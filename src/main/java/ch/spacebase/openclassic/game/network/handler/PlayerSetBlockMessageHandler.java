@@ -2,13 +2,12 @@ package ch.spacebase.openclassic.game.network.handler;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Block;
+import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.entity.BlockEntity.BlockRemoveCause;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
-import ch.spacebase.openclassic.api.event.entity.EntityBlockRemoveEvent;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.api.player.Session.State;
@@ -38,17 +37,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		}
 			
 		Block block = player.getPosition().getLevel().getBlockAt(message.getX(), message.getY(), message.getZ());
-		if(block != null && block.isEntity() && !message.isPlacing()) {
-			if(block.getBlockEntity().getController() != null) {
-				if(OpenClassic.getGame().getEventManager().dispatch(new EntityBlockRemoveEvent(block.getBlockEntity(), BlockRemoveCause.PLAYER, block)).isCancelled() || !block.getBlockEntity().getController().onBlockRemoval(BlockRemoveCause.PLAYER, block)) {
-					session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
-					return;
-				}
-			}
-		}
-		
 		byte type = (message.isPlacing()) ? message.getBlock() : 0;
-		if(message.isPlacing() && player.getPlaceMode() != null && type != 0) type = player.getPlaceMode().getId();
 		BlockType b = Blocks.get(type);
 		if(message.isPlacing() && !(b.getPhysics() != null && !b.getPhysics().canPlace(block))) {
 			session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
@@ -77,7 +66,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		
 		if(block != null && block.getType() != null && block.getType().getPhysics() != null) {
 			if(message.isPlacing()) {
-				block.getType().getPhysics().onPlace(block);
+				block.getType().getPhysics().onPlace(block, BlockFace.DOWN);
 			} else {
 				block.getType().getPhysics().onBreak(block);
 			}

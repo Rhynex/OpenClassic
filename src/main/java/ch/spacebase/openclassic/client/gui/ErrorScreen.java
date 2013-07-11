@@ -2,12 +2,10 @@ package ch.spacebase.openclassic.client.gui;
 
 import org.lwjgl.input.Keyboard;
 
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.ClassicClient;
 
 public final class ErrorScreen extends GuiScreen {
 
@@ -26,13 +24,17 @@ public final class ErrorScreen extends GuiScreen {
 
 	public void onButtonClick(Button button) {
 		if(button.getId() == 0) {
-			((ClassicClient) OpenClassic.getClient()).exitLevel();
+			if(OpenClassic.getClient().isInGame()) {
+				OpenClassic.getClient().exitLevel();
+			} else {
+				OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
+			}
 		}
 	}
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 180);
+		RenderHelper.getHelper().renderScaledText(this.title, this.getWidth() / 2, 180);
 		RenderHelper.getHelper().renderText(this.message, this.getWidth() / 2, 220);
 		super.render();
 	}

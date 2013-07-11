@@ -9,7 +9,7 @@ import ch.spacebase.openclassic.api.util.Constants;
 // Base tracer math borrowed from ArdorcraftAPI (https://github.com/rherlitz/ArdorCraft)
 public class Tracer {
 
-	private static final int MAX_ITERATIONS = 5;
+	private static final int MAX_ITERATIONS = 4;
 	private static final double EPSILON = 0.0001;
 
 	private double mult = 1;
@@ -21,8 +21,26 @@ public class Tracer {
 	public Tracer(Level level) {
 		this.level = level;
 	}
-
+	
 	public Intersection trace(Vector curpos, Vector raydir, int iterations) {
+		return this.trace(curpos, raydir, iterations, new Conditions() {
+			@Override
+			public boolean satisfied(BlockType block, int x, int y, int z) {
+				return block != null && block != VanillaBlock.AIR && !block.isLiquid() && block.getModel().getSelectionBox(x, y, z) != null;
+			}
+		});
+	}
+	
+	public Intersection traceLiquid(Vector curpos, Vector raydir, int iterations) {
+		return this.trace(curpos, raydir, iterations, new Conditions() {
+			@Override
+			public boolean satisfied(BlockType block, int x, int y, int z) {
+				return block != null && block.isLiquid() && block.getData() == 0;
+			}
+		});
+	}
+
+	public Intersection trace(Vector curpos, Vector raydir, int iterations, Conditions cond) {
 		this.tmax.set(0, 0, 0);
 		this.tdelta.set(0, 0, 0);
 
@@ -30,9 +48,7 @@ public class Tracer {
 		boolean back = false;
 
 		Intersection inter = new Intersection();
-		if (curpos.getY() < 0) {
-			return inter;
-		}
+		if (curpos.getY() < 0) return inter;
 		if (curpos.getY() >= Constants.COLUMN_HEIGHT && raydir.getY() >= 0) {
 			return inter;
 		}
@@ -49,7 +65,7 @@ public class Tracer {
 		int z = (int) Math.floor(curpos.getZ());
 
 		BlockType block1 = this.level.getBlockTypeAt(x, y, z);
-		if(block1 != null && block1 != VanillaBlock.AIR && !block1.isLiquid() && block1.getModel().getSelectionBox(x, y, z) != null) {
+		if(cond.satisfied(block1, x, y, z)) {
 			raydir = raydir.clone().multiply(-1, -1, -1);
 			this.mult = -1;
 			back = true;
@@ -65,6 +81,7 @@ public class Tracer {
 			stepX = -1;
 			cbx = x;
 		}
+		
 		if (raydir.getY() > 0) {
 			stepY = 1;
 			cby = y + 1;
@@ -72,6 +89,7 @@ public class Tracer {
 			stepY = -1;
 			cby = y;
 		}
+		
 		if (raydir.getZ() > 0) {
 			stepZ = 1;
 			cbz = z + 1;
@@ -105,7 +123,6 @@ public class Tracer {
 		}
 
 		int oldX = x, oldY = y, oldZ = z;
-
 		int modIterations = 0;
 		for (int iteration = 0; iteration < iterations; iteration++) {
 			if(modIterations > MAX_ITERATIONS) {
@@ -118,7 +135,7 @@ public class Tracer {
 					x = x + stepX;
 					modIterations++;
 					BlockType block = this.level.getBlockTypeAt(x, y, z);
-					boolean hit = block != null && block != VanillaBlock.AIR && !block.isLiquid() && block.getModel().getSelectionBox(x, y, z) != null;
+					boolean hit = cond.satisfied(block, x, y, z);
 					if (back && !hit || !back && hit) {
 						this.gatherMin(inter, this.tmax, x, y, z, oldX, oldY, oldZ);
 						inter.setHit(true);
@@ -130,7 +147,7 @@ public class Tracer {
 					z = z + stepZ;
 					modIterations++;
 					BlockType block = this.level.getBlockTypeAt(x, y, z);
-					boolean hit = block != null && block != VanillaBlock.AIR && !block.isLiquid() && block.getModel().getSelectionBox(x, y, z) != null;
+					boolean hit = cond.satisfied(block, x, y, z);
 					if (back && !hit || !back && hit) {
 						this.gatherMin(inter, this.tmax, x, y, z, oldX, oldY, oldZ);
 						inter.setHit(true);
@@ -148,7 +165,7 @@ public class Tracer {
 					}
 					
 					BlockType block = this.level.getBlockTypeAt(x, y, z);
-					boolean hit = block != null && block != VanillaBlock.AIR && !block.isLiquid() && block.getModel().getSelectionBox(x, y, z) != null;
+					boolean hit = cond.satisfied(block, x, y, z);
 					if (back && !hit || !back && hit) {
 						this.gatherMin(inter, this.tmax, x, y, z, oldX, oldY, oldZ);
 						inter.setHit(true);
@@ -160,7 +177,7 @@ public class Tracer {
 					z = z + stepZ;
 					modIterations++;
 					BlockType block = this.level.getBlockTypeAt(x, y, z);
-					boolean hit = block != null && block != VanillaBlock.AIR && !block.isLiquid() && block.getModel().getSelectionBox(x, y, z) != null;
+					boolean hit = cond.satisfied(block, x, y, z);
 					if (back && !hit || !back && hit) {
 						this.gatherMin(inter, this.tmax, x, y, z, oldX, oldY, oldZ);
 						inter.setHit(true);
@@ -186,13 +203,8 @@ public class Tracer {
 		inter.getPosition().set(x, y, z);
 
 		double min = tmax.getX();
-		if (tmax.getY() < min) {
-			min = tmax.getY();
-		}
-		if (tmax.getZ() < min) {
-			min = tmax.getZ();
-		}
-
+		if (tmax.getY() < min) min = tmax.getY();
+		if (tmax.getZ() < min) min = tmax.getZ();
 		double length = min * this.mult;
 		if (length > 0) {
 			length = Math.max(length - EPSILON, 0);
@@ -201,6 +213,10 @@ public class Tracer {
 		}
 
 		inter.setLength(length);
+	}
+	
+	private static interface Conditions {
+		public boolean satisfied(BlockType block, int x, int y, int z);
 	}
 
 }

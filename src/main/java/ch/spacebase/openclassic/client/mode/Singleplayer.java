@@ -11,7 +11,7 @@ public class Singleplayer extends Mode {
 	
 	@Override
 	public void unload() {
-		this.getLevel().save();
+		this.getPlayer().save();
 		super.unload();
 	}
 

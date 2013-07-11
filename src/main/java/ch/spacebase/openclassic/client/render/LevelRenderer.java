@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.lwjgl.util.glu.Sphere;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.level.column.Chunk;
 import ch.spacebase.openclassic.api.level.column.Column;
-import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.ChunkSorter;
@@ -22,7 +23,6 @@ public class LevelRenderer {
 	private List<ClassicChunk> queue = new ArrayList<ClassicChunk>();
 	private int skyList = -1;
 	private ClassicLevel level;
-	private float currentSkyColor;
 	
 	public LevelRenderer(ClassicLevel level) {
 		this.level = level;
@@ -108,32 +108,31 @@ public class LevelRenderer {
 		}
 	}
 	
+	// TODO: fix sky
 	private void renderSky(float x, float y, float z) {
-		glPushMatrix();
-		glTranslatef(x, y, z);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_FOG);
 		int rgb = OpenClassic.getClient().getLevel().getSkyColor();
-		glColor3f(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f);
-		if (this.skyList == -1 || OpenClassic.getClient().getLevel().getSkyColor() != this.currentSkyColor) {
-			this.skyList = glGenLists(1);
-			glNewList(this.skyList, GL_COMPILE_AND_EXECUTE);
-			glBegin(GL_TRIANGLE_FAN);
-			glVertex3f(0, 0, 0);
+		glColor4f(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, 1);
+        if (this.skyList == -1) {
+        	this.skyList = glGenLists(1);
 
-			for (int i = 0; i <= 32; ++i) {
-				float angle = MathHelper.f_2PI / 32 * i;
-				float xx = MathHelper.cos(angle) * 500;
-				float zz = MathHelper.sin(angle) * 500;
-				glVertex3f(xx, -15, zz);
-			}
+            Sphere sphere = new Sphere();
+            glNewList(this.skyList, GL_COMPILE);
+            sphere.draw(16, 16, 128);
+            glEndList();
+        }
 
-			glEnd();
-			glEndList();
-			this.currentSkyColor = OpenClassic.getClient().getLevel().getSkyColor();
-		} else {
-			glCallList(this.skyList);
-		}
-
-		glPopMatrix();
+        glPushMatrix();
+        glTranslatef(x, y, z);
+        glCallList(this.skyList);
+        glPopMatrix();
+        glEnable(GL_FOG);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_2D);
 	}
 	
 	public void render() {

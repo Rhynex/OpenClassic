@@ -88,7 +88,14 @@ public class ClassicChunk implements Chunk {
 		}
 		
 		if(this.empty) return;
+		int old = this.getBlockAt(x, y, z);
 		this.blocks.set(x, y, z, type.getId(), type.getData());
+		if(type.isComplex()) {
+			if(type.getId() != old) this.column.setComplexBlock(x, y, z, type.createComplexBlock(new Position(this.column.getLevel(), x, y, z)));
+		} else if(this.column.isComplex(x, y, z)) {
+			this.column.setComplexBlock(x, y, z, null);
+		}
+		
 		this.column.updateHeightMap(x - 1, z - 1, x + 1, z + 1);
 	}
 	
@@ -151,7 +158,6 @@ public class ClassicChunk implements Chunk {
 	}
 	
 	public void update() {
-		// TODO
 	}
 	
 	@Override
