@@ -63,7 +63,7 @@ public class Cookie {
 					try {
 						this.expires = expiresFormat2.parse(value);
 					} catch (Exception e1) {
-						System.out.println("Bad date format in header: " + value);
+						System.err.println("Bad date format in header: " + value);
 					}
 				}
 			}

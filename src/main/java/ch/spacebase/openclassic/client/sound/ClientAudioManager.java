@@ -121,7 +121,7 @@ public class ClientAudioManager implements AudioManager {
 				out = new DataOutputStream(new FileOutputStream(file));
 
 				int length = 0;
-				while (this.mc.running) {
+				while (OpenClassic.getClient().isRunning()) {
 					length = in.read(data);
 					if (length < 0) break;
 					out.write(data, 0, length);

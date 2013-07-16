@@ -31,13 +31,9 @@ public class MinecraftCanvas extends Canvas {
 			this.mc.running = false;
 
 			try {
-				this.thread.join(1000);
+				this.thread.join(15000);
 			} catch (InterruptedException e) {
-				try {
-					this.mc.shutdown();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
+				System.exit(0);
 			}
 
 			this.thread = null;

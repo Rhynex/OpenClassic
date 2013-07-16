@@ -480,12 +480,6 @@ public final class LevelGenerator extends Generator {
 				++var15;
 			}
 
-			int var16 = var2 >> var7 & var9;
-			int var17 = var2 >> var7 + var8;
-			if (var16 != var3 || var17 != var13) {
-				System.out.println("Diagonal flood!?");
-			}
-
 			boolean var23 = false;
 			boolean var24 = false;
 			boolean var18 = false;

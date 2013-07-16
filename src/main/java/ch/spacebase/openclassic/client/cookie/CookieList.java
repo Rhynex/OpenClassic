@@ -60,7 +60,7 @@ public class CookieList extends CookieHandler {
 		try {
 			return getCookie(new URI(uri), name);
 		} catch (URISyntaxException e) {
-			System.out.println("URI syntax exception: " + e);
+			System.err.println("URI syntax exception: " + e);
 		}
 		return null;
 	}

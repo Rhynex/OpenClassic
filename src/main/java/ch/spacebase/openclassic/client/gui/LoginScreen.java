@@ -163,7 +163,7 @@ public class LoginScreen extends GuiScreen {
 		try {
 			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), Constants.MINECRAFT_URL);
 		} catch (UnsupportedEncodingException e) {
-			System.out.println("UTF-8 not supported!");
+			System.err.println("UTF-8 not supported!");
 			return false;
 		}
 

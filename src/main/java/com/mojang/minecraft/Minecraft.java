@@ -164,6 +164,7 @@ public final class Minecraft implements Runnable {
 	private boolean started;
 	public String levelName = "";
 	public int levelSize = 0;
+	private boolean shutdown = false;
 
 	public boolean hideGui = false;
 	public boolean openclassicServer = false;
@@ -249,10 +250,11 @@ public final class Minecraft implements Runnable {
 	}
 
 	public final void shutdown() {
-		if(!this.running) {
+		if(this.shutdown) {
 			return;
 		}
 		
+		this.shutdown = true;
 		this.running = false;
 		if(this.ingame) this.stopGame(false);
 		if (this.resourceThread != null) {
@@ -263,12 +265,11 @@ public final class Minecraft implements Runnable {
 			OpenClassic.getServer().shutdown();
 		}
 
+		((ClassicScheduler) OpenClassic.getClient().getScheduler()).stop();
 		this.audio.cleanup();
 		Mouse.destroy();
 		Keyboard.destroy();
 		Display.destroy();
-
-		System.exit(0);
 	}
 
 	public void stopGame(boolean menu) {
@@ -363,6 +364,10 @@ public final class Minecraft implements Runnable {
 	}
 
 	private void handleException(Throwable e) {
+		if(!this.running) {
+			return;
+		}
+		
 		if(this.started) {
 			if(e instanceof LWJGLException) {
 				this.shutdown();
