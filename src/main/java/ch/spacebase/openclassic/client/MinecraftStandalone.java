@@ -32,7 +32,6 @@ public class MinecraftStandalone {
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		frame.setMinimumSize(new Dimension(854, 480));
 		frame.setLocation((gd.getDisplayMode().getWidth() - frame.getWidth()) / 2, (gd.getDisplayMode().getHeight() - frame.getHeight()) / 2);
-
 		frame.addWindowListener(new WindowListener() {
 			@Override
 			public void windowOpened(WindowEvent e) {
@@ -45,7 +44,7 @@ public class MinecraftStandalone {
 
 			@Override
 			public void windowClosed(WindowEvent e) {
-				minecraft.running = false;
+				minecraft.shutdown();
 			}
 
 			@Override

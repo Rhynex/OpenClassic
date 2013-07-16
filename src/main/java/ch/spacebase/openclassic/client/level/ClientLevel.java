@@ -8,9 +8,6 @@ import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.entity.BlockEntity;
-import ch.spacebase.openclassic.api.event.EventFactory;
-import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
@@ -19,7 +16,6 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 public class ClientLevel implements Level {
 
 	private com.mojang.minecraft.level.Level handle;
-	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
 	private boolean generating = false;
 	
 	private boolean physics = true;
@@ -30,9 +26,6 @@ public class ClientLevel implements Level {
 	}
 	
 	public void tick() {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getController() != null) entity.getController().tick();
-		}
 	}
 	
 	@Override
@@ -80,7 +73,7 @@ public class ClientLevel implements Level {
 
 	@Override
 	public Position getSpawn() {
-		return new Position(this, this.handle.xSpawn, this.handle.ySpawn, this.handle.zSpawn, (byte) this.handle.rotSpawn, (byte) 0);
+		return new Position(this, this.handle.xSpawn, this.handle.ySpawn, this.handle.zSpawn, this.handle.rotSpawn, 0);
 	}
 
 	@Override
@@ -231,47 +224,6 @@ public class ClientLevel implements Level {
 	public void sendToAllExcept(Player skip, Message message) {
 		if(skip.getPlayerId() != this.getPlayers().get(0).getPlayerId()) {
 			this.getPlayers().get(0).getSession().send(message);
-		}
-	}
-
-	public List<BlockEntity> getBlockEntities() {
-		return new ArrayList<BlockEntity>(this.entities);
-	}
-	
-	public BlockEntity getBlockEntityFromId(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity getBlockEntity(Position pos) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getPosition().equals(pos)) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity spawnBlockEntity(BlockEntity entity, Position pos) {
-		this.entities.add(entity);
-		entity.setPosition(pos);
-		
-		return entity;
-	}
-	
-	public void removeBlockEntity(BlockEntity entity) {
-		this.removeBlockEntity(entity.getEntityId());
-	}
-	
-	public void removeBlockEntity(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) {
-				if(entity.getController() != null) entity.getController().onDeath();
-				EventFactory.callEvent(new EntityDeathEvent(entity));
-				this.entities.remove(entity);
-			}
 		}
 	}
 	

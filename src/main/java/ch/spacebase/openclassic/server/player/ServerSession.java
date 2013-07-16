@@ -12,7 +12,7 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerKickEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
@@ -26,7 +26,6 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.server.network.HandlerLookupService;
 import ch.spacebase.openclassic.server.network.handler.MessageHandler;
-
 
 public class ServerSession implements Session {
 
@@ -92,8 +91,8 @@ public class ServerSession implements Session {
 	public void send(Message message) {
 		if(message instanceof BlockChangeMessage && !this.player.hasCustomClient()) {
 			BlockType block = Blocks.fromId(((BlockChangeMessage) message).getBlock());
-			if(block instanceof CustomBlock) {
-				message = new BlockChangeMessage(((BlockChangeMessage) message).getX(), ((BlockChangeMessage) message).getY(), ((BlockChangeMessage) message).getZ(), ((CustomBlock) block).getFallback().getId());
+			if(block.getId() > 49) {
+				message = new BlockChangeMessage(((BlockChangeMessage) message).getX(), ((BlockChangeMessage) message).getY(), ((BlockChangeMessage) message).getZ(), VanillaBlock.STONE.getId());
 			}
 		}
 		

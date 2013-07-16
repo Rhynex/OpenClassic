@@ -10,7 +10,7 @@ import java.util.zip.GZIPOutputStream;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
@@ -215,8 +215,8 @@ public class ServerPlayer implements Player {
 					byte[] b = level.getBlocks();
 					if(!hasCustomClient()) {
 						for(int index = 0; index < b.length; index++) {
-							if(Blocks.fromId(b[index]) instanceof CustomBlock) {
-								b[index] = ((CustomBlock) Blocks.fromId(b[index])).getFallback().getId();
+							if(Blocks.fromId(b[index]).getId() > 49) {
+								b[index] = VanillaBlock.STONE.getId();
 							}
 						}
 					}

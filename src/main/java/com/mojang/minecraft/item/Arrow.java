@@ -126,10 +126,10 @@ public class Arrow extends Entity {
 
 			if (!this.hasHit) {
 				float var9 = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
-				this.yRot = (float) (Math.atan2(this.xd, this.zd) * 180.0D / 3.1415927410125732D);
-
-				for (this.xRot = (float) (Math.atan2(this.yd, var9) * 180.0D / 3.1415927410125732D); this.xRot - this.xRotO < -180.0F; this.xRotO -= 360.0F) {
-					;
+				this.yRot = (float) (Math.atan2(this.xd, this.zd) * 180.0D / Math.PI);
+				this.xRot = (float) (Math.atan2(this.yd, var9) * 180.0D / Math.PI);
+				while(this.xRot - this.xRotO < -180.0F) {
+					this.xRotO -= 360.0F;
 				}
 
 				while (this.xRot - this.xRotO >= 180.0F) {

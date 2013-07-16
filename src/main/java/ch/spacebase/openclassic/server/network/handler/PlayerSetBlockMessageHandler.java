@@ -4,11 +4,9 @@ import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.entity.BlockEntity.BlockRemoveCause;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
-import ch.spacebase.openclassic.api.event.entity.EntityBlockRemoveEvent;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.api.player.Session.State;
@@ -23,7 +21,8 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		if(session == null || player == null) return;
 		if(session.getState() != State.GAME) return;
 		
-		if(message.getBlock() == VanillaBlock.AIR.getId() || message.getBlock() == VanillaBlock.WATER.getId() || message.getBlock() == VanillaBlock.STATIONARY_WATER.getId() || message.getBlock() == VanillaBlock.LAVA.getId() || message.getBlock() == VanillaBlock.STATIONARY_LAVA.getId() || message.getBlock() == VanillaBlock.BEDROCK.getId()) {
+		BlockType b = Blocks.fromId(message.getBlock());
+		if(b == null || !b.isSelectable()) {
 			session.disconnect("Block type hack detected.");
 			return;
 		}
@@ -37,15 +36,6 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		}
 			
 		Block block = player.getPosition().getLevel().getBlockAt(message.getX(), message.getY(), message.getZ());
-		if(block != null && block.isEntity() && !message.isPlacing()) {
-			if(block.getBlockEntity().getController() != null) {
-				if(EventFactory.callEvent(new EntityBlockRemoveEvent(block.getBlockEntity(), BlockRemoveCause.PLAYER, block)).isCancelled() || !block.getBlockEntity().getController().onBlockRemoval(BlockRemoveCause.PLAYER, block)) {
-					session.send(new BlockChangeMessage((short) block.getPosition().getBlockX(), (short) block.getPosition().getBlockY(), (short) block.getPosition().getBlockZ(), block.getTypeId()));
-					return;
-				}
-			}
-		}
-		
 		byte type = (message.isPlacing()) ? message.getBlock() : 0;
 		if(message.isPlacing() && player.getPlaceMode() != 0 && type != 0) type = player.getPlaceMode();
 		

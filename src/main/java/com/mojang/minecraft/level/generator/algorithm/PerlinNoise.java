@@ -14,7 +14,9 @@ public final class PerlinNoise extends Noise {
 	public PerlinNoise(Random rand) {
 		this.permutations = new int[512];
 
-		for (int count = 0; count < 256; this.permutations[count] = count++);
+		for (int count = 0; count < 256; count++) {
+			this.permutations[count] = count;
+		}
 
 		for (int count = 0; count < 256; count++) {
 			int var3 = rand.nextInt(256 - count) + count;

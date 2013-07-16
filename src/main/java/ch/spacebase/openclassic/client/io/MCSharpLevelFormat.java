@@ -26,6 +26,7 @@ public class MCSharpLevelFormat {
 		if (magic != 1874) {
 			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("level.format-mismatch"), "MCSharp v1"));
 			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.try-mcforge"));
+			data.close();
 			return MCForgeLevelFormat.load(file);
 		}
 

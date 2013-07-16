@@ -26,12 +26,14 @@ public class MCForgeLevelFormat {
 		if (magic != 7882256401675281664L) {
 			OpenClassic.getLogger().severe("Only MCForge 6 levels are supported!");
 			System.out.println(magic);
+			data.close();
 			return null;
 		}
 		
 		byte version = data.readByte();
 		if (version != 1) {
 			OpenClassic.getLogger().severe("Unknown version!");
+			data.close();
 			return null;
 		}
 		
@@ -43,13 +45,13 @@ public class MCForgeLevelFormat {
 		level.setSpawn(new Position(level, Integer.parseInt(ldata.split("\\!")[0]), Integer.parseInt(ldata.split("\\!")[1]), Integer.parseInt(ldata.split("\\!")[2])));
 		ldata = readString(data);
 		
-		// ====METADATA CRAP==//
+		// ====METADATA==//
 		int metadata = readInt(data);
 		for (int i = 0; i < metadata; i++) {
 			readString(data); // key
 			readString(data); // value
 		}
-		// ====METADATA CRAP==//
+		// ====METADATA==//
 		
 		readInt(data); // block size
 		int bytesize = readInt(data);

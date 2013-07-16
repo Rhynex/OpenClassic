@@ -26,7 +26,13 @@ public class MainMenuScreen extends GuiScreen {
 		this.attachWidget(new Button(5, this.getWidth() / 2 - 102, this.getHeight() / 4 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.about")));
 		this.attachWidget(new Button(6, this.getWidth() / 2 + 2, this.getHeight() / 4 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.quit")));
 	
-		if(!OpenClassic.getClient().getAudioManager().isPlaying("menu")) OpenClassic.getClient().getAudioManager().playMusic("menu", true);
+		if(!OpenClassic.getClient().getAudioManager().isPlaying("menu")) {
+			OpenClassic.getClient().getAudioManager().playMusic("menu", true);
+		}
+		
+		if(GeneralUtils.getMinecraft().data == null || GeneralUtils.getMinecraft().settings.survival) {
+			this.getWidget(1, Button.class).setActive(false);
+		}
 	}
 
 	public void onButtonClick(Button button) {

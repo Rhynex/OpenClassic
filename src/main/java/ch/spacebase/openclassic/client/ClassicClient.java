@@ -19,14 +19,6 @@ import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
-import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
-import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
-import ch.spacebase.openclassic.api.block.physics.HalfStepPhysics;
-import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
-import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
-import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
-import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
@@ -86,18 +78,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.registerGenerator("normal", new LevelGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
 		
-		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
-		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 13));
-		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
-		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
-		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
-		VanillaBlock.WATER.setPhysics(new LiquidPhysics((byte) 8));
-		VanillaBlock.LAVA.setPhysics(new LiquidPhysics((byte) 10));
-		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
-		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
-		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
-		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
-		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
+
 		VanillaBlock.TNT.setPhysics(new TNTPhysics());
 		
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
@@ -120,18 +101,16 @@ public class ClassicClient extends ClassicGame implements Client {
 		level.creator = this.mc.data != null ? this.mc.data.username : "unknown";
 		level.createTime = System.currentTimeMillis();
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
-		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
+		level.setBounds(info.getWidth(), info.getHeight(), info.getDepth());
 		generator.generate(level.openclassic, data);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-				
-		if(level.openclassic.getSpawn() == null) {
-			level.openclassic.setSpawn(generator.findSpawn(level.openclassic));
+		level.openclassic.setSpawn(generator.findSpawn(level.openclassic));
+		if(info.getSpawn() != null) {
+			level.openclassic.setSpawn(info.getSpawn());
 		}
-
-		if(info.getSpawn() != null) level.openclassic.setSpawn(info.getSpawn());
+		
 		level.openclassic.data = new NBTData(level.name);
 		level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
-
 		this.mc.mode.prepareLevel(level);
 		this.mc.setLevel(level);
 		EventFactory.callEvent(new LevelCreateEvent(level.openclassic));

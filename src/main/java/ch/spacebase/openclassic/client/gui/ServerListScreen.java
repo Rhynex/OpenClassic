@@ -52,6 +52,10 @@ public class ServerListScreen extends GuiScreen {
 			this.getWidget(8, Button.class).setActive(false);
 		}
 		
+		if(GeneralUtils.getMinecraft().data == null) {
+			this.getWidget(5, Button.class).setActive(false);
+		}
+		
 		if(HeartbeatManager.getURL().equals("")) {
 			this.getWidget(8, Button.class).setActive(false);
 		}
@@ -179,6 +183,7 @@ public class ServerListScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().render();
 
 			String page = HTTPUtil.fetchUrl(server.getUrl(), "", Constants.MINECRAFT_URL + "classic/list/");
 			mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));

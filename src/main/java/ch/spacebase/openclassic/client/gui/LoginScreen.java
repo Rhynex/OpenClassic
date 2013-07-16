@@ -107,6 +107,7 @@ public class LoginScreen extends GuiScreen {
 			
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("gui.login.logging-in"));
 			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().render();
 			if (!auth(user, pass)) {
 				this.title = Color.RED + OpenClassic.getGame().getTranslator().translate("gui.login.failed");
 				return;

@@ -11,9 +11,8 @@ import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.model.CubeModel;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
-import ch.spacebase.openclassic.api.block.model.LiquidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
@@ -197,7 +196,7 @@ public class ClientRenderHelper extends RenderHelper {
 		this.drawQuad(quad, x, y, z, 1);
 	}
 	
-	@Override // TODO: Custom block's custom textures mess up other textures sometimes?
+	@Override
 	public void drawQuad(Quad quad, float x, float y, float z, float brightness) {
 		ShapeRenderer.instance.begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
@@ -209,20 +208,67 @@ public class ClientRenderHelper extends RenderHelper {
 			ShapeRenderer.instance.color(brightness, brightness, brightness);
 		}
 		
+		float ox1 = quad.getTexture().getX1();
+		float oy1 = quad.getTexture().getY1();
+		float x1 = quad.getTexture().getX1();
+		float x2 = quad.getTexture().getX2();
 		float y1 = quad.getTexture().getY1();
 		float y2 = quad.getTexture().getY2();
 		
-		if(quad.getParent() instanceof CuboidModel && !(quad.getParent() instanceof LiquidModel) && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
-			y1 = y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight();
-			y2 = y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight();
+		if(quad.getParent() instanceof CuboidModel) {
+			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			switch(face) {
+				case UP:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and z
+					break;
+				case DOWN:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(1).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and z
+					break;
+				case NORTH:
+					x1 = (int) (ox1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// y and z
+					break;
+				case SOUTH:
+					x1 = (int) (ox1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// y and z
+					break;
+				case EAST:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and y
+					break;
+				case WEST:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and y
+					break;
+			}
 		}
-		
+	
 		float width = quad.getTexture().getParent().getWidth();
 		float height = quad.getTexture().getParent().getHeight();
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), quad.getTexture().getX2() / width, y2 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), quad.getTexture().getX2() / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), quad.getTexture().getX1() / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), quad.getTexture().getX1() / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), x2 / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), x2 / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), x1 / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 		
 		ShapeRenderer.instance.end();
 	}
@@ -239,43 +285,137 @@ public class ClientRenderHelper extends RenderHelper {
 			ShapeRenderer.instance.color(brightness, brightness, brightness);
 		}
 
+		float ox1 = quad.getTexture().getX1();
+		float oy1 = quad.getTexture().getY1();
+		float x1 = quad.getTexture().getX1();
+		float x2 = quad.getTexture().getX2();
 		float y1 = quad.getTexture().getY1();
 		float y2 = quad.getTexture().getY2();
-
-		if(quad.getParent() instanceof CuboidModel && !(quad.getParent() instanceof LiquidModel) && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
-			y1 = y1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight();
-			y2 = y1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight();
+		
+		if(quad.getParent() instanceof CuboidModel) {
+			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			switch(face) {
+				case UP:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and z
+					break;
+				case DOWN:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(1).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and z
+					break;
+				case NORTH:
+					x1 = (int) (ox1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// y and z
+					break;
+				case SOUTH:
+					x1 = (int) (ox1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// y and z
+					break;
+				case EAST:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and y
+					break;
+				case WEST:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and y
+					break;
+			}
 		}
-
+	
 		float width = quad.getTexture().getParent().getWidth();
 		float height = quad.getTexture().getParent().getHeight();
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX() * scale, y + quad.getVertex(0).getY() * scale, z + quad.getVertex(0).getZ() * scale, quad.getTexture().getX2() / width, y2 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX() * scale, y + quad.getVertex(1).getY() * scale, z + quad.getVertex(1).getZ() * scale, quad.getTexture().getX2() / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX() * scale, y + quad.getVertex(2).getY() * scale, z + quad.getVertex(2).getZ() * scale, quad.getTexture().getX1() / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX() * scale, y + quad.getVertex(3).getY() * scale, z + quad.getVertex(3).getZ() * scale, quad.getTexture().getX1() / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX() * scale, y + quad.getVertex(0).getY() * scale, z + quad.getVertex(0).getZ() * scale, x2 / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX() * scale, y + quad.getVertex(1).getY() * scale, z + quad.getVertex(1).getZ() * scale, x2 / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX() * scale, y + quad.getVertex(2).getY() * scale, z + quad.getVertex(2).getZ() * scale, x1 / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX() * scale, y + quad.getVertex(3).getY() * scale, z + quad.getVertex(3).getZ() * scale, x1 / width, y2 / height);
 		
 		ShapeRenderer.instance.end();
 	}
 	
 	public void drawCracks(Quad quad, int x, int y, int z, int crackTexture) {
 		ShapeRenderer.instance.begin();
-		this.bindTexture(VanillaBlock.TERRAIN.getTexture(), true);
+		this.bindTexture(BlockType.TERRAIN_TEXTURE.getTexture(), true);
 		
 		SubTexture texture = quad.getTexture().getParent().getSubTexture(crackTexture);
+		float ox1 = texture.getX1();
+		float oy1 = texture.getY1();
+		float x1 = texture.getX1();
+		float x2 = texture.getX2();
 		float y1 = texture.getY1();
 		float y2 = texture.getY2();
 		
-		if(quad.getParent() instanceof CuboidModel && quad.getId() > 1 && (quad.getVertex(0).getY() > 0 || quad.getVertex(1).getY() < 1)) {
-			y1 = (int) (y1 + quad.getVertex(0).getY() * texture.getParent().getSubTextureHeight());
-			y2 = (int) (y1 + quad.getVertex(1).getY() * texture.getParent().getSubTextureHeight());
+		if(quad.getParent() instanceof CuboidModel) {
+			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			switch(face) {
+				case UP:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and z
+					break;
+				case DOWN:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(1).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and z
+					break;
+				case NORTH:
+					x1 = (int) (ox1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// y and z
+					break;
+				case SOUTH:
+					x1 = (int) (ox1 + quad.getVertex(0).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getZ() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// y and z
+					break;
+				case EAST:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and y
+					break;
+				case WEST:
+					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					x2 = (int) (ox1 + quad.getVertex(2).getX() * quad.getTexture().getParent().getSubTextureWidth());
+					y1 = (int) (oy1 + quad.getVertex(0).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					y2 = (int) (oy1 + quad.getVertex(1).getY() * quad.getTexture().getParent().getSubTextureHeight());
+					// x and y
+					break;
+			}
 		}
 		
 		float width = quad.getTexture().getParent().getWidth();
 		float height = quad.getTexture().getParent().getHeight();
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), texture.getX2() / width, y2 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), texture.getX2() / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), texture.getX1() / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), texture.getX1() / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), x2 / width, y2 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), x2 / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), x1 / width, y1 / height);
+		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 		
 		ShapeRenderer.instance.end();
 	}
@@ -334,44 +474,37 @@ public class ClientRenderHelper extends RenderHelper {
 	@Override
 	public boolean canRenderSide(BlockType block, int x, int y, int z, BlockFace face) {
 		if(block == null) return false;
-		if(block instanceof CustomBlock) {
-			block = ((CustomBlock) block).getFallback();
-		}
-		
 		BlockType relative = OpenClassic.getClient().getLevel().getBlockTypeAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
-		if(block instanceof VanillaBlock) {
-			switch((VanillaBlock) block) {
-			case GLASS: {
-				return relative == null || (relative != block && !this.isSolidTile(relative));
+		if(block.isLiquid()) {
+			if(relative == null) {
+				return false;
 			}
-			case WATER:
-			case LAVA:
-			case STATIONARY_WATER:
-			case STATIONARY_LAVA: {
-				if(relative == null) {
-					return false;
-				}
-				
-				if(Level.toMoving(relative) == Level.toMoving(block)) {
-					return false;
-				}
-				
-				return !this.isSolidTile(relative);
+			
+			if(Level.toMoving(relative) == Level.toMoving(block)) {
+				return false;
 			}
-			case SLAB: {
-				return relative == null || face == BlockFace.UP || (!this.isSolidTile(relative) && (face == BlockFace.DOWN || relative != VanillaBlock.SLAB));
-			}
-			default:
-				return relative == null || !this.isSolidTile(relative);
-			}
+			
+			return !this.getPreventsRendering(relative);
 		}
 		
-		return true;
+		if(!(block.getModel() instanceof CubeModel)) {
+			//if(block.getModel() instanceof CuboidModel) {
+				// TODO: non-complete block logic
+			//} else {
+				return true;
+			//}
+		}
+		
+		if(!block.isOpaque()) {
+			return relative == null || (relative != block && !this.getPreventsRendering(relative));
+		}
+		
+		return relative == null || !this.getPreventsRendering(relative);
 	}
 	
-	private boolean isSolidTile(BlockType block) {
+	private boolean getPreventsRendering(BlockType block) {
 		if(block == null) return true;
-		return block.isSolid();
+		return block.getPreventsRendering();
 	}
 	
 	@Override

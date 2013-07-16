@@ -66,7 +66,10 @@ public class Inventory implements Serializable {
 			direction = -1;
 		}
 
-		for (this.selected -= direction; this.selected < 0; this.selected += this.slots.length);
+		this.selected -= direction;
+		while (this.selected < 0) {
+			this.selected += this.slots.length;
+		}
 
 		while (this.selected >= this.slots.length) {
 			this.selected -= this.slots.length;

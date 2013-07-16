@@ -5,10 +5,9 @@ import java.io.IOException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
+import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.server.network.codec.MessageCodec;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
@@ -28,8 +27,9 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		ChannelBufferUtils.writeString(buffer, message.getBlock().getStepSound().name());
 		buffer.writeByte(message.getBlock().isLiquid() ? 1 : 0);
 		buffer.writeInt(message.getBlock().getTickDelay());
-		buffer.writeByte(message.getBlock().getFallback().getId());
-		buffer.writeByte(message.getBlock().isSolid() ? 1 : 0);
+		buffer.writeByte(message.getBlock().getPreventsRendering() ? 1 : 0);
+		buffer.writeByte(message.getBlock().canPlaceIn() ? 1 : 0);
+		buffer.writeByte(message.getBlock().isGas() ? 1 : 0);
 		
 		return buffer;
 	}
@@ -42,13 +42,18 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		StepSound sound = StepSound.valueOf(ChannelBufferUtils.readString(buffer));
 		boolean liquid = buffer.readByte() == 1;
 		int delay = buffer.readInt();
-		VanillaBlock fallback = (VanillaBlock) Blocks.fromId(buffer.readByte());
-		boolean solid = buffer.readByte() == 1;
+		boolean preventsRendering = buffer.readByte() == 1;
+		boolean placeIn = buffer.readByte() == 1;
+		boolean gas = buffer.readByte() == 1;
 		
-		CustomBlock block = new CustomBlock(id, sound, null, opaque, liquid, selectable);
+		BlockType block = new BlockType(id, sound, (Model) null);
+		block.setOpaque(opaque);
+		block.setLiquid(liquid);
+		block.setSelectable(selectable);
 		block.setTickDelay(delay);
-		block.setFallback(fallback);
-		block.setSolid(solid);
+		block.setPreventsRendering(preventsRendering);
+		block.setPlaceIn(placeIn);
+		block.setGas(gas);
 		
 		return new CustomBlockMessage(block);
 	}

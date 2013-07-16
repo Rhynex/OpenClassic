@@ -88,7 +88,7 @@ public final class PacketType {
 		
 		// Custom
 		GAME_INFO = new PacketType(new Class[] { String.class, String.class });
-		CUSTOM_BLOCK = new PacketType(new Class[] { Byte.TYPE, Byte.TYPE, Byte.TYPE, String.class, Byte.TYPE, Integer.TYPE, Byte.TYPE, Byte.TYPE });
+		CUSTOM_BLOCK = new PacketType(new Class[] { Byte.TYPE, Byte.TYPE, Byte.TYPE, String.class, Byte.TYPE, Integer.TYPE, Byte.TYPE, Byte.TYPE, Byte.TYPE });
 		BLOCK_MODEL = new PacketType(new Class[] { Byte.TYPE, String.class, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE });
 		QUAD = new PacketType(new Class[] { Byte.TYPE, Integer.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, Float.TYPE, String.class, Byte.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE });
 		KEY_CHANGE = new PacketType(new Class[] { Integer.TYPE, Byte.TYPE });

@@ -17,16 +17,14 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
-import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
+import ch.spacebase.openclassic.api.block.physics.SpreadPhysics;
 import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
-import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
+import ch.spacebase.openclassic.api.block.physics.TreeGrowthPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.entity.BlockEntity;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
-import ch.spacebase.openclassic.api.event.entity.EntityDeathEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
@@ -36,6 +34,7 @@ import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.api.util.CoordUtil;
 import ch.spacebase.openclassic.api.util.set.TripleIntHashMap;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 
@@ -57,7 +56,6 @@ public class ServerLevel implements Level {
 	private int fogColor = 16777215;
 	private int cloudColor = 16777215;
 	private List<Player> players = new ArrayList<Player>();
-	private List<BlockEntity> entities = new ArrayList<BlockEntity>();
 
 	private boolean physics = OpenClassic.getGame().getConfig().getBoolean("physics.enabled", true);
 	private TripleIntHashMap<Integer> physicsQueue = new TripleIntHashMap<Integer>();
@@ -143,10 +141,6 @@ public class ServerLevel implements Level {
 	public void tick() {
 		for(Player player : this.players) {
 			((ServerPlayer) player).tick();
-		}
-		
-		for(BlockEntity entity : this.entities) {
-			if(entity.getController() != null) entity.getController().tick();
 		}
 	}
 	
@@ -294,7 +288,7 @@ public class ServerLevel implements Level {
 		if (x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth)
 			return 0;
 		
-		return blocks[coordsToBlockIndex(x, y, z)];
+		return this.blocks[CoordUtil.coordsToBlockIndex(this, x, y, z)];
 	}
 	
 	public BlockType getBlockTypeAt(Position pos) {
@@ -339,7 +333,7 @@ public class ServerLevel implements Level {
 			type = VanillaBlock.WATER.getId();
 		}
 		
-		blocks[coordsToBlockIndex(x, y, z)] = type;
+		this.blocks[CoordUtil.coordsToBlockIndex(this, x, y, z)] = type;
 		this.sendToAll(new BlockChangeMessage((short) x, (short) y, (short) z, type));
 		
 		if(physics && !this.generating) {
@@ -395,14 +389,13 @@ public class ServerLevel implements Level {
 		boolean lit = false;
 		
 		for(int curr = y; curr <= this.getHeight(); curr++) {
-			if(!this.canLightPass(this.getBlockAt(x, curr, z))) lit = false;
+			BlockType block = this.getBlockTypeAt(x, curr, z);
+			if(block != null && block.isOpaque()) {
+				lit = false;
+			}
 		}
 		
 		return lit;
-	}
-	
-	public boolean canLightPass(Block block) {
-		return block == null || block.getType() == VanillaBlock.AIR || block.getType() == VanillaBlock.DANDELION || block.getType() == VanillaBlock.ROSE || block.getType() == VanillaBlock.RED_MUSHROOM || block.getType() == VanillaBlock.BROWN_MUSHROOM || block.getType() == VanillaBlock.GLASS || block.getType() == VanillaBlock.LEAVES;
 	}
 	
 	public boolean isGenerating() {
@@ -416,46 +409,6 @@ public class ServerLevel implements Level {
 	public boolean treePhysics() {
 		return OpenClassic.getGame().getConfig().getBoolean("physics.trees", true);
 	}
-
-	public int coordsToBlockIndex(int x, int y, int z) {
-		if (x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth)
-			return -1;
-
-		return x + (z * this.width) + (y * this.width * this.depth);
-	}
-
-	public Position blockIndexToCoords(int index) {
-		if (index < 0)
-			return null;
-
-		int y = index / this.width / this.depth;
-		index -= y * this.width * this.depth;
-
-		int z = index / this.width;
-		int x = index - z * this.width;
-
-		return new Position(this, x, y, z);
-	}
-	
-	public static int coordsToBlockIndex(int x, int y, int z, int width, int height, int depth) {
-		if (x < 0 || y < 0 || z < 0 || x >= width || y >= height || z >= depth)
-			return -1;
-
-		return x + (z * width) + (y * width * depth);
-	}
-
-	public static Position blockIndexToCoords(int index, ServerLevel level, int width, int height, int depth) {
-		if (index < 0)
-			return null;
-
-		int y = index / width / depth;
-		index -= y * width * depth;
-
-		int z = index / width;
-		int x = index - z * width;
-
-		return new Position(level, x, y, z);
-	}
 	
 	public void sendToAll(Message message) {
 		for(Player player : this.getPlayers()) {
@@ -468,47 +421,6 @@ public class ServerLevel implements Level {
 			if(player.getPlayerId() == skip.getPlayerId()) continue;
 			
 			player.getSession().send(message);
-		}
-	}
-	
-	public List<BlockEntity> getBlockEntities() {
-		return new ArrayList<BlockEntity>(this.entities);
-	}
-	
-	public BlockEntity getBlockEntityFromId(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity getBlockEntity(Position pos) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getPosition().equals(pos)) return entity;
-		}
-		
-		return null;
-	}
-	
-	public BlockEntity spawnBlockEntity(BlockEntity entity, Position pos) {
-		this.entities.add(entity);
-		entity.setPosition(pos);
-		
-		return entity;
-	}
-	
-	public void removeBlockEntity(BlockEntity entity) {
-		this.removeBlockEntity(entity.getEntityId());
-	}
-	
-	public void removeBlockEntity(int id) {
-		for(BlockEntity entity : this.entities) {
-			if(entity.getEntityId() == id) {
-				if(entity.getController() != null) entity.getController().onDeath();
-				EventFactory.callEvent(new EntityDeathEvent(entity));
-				this.entities.remove(entity);
-			}
 		}
 	}
 	
@@ -528,7 +440,7 @@ public class ServerLevel implements Level {
 			return OpenClassic.getGame().getConfig().getBoolean("physics.mushroom", true) && !event.isCancelled();
 		}
 		
-		if(block.getType().getPhysics() instanceof SaplingPhysics) {
+		if(block.getType().getPhysics() instanceof TreeGrowthPhysics) {
 			return OpenClassic.getGame().getConfig().getBoolean("physics.trees", true) && !event.isCancelled();
 		}
 	
@@ -540,7 +452,7 @@ public class ServerLevel implements Level {
 			return OpenClassic.getGame().getConfig().getBoolean("physics.liquid", true) && !event.isCancelled();
 		}
 		
-		if(block.getType().getPhysics() instanceof GrassPhysics) {
+		if(block.getType().getPhysics() instanceof SpreadPhysics) {
 			return OpenClassic.getGame().getConfig().getBoolean("physics.grass", true) && !event.isCancelled();
 		}
 		

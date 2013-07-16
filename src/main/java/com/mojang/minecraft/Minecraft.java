@@ -4,7 +4,6 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.CubeModel;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
@@ -141,7 +140,7 @@ public final class Minecraft implements Runnable {
 	public TextureManager textureManager;
 	public FontRenderer fontRenderer;
 	public GuiScreen currentScreen = null;
-	public ProgressBarDisplay progressBar = new ProgressBarDisplay(this);
+	public ClientProgressBar progressBar = new ClientProgressBar();
 	public Renderer renderer = new Renderer(this);
 	public ClientAudioManager audio;
 	public ResourceDownloadThread resourceThread;
@@ -170,16 +169,9 @@ public final class Minecraft implements Runnable {
 	public boolean openclassicServer = false;
 	public String openclassicVersion = "";
 	public boolean hacks = true;
-	private List<CustomBlock> clientCache = new ArrayList<CustomBlock>();
 	public List<RemotePluginInfo> serverPlugins = new ArrayList<RemotePluginInfo>();
 	private boolean ctf;
 	public int mipmapMode = 0;
-
-	static {
-		// Apparently the enum needs a kickstart...
-		@SuppressWarnings("unused")
-		BlockType type = VanillaBlock.AIR;
-	}
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -249,14 +241,19 @@ public final class Minecraft implements Runnable {
 		int error = GL11.glGetError();
 		if (error != 0) {
 			String message = GLU.gluErrorString(error);
-			System.out.println("########## GL ERROR ##########");
-			System.out.println("@ " + task);
-			System.out.println(error + ": " + message);
+			System.err.println("########## GL ERROR ##########");
+			System.err.println("@ " + task);
+			System.err.println(error + ": " + message);
 			System.exit(0);
 		}
 	}
 
 	public final void shutdown() {
+		if(!this.running) {
+			return;
+		}
+		
+		this.running = false;
 		if(this.ingame) this.stopGame(false);
 		if (this.resourceThread != null) {
 			this.resourceThread.running = false;
@@ -294,6 +291,12 @@ public final class Minecraft implements Runnable {
 			this.netManager = null;
 		}
 
+		for(BlockType block : Blocks.getBlocks()) {
+			if(block != null) {
+				Blocks.unregister(block.getId());
+			}
+		}
+		
 		this.openclassicServer = false;
 		this.server = null;
 		this.port = 0;
@@ -317,10 +320,12 @@ public final class Minecraft implements Runnable {
 			level.setData(8, 8, 8, new byte[512]);
 			this.setLevel(level);
 		} else {
+			VanillaBlock.registerAll();
 			if (this.level == null) {
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
 				this.progressBar.setText("");
 				this.progressBar.setProgress(0);
+				this.progressBar.render();
 				OpenClassic.getClient().createLevel(new LevelInfo(!this.levelName.equals("") ? this.levelName : "A Nice World", null, (short) (128 << this.levelSize), (short) 128, (short) (128 << this.levelSize)), gen);
 				this.levelName = "";
 			}
@@ -360,33 +365,38 @@ public final class Minecraft implements Runnable {
 	private void handleException(Throwable e) {
 		if(this.started) {
 			if(e instanceof LWJGLException) {
-				this.running = false;
 				this.shutdown();
 			} else {
 				setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
 			}
 		} else {
 			JOptionPane.showMessageDialog(null, e.toString(), OpenClassic.getGame().getTranslator().translate("core.fail-start"), 0);
-			this.running = false;
 			this.shutdown();
 		}
 
 		e.printStackTrace();
 	}
 
-	@SuppressWarnings({ "null", "unused" })
+	@SuppressWarnings({"unused"})
 	public final void run() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				shutdown();
+			}
+		});
+		
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				System.out.println("Uncaught exception in thread \"" + t.getName() + "\"");
+				System.err.println("Uncaught exception in thread \"" + t.getName() + "\"");
 				e.printStackTrace();
 				handleException(e);
 			}
 		});
 
 		this.running = true;
-		OpenClassic.setClient(new ClassicClient(this));
+		new ClassicClient(this);
 
 		this.dir = GeneralUtils.getMinecraftDirectory();
 		File lib = new File(this.dir, "lib");
@@ -501,6 +511,7 @@ public final class Minecraft implements Runnable {
 
 		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
 		this.progressBar.setProgress(0);
+		this.progressBar.render();
 
 		ShaderManager.setup();
 		long lastUpdate = System.currentTimeMillis();
@@ -514,8 +525,7 @@ public final class Minecraft implements Runnable {
 				}
 			} else {
 				if (this.canvas == null && Display.isCloseRequested()) {
-					this.running = false;
-					continue;
+					break;
 				}
 
 				if(!Display.isFullscreen() && (this.canvas.getWidth() != Display.getDisplayMode().getWidth() || this.canvas.getHeight() != Display.getDisplayMode().getHeight())) {
@@ -542,9 +552,6 @@ public final class Minecraft implements Runnable {
 						}
 
 						this.started = true;
-					} else {
-						this.progressBar.setProgress(this.resourceThread.getProgress());
-						continue;
 					}
 				}
 
@@ -776,14 +783,14 @@ public final class Minecraft implements Runnable {
 								this.renderer.updateFog();
 								GL11.glEnable(GL11.GL_FOG);
 								this.levelRenderer.sortChunks(this.player, 0);
-								if (this.level.isSolid(this.player.x, this.player.y, this.player.z, 0.1F)) {
+								if (this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
 									for (int var122 = (int) this.player.x - 1; var122 <= (int) this.player.x + 1; ++var122) {
 										for (int var125 = (int) this.player.y - 1; var125 <= (int) this.player.y + 1; ++var125) {
 											for (int var38 = (int) this.player.z - 1; var38 <= (int) this.player.z + 1; ++var38) {
 												var105 = var38;
 												var98 = var125;
 												int var99 = this.levelRenderer.level.getTile(var122, var125, var38);
-												if (var99 != 0 && Blocks.fromId(var99) != null && Blocks.fromId(var99).isSolid()) {
+												if (var99 != 0 && Blocks.fromId(var99) != null && Blocks.fromId(var99).getPreventsRendering()) {
 													GL11.glColor4f(0.2F, 0.2F, 0.2F, 1.0F);
 													GL11.glDepthFunc(GL11.GL_LESS);
 													ShapeRenderer.instance.begin();
@@ -924,23 +931,15 @@ public final class Minecraft implements Runnable {
 										GL11.glPushMatrix();
 										int var114 = this.levelRenderer.level.getTile(var102.x, var102.y, var102.z);
 										BlockType var10000 = var114 > 0 ? Blocks.fromId(var114) : null;
-										type = var10000;
-										var1000 = (type.getModel().getSelectionBox(var102.x, var102.y, var102.z).getX1() + type.getModel().getSelectionBox(var102.x, var102.y, var102.z).getX2()) / 2.0F;
-										var33 = (type.getModel().getSelectionBox(var102.x, var102.y, var102.z).getY1() + type.getModel().getSelectionBox(var102.x, var102.y, var102.z).getY2()) / 2.0F;
-										var34 = (type.getModel().getSelectionBox(var102.x, var102.y, var102.z).getZ1() + type.getModel().getSelectionBox(var102.x, var102.y, var102.z).getZ2()) / 2.0F;
-										GL11.glTranslatef(var102.x + var1000, var102.y + var33, var102.z + var34);
-										var35 = 1.01F;
-										GL11.glScalef(1.01F, var35, var35);
-										GL11.glTranslatef(-(var102.x + var1000), -(var102.y + var33), -(var102.z + var34));
 										var113.begin();
 										var113.noColor();
 										GL11.glDepthMask(false);
-										if (type == null) {
-											type = VanillaBlock.STONE;
+										if (var10000 == null) {
+											var10000 = VanillaBlock.STONE;
 										}
 
-										for (int var86 = 0; var86 < type.getModel().getQuads().size(); ++var86) {
-											ClientRenderHelper.getHelper().drawCracks(type.getModel().getQuad(var86), var102.x, var102.y, var102.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
+										for (int var86 = 0; var86 < var10000.getModel().getQuads().size(); ++var86) {
+											ClientRenderHelper.getHelper().drawCracks(var10000.getModel().getQuad(var86), var102.x, var102.y, var102.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
 										}
 
 										var113.end();
@@ -1157,6 +1156,10 @@ public final class Minecraft implements Runnable {
 						if (this.currentScreen != null) {
 							this.currentScreen.render();
 						}
+						
+						if(this.progressBar.isVisible()) {
+							this.progressBar.render();
+						}
 
 						Thread.yield();
 						Display.update();
@@ -1276,7 +1279,7 @@ public final class Minecraft implements Runnable {
 
 						BlockType block = this.level.openclassic.getBlockTypeAt(x, y, z);
 						AABB collision = BlockUtils.getCollisionBox(id, x, y, z);
-						if ((block == null || block == VanillaBlock.AIR || block == VanillaBlock.WATER || block == VanillaBlock.STATIONARY_WATER || block == VanillaBlock.LAVA || block == VanillaBlock.STATIONARY_LAVA) && (collision == null || (!this.player.bb.intersects(collision) && this.level.isFree(collision)))) {
+						if ((block == null || block.canPlaceIn()) && (collision == null || (!this.player.bb.intersects(collision) && this.level.isFree(collision)))) {
 							if (!this.mode.canPlace(id)) {
 								return;
 							}
@@ -1368,6 +1371,7 @@ public final class Minecraft implements Runnable {
 			if (!this.netManager.isConnected()) {
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 				this.progressBar.setProgress(0);
+				this.progressBar.render();
 			} else {
 				if (this.netManager.successful) {
 					if (this.netManager.netHandler.connected) {
@@ -1377,11 +1381,10 @@ public final class Minecraft implements Runnable {
 
 							while (this.netManager.netHandler.in.position() > 0 && count++ != 100) {
 								this.netManager.netHandler.in.flip();
-								byte packetId = this.netManager.netHandler.in.get(0);
+								int packetId = this.netManager.netHandler.in.get(0);
 								PacketType type = PacketType.packets[packetId];
-
 								if (type == null) {
-									System.out.println("Bad packet: " + packetId);
+									System.err.println("Bad packet: " + packetId);
 									this.netManager.netHandler.close();
 									break;
 								}
@@ -1427,18 +1430,15 @@ public final class Minecraft implements Runnable {
 												this.ctf = true;
 											}
 
-											for(BlockType block : Blocks.getBlocks()) {
-												if(block != null && block instanceof CustomBlock) {
-													this.clientCache.add((CustomBlock) block);
-													Blocks.unregister(block.getId());
-												}
-											}
-
 											EventFactory.callEvent(new PlayerJoinEvent(OpenClassic.getClient().getPlayer(), "Joined"));
 										}
 
 										this.netManager.identified = true;
 									} else if (type == PacketType.LEVEL_INIT) {
+										if(!this.openclassicServer) {
+											VanillaBlock.registerAll();
+										}
+										
 										this.setLevel(null);
 										this.setCurrentScreen(null);
 										this.netManager.levelData = new ByteArrayOutputStream();
@@ -1566,13 +1566,18 @@ public final class Minecraft implements Runnable {
 										StepSound sound = StepSound.valueOf((String) params[3]);
 										boolean liquid = (Byte) params[4] == 1;
 										int delay = (Integer) params[5];
-										VanillaBlock fallback = (VanillaBlock) Blocks.fromId((Byte) params[6]);
-										boolean solid = (Byte) params[7] == 1;
+										boolean preventsRendering = (Byte) params[6] == 1;
+										boolean placeIn = (Byte) params[7] == 1;
+										boolean gas = (Byte) params[8] == 1;
 
-										CustomBlock block = new CustomBlock(id, sound, null, opaque, liquid, selectable);
+										BlockType block = new BlockType(id, sound, (Model) null);
+										block.setOpaque(opaque);
+										block.setLiquid(liquid);
+										block.setSelectable(selectable);
 										block.setTickDelay(delay);
-										block.setFallback(fallback);
-										block.setSolid(solid);
+										block.setPreventsRendering(preventsRendering);
+										block.setPlaceIn(placeIn);
+										block.setGas(gas);
 										Blocks.register(block);
 									} else if (type == PacketType.BLOCK_MODEL) {
 										byte block = (Byte) params[0];
@@ -1586,7 +1591,11 @@ public final class Minecraft implements Runnable {
 										float y2 = (Float) params[5];
 										float z1 = (Float) params[6];
 										float z2 = (Float) params[7];
-										model.setCollisionBox(new BoundingBox(x1, y1, z1, x2, y2, z2));
+										if(x1 != -1) {
+											model.setCollisionBox(new BoundingBox(x1, y1, z1, x2, y2, z2));
+										} else {
+											model.setCollisionBox(null);
+										}
 
 										float sx1 = (Float) params[8];
 										float sx2 = (Float) params[9];
@@ -1594,9 +1603,13 @@ public final class Minecraft implements Runnable {
 										float sy2 = (Float) params[11];
 										float sz1 = (Float) params[12];
 										float sz2 = (Float) params[13];
-										model.setSelectionBox(new BoundingBox(sx1, sy1, sz1, sx2, sy2, sz2));
-
-										((CustomBlock) Blocks.fromId(block)).setModel(model);
+										if(sx1 != -1) {
+											model.setSelectionBox(new BoundingBox(sx1, sy1, sz1, sx2, sy2, sz2));
+										} else {
+											model.setSelectionBox(null);
+										}
+										
+										Blocks.fromId(block).setModel(model);
 									} else if (type == PacketType.QUAD) {
 										byte block = (Byte) params[0];
 										int id = (Integer) params[1];
@@ -1743,14 +1756,6 @@ public final class Minecraft implements Runnable {
 			}
 		}
 
-		if(this.netManager == null && this.clientCache.size() > 0) {
-			for(CustomBlock block : this.clientCache) {
-				Blocks.register(block);
-			}
-
-			this.clientCache.clear();
-		}
-
 		if (this.currentScreen == null && this.player != null && this.player.health <= 0) {
 			this.setCurrentScreen(null);
 		}
@@ -1829,7 +1834,6 @@ public final class Minecraft implements Runnable {
 							if (Keyboard.getEventKey() == this.settings.loadLocKey.key && !this.ctf) {
 								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, (byte) this.level.rotSpawn, (byte) 0));
 								if(!event.isCancelled()) {
-									System.out.println(event.getPosition().getX() + ", " + event.getPosition().getY() + ", " + event.getPosition().getZ() + " : " + this.level.xSpawn + 0.5F + ", " + this.level.ySpawn + ", " + this.level.zSpawn + 0.5F);
 									this.player.resetPos(event.getPosition());
 								}
 							}

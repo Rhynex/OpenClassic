@@ -20,11 +20,9 @@ public final class ResourceDownloadThread extends Thread {
 	private File resource;
 	private Minecraft mc;
 	public boolean running = true;
-	
 	private boolean finished = false;
-	private int progress = 0;
 
-	public ResourceDownloadThread(File location, Minecraft mc, ProgressBarDisplay progress) {
+	public ResourceDownloadThread(File location, Minecraft mc, ClientProgressBar progress) {
 		this.mc = mc;
 		this.setName("Client-Resource Download Thread");
 		this.setDaemon(true);
@@ -40,7 +38,7 @@ public final class ResourceDownloadThread extends Thread {
 
 		try {
 			ArrayList<String> list = new ArrayList<String>();
-			URL base = new URL("http://dl.dropbox.com/u/40737374/minecraft_resources/");
+			URL base = new URL("https://dl.dropboxusercontent.com/u/40737374/minecraft_resources/");
 			URL url = new URL(base, "resources/");
 			
 			URLConnection con = url.openConnection();
@@ -101,8 +99,8 @@ public final class ResourceDownloadThread extends Thread {
 	
 	private void download(URL url, File file, int size) {
 		System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloading"), file.getName()));
-		this.mc.progressBar.setText(file.getName(), false);
-		
+		this.mc.progressBar.setText(file.getName());
+		this.mc.progressBar.render();
 		byte[] data = new byte[4096];
 		DataInputStream in = null;
 		DataOutputStream out = null;
@@ -119,7 +117,7 @@ public final class ResourceDownloadThread extends Thread {
 
 				out.write(data, 0, length);
 				done += length;
-				this.progress = (int) (((double) done / (double) size) * 100);
+				this.mc.progressBar.setProgress((int) (((double) done / (double) size) * 100));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -134,14 +132,8 @@ public final class ResourceDownloadThread extends Thread {
 			}
 		}
 		
-		this.mc.progressBar.setText("", false);
-		this.progress = 0;
-		
+		this.mc.progressBar.setText("");
 		System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
-	}
-	
-	public int getProgress() {
-		return this.progress;
 	}
 	
 	public boolean isFinished() {

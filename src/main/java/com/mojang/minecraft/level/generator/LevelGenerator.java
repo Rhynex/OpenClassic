@@ -8,7 +8,7 @@ import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.ProgressBarDisplay;
+import com.mojang.minecraft.ClientProgressBar;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.generator.algorithm.CombinedNoise;
 import com.mojang.minecraft.level.generator.algorithm.OctaveNoise;
@@ -17,7 +17,7 @@ import java.util.Random;
 
 public final class LevelGenerator extends Generator {
 
-	private ProgressBarDisplay progress;
+	private ClientProgressBar progress;
 	private int width;
 	private int depth;
 	private int height;
@@ -434,6 +434,7 @@ public final class LevelGenerator extends Generator {
 
 	private void setProgress(int progress) {
 		this.progress.setProgress(progress);
+		this.progress.render();
 	}
 
 	private long liquify(int var1, int var2, int var3, int var4, int var5, byte data[]) {
@@ -442,9 +443,9 @@ public final class LevelGenerator extends Generator {
 		byte var6 = 0;
 		int var7 = 1;
 
-		int var8;
-		for (var8 = 1; 1 << var7 < this.width; ++var7) {
-			;
+		int var8 = 1;
+		while (1 << var7 < this.width) {
+			var7++;
 		}
 
 		while (1 << var8 < this.depth) {

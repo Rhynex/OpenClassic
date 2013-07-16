@@ -27,6 +27,7 @@ public class MCSharpLevelFormat {
 		if (magic != 1874) {
 			OpenClassic.getLogger().severe("Only version 1 MCSharp maps are supported.");
 			OpenClassic.getLogger().severe("Trying MCForge 6..");
+			data.close();
 			return MCForgeLevelFormat.load(file);
 		}
 
@@ -44,7 +45,7 @@ public class MCSharpLevelFormat {
 				data.readFully(row);
 
 				for (int x = 0; x < width; x++) {
-					blocks[ServerLevel.coordsToBlockIndex(x, y, z, width, height, depth)] = translateBlock(row[x]);
+					blocks[(y * height + z) * width + x] = translateBlock(row[x]);
 				}
 			}
 		}

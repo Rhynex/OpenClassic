@@ -27,15 +27,9 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.HeartbeatManager;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Server;
+import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
-import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
-import ch.spacebase.openclassic.api.block.physics.GrassPhysics;
-import ch.spacebase.openclassic.api.block.physics.HalfStepPhysics;
-import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
-import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
-import ch.spacebase.openclassic.api.block.physics.SaplingPhysics;
-import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
 import ch.spacebase.openclassic.api.command.Console;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
@@ -145,7 +139,6 @@ public class ClassicServer extends ClassicGame implements Server {
 		if(this.isRunning()) return;
 		this.running = true;
 		
-		OpenClassic.setServer(this);
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.server"), Constants.SERVER_VERSION));
 		
 		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
@@ -165,7 +158,9 @@ public class ClassicServer extends ClassicGame implements Server {
 		
 		this.console.setup();
 		
-		this.bind(new InetSocketAddress(this.getPort()));
+		if(!this.bind(new InetSocketAddress(this.getPort()))) {
+			return;
+		}
 		
 		this.persistenceManager.load();
 		this.permManager.load();
@@ -174,19 +169,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		
 		this.registerGenerator("flat", new FlatLandGenerator());
 		
-		VanillaBlock.SAND.setPhysics(new FallingBlockPhysics((byte) 12));
-		VanillaBlock.GRAVEL.setPhysics(new FallingBlockPhysics((byte) 12));
-		VanillaBlock.ROSE.setPhysics(new FlowerPhysics());
-		VanillaBlock.DANDELION.setPhysics(new FlowerPhysics());
-		VanillaBlock.GRASS.setPhysics(new GrassPhysics());
-		VanillaBlock.WATER.setPhysics(new LiquidPhysics((byte) 8));
-		VanillaBlock.LAVA.setPhysics(new LiquidPhysics((byte) 10));
-		VanillaBlock.RED_MUSHROOM.setPhysics(new MushroomPhysics());
-		VanillaBlock.BROWN_MUSHROOM.setPhysics(new MushroomPhysics());
-		VanillaBlock.SAPLING.setPhysics(new SaplingPhysics());
-		VanillaBlock.SPONGE.setPhysics(new SpongePhysics());
-		VanillaBlock.SLAB.setPhysics(new HalfStepPhysics());
-		
+		VanillaBlock.registerAll();
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		
 		File file = new File(this.getDirectory(), "levels");
@@ -266,6 +249,12 @@ public class ClassicServer extends ClassicGame implements Server {
         this.group.close();
         this.bootstrap.getFactory().releaseExternalResources();
 		
+		for(BlockType block : Blocks.getBlocks()) {
+			if(block != null) {
+				Blocks.unregister(block.getId());
+			}
+		}
+		
 		OpenClassic.getLogger().info("Stopping console...");
 		this.console.stop();
 		OpenClassic.setServer(null);
@@ -279,14 +268,16 @@ public class ClassicServer extends ClassicGame implements Server {
 		return this.sessions;
 	}
 	
-	public void bind(SocketAddress address) {
+	public boolean bind(SocketAddress address) {
 		OpenClassic.getLogger().info("Binding to address: " + address + "...");
 		
 		try {
 			this.group.add(this.bootstrap.bind(address));
+			return true;
 		} catch(ChannelException e) {
 			OpenClassic.getLogger().severe("Failed to bind to address! (is it already in use?)");
 			this.shutdown();
+			return false;
 		}
 	}
 	

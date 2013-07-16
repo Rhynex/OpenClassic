@@ -1,9 +1,6 @@
 package com.mojang.minecraft.net;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.Minecraft;
@@ -52,14 +49,6 @@ public final class NetworkHandler {
 	}
 
 	public void close() {
-		if(this.netManager.identified) {
-			for(BlockType block : Blocks.getBlocks()) {
-				if(block != null && block instanceof CustomBlock) {
-					Blocks.unregister(block.getId());
-				}
-			}
-		}
-		
 		GeneralUtils.getMinecraft().serverPlugins.clear();
 		
 		try {

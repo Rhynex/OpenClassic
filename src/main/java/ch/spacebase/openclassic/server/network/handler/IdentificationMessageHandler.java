@@ -11,7 +11,6 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
@@ -166,8 +165,8 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 				}
 
 				for(BlockType block : Blocks.getBlocks()) {
-					if(block instanceof CustomBlock) {
-						player.getSession().send(new CustomBlockMessage((CustomBlock) block));
+					if(block != null) {
+						player.getSession().send(new CustomBlockMessage(block));
 						player.getSession().send(new BlockModelMessage(block.getId(), block.getModel()));
 						for(Quad quad : block.getModel().getQuads()) {
 							player.getSession().send(new QuadMessage(block.getId(), quad));

@@ -41,6 +41,7 @@ public class MinecraftLevelFormat {
 			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.load-fail"));
 			OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("level.load-fail"), ""));
 			e.printStackTrace();
+			obj.close();
 			return null;
 		}
 		

@@ -138,15 +138,21 @@ public class Mob extends Entity {
 
 		this.run += (friction - this.run) * 0.3F;
 
-		for (xDistance = yaw - this.yBodyRot; xDistance < -180.0F; xDistance += 360.0F);
+		xDistance = yaw - this.yBodyRot;
+		while (xDistance < -180.0F) {
+			xDistance += 360.0F;
+		}
 
 		while (xDistance >= 180) {
 			xDistance -= 360;
 		}
 
 		this.yBodyRot += xDistance * 0.1;
-
-		for (xDistance = this.yRot - this.yBodyRot; xDistance < -180.0F; xDistance += 360.0F);
+		
+		xDistance = this.yRot - this.yBodyRot;
+		while (xDistance < -180.0F) {
+			xDistance += 360.0F;
+		}
 
 		while (xDistance >= 180) {
 			xDistance -= 360;

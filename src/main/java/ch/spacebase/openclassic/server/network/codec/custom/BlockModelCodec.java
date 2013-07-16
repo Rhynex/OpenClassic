@@ -27,19 +27,37 @@ public class BlockModelCodec extends MessageCodec<BlockModelMessage> {
 		buffer.writeByte(message.getBlock());
 		ChannelBufferUtils.writeString(buffer, message.getModel().getClass().getSimpleName());
 		
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getX1());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getX2());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getY1());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getY2());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getZ1());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getZ2());
+		if(message.getModel().getDefaultCollisionBox() != null) {
+			buffer.writeFloat(message.getModel().getDefaultCollisionBox().getX1());
+			buffer.writeFloat(message.getModel().getDefaultCollisionBox().getX2());
+			buffer.writeFloat(message.getModel().getDefaultCollisionBox().getY1());
+			buffer.writeFloat(message.getModel().getDefaultCollisionBox().getY2());
+			buffer.writeFloat(message.getModel().getDefaultCollisionBox().getZ1());
+			buffer.writeFloat(message.getModel().getDefaultCollisionBox().getZ2());
+		} else {
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+		}
 		
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getX1());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getX2());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getY1());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getY2());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getZ1());
-		buffer.writeFloat(message.getModel().getDefaultCollisionBox().getZ2());
+		if(message.getModel().getDefaultSelectionBox() != null) {
+			buffer.writeFloat(message.getModel().getDefaultSelectionBox().getX1());
+			buffer.writeFloat(message.getModel().getDefaultSelectionBox().getX2());
+			buffer.writeFloat(message.getModel().getDefaultSelectionBox().getY1());
+			buffer.writeFloat(message.getModel().getDefaultSelectionBox().getY2());
+			buffer.writeFloat(message.getModel().getDefaultSelectionBox().getZ1());
+			buffer.writeFloat(message.getModel().getDefaultSelectionBox().getZ2());
+		} else {
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+			buffer.writeFloat(-1);
+		}
 		
 		return buffer;
 	}

@@ -54,7 +54,6 @@ public class Level implements Serializable {
 	public int fogColor;
 	public int cloudColor;
 	private int unprocessed;
-	private int tickCount;
 	public Entity player;
 	public transient ParticleManager particleEngine;
 	public transient Object font;
@@ -67,7 +66,6 @@ public class Level implements Serializable {
 		this.tickNextTicks = new ArrayList<TickNextTick>();
 		this.networkMode = false;
 		this.unprocessed = 0;
-		this.tickCount = 0;
 		this.growTrees = false;
 		
 		this.openclassic = new ClientLevel(this);
@@ -110,10 +108,17 @@ public class Level implements Serializable {
 		}
 	}
 
-	public void setData(int width, int depth, int height, byte[] blocks) {
+	public void setBounds(int width, int depth, int height) {
 		this.width = width;
 		this.height = height;
 		this.waterLevel = height / 2;
+		this.depth = depth;
+	}
+	
+	public void setData(int width, int depth, int height, byte[] blocks) {
+		this.width = width;
+		this.height = height;
+		this.waterLevel = depth / 2;
 		this.depth = depth;
 		this.blocks = blocks;
 		this.highest = new int[width * height];
@@ -124,7 +129,6 @@ public class Level implements Serializable {
 		}
 		
 		this.tickNextTicks.clear();
-		this.findSpawn();
 		this.initTransient();
 	}
 
@@ -158,8 +162,10 @@ public class Level implements Serializable {
 			for (int z = z1; z < z1 + z2; ++z) {
 				int highest = this.highest[x + z * this.width];
 
-				int blocker;
-				for (blocker = this.depth - 1; blocker > 0 && !this.isLightBlocker(x, blocker, z); blocker--);
+				int blocker = this.depth - 1;
+				while (blocker > 0 && !this.isLightBlocker(x, blocker, z)) {
+					blocker--;
+				}
 
 				this.highest[x + z * this.width] = blocker;
 				if (highest != blocker) {
@@ -277,12 +283,12 @@ public class Level implements Serializable {
 
 	public void updateNeighborsAt(int x, int y, int z) {
 		if(this.openclassic.getPhysicsEnabled()) {
-			this.a(x - 1, y, z, x, y, z);
-			this.a(x + 1, y, z, x, y, z);
-			this.a(x, y - 1, z, x, y, z);
-			this.a(x, y + 1, z, x, y, z);
-			this.a(x, y, z - 1, x, y, z);
-			this.a(x, y, z + 1, x, y, z);
+			this.updateNeighbor(x - 1, y, z, x, y, z);
+			this.updateNeighbor(x + 1, y, z, x, y, z);
+			this.updateNeighbor(x, y - 1, z, x, y, z);
+			this.updateNeighbor(x, y + 1, z, x, y, z);
+			this.updateNeighbor(x, y, z - 1, x, y, z);
+			this.updateNeighbor(x, y, z + 1, x, y, z);
 		}
 	}
 
@@ -299,7 +305,7 @@ public class Level implements Serializable {
 		}
 	}
 
-	private void a(int x, int y, int z, int nx, int nz, int ny) {
+	private void updateNeighbor(int x, int y, int z, int nx, int nz, int ny) {
 		if (x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.depth && z < this.height) {
 			BlockType type = Blocks.fromId(this.getTile(x, y, z));
 			if (type != null) {
@@ -319,9 +325,9 @@ public class Level implements Serializable {
 		return x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.depth && z < this.height ? this.blocks[(y * this.height + z) * this.width + x] & 255 : 0;
 	}
 
-	public boolean isSolidTile(int x, int y, int z) {
+	public boolean getPreventsRendering(int x, int y, int z) {
 		BlockType type = Blocks.fromId(this.getTile(x, y, z));
-		return type != null && type.isSolid();
+		return type != null && type.getPreventsRendering();
 	}
 
 	public void tickEntities() {
@@ -329,28 +335,29 @@ public class Level implements Serializable {
 	}
 
 	public void tick() {
-		this.tickCount++;
-		int var1 = 6;
-		int var2 = 6;
+		int var1 = 1;
+		int var2 = 1;
 		
-		for (var1 = 1; 1 << var1 < this.width; var1++);
-		for (var2 = 1; 1 << var2 < this.height; var2++);
+		while (1 << var1 < this.width) {
+			var1++;
+		}
+		
+		while (1 << var2 < this.height) {
+			var2++;
+		}
 
-		if (this.tickCount % 5 == 0) {
-			int ticks = this.tickNextTicks.size();
-
-			for (int tick = 0; tick < ticks; ++tick) {
-				TickNextTick next = this.tickNextTicks.remove(0);
-				if (next.ticks > 0) {
-					next.ticks--;
-					this.tickNextTicks.add(next);
-				} else {
-					if (this.isInBounds(next.x, next.y, next.z)) {
-						byte block = this.blocks[(next.y * this.height + next.z) * this.width + next.x];
-						if(block == next.block && block > 0) {
-							if(Blocks.fromId(block) != null && Blocks.fromId(block).getPhysics() != null && this.openclassic.getPhysicsEnabled()) {
-								Blocks.fromId(block).getPhysics().update(this.openclassic.getBlockAt(next.x, next.y, next.z));
-							}
+		int size = this.tickNextTicks.size();
+		for (int ct = 0; ct < size; ct++) {
+			TickNextTick next = this.tickNextTicks.remove(0);
+			if (next.ticks > 0) {
+				next.ticks--;
+				this.tickNextTicks.add(next);
+			} else {
+				if (this.isInBounds(next.x, next.y, next.z)) {
+					byte block = this.blocks[(next.y * this.height + next.z) * this.width + next.x];
+					if(block == next.block && block > 0) {
+						if(Blocks.fromId(block) != null && Blocks.fromId(block).getPhysics() != null && this.openclassic.getPhysicsEnabled()) {
+							Blocks.fromId(block).getPhysics().update(this.openclassic.getBlockAt(next.x, next.y, next.z));
 						}
 					}
 				}
@@ -543,18 +550,20 @@ public class Level implements Serializable {
 		return this.blockMap.getEntities(entity, aabb);
 	}
 
-	public boolean isSolid(float x, float y, float z, float distance) {
-		return this.isSolid(x - distance, y - distance, z - distance) || this.isSolid(x - distance, y - distance, z + distance) || this.isSolid(x - distance, y + distance, z - distance) || this.isSolid(x - distance, y + distance, z + distance) || this.isSolid(x + distance, y - distance, z - distance) || this.isSolid(x + distance, y - distance, z + distance) || this.isSolid(x + distance, y + distance, z - distance) || this.isSolid(x + distance, y + distance, z + distance);
+	public boolean preventsRendering(float x, float y, float z, float distance) {
+		return this.preventsRendering(x - distance, y - distance, z - distance) || this.preventsRendering(x - distance, y - distance, z + distance) || this.preventsRendering(x - distance, y + distance, z - distance) || this.preventsRendering(x - distance, y + distance, z + distance) || this.preventsRendering(x + distance, y - distance, z - distance) || this.preventsRendering(x + distance, y - distance, z + distance) || this.preventsRendering(x + distance, y + distance, z - distance) || this.preventsRendering(x + distance, y + distance, z + distance);
 	}
 
-	private boolean isSolid(float x, float y, float z) {
+	private boolean preventsRendering(float x, float y, float z) {
 		int tile = this.getTile((int) x, (int) y, (int) z);
-		return tile > 0 && Blocks.fromId(tile) != null && Blocks.fromId(tile).isSolid();
+		return tile > 0 && Blocks.fromId(tile) != null && Blocks.fromId(tile).getPreventsRendering();
 	}
 
 	public int getHighestTile(int x, int z) {
-		int y;
-		for (y = this.depth; (this.getTile(x, y - 1, z) == 0 || (Blocks.fromId(this.getTile(x, y - 1, z)) != null && Blocks.fromId(this.getTile(x, y - 1, z)).isLiquid())) && y > 0; --y);
+		int y = this.depth;
+		while ((this.getTile(x, y - 1, z) == 0 || (Blocks.fromId(this.getTile(x, y - 1, z)) != null && Blocks.fromId(this.getTile(x, y - 1, z)).isLiquid())) && y > 0) {
+			y--;
+		}
 
 		return y;
 	}

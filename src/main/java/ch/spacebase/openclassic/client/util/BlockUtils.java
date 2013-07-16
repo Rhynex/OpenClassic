@@ -11,7 +11,6 @@ import com.mojang.minecraft.phys.AABB;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.custom.CustomBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.Model;
 
@@ -239,127 +238,88 @@ public class BlockUtils {
 	}
 	
 	public static AABB getSelectionBox(int id, int x, int y, int z) {
-		BoundingBox bb = Blocks.fromId(id).getModel().getSelectionBox(x, y, z);
+		BlockType type = Blocks.fromId(id);
+		if(type == null) return null;
+		BoundingBox bb = type.getModel().getSelectionBox(x, y, z);
 		if(bb == null) return null;
 		return new AABB(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2());
 	}
 
 	public static AABB getCollisionBox(int id, int x, int y, int z) {
-		BoundingBox bb = Blocks.fromId(id).getModel().getCollisionBox(x, y, z);
+		BlockType type = Blocks.fromId(id);
+		if(type == null) return null;
+		BoundingBox bb = type.getModel().getCollisionBox(x, y, z);
 		if(bb == null) return null;
 		return new AABB(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2());
 	}
 	
 	public static boolean canExplode(BlockType type) {
-		if(type instanceof CustomBlock) type = ((CustomBlock) type).getFallback();
 		return type != VanillaBlock.STONE && type != VanillaBlock.COBBLESTONE && type != VanillaBlock.BEDROCK && type != VanillaBlock.COAL_ORE && type != VanillaBlock.IRON_ORE && type != VanillaBlock.GOLD_ORE && type != VanillaBlock.GOLD_BLOCK && type != VanillaBlock.IRON_BLOCK && type != VanillaBlock.SLAB && type != VanillaBlock.DOUBLE_SLAB && type != VanillaBlock.BRICK_BLOCK && type != VanillaBlock.MOSSY_COBBLESTONE && type != VanillaBlock.OBSIDIAN;
 	}
 	
 	public static int getHardness(BlockType type) {
-		if(type instanceof CustomBlock) type = ((CustomBlock) type).getFallback();
-		if(type instanceof VanillaBlock) {
-			switch((VanillaBlock) type) {
-				case SAPLING:
-				case DANDELION:
-				case ROSE:
-				case BROWN_MUSHROOM:
-				case RED_MUSHROOM:
-				case TNT:
-					return 0;
-				case RED_CLOTH:
-				case ORANGE_CLOTH:
-				case YELLOW_CLOTH:
-				case LIME_CLOTH:
-				case GREEN_CLOTH:
-				case AQUA_GREEN_CLOTH:
-				case CYAN_CLOTH:
-				case BLUE_CLOTH:
-				case PURPLE_CLOTH:
-				case INDIGO_CLOTH:
-				case VIOLET_CLOTH:
-				case MAGENTA_CLOTH:
-				case PINK_CLOTH:
-				case BLACK_CLOTH:
-				case GRAY_CLOTH:
-				case WHITE_CLOTH:
-					return 16;
-				case GRASS:
-				case DIRT:
-				case GRAVEL:
-				case SPONGE:
-				case SAND:
-					return 12;
-				case STONE:
-				case MOSSY_COBBLESTONE:
-				case SLAB:
-				case DOUBLE_SLAB:
-					return 20;
-				case COBBLESTONE:
-				case WOOD:
-				case BOOKSHELF:
-					return 30;
-				case BEDROCK:
-					return 19980;
-				case WATER:
-				case STATIONARY_WATER:
-				case LAVA:
-				case STATIONARY_LAVA:
-					return 2000;
-				case GOLD_ORE:
-				case IRON_ORE:
-				case COAL_ORE:
-				case GOLD_BLOCK:
-					return 60;
-				case LOG:
-					return 50;
-				case LEAVES:
-					return 4;
-				case GLASS:
-					return 6;
-				case IRON_BLOCK:
-					return 100;
-				case OBSIDIAN:
-					return 200;
-			}
+		if(type == VanillaBlock.SAPLING || type == VanillaBlock.DANDELION || type == VanillaBlock.ROSE || type == VanillaBlock.BROWN_MUSHROOM || type == VanillaBlock.RED_MUSHROOM || type == VanillaBlock.TNT) {
+			return 0;
+		} else if(type == VanillaBlock.RED_CLOTH || type == VanillaBlock.ORANGE_CLOTH || type == VanillaBlock.YELLOW_CLOTH || type == VanillaBlock.LIME_CLOTH || type == VanillaBlock.GREEN_CLOTH || type == VanillaBlock.AQUA_GREEN_CLOTH || type == VanillaBlock.CYAN_CLOTH || type == VanillaBlock.BLUE_CLOTH || type == VanillaBlock.PURPLE_CLOTH || type == VanillaBlock.INDIGO_CLOTH || type == VanillaBlock.VIOLET_CLOTH || type == VanillaBlock.MAGENTA_CLOTH || type == VanillaBlock.PINK_CLOTH || type == VanillaBlock.BLACK_CLOTH || type == VanillaBlock.GRAY_CLOTH || type == VanillaBlock.WHITE_CLOTH) {
+			return 16;
+		} else if(type == VanillaBlock.GRASS || type == VanillaBlock.DIRT || type == VanillaBlock.GRAVEL || type == VanillaBlock.SPONGE || type == VanillaBlock.SAND) {
+			return 12;
+		} else if(type == VanillaBlock.STONE || type == VanillaBlock.MOSSY_COBBLESTONE || type == VanillaBlock.SLAB || type == VanillaBlock.DOUBLE_SLAB) {
+			return 20;
+		} else if(type == VanillaBlock.COBBLESTONE || type == VanillaBlock.WOOD || type == VanillaBlock.BOOKSHELF) {
+			return 30;
+		} else if(type == VanillaBlock.BEDROCK) {
+			return 19980;
+		} else if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER || type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
+			return 2000;
+		} else if(type == VanillaBlock.GOLD_ORE || type == VanillaBlock.IRON_ORE || type == VanillaBlock.COAL_ORE || type == VanillaBlock.GOLD_BLOCK) {
+			return 60;
+		} else if(type == VanillaBlock.LOG) {
+			return 50;
+		} else if(type == VanillaBlock.LEAVES) {
+			return 4;
+		} else if(type == VanillaBlock.GLASS) {
+			return 6;
+		} else if(type == VanillaBlock.IRON_BLOCK) {
+			return 100;
+		} else if(type == VanillaBlock.OBSIDIAN) {
+			return 200;
 		}
-		
+
 		return 0;
 	}
 	
 	public static int getDrop(BlockType type) {
-		if(type instanceof VanillaBlock) {
-			switch((VanillaBlock) type) {
-				case STONE:
-				case OBSIDIAN: return VanillaBlock.COBBLESTONE.getId();
-				case GRASS: return VanillaBlock.DIRT.getId();
-				case GOLD_ORE: return VanillaBlock.GOLD_BLOCK.getId();
-				case IRON_ORE: return VanillaBlock.IRON_BLOCK.getId();
-				case COAL_ORE:
-				case DOUBLE_SLAB: return VanillaBlock.SLAB.getId();
-				case LOG: return VanillaBlock.WOOD.getId();
-				case LEAVES: return VanillaBlock.SAPLING.getId();
-			}
+		if(type == VanillaBlock.STONE) {
+			return VanillaBlock.COBBLESTONE.getId();
+		} else if(type == VanillaBlock.GRASS) {
+			return VanillaBlock.DIRT.getId();
+		} else if(type == VanillaBlock.GOLD_ORE) {
+			return VanillaBlock.GOLD_BLOCK.getId();
+		} else if(type == VanillaBlock.IRON_ORE) {
+			return VanillaBlock.IRON_BLOCK.getId();
+		} else if(type == VanillaBlock.COAL_ORE || type == VanillaBlock.DOUBLE_SLAB) {
+			return VanillaBlock.SLAB.getId();
+		} else if(type == VanillaBlock.LOG) {
+			return VanillaBlock.WOOD.getId();
+		} else if(type == VanillaBlock.LEAVES) {
+			return VanillaBlock.SAPLING.getId();
 		}
 		
 		return type.getId();
 	}
 	
 	public static int getDropCount(BlockType type) {
-		if(type instanceof VanillaBlock) {
-			switch((VanillaBlock) type) {
-			case WATER:
-			case STATIONARY_WATER:
-			case LAVA:
-			case STATIONARY_LAVA:
-			case TNT: 
-			case BOOKSHELF: return 0;
-			case DOUBLE_SLAB: return 2;
-			case GOLD_ORE:
-			case COAL_ORE:
-			case IRON_ORE: return rand.nextInt(3) + 1;
-			case LOG: return rand.nextInt(3) + 3;
-			case LEAVES: return rand.nextInt(10) == 0 ? 1 : 0;
-			}
+		if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER || type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA || type == VanillaBlock.TNT || type == VanillaBlock.BOOKSHELF) {
+			return 0;
+		} else if(type == VanillaBlock.DOUBLE_SLAB) {
+			return 2;
+		} else if(type == VanillaBlock.GOLD_ORE || type == VanillaBlock.COAL_ORE || type == VanillaBlock.IRON_ORE) {
+			return rand.nextInt(3) + 1;
+		} else if(type == VanillaBlock.LOG) {
+			return rand.nextInt(3) + 3;
+		} else if(type == VanillaBlock.LEAVES) {
+			return rand.nextInt(10) == 0 ? 1 : 0;
 		}
 		
 		return 1;

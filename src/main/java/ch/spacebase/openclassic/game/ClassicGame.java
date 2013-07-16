@@ -52,10 +52,13 @@ public abstract class ClassicGame implements Game {
 		
 		File file = new File(this.getDirectory(), "config.yml");
 		if (!file.exists()) {
+			if(!file.getParentFile().exists()) {
+				file.getParentFile().mkdirs();
+			}
+			
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
-				OpenClassic.getLogger().severe(this.translator.translate("config.fail-load"));
 				e.printStackTrace();
 			}
 		}

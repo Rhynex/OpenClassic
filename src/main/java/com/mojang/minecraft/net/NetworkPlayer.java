@@ -132,9 +132,11 @@ public class NetworkPlayer extends HumanoidMob {
 
 	public void queue(byte xChange, byte yChange, byte zChange, float yawChange, float pitchChange) {
 		float yaw = yawChange - this.yRot;
-		float pitch;
+		float pitch = pitchChange - this.xRot;
 		
-		for (pitch = pitchChange - this.xRot; yaw >= 180.0F; yaw -= 360.0F);
+		while (yaw >= 180.0F) {
+			yaw -= 360.0F;
+		}
 
 		while (yaw < -180.0F) {
 			yaw += 360.0F;
@@ -159,9 +161,10 @@ public class NetworkPlayer extends HumanoidMob {
 
 	public void teleport(short x, short y, short z, float yaw, float pitch) {
 		float newYaw = yaw - this.yRot;
-
-		float newPitch;
-		for (newPitch = pitch - this.xRot; newYaw >= 180.0F; newYaw -= 360.0F);
+		float newPitch = pitch - this.xRot;
+		while (newYaw >= 180.0F) {
+			newYaw -= 360.0F;
+		}
 
 		while (newYaw < -180.0F) {
 			newYaw += 360.0F;
@@ -195,9 +198,9 @@ public class NetworkPlayer extends HumanoidMob {
 	public void queue(float yaw, float pitch) {
 		float newYaw = yaw - this.yRot;
 
-		float newPitch;
-		for (newPitch = pitch - this.xRot; newYaw >= 180.0F; newYaw -= 360.0F) {
-			;
+		float newPitch = pitch - this.xRot;
+		while (newYaw >= 180.0F) {
+			newYaw -= 360.0F;
 		}
 
 		while (newYaw < -180.0F) {

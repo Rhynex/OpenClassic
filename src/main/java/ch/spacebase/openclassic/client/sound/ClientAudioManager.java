@@ -89,8 +89,6 @@ public class ClientAudioManager implements AudioManager {
 		
 		if(!this.music.containsKey(music)) this.music.put(music, new ArrayList<URL>());
 		this.music.get(music).add(file);
-		this.system.backgroundMusic(music, file, file.getFile(), false);
-		this.system.backgroundMusic(music + "_loop", file, file.getFile(), true);
 	}
 	
 	private void download(URL url) {
@@ -181,15 +179,16 @@ public class ClientAudioManager implements AudioManager {
 	
 	public boolean playMusic(String music, boolean loop) {
 		if(!this.mc.settings.music) return true;
-		
 		List<URL> files = this.music.get(music);
 		if(files != null) {
+			URL file = files.get(rand.nextInt(files.size()));
 			if(this.isPlaying(music)) return true;
 			if(this.isPlayingMusic()) {
 				this.stopMusic();
 			}
 			
-			this.system.play(music + (loop ? "_loop" : ""));
+			this.system.backgroundMusic(music, file, file.getFile(), loop);
+			this.system.play(music);
 			return true;
 		}
 		
@@ -211,12 +210,11 @@ public class ClientAudioManager implements AudioManager {
 	}
 	
 	public boolean isPlaying(String music) {
-		return this.system.playing(music) || this.system.playing(music + "_loop");
+		return this.system.playing(music);
 	}
 	
 	public void stop(String music) {
 		this.system.stop(music);
-		this.system.stop(music + "_loop");
 	}
 
 	@Override
