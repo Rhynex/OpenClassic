@@ -102,7 +102,7 @@ public class FavoriteServersScreen extends GuiScreen {
 				return;
 			}
 		} else {
-			mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.failed"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
+			mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
 			mc.progressBar.setVisible(false);
 			return;
 		}
