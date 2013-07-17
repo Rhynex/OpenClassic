@@ -50,7 +50,8 @@ public final class LevelIO {
 	public static Level load(String name) {		
 		if (GeneralUtils.getMinecraft() != null) {
 			GeneralUtils.getMinecraft().progressBar.setVisible(true);
-			GeneralUtils.getMinecraft().progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("level.loading"));
+			GeneralUtils.getMinecraft().progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
+			GeneralUtils.getMinecraft().progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.loading"));
 			GeneralUtils.getMinecraft().progressBar.setText(OpenClassic.getGame().getTranslator().translate("level.reading"));
 			GeneralUtils.getMinecraft().progressBar.setProgress(0);
 		}

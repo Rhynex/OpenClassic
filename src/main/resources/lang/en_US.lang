@@ -254,3 +254,7 @@ options:
 screenshot:
     saved: Saved screenshot "%s"!
     error: "Error saving screenshot: %s"
+progress-bar:
+    singleplayer: Singleplayer
+    multiplayer: Multiplayer
+    loading: Loading

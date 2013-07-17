@@ -8,6 +8,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+import org.lwjgl.opengl.GL11;
+
 public final class FontRenderer {
 
 	private int[] font = new int[256];
@@ -58,15 +60,28 @@ public final class FontRenderer {
 	}
 
 	public final void renderWithShadow(String text, int x, int y, int color) {
-		this.render(text, x + 1, y + 1, color, true);
-		this.renderNoShadow(text, x, y, color);
+		this.renderWithShadow(text, x, y, color, false);
+	}
+	
+	public final void renderWithShadow(String text, int x, int y, int color, boolean scaled) {
+		this.render(text, x + 1, y + 1, color, true, scaled);
+		this.renderNoShadow(text, x, y, color, scaled);
 	}
 
 	public final void renderNoShadow(String text, int x, int y, int color) {
-		this.render(text, x, y, color, false);
+		this.renderNoShadow(text, x, y, color, false);
 	}
-
-	private void render(String text, int x, int y, int color, boolean shadow) {
+	
+	public final void renderNoShadow(String text, int x, int y, int color, boolean scaled) {
+		this.render(text, x, y, color, false, scaled);
+	}
+	
+	private void render(String text, int x, int y, int color, boolean shadow, boolean scaled) {
+		if(scaled) {
+			GL11.glScalef(2, 2, 2);
+			GL11.glTranslatef(-(x / 2), -(y / 2), 0);
+		}
+		
 		if (text != null) {
 			char[] chars = text.toCharArray();
 			if (shadow) {
@@ -118,6 +133,11 @@ public final class FontRenderer {
 			}
 
 			ShapeRenderer.instance.end();
+		}
+		
+		if(scaled) {
+			GL11.glTranslatef(x / 2, y / 2, 0);
+			GL11.glScalef(0.5f, 0.5f, 0.5f);
 		}
 	}
 

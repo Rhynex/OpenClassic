@@ -74,7 +74,8 @@ public class FavoriteServersScreen extends GuiScreen {
 		Minecraft mc = GeneralUtils.getMinecraft();
 		
 		mc.progressBar.setVisible(true);
-		mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+		mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
+		mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 		mc.progressBar.setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 		mc.progressBar.setProgress(0);
 		mc.progressBar.render();

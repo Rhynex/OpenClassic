@@ -56,12 +56,38 @@ public class ClientRenderHelper extends RenderHelper {
 		ShapeRenderer.instance.end();
 	}
 	
+	public void drawBlackBG(int x, int y, int width, int height) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		ShapeRenderer.instance.begin();
+		ShapeRenderer.instance.color(0);
+		ShapeRenderer.instance.vertexUV(x, y + height, 0, 0, height / 32);
+		ShapeRenderer.instance.vertexUV(x + width, y + height, 0, width / 32, height / 32);
+		ShapeRenderer.instance.vertexUV(x + width, y, 0, width / 32, 0);
+		ShapeRenderer.instance.vertexUV(x, y, 0, 0, 0);
+		ShapeRenderer.instance.end();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+	
 	public void renderText(String text, float x, float y) {
 		this.renderText(text, x, y, true);
 	}
 	
 	public void renderText(String text, float x, float y, boolean xCenter) {
 		this.renderText(text, x, y, 16777215, xCenter);
+	}
+	
+	public void renderScaledText(String text, float x, float y) {
+		this.renderScaledText(text, x, y, true);
+	}
+	
+	public void renderScaledText(String text, float x, float y, boolean xCenter) {
+		FontRenderer renderer = ((ClassicClient) OpenClassic.getClient()).getMinecraft().fontRenderer;
+		
+		if(xCenter) {
+			renderer.renderWithShadow(text, (int) x - renderer.getWidth(text), (int) y, 16777215, true);
+		} else {
+			renderer.renderWithShadow(text, (int) x, (int) y, 16777215, true);
+		}
 	}
 	
 	public void renderText(String text, float x, float y, int color) {
@@ -449,6 +475,11 @@ public class ClientRenderHelper extends RenderHelper {
 	@Override
 	public void drawSubTex(SubTexture texture, float x, float y, float z, float brightness) {
 		this.drawSubTex(texture, x, y, z, 1, brightness, brightness, brightness);
+	}
+	
+	@Override
+	public void drawSubTex(SubTexture texture, float x, float y, float z, float scale, float brightness) {
+		this.drawSubTex(texture, x, y, z, scale, brightness, brightness, brightness);
 	}
 
 	@Override

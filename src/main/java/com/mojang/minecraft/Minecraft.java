@@ -324,7 +324,8 @@ public final class Minecraft implements Runnable {
 			VanillaBlock.registerAll();
 			if (this.level == null) {
 				this.progressBar.setVisible(true);
-				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
+				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
+				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
 				this.progressBar.setText("");
 				this.progressBar.setProgress(0);
 				this.progressBar.render();
@@ -517,7 +518,8 @@ public final class Minecraft implements Runnable {
 		this.resourceThread.start();
 
 		this.progressBar.setVisible(true);
-		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
+		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.loading"));
+		this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
 		this.progressBar.setProgress(0);
 		this.progressBar.render();
 
@@ -1379,7 +1381,8 @@ public final class Minecraft implements Runnable {
 		if (this.netManager != null && !(this.currentScreen instanceof ErrorScreen)) {
 			if (!this.netManager.isConnected()) {
 				this.progressBar.setVisible(true);
-				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
+				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 				this.progressBar.setProgress(0);
 				this.progressBar.render();
 			} else {
@@ -1421,7 +1424,8 @@ public final class Minecraft implements Runnable {
 											}
 										}
 
-										this.progressBar.setTitle(params[1].toString());
+										this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
+										this.progressBar.setSubtitle(params[1].toString());
 										this.progressBar.setText(params[2].toString());
 										this.player.userType = (Byte) params[3];
 
