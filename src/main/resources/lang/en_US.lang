@@ -258,3 +258,6 @@ progress-bar:
     singleplayer: Singleplayer
     multiplayer: Multiplayer
     loading: Loading
+server:
+    client-version-mismatch: "Your OpenClassic Client was detected, however its protocol version does not match the server's."
+    still-can-play: "You can still play, but you will not get enhanced client features."

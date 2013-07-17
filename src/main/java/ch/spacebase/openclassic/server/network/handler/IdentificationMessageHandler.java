@@ -174,8 +174,8 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 					}
 				}
 			} else {
-				player.sendMessage(Color.RED + "Your OpenClassic Client was detected, however its protocol version does not match the server's.");
-				player.sendMessage(Color.RED + "You can still play, but you will not get enhanced client features.");
+				player.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("server.client-version-mismatch", player.getLanguage()));
+				player.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("server.still-can-play", player.getLanguage()));
 			}
 		}
 		
