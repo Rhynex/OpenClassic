@@ -157,7 +157,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public String getClientVersion() {
-		return Constants.CLIENT_VERSION;
+		return Constants.VERSION;
 	}
 
 	@Override

@@ -72,7 +72,7 @@ public class ClassicClient extends ClassicGame implements Client {
 			e.printStackTrace();
 		}
 
-		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.CLIENT_VERSION));
+		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
 		
 		this.registerExecutor(null, new ClientCommands());
 		this.registerGenerator("normal", new LevelGenerator());

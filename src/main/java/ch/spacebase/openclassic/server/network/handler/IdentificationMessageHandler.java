@@ -159,7 +159,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 					build.append(plugin.getDescription().getName()).append(",");
 				}
 				
-				session.send(new GameInfoMessage(Constants.SERVER_VERSION, ""));
+				session.send(new GameInfoMessage(Constants.VERSION, ""));
 				for(Plugin plugin : OpenClassic.getServer().getPluginManager().getPlugins()) {
 					session.send(new PluginMessage(plugin.getDescription().getName(), plugin.getDescription().getVersion()));
 				}

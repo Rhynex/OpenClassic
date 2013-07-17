@@ -139,7 +139,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		if(this.isRunning()) return;
 		this.running = true;
 		
-		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.server"), Constants.SERVER_VERSION));
+		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.server"), Constants.VERSION));
 		
 		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
 		this.bootstrap.setFactory(factory);

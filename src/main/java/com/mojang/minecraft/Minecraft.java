@@ -458,7 +458,7 @@ public final class Minecraft implements Runnable {
 			return;
 		}
 		
-		Display.setTitle("OpenClassic " + Constants.CLIENT_VERSION);
+		Display.setTitle("OpenClassic " + Constants.VERSION);
 		try {
 			Display.create();
 			Keyboard.create();
@@ -1544,7 +1544,7 @@ public final class Minecraft implements Runnable {
 										OpenClassic.getLogger().info("Connected to OpenClassic v" + (String) params[0] + "!");
 										this.openclassicServer = true;
 										this.openclassicVersion = (String) params[0];
-										this.netManager.netHandler.send(PacketType.GAME_INFO, Constants.CLIENT_VERSION, OpenClassic.getGame().getLanguage());
+										this.netManager.netHandler.send(PacketType.GAME_INFO, Constants.VERSION, OpenClassic.getGame().getLanguage());
 										for(Plugin plugin : OpenClassic.getClient().getPluginManager().getPlugins()) {
 											this.netManager.netHandler.send(PacketType.PLUGIN, plugin.getDescription().getName(), plugin.getDescription().getVersion());
 										}
