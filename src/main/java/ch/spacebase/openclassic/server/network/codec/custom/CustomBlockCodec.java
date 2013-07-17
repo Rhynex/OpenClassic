@@ -30,6 +30,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().getPreventsRendering() ? 1 : 0);
 		buffer.writeByte(message.getBlock().canPlaceIn() ? 1 : 0);
 		buffer.writeByte(message.getBlock().isGas() ? 1 : 0);
+		buffer.writeByte(message.getBlock().getPreventsOwnRenderingRaw() ? 1 : 0);
 		
 		return buffer;
 	}
@@ -45,6 +46,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		boolean preventsRendering = buffer.readByte() == 1;
 		boolean placeIn = buffer.readByte() == 1;
 		boolean gas = buffer.readByte() == 1;
+		boolean preventsOwnRendering = buffer.readByte() == 1;
 		
 		BlockType block = new BlockType(id, sound, (Model) null);
 		block.setOpaque(opaque);
@@ -54,6 +56,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		block.setPreventsRendering(preventsRendering);
 		block.setPlaceIn(placeIn);
 		block.setGas(gas);
+		block.setPreventsOwnRendering(preventsOwnRendering);
 		
 		return new CustomBlockMessage(block);
 	}

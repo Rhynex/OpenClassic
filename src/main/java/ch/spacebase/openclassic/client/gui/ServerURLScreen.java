@@ -41,6 +41,7 @@ public class ServerURLScreen extends GuiScreen {
 		if(button.getId() == 0) {
 			Minecraft mc = GeneralUtils.getMinecraft();
 			
+			mc.progressBar.setVisible(true);
 			mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			mc.progressBar.setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			mc.progressBar.setProgress(0);
@@ -64,13 +65,16 @@ public class ServerURLScreen extends GuiScreen {
 				} catch(NumberFormatException e) {
 					mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
 					mc.server = null;
+					mc.progressBar.setVisible(false);
 					return;
 				}
 			} else {
 				OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.failed"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
+				mc.progressBar.setVisible(false);
 				return;
 			}
 			
+			mc.progressBar.setVisible(false);
 			mc.initGame();
 			OpenClassic.getClient().setCurrentScreen(null);
 		}

@@ -49,7 +49,8 @@ public final class LevelGenerator extends Generator {
 
 	@Override
 	public void generate(ch.spacebase.openclassic.api.level.Level level, byte data[]) {
-		level.setGenerating(true); 
+		level.setGenerating(true);
+		GeneralUtils.getMinecraft().progressBar.setVisible(true);
 		this.progress.setTitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
 		this.progress.setText(OpenClassic.getGame().getTranslator().translate("level.raising"));
 		CombinedNoise alg1 = new CombinedNoise(new OctaveNoise(this.rand, 8), new OctaveNoise(this.rand, 8));
@@ -382,6 +383,7 @@ public final class LevelGenerator extends Generator {
 		}
 		
 		level.setGenerating(false);
+		GeneralUtils.getMinecraft().progressBar.setVisible(false);
 	}
 
 	private void populateOre(int var1, int var2, int var3, int var4, byte data[]) {

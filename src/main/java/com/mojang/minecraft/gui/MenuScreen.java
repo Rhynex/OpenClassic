@@ -43,11 +43,13 @@ public final class MenuScreen extends GuiScreen {
 					return;
 				}
 				
+				mc.progressBar.setVisible(true);
 				mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("level.saving"));
 				mc.progressBar.setText("");
 				mc.progressBar.setProgress(0);
 				mc.progressBar.render();
 				LevelIO.save(mc.level);
+				mc.progressBar.setVisible(false);
 			}
 			
 			mc.stopGame(true);

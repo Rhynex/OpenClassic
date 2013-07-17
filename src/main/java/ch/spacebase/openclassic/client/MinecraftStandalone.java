@@ -44,7 +44,7 @@ public class MinecraftStandalone {
 
 			@Override
 			public void windowClosed(WindowEvent e) {
-				minecraft.shutdown();
+				minecraft.running = false;
 			}
 
 			@Override

@@ -323,11 +323,13 @@ public final class Minecraft implements Runnable {
 		} else {
 			VanillaBlock.registerAll();
 			if (this.level == null) {
+				this.progressBar.setVisible(true);
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
 				this.progressBar.setText("");
 				this.progressBar.setProgress(0);
 				this.progressBar.render();
 				OpenClassic.getClient().createLevel(new LevelInfo(!this.levelName.equals("") ? this.levelName : "A Nice World", null, (short) (128 << this.levelSize), (short) 128, (short) (128 << this.levelSize)), gen);
+				this.progressBar.setVisible(false);
 				this.levelName = "";
 			}
 		}
@@ -370,13 +372,13 @@ public final class Minecraft implements Runnable {
 		
 		if(this.started) {
 			if(e instanceof LWJGLException) {
-				this.shutdown();
+				this.running = false;
 			} else {
 				setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
 			}
 		} else {
 			JOptionPane.showMessageDialog(null, e.toString(), OpenClassic.getGame().getTranslator().translate("core.fail-start"), 0);
-			this.shutdown();
+			this.running = false;
 		}
 
 		e.printStackTrace();
@@ -387,7 +389,7 @@ public final class Minecraft implements Runnable {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				shutdown();
+				running = false;
 			}
 		});
 		
@@ -514,6 +516,7 @@ public final class Minecraft implements Runnable {
 		this.resourceThread = new ResourceDownloadThread(dir, this, this.progressBar);
 		this.resourceThread.start();
 
+		this.progressBar.setVisible(true);
 		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
 		this.progressBar.setProgress(0);
 		this.progressBar.render();
@@ -545,6 +548,7 @@ public final class Minecraft implements Runnable {
 
 				if(!this.started) {
 					if(this.resourceThread.isFinished()) {
+						this.progressBar.setVisible(false);
 						try {
 							Thread.sleep(1000);
 						} catch (InterruptedException e) {
@@ -1374,6 +1378,7 @@ public final class Minecraft implements Runnable {
 
 		if (this.netManager != null && !(this.currentScreen instanceof ErrorScreen)) {
 			if (!this.netManager.isConnected()) {
+				this.progressBar.setVisible(true);
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 				this.progressBar.setProgress(0);
 				this.progressBar.render();
@@ -1467,6 +1472,7 @@ public final class Minecraft implements Runnable {
 										this.setLevel(level);
 										this.online = false;
 										this.netManager.levelLoaded = true;
+										this.progressBar.setVisible(false);
 									} else if (type == PacketType.SET_BLOCK) {
 										if (this.level != null) {
 											this.level.netSetTile((Short) params[0], (Short) params[1], (Short) params[2], (Byte) params[3]);
@@ -1574,6 +1580,7 @@ public final class Minecraft implements Runnable {
 										boolean preventsRendering = (Byte) params[6] == 1;
 										boolean placeIn = (Byte) params[7] == 1;
 										boolean gas = (Byte) params[8] == 1;
+										boolean preventsOwnRendering = (Byte) params[9] == 1;
 
 										BlockType block = new BlockType(id, sound, (Model) null);
 										block.setOpaque(opaque);
@@ -1583,6 +1590,7 @@ public final class Minecraft implements Runnable {
 										block.setPreventsRendering(preventsRendering);
 										block.setPlaceIn(placeIn);
 										block.setGas(gas);
+										block.setPreventsOwnRendering(preventsOwnRendering);
 										Blocks.register(block);
 									} else if (type == PacketType.BLOCK_MODEL) {
 										byte block = (Byte) params[0];

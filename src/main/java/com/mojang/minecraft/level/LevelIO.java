@@ -49,8 +49,10 @@ public final class LevelIO {
 
 	public static Level load(String name) {		
 		if (GeneralUtils.getMinecraft() != null) {
+			GeneralUtils.getMinecraft().progressBar.setVisible(true);
 			GeneralUtils.getMinecraft().progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("level.loading"));
 			GeneralUtils.getMinecraft().progressBar.setText(OpenClassic.getGame().getTranslator().translate("level.reading"));
+			GeneralUtils.getMinecraft().progressBar.setProgress(0);
 		}
 		
 		try {
@@ -58,6 +60,7 @@ public final class LevelIO {
 			level.openclassic.data = new NBTData(level.name);
 			level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
 			EventFactory.callEvent(new LevelLoadEvent(level.openclassic));
+			GeneralUtils.getMinecraft().progressBar.setVisible(false);
 			return level;
 		} catch (IOException e) {
 			if (GeneralUtils.getMinecraft() != null) {
@@ -71,6 +74,7 @@ public final class LevelIO {
 			} catch (InterruptedException e1) {
 			}
 			
+			GeneralUtils.getMinecraft().progressBar.setVisible(false);
 			return null;
 		}
 	}

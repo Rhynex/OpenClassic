@@ -484,7 +484,7 @@ public class ClientRenderHelper extends RenderHelper {
 				return false;
 			}
 			
-			return !this.getPreventsRendering(relative);
+			return !relative.getPreventsRendering();
 		}
 		
 		if(!(block.getModel() instanceof CubeModel)) {
@@ -495,16 +495,15 @@ public class ClientRenderHelper extends RenderHelper {
 			//}
 		}
 		
-		if(!block.isOpaque()) {
-			return relative == null || (relative != block && !this.getPreventsRendering(relative));
+		if(relative == block) {
+			return !relative.getPreventsOwnRendering();
 		}
 		
-		return relative == null || !this.getPreventsRendering(relative);
-	}
-	
-	private boolean getPreventsRendering(BlockType block) {
-		if(block == null) return true;
-		return block.getPreventsRendering();
+		if(block.isOpaque()) {
+			return true;
+		}
+		
+		return relative == null || !relative.getPreventsRendering();
 	}
 	
 	@Override

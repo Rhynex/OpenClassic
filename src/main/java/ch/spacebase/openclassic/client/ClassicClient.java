@@ -87,7 +87,7 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public void shutdown() {
-		this.mc.shutdown();
+		this.mc.running = false;
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		level.creator = this.mc.data != null ? this.mc.data.username : "unknown";
 		level.createTime = System.currentTimeMillis();
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
-		level.setBounds(info.getWidth(), info.getHeight(), info.getDepth());
+		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
 		generator.generate(level.openclassic, data);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
 		level.openclassic.setSpawn(generator.findSpawn(level.openclassic));

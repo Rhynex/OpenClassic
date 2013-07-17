@@ -56,26 +56,21 @@ public final class ClientProgressBar implements ProgressBar {
 	
 	@Override
 	public void render() {
-		/*
-		  	int x = this.mc.width * 240 / this.mc.height;
-			int y = this.mc.height * 240 / this.mc.height;
-			
-			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
-			GL11.glOrtho(0, x, y, 0, 100, 300);
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			GL11.glLoadIdentity();
-			GL11.glTranslatef(0, 0, -200);
-		 */
 		if(!this.isVisible()) {
 			return;
 		}
 		
 		int x = ClientRenderHelper.getHelper().getDisplayWidth() * 240 / ClientRenderHelper.getHelper().getDisplayHeight();
 		int y = ClientRenderHelper.getHelper().getDisplayHeight() * 240 / ClientRenderHelper.getHelper().getDisplayHeight();
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GL11.glOrtho(0, x, y, 0, 100, 300);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+		GL11.glTranslatef(0, 0, -200);
 		ClientRenderHelper.getHelper().drawDefaultBG();
-		if (progress >= 0) {
+		if (this.progress >= 0) {
 			int barX = x / 2 - 50;
 			int barY = y / 2 + 16;
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -94,8 +89,8 @@ public final class ClientProgressBar implements ProgressBar {
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 
-		ClientRenderHelper.getHelper().renderText(this.title, x, y / 2 - 4 - 16, 16777215);
-		ClientRenderHelper.getHelper().renderText(this.text, x, y / 2 - 4 + 8, 16777215);
+		ClientRenderHelper.getHelper().renderText(this.title, x / 2, y / 2 - 4 - 16, 16777215);
+		ClientRenderHelper.getHelper().renderText(this.text, x / 2, y / 2 - 4 + 8, 16777215);
 		Display.update();
 	}
 	
