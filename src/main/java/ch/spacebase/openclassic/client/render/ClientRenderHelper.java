@@ -44,8 +44,8 @@ public class ClientRenderHelper extends RenderHelper {
 	public void drawDefaultBG() {
 		this.bindTexture("/dirt.png", true);
 
-		int width = Display.getWidth() * 240 / Display.getHeight();
-		int height = Display.getHeight() * 240 / Display.getHeight();
+		int width = this.getGuiWidth();
+		int height = this.getGuiHeight();
 
 		ShapeRenderer.instance.begin();
 		ShapeRenderer.instance.color(4210752);

@@ -36,7 +36,7 @@ import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.ClassicClient;
-import ch.spacebase.openclassic.client.MinecraftStandalone;
+import ch.spacebase.openclassic.client.ClientProgressBar;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
@@ -81,8 +81,6 @@ import com.mojang.minecraft.render.LevelRenderer;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 import java.awt.AWTException;
 import java.awt.Canvas;
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -96,7 +94,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -111,7 +108,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Controllers;
-import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -136,7 +132,6 @@ public final class Minecraft implements Runnable {
 	public SessionData data = null;
 	public Canvas canvas;
 	public volatile boolean waiting = false;
-	private Cursor cursor;
 	public TextureManager textureManager;
 	public FontRenderer fontRenderer;
 	public GuiScreen currentScreen = null;
@@ -156,7 +151,6 @@ public final class Minecraft implements Runnable {
 	public int port;
 	public volatile boolean running;
 	public String debugInfo;
-	public boolean hasMouse;
 	private int lastClick;
 	public boolean raining;
 	public File dir;
@@ -183,7 +177,6 @@ public final class Minecraft implements Runnable {
 		this.port = 0;
 		this.running = false;
 		this.debugInfo = "";
-		this.hasMouse = false;
 		this.lastClick = 0;
 		this.raining = false;
 
@@ -221,16 +214,11 @@ public final class Minecraft implements Runnable {
 
 		this.currentScreen = screen;
 		if (screen != null) {
-			if (this.hasMouse) {
+			if(this.player != null) {
 				this.player.releaseAllKeys();
-				this.hasMouse = false;
-				try {
-					Mouse.setNativeCursor(null);
-				} catch (LWJGLException e) {
-					e.printStackTrace();
-				}
 			}
-
+			
+			Mouse.setGrabbed(false);
 			screen.open(this.width, this.height);
 			this.online = false;
 		} else {
@@ -267,9 +255,9 @@ public final class Minecraft implements Runnable {
 
 		((ClassicScheduler) OpenClassic.getClient().getScheduler()).stop();
 		this.audio.cleanup();
-		Mouse.destroy();
-		Keyboard.destroy();
 		Display.destroy();
+		
+		System.exit(0);
 	}
 
 	public void stopGame(boolean menu) {
@@ -336,17 +324,7 @@ public final class Minecraft implements Runnable {
 		}
 
 		this.particleManager = new ParticleManager(this.level, this.textureManager);
-		
-		try {
-			IntBuffer buffer = BufferUtils.createIntBuffer(256);
-			buffer.clear().limit(256);
-			this.cursor = new Cursor(16, 16, 0, 0, 1, buffer, null);
-		} catch (LWJGLException e) {
-			this.handleException(e);
-			return;
-		}
-
-		this.hud = new HUDScreen(this, this.width, this.height);
+		this.hud = new HUDScreen(this);
 
 		OpenClassic.getGame().getScheduler().scheduleTask(this, new SkinDownloadTask(this));
 		if (this.server != null && this.data != null) {
@@ -417,9 +395,6 @@ public final class Minecraft implements Runnable {
 		}
 
 		LWJGLNatives.load(lib);
-		if(MinecraftStandalone.frame != null) {
-			MinecraftStandalone.frame.setTitle("Minecraft " + Constants.CLIENT_VERSION);
-		}
 
 		File levels = new File(this.dir, "levels");
 		if(!levels.exists()) {
@@ -453,14 +428,14 @@ public final class Minecraft implements Runnable {
 				Display.setParent(this.canvas);
 			} else {
 				Display.setDisplayMode(new DisplayMode(this.width, this.height));
+				Display.setResizable(true);
 			}
 		} catch (LWJGLException e) {
 			this.handleException(e);
 			return;
 		}
-
-		Display.setTitle("Minecraft " + Constants.CLIENT_VERSION);
-
+		
+		Display.setTitle("OpenClassic " + Constants.CLIENT_VERSION);
 		try {
 			Display.create();
 			Keyboard.create();
@@ -534,17 +509,11 @@ public final class Minecraft implements Runnable {
 				} catch (InterruptedException e) {
 				}
 			} else {
-				if (this.canvas == null && Display.isCloseRequested()) {
+				if (Display.isCloseRequested()) {
 					break;
 				}
 
-				if(!Display.isFullscreen() && (this.canvas.getWidth() != Display.getDisplayMode().getWidth() || this.canvas.getHeight() != Display.getDisplayMode().getHeight())) {
-					try {
-						Display.setDisplayMode(new DisplayMode(this.canvas.getWidth(), this.canvas.getHeight()));
-					} catch (LWJGLException e) {
-						this.handleException(e);
-					}
-
+				if(this.width != Display.getWidth() || this.height != Display.getHeight()) {
 					this.resize();
 				}
 
@@ -616,32 +585,21 @@ public final class Minecraft implements Runnable {
 					}
 
 					this.renderer.displayActive = Display.isActive();
-					if (this.hasMouse) {
-						int x = 0;
-						int y = 0;
-						if (this.canvas != null) {
-							Point canvas = this.canvas.getLocationOnScreen();
-							int canvasCenterX = canvas.x + this.width / 2;
-							int canvasCenterY = canvas.y + this.height / 2;
-							Point mouse = MouseInfo.getPointerInfo().getLocation();
-							x = mouse.x - canvasCenterX;
-							y = -(mouse.y - canvasCenterY);
-							this.robot.mouseMove(canvasCenterX, canvasCenterY);
-						} else {
-							Mouse.setCursorPosition(this.width / 2, this.height / 2);
-						}
-
+					if (Mouse.isGrabbed()) {
+						int x = Mouse.getDX();
+						int y = Mouse.getDY();
 						byte direction = 1;
 						if (this.settings.invertMouse) {
 							direction = -1;
 						}
 
 						this.player.turn(x, (y * direction));
+						Mouse.setCursorPosition(this.width / 2, this.height / 2);
 					}
 
 					if (!this.online) {
-						int width = this.width * 240 / this.height;
-						int height = this.height * 240 / this.height;
+						int width = ClientRenderHelper.getHelper().getGuiWidth();
+						int height = ClientRenderHelper.getHelper().getGuiHeight();
 						if (this.level != null) {
 							float var29 = (this.player = this.renderer.mc.player).xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks;
 							float var30 = this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks;
@@ -1169,7 +1127,7 @@ public final class Minecraft implements Runnable {
 						}
 						
 						if(this.progressBar.isVisible()) {
-							this.progressBar.render();
+							this.progressBar.render(false);
 						}
 
 						Thread.yield();
@@ -1202,15 +1160,8 @@ public final class Minecraft implements Runnable {
 	}
 
 	public final void grabMouse() {
-		if (!this.hasMouse) {
-			this.hasMouse = true;
-			try {
-				Mouse.setNativeCursor(this.cursor);
-				Mouse.setCursorPosition(this.width / 2, this.height / 2);
-			} catch (LWJGLException e) {
-				e.printStackTrace();
-			}
-
+		if (!Mouse.isGrabbed()) {
+			Mouse.setGrabbed(true);
 			this.setCurrentScreen(null);
 			this.lastClick = this.ticks + 10000;
 		}
@@ -1906,7 +1857,7 @@ public final class Minecraft implements Runnable {
 				}
 
 				if (this.currentScreen == null) {
-					if (!this.hasMouse && Mouse.getEventButtonState()) {
+					if (!Mouse.isGrabbed() && Mouse.getEventButtonState()) {
 						this.grabMouse();
 					} else {
 						if(Mouse.getEventButtonState()) {
@@ -1954,19 +1905,19 @@ public final class Minecraft implements Runnable {
 			}
 
 			if (this.currentScreen == null) {
-				if (Mouse.isButtonDown(0) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && this.hasMouse) {
+				if (Mouse.isButtonDown(0) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && Mouse.isGrabbed()) {
 					this.onMouseClick(0);
 					this.lastClick = this.ticks;
 				}
 
-				if (Mouse.isButtonDown(1) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && this.hasMouse) {
+				if (Mouse.isButtonDown(1) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && Mouse.isGrabbed()) {
 					this.onMouseClick(1);
 					this.lastClick = this.ticks;
 				}
 			}
 
 			if (!this.mode.creative && this.blockHitTime <= 0) {
-				if (this.currentScreen == null && Mouse.isButtonDown(0) && this.hasMouse && this.selected != null && !this.selected.entityPos) {
+				if (this.currentScreen == null && Mouse.isButtonDown(0) && Mouse.isGrabbed() && this.selected != null && !this.selected.entityPos) {
 					this.mode.hitBlock(this.selected.x, this.selected.y, this.selected.z, this.selected.side);
 				} else {
 					this.mode.resetHits();
@@ -2035,12 +1986,12 @@ public final class Minecraft implements Runnable {
 	}
 
 	private void resize() {
-		this.width = Display.getDisplayMode().getWidth();
-		this.height = Display.getDisplayMode().getHeight();
+		this.width = Display.getWidth();
+		this.height = Display.getHeight();
 
 		if(this.hud != null) {
-			this.hud.width = this.width * 240 / this.height;
-			this.hud.height = this.height * 240 / this.height;
+			this.hud.width = ClientRenderHelper.getHelper().getGuiWidth();
+			this.hud.height = ClientRenderHelper.getHelper().getGuiHeight();
 		}
 
 		if(this.currentScreen != null) {

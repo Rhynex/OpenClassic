@@ -28,10 +28,10 @@ public class HUDScreen extends MainScreen {
 	public String clickedPlayer = null;
 	public int ticks = 0;
 
-	public HUDScreen(Minecraft mc, int width, int height) {
+	public HUDScreen(Minecraft mc) {
 		this.mc = mc;
-		this.width = width * 240 / height;
-		this.height = height * 240 / height;
+		this.width = ClientRenderHelper.getHelper().getGuiWidth();
+		this.height = ClientRenderHelper.getHelper().getGuiHeight();
 		//this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
 	}
 

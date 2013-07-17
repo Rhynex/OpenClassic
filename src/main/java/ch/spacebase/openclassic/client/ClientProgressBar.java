@@ -1,4 +1,4 @@
-package com.mojang.minecraft;
+package ch.spacebase.openclassic.client;
 
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.render.RenderHelper;
@@ -69,17 +69,24 @@ public final class ClientProgressBar implements ProgressBar {
 	
 	@Override
 	public void render() {
+		this.render(true);
+	}
+	
+	public void render(boolean fresh) {
 		if(this.isVisible()) {
-			int x = ClientRenderHelper.getHelper().getDisplayWidth() * 240 / ClientRenderHelper.getHelper().getDisplayHeight();
-			int sy = ClientRenderHelper.getHelper().getDisplayHeight() * 240 / ClientRenderHelper.getHelper().getDisplayHeight();
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
-			GL11.glOrtho(0, x, sy, 0, 100, 300);
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			GL11.glLoadIdentity();
-			GL11.glTranslatef(0, 0, -200);
+			int x = ClientRenderHelper.getHelper().getGuiWidth();
+			int sy = ClientRenderHelper.getHelper().getGuiHeight();
+			if(fresh) {
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+				GL11.glMatrixMode(GL11.GL_PROJECTION);
+				GL11.glLoadIdentity();
+				GL11.glOrtho(0, x, sy, 0, 100, 300);
+				GL11.glMatrixMode(GL11.GL_MODELVIEW);
+				GL11.glLoadIdentity();
+				GL11.glTranslatef(0, 0, -200);
+			}
+			
 			ClientRenderHelper.getHelper().drawDefaultBG();
 			int width = RenderHelper.getHelper().getGuiWidth();
 			int height = RenderHelper.getHelper().getGuiHeight();
@@ -108,7 +115,9 @@ public final class ClientProgressBar implements ProgressBar {
 			RenderHelper.getHelper().renderScaledText(this.title, width - 10 - ClientRenderHelper.getHelper().getStringWidth(this.title), 10);
 			RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 32);
 			RenderHelper.getHelper().renderText(this.text, width / 2, height - 19);
-			Display.update();
+			if(fresh) {
+				Display.update();
+			}
 		}
 	}
 	

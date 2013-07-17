@@ -1,6 +1,7 @@
 package com.mojang.minecraft;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.client.ClientProgressBar;
 
 import com.mojang.minecraft.Minecraft;
 
@@ -101,7 +102,6 @@ public final class ResourceDownloadThread extends Thread {
 		System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloading"), file.getName()));
 		this.mc.progressBar.setVisible(true);
 		this.mc.progressBar.setText(file.getName());
-		this.mc.progressBar.render();
 		byte[] data = new byte[4096];
 		DataInputStream in = null;
 		DataOutputStream out = null;

@@ -9,6 +9,8 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.render.HeldBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+
 import java.nio.FloatBuffer;
 import java.util.Random;
 import org.lwjgl.BufferUtils;
@@ -83,8 +85,8 @@ public final class Renderer {
 	}
 
 	public final void enableGuiMode() {
-		int width = this.mc.width * 240 / this.mc.height;
-		int height = this.mc.height * 240 / this.mc.height;
+		int width = ClientRenderHelper.getHelper().getGuiWidth();
+		int height = ClientRenderHelper.getHelper().getGuiHeight();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();

@@ -5,10 +5,10 @@ import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.ClientProgressBar;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.ClientProgressBar;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.generator.algorithm.CombinedNoise;
 import com.mojang.minecraft.level.generator.algorithm.OctaveNoise;
