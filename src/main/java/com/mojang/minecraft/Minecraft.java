@@ -79,6 +79,9 @@ import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.LevelRenderer;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
+
+import de.matthiasmann.twl.utils.PNGDecoder;
+
 import java.awt.AWTException;
 import java.awt.Canvas;
 import java.awt.Robot;
@@ -90,6 +93,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -363,6 +367,18 @@ public final class Minecraft implements Runnable {
 		e.printStackTrace();
 	}
 
+	private ByteBuffer loadIcon(InputStream in) throws IOException {
+		try {
+			PNGDecoder decoder = new PNGDecoder(in);
+			ByteBuffer bb = ByteBuffer.allocateDirect(decoder.getWidth()*decoder.getHeight()*4);
+			decoder.decode(bb, decoder.getWidth()*4, PNGDecoder.Format.RGBA);
+			bb.flip();
+			return bb;
+		} finally {
+			in.close();
+		}
+	}
+
 	@SuppressWarnings({"unused"})
 	public final void run() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -376,7 +392,6 @@ public final class Minecraft implements Runnable {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				System.err.println("Uncaught exception in thread \"" + t.getName() + "\"");
-				e.printStackTrace();
 				handleException(e);
 			}
 		});
@@ -429,6 +444,14 @@ public final class Minecraft implements Runnable {
 			} else {
 				Display.setDisplayMode(new DisplayMode(this.width, this.height));
 				Display.setResizable(true);
+				try {
+					Display.setIcon(new ByteBuffer[] {
+							this.loadIcon(TextureManager.class.getResourceAsStream("/icon.png"))
+					});
+				} catch(IOException e) {
+					System.err.println("Failed to load icon!");
+					e.printStackTrace();
+				}
 			}
 		} catch (LWJGLException e) {
 			this.handleException(e);
@@ -447,7 +470,7 @@ public final class Minecraft implements Runnable {
 
 		try {
 			Controllers.create();
-		} catch (Exception e) {
+		} catch (Throwable t) {
 		}
 
 		checkGLError("Pre startup");

@@ -2,11 +2,13 @@ package ch.spacebase.openclassic.client.util;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.util.io.IOUtils;
 
 import com.mojang.minecraft.Minecraft;
 
@@ -49,24 +51,35 @@ public class LWJGLNatives {
 
 	private static void load(String dir, String lib, String arch) {
 		File file = new File(dir + "/" + lib);
-		if(file.exists()) {
-			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
-				System.load(file.getPath());
-			}
-			
-			return;
-		}
 		
 		try {
+			if(file.exists()) {
+				InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
+				InputStream fin = new FileInputStream(file);
+				if(IOUtils.contentEquals(in, fin)) {
+					if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
+						System.load(file.getPath());
+					}
+					
+					in.close();
+					fin.close();
+					return;
+				}
+				
+				in.close();
+				fin.close();
+			}
+			
 			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
 			System.out.println("Writing " + lib + " to " + file.getPath());
 			copy(in, file);
 			in.close();
-			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) System.load(file.getPath());
+			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
+				System.load(file.getPath());
+			}
 		} catch (Exception e) {
-			System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
+			System.err.println(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
 			e.printStackTrace();
-			System.exit(0);
 		}
 	}
 	
@@ -81,6 +94,13 @@ public class LWJGLNatives {
 			}
 			
 			try {
+				to.createNewFile();
+			} catch(SecurityException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				to.delete();
 				to.createNewFile();
 			} catch(SecurityException e) {
 				e.printStackTrace();
