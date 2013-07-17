@@ -47,10 +47,6 @@
         		<id>maven-central</id>
         		<url>http://central.maven.org/maven2</url>
     		</repository>
-    		<repository>
-        		<id>libs-mvn-repo</id>
-        		<url>https://github.com/Steveice10/libs-mvn-repo/raw/master/releases</url>
-    		</repository>
               	<repository>
                     	<id>spacebase</id>
                     	<url>http://repo.spacebase.ch</url>
@@ -88,27 +84,32 @@
   		<dependency>
     			<groupId>com.paulscode.soundsystem</groupId>
     			<artifactId>codecjorbis</artifactId>
-    			<version>0.0.1</version>
+    			<version>latest</version>
   		</dependency>
   		<dependency>
     			<groupId>com.paulscode.soundsystem</groupId>
     			<artifactId>codecwav</artifactId>
-    			<version>0.0.1</version>
+    			<version>latest</version>
   		</dependency>
   		<dependency>
     			<groupId>com.paulscode.soundsystem</groupId>
     			<artifactId>libraryjavasound</artifactId>
-    			<version>0.0.1</version>
+    			<version>latest</version>
   		</dependency>
   		<dependency>
     			<groupId>com.paulscode.soundsystem</groupId>
     			<artifactId>librarylwjglopenal</artifactId>
-    			<version>0.0.1</version>
+    			<version>latest</version>
   		</dependency>
   		<dependency>
     			<groupId>com.paulscode.soundsystem</groupId>
     			<artifactId>soundsystem</artifactId>
-    			<version>0.0.1</version>
+    			<version>latest</version>
+  		</dependency>
+  		<dependency>
+    			<groupId>de.cuina.fireandfuel</groupId>
+    			<artifactId>codecjlayermp3</artifactId>
+    			<version>latest</version>
   		</dependency>
         	<dependency>
             		<groupId>jline</groupId>

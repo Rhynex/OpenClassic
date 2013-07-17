@@ -5,5 +5,4 @@ lib
 .project
 .git
 target
-
-
+deploy-libs.sh

@@ -18,6 +18,8 @@ import ch.spacebase.openclassic.api.player.Player;
 
 import com.mojang.minecraft.Minecraft;
 
+import de.cuina.fireandfuel.CodecJLayerMP3;
+
 import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
@@ -54,6 +56,7 @@ public class ClientAudioManager implements AudioManager {
 			this.system = new SoundSystem(lib);
 			SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
 			SoundSystemConfig.setCodec("wav", CodecWav.class);
+			SoundSystemConfig.setCodec("mp3", CodecJLayerMP3.class);
 		} catch(SoundSystemException e) {
 			e.printStackTrace();
 		}
