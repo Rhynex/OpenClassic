@@ -73,6 +73,10 @@ public final class ClientProgressBar implements ProgressBar {
 	}
 	
 	public void render(boolean fresh) {
+		if(!Thread.currentThread().getName().equalsIgnoreCase("Client-Main")) {
+			return;
+		}
+		
 		if(this.isVisible()) {
 			int x = ClientRenderHelper.getHelper().getGuiWidth();
 			int sy = ClientRenderHelper.getHelper().getGuiHeight();

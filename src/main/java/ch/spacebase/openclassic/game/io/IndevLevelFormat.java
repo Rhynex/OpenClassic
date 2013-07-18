@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.server.io;
+package ch.spacebase.openclassic.game.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,8 +7,7 @@ import java.io.IOException;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
-import ch.spacebase.openclassic.server.level.ServerLevel;
-
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 import ch.spacebase.opennbt.stream.NBTInputStream;
 import ch.spacebase.opennbt.tag.ByteArrayTag;
@@ -19,12 +18,11 @@ import ch.spacebase.opennbt.tag.ShortTag;
 import ch.spacebase.opennbt.tag.StringTag;
 
 public class IndevLevelFormat {
-
+	
 	@SuppressWarnings("unchecked")
-	public static Level read(String file) throws IOException {
-		ServerLevel level = new ServerLevel();
-		
-		NBTInputStream in = new NBTInputStream(new FileInputStream(new File(OpenClassic.getGame().getDirectory(), file)));
+	public static Level read(ClassicLevel level, String file) throws IOException {
+		File f = new File(OpenClassic.getGame().getDirectory(), file);
+		NBTInputStream in = new NBTInputStream(new FileInputStream(f));
 		CompoundTag data = (CompoundTag) in.readTag();
 		CompoundTag map = (CompoundTag) data.get("Map");
 		ListTag<ShortTag> spawn = (ListTag<ShortTag>) map.get("Spawn");
@@ -39,9 +37,9 @@ public class IndevLevelFormat {
 			blocks[index] = convert(blocks[index]);
 		}
 		
-		double x = spawn.get(0).getValue() / 32;
-		double y = spawn.get(1).getValue() / 32;
-		double z = spawn.get(2).getValue() / 32;
+		double x = spawn.get(0).getValue() / 32d;
+		double y = spawn.get(1).getValue() / 32d;
+		double z = spawn.get(2).getValue() / 32d;
 		
 		String name = ((StringTag) about.get("Name")).getValue();
 		String author = ((StringTag) about.get("Author")).getValue();
@@ -50,10 +48,17 @@ public class IndevLevelFormat {
 		level.setName(name);
 		level.setAuthor(author);
 		level.setCreationTime(created);
-		level.setWorldData(width, height, depth, blocks);
-		level.setSpawn(new Position(level, (float) x, (float) y, (float) z));
+		level.setData(width, height, depth, blocks);
 		
-		in.close();	
+		level.setSpawn(new Position(level, (float) x, (float) y, (float) z));
+		in.close();
+		
+		try {
+			f.delete();
+		} catch(SecurityException e) {
+			e.printStackTrace();
+		}
+		
 		return level;
 	}
 	

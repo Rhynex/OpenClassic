@@ -49,8 +49,8 @@ public final class LevelRenderer {
 		}
 
 		this.xChunks = this.level.width / 16;
-		this.zChunks = this.level.depth / 16;
-		this.yChunks = this.level.height / 16;
+		this.zChunks = this.level.height / 16;
+		this.yChunks = this.level.depth / 16;
 		this.chunkCache = new Chunk[this.xChunks * this.zChunks * this.yChunks];
 		this.loadQueue = new Chunk[this.xChunks * this.zChunks * this.yChunks];
 		int listCount = 0;
@@ -78,17 +78,17 @@ public final class LevelRenderer {
 			var5 = this.level.width;
 		}
 
-		if (var5 > this.level.height) {
-			var5 = this.level.height;
+		if (var5 > this.level.depth) {
+			var5 = this.level.depth;
 		}
 
 		int var6 = 2048 / var5;
 		ShapeRenderer.instance.begin();
 
 		for (int var7 = -var5 * var6; var7 < this.level.width + var5 * var6; var7 += var5) {
-			for (int var8 = -var5 * var6; var8 < this.level.height + var5 * var6; var8 += var5) {
+			for (int var8 = -var5 * var6; var8 < this.level.depth + var5 * var6; var8 += var5) {
 				float var10 = groundLevel;
-				if (var7 >= 0 && var8 >= 0 && var7 < this.level.width && var8 < this.level.height) {
+				if (var7 >= 0 && var8 >= 0 && var7 < this.level.width && var8 < this.level.depth) {
 					var10 = 0;
 				}
 
@@ -108,15 +108,15 @@ public final class LevelRenderer {
 			ShapeRenderer.instance.vertexUV((var7 + var5), 0.0F, 0.0F, var5, 0.0F);
 			ShapeRenderer.instance.vertexUV((var7 + var5), groundLevel, 0.0F, var5, groundLevel);
 			ShapeRenderer.instance.vertexUV(var7, groundLevel, 0.0F, 0.0F, groundLevel);
-			ShapeRenderer.instance.vertexUV(var7, groundLevel, this.level.height, 0.0F, groundLevel);
-			ShapeRenderer.instance.vertexUV((var7 + var5), groundLevel, this.level.height, var5, groundLevel);
-			ShapeRenderer.instance.vertexUV((var7 + var5), 0.0F, this.level.height, var5, 0.0F);
-			ShapeRenderer.instance.vertexUV(var7, 0.0F, this.level.height, 0.0F, 0.0F);
+			ShapeRenderer.instance.vertexUV(var7, groundLevel, this.level.depth, 0.0F, groundLevel);
+			ShapeRenderer.instance.vertexUV((var7 + var5), groundLevel, this.level.depth, var5, groundLevel);
+			ShapeRenderer.instance.vertexUV((var7 + var5), 0.0F, this.level.depth, var5, 0.0F);
+			ShapeRenderer.instance.vertexUV(var7, 0.0F, this.level.depth, 0.0F, 0.0F);
 		}
 
 		GL11.glColor3f(0.6F, 0.6F, 0.6F);
 
-		for (int var7 = 0; var7 < this.level.height; var7 += var5) {
+		for (int var7 = 0; var7 < this.level.depth; var7 += var5) {
 			ShapeRenderer.instance.vertexUV(0.0F, groundLevel, var7, 0.0F, 0.0F);
 			ShapeRenderer.instance.vertexUV(0.0F, groundLevel, (var7 + var5), var5, 0.0F);
 			ShapeRenderer.instance.vertexUV(0.0F, 0.0F, (var7 + var5), var5, groundLevel);
@@ -138,17 +138,17 @@ public final class LevelRenderer {
 			var100 = this.level.width;
 		}
 
-		if (var100 > this.level.height) {
-			var100 = this.level.height;
+		if (var100 > this.level.depth) {
+			var100 = this.level.depth;
 		}
 
 		var5 = 2048 / var100;
 		ShapeRenderer.instance.begin();
 
 		for (int var1000 = -var100 * var5; var1000 < this.level.width + var100 * var5; var1000 += var100) {
-			for (int var7 = -var100 * var5; var7 < this.level.height + var100 * var5; var7 += var100) {
+			for (int var7 = -var100 * var5; var7 < this.level.depth + var100 * var5; var7 += var100) {
 				float var13 = waterLevel - 0.1F;
-				if (var1000 < 0 || var7 < 0 || var1000 >= this.level.width || var7 >= this.level.height) {
+				if (var1000 < 0 || var7 < 0 || var1000 >= this.level.width || var7 >= this.level.depth) {
 					ShapeRenderer.instance.vertexUV(var1000, var13, (var7 + var100), 0.0F, var100);
 					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, (var7 + var100), var100, var100);
 					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, var7, var100, 0.0F);
@@ -164,7 +164,7 @@ public final class LevelRenderer {
 		ShapeRenderer.instance.end();
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEndList();
-		this.queueChunks(0, 0, 0, this.level.width, this.level.depth, this.level.height);
+		this.queueChunks(0, 0, 0, this.level.width, this.level.height, this.level.depth);
 	}
 
 	public final int sortChunks(Player player, int var2) {

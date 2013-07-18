@@ -82,7 +82,7 @@ public class LoadLevelScreen extends GuiScreen {
 
 				if(file == null) return;
 
-				GeneralUtils.getMinecraft().setCurrentScreen(new ConfirmDeleteScreen(this, file));
+				GeneralUtils.getMinecraft().setCurrentScreen(new ConfirmDeleteScreen(this, button.getText(), file));
 				this.delete = false;
 				this.title = OpenClassic.getGame().getTranslator().translate("gui.load-level.title");
 			} else {

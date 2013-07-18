@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.server.io;
+package ch.spacebase.openclassic.game.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -11,20 +11,18 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.level.Level;
-import ch.spacebase.openclassic.server.level.ServerLevel;
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class MCForgeLevelFormat {
 	
-	public static Level load(String file) throws IOException {
-		ServerLevel level = new ServerLevel();
-		
+	public static Level load(ClassicLevel level, String file) throws IOException {
 		File f = new File(file);
 		FileInputStream in = new FileInputStream(f);
 		DataInputStream data = new DataInputStream(in);
 		
 		long magic = data.readLong();
 		if (magic != 7882256401675281664L) {
-			OpenClassic.getLogger().severe("Only MCForge 6 levels are supported!");
+			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("level.format-mismatch"), "MCForge 6"));
 			System.out.println(magic);
 			data.close();
 			return null;
@@ -32,17 +30,23 @@ public class MCForgeLevelFormat {
 		
 		byte version = data.readByte();
 		if (version != 1) {
-			OpenClassic.getLogger().severe("Unknown version!");
+			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.unknown-version"));
 			data.close();
 			return null;
 		}
 		
+		level.setName(file.substring(file.lastIndexOf("/") + 1, file.lastIndexOf(".")));
+		level.setAuthor("Unknown");
+		level.setCreationTime(System.currentTimeMillis());
 		String ldata = readString(data);
 		int width = Integer.parseInt(ldata.split("\\@")[0]);
 		int height = Integer.parseInt(ldata.split("\\@")[1]);
 		int depth = Integer.parseInt(ldata.split("\\@")[2]);
 		ldata = readString(data);
-		level.setSpawn(new Position(level, Integer.parseInt(ldata.split("\\!")[0]), Integer.parseInt(ldata.split("\\!")[1]), Integer.parseInt(ldata.split("\\!")[2])));
+		int x = Integer.parseInt(ldata.split("\\!")[0]);
+		int y = Integer.parseInt(ldata.split("\\!")[1]);
+		int z = Integer.parseInt(ldata.split("\\!")[2]);
+		level.setSpawn(new Position(level, x, y, z));
 		ldata = readString(data);
 		
 		// ====METADATA==//
@@ -64,7 +68,7 @@ public class MCForgeLevelFormat {
 			blocks[i] = translateBlock(decompressed[i]);
 		}
 		
-		level.setWorldData((short) width, (short) height, (short) depth, blocks);
+		level.setData(width, depth, height, blocks);
 		data.close();
 		
 		try {

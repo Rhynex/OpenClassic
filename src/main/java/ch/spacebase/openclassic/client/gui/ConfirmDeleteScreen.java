@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -13,10 +14,12 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 public class ConfirmDeleteScreen extends GuiScreen {
 
 	private GuiScreen parent;
+	private String name;
 	private File file;
 
-	public ConfirmDeleteScreen(GuiScreen parent, File file) {
+	public ConfirmDeleteScreen(GuiScreen parent, String name, File file) {
 		this.parent = parent;
+		this.name = name;
 		this.file = file;
 	}
 
@@ -32,6 +35,15 @@ public class ConfirmDeleteScreen extends GuiScreen {
 				this.file.delete();
 			} catch(SecurityException e) {
 				e.printStackTrace();
+			}
+			
+			File file = new File(new File(GeneralUtils.getMinecraft().dir, "levels"), this.name + ".nbt");
+			if(file.exists()) {
+				try {
+					file.delete();
+				} catch(SecurityException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		

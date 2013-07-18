@@ -48,9 +48,9 @@ import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.server.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ClassicPipelineFactory;
@@ -465,7 +465,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		ServerLevel level = new ServerLevel(info);
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		generator.generate(level, data);
-		level.setWorldData(info.getWidth(), info.getHeight(), info.getDepth(), data);
+		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
 		
 		if(level.getSpawn() == null) {
 			level.setSpawn(generator.findSpawn(level));
@@ -494,10 +494,13 @@ public class ClassicServer extends ClassicGame implements Server {
 		if(this.getLevel(name) != null) return this.getLevel(name);
 		
 		try {
-			Level level = OpenClassicLevelFormat.load(name, create);
-			if(level == null) return null;
-			this.levels.add(level);
+			ServerLevel level = new ServerLevel();
+			level = (ServerLevel) OpenClassicLevelFormat.load(level, name, create);
+			if(level == null) {
+				return null;
+			}
 			
+			this.levels.add(level);
 			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
 				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().levels;
 				model.add(model.size(), level.getName());

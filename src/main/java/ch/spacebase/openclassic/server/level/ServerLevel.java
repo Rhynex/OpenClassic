@@ -26,7 +26,6 @@ import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
-import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.Message;
@@ -36,9 +35,10 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.CoordUtil;
 import ch.spacebase.openclassic.api.util.set.TripleIntHashMap;
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 
-public class ServerLevel implements Level {
+public class ServerLevel implements ClassicLevel {
 
 	private static final Random rand = new Random();
 	
@@ -271,10 +271,11 @@ public class ServerLevel implements Level {
 		return Arrays.copyOf(this.blocks, this.blocks.length);
 	}
 
-	public void setWorldData(short width, short height, short depth, byte[] blocks) {
-		this.width = width;
-		this.height = height;
-		this.depth = depth;
+	@Override
+	public void setData(int width, int height, int depth, byte blocks[]) {
+		this.width = (short) width;
+		this.height = (short) height;
+		this.depth = (short) depth;
 		this.waterLevel = (short) (this.height / 2);
 
 		this.blocks = blocks;

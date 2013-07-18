@@ -856,14 +856,14 @@ public final class Minecraft implements Runnable {
 								}
 
 								var33 = 4.8828125E-4F;
-								var1000 = (this.levelRenderer.level.depth + 2);
+								var1000 = (this.levelRenderer.level.height + 2);
 								var34 = (this.levelRenderer.ticks + this.timer.renderPartialTicks) * var33 * 0.03F;
 								float var35 = 0;
 								ShapeRenderer.instance.begin();
 								ShapeRenderer.instance.color(var107, var29, var30);
 
 								for (int var86 = -2048; var86 < this.levelRenderer.level.width + 2048; var86 += 512) {
-									for (int var125 = -2048; var125 < this.levelRenderer.level.height + 2048; var125 += 512) {
+									for (int var125 = -2048; var125 < this.levelRenderer.level.depth + 2048; var125 += 512) {
 										ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
 										ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
 										ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
@@ -891,10 +891,10 @@ public final class Minecraft implements Runnable {
 								}
 
 								ShapeRenderer.instance.color(var34, var35, var87);
-								var1000 = (this.levelRenderer.level.depth + 10);
+								var1000 = (this.levelRenderer.level.height + 10);
 
 								for (int var125 = -2048; var125 < this.levelRenderer.level.width + 2048; var125 += 512) {
-									for (int var68 = -2048; var68 < this.levelRenderer.level.height + 2048; var68 += 512) {
+									for (int var68 = -2048; var68 < this.levelRenderer.level.depth + 2048; var68 += 512) {
 										ShapeRenderer.instance.vertex(var125, var1000, var68);
 										ShapeRenderer.instance.vertex((var125 + 512), var1000, var68);
 										ShapeRenderer.instance.vertex((var125 + 512), var1000, (var68 + 512));
@@ -1469,7 +1469,7 @@ public final class Minecraft implements Runnable {
 											this.netManager.players.put(playerId, player);
 											this.level.addEntity(player);
 										} else {
-											this.level.setSpawnPos(x / 32, y / 32, z / 32, (yaw * 320 / 256f));
+											this.level.setSpawnPos(x / 32f, y / 32f, z / 32f, (yaw * 360) / 256f, (pitch * 360) / 256f);
 											this.player.moveTo(x / 32f, y / 32f, z / 32f, (yaw * 360) / 256f, (pitch * 360) / 256f);
 										}
 									} else if (type == PacketType.POSITION_ROTATION) {
@@ -1823,14 +1823,14 @@ public final class Minecraft implements Runnable {
 
 						if (this.mode instanceof CreativeGameMode) {
 							if (Keyboard.getEventKey() == this.settings.loadLocKey.key && !this.ctf) {
-								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, (byte) this.level.rotSpawn, (byte) 0));
+								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, this.level.yawSpawn, this.level.pitchSpawn));
 								if(!event.isCancelled()) {
 									this.player.resetPos(event.getPosition());
 								}
 							}
 
 							if (Keyboard.getEventKey() == this.settings.saveLocKey.key && !this.ctf) {
-								this.level.setSpawnPos((int) this.player.x, (int) this.player.y, (int) this.player.z, this.player.yRot);
+								this.level.setSpawnPos(this.player.x, this.player.y, this.player.z, this.player.yRot, this.player.xRot);
 								this.player.resetPos();
 							}
 						}

@@ -5,9 +5,9 @@ import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
-import ch.spacebase.openclassic.client.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 
 import com.mojang.minecraft.level.Level;
 import java.io.DataInputStream;
@@ -54,10 +54,12 @@ public final class LevelIO {
 			GeneralUtils.getMinecraft().progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.loading"));
 			GeneralUtils.getMinecraft().progressBar.setText(OpenClassic.getGame().getTranslator().translate("level.reading"));
 			GeneralUtils.getMinecraft().progressBar.setProgress(0);
+			GeneralUtils.getMinecraft().progressBar.render();
 		}
 		
 		try {
-			Level level = ((ClientLevel) OpenClassicLevelFormat.load(name, false)).getHandle();
+			Level level = new Level();
+			level = ((ClientLevel) OpenClassicLevelFormat.load(level.openclassic, name, false)).getHandle();
 			level.openclassic.data = new NBTData(level.name);
 			level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
 			EventFactory.callEvent(new LevelLoadEvent(level.openclassic));

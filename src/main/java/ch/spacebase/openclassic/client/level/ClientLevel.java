@@ -8,12 +8,12 @@ import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 
-public class ClientLevel implements Level {
+public class ClientLevel implements ClassicLevel {
 
 	private com.mojang.minecraft.level.Level handle;
 	private boolean generating = false;
@@ -73,12 +73,12 @@ public class ClientLevel implements Level {
 
 	@Override
 	public Position getSpawn() {
-		return new Position(this, this.handle.xSpawn, this.handle.ySpawn, this.handle.zSpawn, this.handle.rotSpawn, 0);
+		return new Position(this, this.handle.xSpawn, this.handle.ySpawn, this.handle.zSpawn, this.handle.yawSpawn, this.handle.pitchSpawn);
 	}
 
 	@Override
 	public void setSpawn(Position pos) {
-		this.handle.setSpawnPos(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), pos.getYaw());
+		this.handle.setSpawnPos(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), pos.getYaw(), pos.getPitch());
 	}
 
 	@Override
@@ -88,12 +88,12 @@ public class ClientLevel implements Level {
 
 	@Override
 	public short getHeight() {
-		return (short) this.handle.depth;
+		return (short) this.handle.height;
 	}
 
 	@Override
 	public short getDepth() {
-		return (short) this.handle.height;
+		return (short) this.handle.depth;
 	}
 
 	@Override
@@ -274,6 +274,26 @@ public class ClientLevel implements Level {
 	@Override
 	public void setCloudColor(int color) {
 		this.handle.cloudColor = color;
+	}
+
+	@Override
+	public void setData(int width, int height, int depth, byte[] blocks) {
+		this.handle.setData(width, height, depth, blocks);
+	}
+
+	@Override
+	public void setName(String name) {
+		this.handle.name = name;
+	}
+
+	@Override
+	public void setAuthor(String name) {
+		this.handle.creator = name;
+	}
+
+	@Override
+	public void setCreationTime(long time) {
+		this.handle.createTime = time;
 	}
 
 }

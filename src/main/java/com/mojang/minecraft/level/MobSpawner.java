@@ -32,8 +32,8 @@ public final class MobSpawner {
 
 			int var6 = this.level.random.nextInt(6);
 			int var7 = this.level.random.nextInt(this.level.width);
-			int var8 = (int) (Math.min(this.level.random.nextFloat(), this.level.random.nextFloat()) * this.level.depth);
-			int var9 = this.level.random.nextInt(this.level.height);
+			int var8 = (int) (Math.min(this.level.random.nextFloat(), this.level.random.nextFloat()) * this.level.height);
+			int var9 = this.level.random.nextInt(this.level.depth);
 			if (!this.level.getPreventsRendering(var7, var8, var9) && !(Blocks.fromId(this.level.getTile(var7, var8, var9)) != null && Blocks.fromId(this.level.getTile(var7, var8, var9)).isLiquid()) && (!this.level.isLit(var7, var8, var9) || this.level.random.nextInt(5) == 0)) {
 				for (int var10 = 0; var10 < 3; ++var10) {
 					int var11 = var7;
@@ -44,7 +44,7 @@ public final class MobSpawner {
 						var11 += this.level.random.nextInt(6) - this.level.random.nextInt(6);
 						var12 += this.level.random.nextInt(1) - this.level.random.nextInt(1);
 						var13 += this.level.random.nextInt(6) - this.level.random.nextInt(6);
-						if (var11 >= 0 && var13 >= 1 && var12 >= 0 && var12 < this.level.depth - 2 && var11 < this.level.width && var13 < this.level.height && this.level.getPreventsRendering(var11, var12 - 1, var13) && !this.level.getPreventsRendering(var11, var12, var13) && !this.level.getPreventsRendering(var11, var12 + 1, var13)) {
+						if (var11 >= 0 && var13 >= 1 && var12 >= 0 && var12 < this.level.height - 2 && var11 < this.level.width && var13 < this.level.depth && this.level.getPreventsRendering(var11, var12 - 1, var13) && !this.level.getPreventsRendering(var11, var12, var13) && !this.level.getPreventsRendering(var11, var12 + 1, var13)) {
 							float var15 = var11 + 0.5F;
 							float var16 = var12 + 1.0F;
 							float var17 = var13 + 0.5F;

@@ -126,6 +126,11 @@
     			<artifactId>twl</artifactId>
     			<version>latest</version>
   		</dependency>
+  		<dependency>
+    			<groupId>org.unsynchronized</groupId>
+    			<artifactId>jdeserialize</artifactId>
+    			<version>latest</version>
+  		</dependency>
 	</dependencies>
 
 	<build>

@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.server.io;
+package ch.spacebase.openclassic.game.io;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -10,14 +10,13 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.level.Level;
-import ch.spacebase.openclassic.server.level.ServerLevel;
+import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class MCSharpLevelFormat {
 	
-	public static Level load(String file) throws IOException {
-		ServerLevel level = new ServerLevel();
-
-		FileInputStream in = new FileInputStream(new File(OpenClassic.getGame().getDirectory(), file));
+	public static Level load(ClassicLevel level, String file) throws IOException {
+		File f = new File(OpenClassic.getGame().getDirectory(), file);
+		FileInputStream in = new FileInputStream(f);
 		GZIPInputStream decompressor = new GZIPInputStream(in);
 
 		DataInputStream data = new DataInputStream(decompressor);
@@ -25,17 +24,26 @@ public class MCSharpLevelFormat {
 		int magic = convert(data.readShort());
 
 		if (magic != 1874) {
-			OpenClassic.getLogger().severe("Only version 1 MCSharp maps are supported.");
-			OpenClassic.getLogger().severe("Trying MCForge 6..");
+			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("level.format-mismatch"), "MCSharp v1"));
+			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.try-mcforge"));
 			data.close();
-			return MCForgeLevelFormat.load(file);
+			return MCForgeLevelFormat.load(level, file);
 		}
 
+		level.setName(file.substring(file.lastIndexOf("/") + 1, file.lastIndexOf(".")));
+		level.setAuthor("Unknown");
+		level.setCreationTime(System.currentTimeMillis());
 		short width = convert(data.readShort());
 		short height = convert(data.readShort());
 		short depth = convert(data.readShort());
 
-		level.setSpawn(new Position(level, data.readShort(), data.readShort(), data.readShort(), (byte) data.readUnsignedByte(), (byte) data.readUnsignedByte()));
+		short sx = data.readShort();
+		short sy = data.readShort();
+		short sz = data.readShort();
+		byte yaw = (byte) data.readUnsignedByte();
+		byte pitch = (byte) data.readUnsignedByte();
+		level.setSpawn(new Position(level, sx, sy, sz, yaw, pitch));
+		
 
 		byte[] blocks = new byte[width * depth * height];
 
@@ -50,10 +58,16 @@ public class MCSharpLevelFormat {
 			}
 		}
 
-		level.setWorldData(width, height, depth, blocks);
-		level.setName(file.replace(".lvl", ""));
+		level.setData(width, height, depth, blocks);
 		
 		data.close();
+		
+		try {
+			f.delete();
+		} catch(SecurityException e) {
+			e.printStackTrace();
+		}
+		
 		return level;
 	}
 	
