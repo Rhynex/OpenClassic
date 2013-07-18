@@ -4,6 +4,7 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.mob.ai.AI;
+
 import java.util.List;
 import java.util.Random;
 
@@ -21,6 +22,8 @@ public class BasicAI extends AI {
 	public float runSpeed = 0.7F;
 	protected int noActionTime = 0;
 	public Entity attackTarget = null;
+	public boolean flying = false;
+	public boolean flyDown = false;
 
 	public void tick(Level level, Mob mob) {
 		this.noActionTime++;
@@ -57,13 +60,24 @@ public class BasicAI extends AI {
 		boolean water = mob.isInWater();
 		boolean lava = mob.isInLava();
 		if (this.jumping) {
-			if (water || lava) {
+			if(this.flying) {
+				mob.move(0, 0.4F, 0);
+			} else if (water || lava) {
 				mob.yd += 0.04F;
 			} else if (mob.onGround) {
 				this.jumpFromGround();
 			}
 		}
 
+		if(this.flying) {
+			if(this.flyDown) {
+				mob.move(0, -0.4F, 0);
+				if(mob.onGround) {
+					this.flying = false;
+				}
+			}
+		}
+		
 		this.xxa *= 0.98F;
 		this.yya *= 0.98F;
 		

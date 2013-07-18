@@ -323,15 +323,17 @@ public abstract class Entity implements Serializable {
 			this.z = (this.bb.z0 + this.bb.z1) / 2.0F;
 			float xDiff = this.x - oldEntityX;
 			float zDiff = this.z - oldEntityZ;
-			this.walkDist = (float) (this.walkDist + (float) Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
-			if (this.makeStepSound) {
-				int id = this.level.getTile((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
-				if (this.walkDist > this.nextStep && id > 0) {
-					this.nextStep++;
-					if(Blocks.fromId(id) != null) {
-						StepSound step = Blocks.fromId(id).getStepSound();
-						if (step != StepSound.NONE) {
-							this.playSound(step.getSound(), step.getVolume() * 0.75F, step.getPitch());
+			if(this.onGround) {
+				this.walkDist = (float) (this.walkDist + (float) Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
+				if (this.makeStepSound) {
+					int id = this.level.getTile((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
+					if (this.walkDist > this.nextStep && id > 0) {
+						this.nextStep++;
+						if(Blocks.fromId(id) != null) {
+							StepSound step = Blocks.fromId(id).getStepSound();
+							if (step != StepSound.NONE) {
+								this.playSound(step.getSound(), step.getVolume() * 0.75F, step.getPitch());
+							}
 						}
 					}
 				}

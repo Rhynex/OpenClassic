@@ -1,7 +1,5 @@
 package com.mojang.minecraft.player;
 
-import ch.spacebase.openclassic.api.input.Keyboard;
-
 import com.mojang.minecraft.GameSettings;
 import com.mojang.minecraft.player.InputHandler;
 
@@ -11,6 +9,9 @@ public final class InputHandler {
 	public float yya = 0;
 	public boolean jumping = false;
 	public boolean speed = false;
+	public boolean flyDown = false;
+	private int flyDelay = 0;
+	public boolean toggleFly = false;
 	
 	private boolean[] keyStates = new boolean[10];
 	private GameSettings settings;
@@ -42,8 +43,12 @@ public final class InputHandler {
 			index = 4;
 		}
 		
-		if (key == Keyboard.KEY_LSHIFT) {
+		if (key == this.settings.speedHackKey.key) {
 			index = 5;
+		}
+		
+		if (key == this.settings.flyDownKey.key) {
+			index = 6;
 		}
 
 		if (index >= 0) {
@@ -58,6 +63,10 @@ public final class InputHandler {
 	}
 
 	public final void updateMovement() {
+		if(this.flyDelay > 0) {
+			this.flyDelay--;
+		}
+		
 		this.xxa = 0;
 		this.yya = 0;
 		
@@ -76,8 +85,20 @@ public final class InputHandler {
 		if (this.keyStates[3]) {
 			this.xxa++;
 		}
-
+		
 		this.jumping = this.keyStates[4];
 		this.speed = this.keyStates[5];
+		this.flyDown = this.keyStates[6];
+	}
+	
+	public final void keyPress(int key) {
+		if(key == this.settings.jumpKey.key) {
+			if(this.flyDelay == 0) {
+				this.flyDelay = 10;
+			} else {
+				this.toggleFly = true;
+				this.flyDelay = 0;
+			}
+		}
 	}
 }

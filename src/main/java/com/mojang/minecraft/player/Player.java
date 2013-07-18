@@ -112,6 +112,10 @@ public class Player extends Mob {
 	public void setKey(int key, boolean pressed) {
 		this.input.setKeyState(key, pressed);
 	}
+	
+	public void keyPress(int key) {
+		this.input.keyPress(key);
+	}
 
 	public boolean addResource(int block) {
 		return this.inventory.addResource(block);
@@ -147,11 +151,9 @@ public class Player extends Mob {
 		}
 		
 		for(int slot = 0; slot < this.inventory.slots.length; slot++) {
-			//for(int count = 0; count < this.inventory.count[slot]; count++) {
 			if(this.inventory.slots[slot] != -1) {
 				this.level.addEntity(new Item(this.level, this.x, this.y, this.z, this.inventory.slots[slot], this.inventory.count[slot]));
 			}
-			//}
 		}
 
 		this.heightOffset = 0.1F;
@@ -221,10 +223,23 @@ public class Player extends Mob {
 		}
 		
 		public void update() {
-			this.jumping = parent.input.jumping;
-			parent.speedHack = parent.input.speed;
-			this.xxa = parent.input.xxa;
-			this.yya = parent.input.yya;
+			this.jumping = this.parent.input.jumping;
+			this.flyDown = this.parent.input.flyDown;
+			this.parent.speedHack = this.parent.input.speed;
+			this.xxa = this.parent.input.xxa;
+			this.yya = this.parent.input.yya;
+			if(this.parent.input.toggleFly && GeneralUtils.getMinecraft().settings.flying &&  GeneralUtils.getMinecraft().hacks) {
+				this.flying = !this.flying; 
+				if(this.flying) {
+					this.mob.yd = 0;
+				}
+			}
+			
+			if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().settings.flying) {
+				this.flying = false;
+			}
+			
+			this.parent.input.toggleFly = false;
 		}
 	}
 

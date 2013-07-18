@@ -6,6 +6,8 @@ import com.mojang.minecraft.KeyBinding;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
+import com.mojang.minecraft.player.Player.PlayerAI;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,6 +30,7 @@ public final class GameSettings {
 	public boolean survival = false;
 	public boolean smoothing = false;
 	public boolean speed = false;
+	public boolean flying = false;
 	public String texturePack = "none";
 	public KeyBinding forwardKey = new KeyBinding("options.keys.forward", Keyboard.KEY_W);
 	public KeyBinding leftKey = new KeyBinding("options.keys.left", Keyboard.KEY_A);
@@ -39,6 +42,8 @@ public final class GameSettings {
 	public KeyBinding fogKey = new KeyBinding("options.keys.toggle-fog", Keyboard.KEY_F);
 	public KeyBinding saveLocKey = new KeyBinding("options.keys.save-loc", Keyboard.KEY_RETURN);
 	public KeyBinding loadLocKey = new KeyBinding("options.keys.load-loc", Keyboard.KEY_R);
+	public KeyBinding speedHackKey = new KeyBinding("options.keys.speedhack", Keyboard.KEY_LCONTROL);
+	public KeyBinding flyDownKey = new KeyBinding("options.keys.fly-down", Keyboard.KEY_LSHIFT);
 	public KeyBinding[] bindings;
 	private Minecraft mc;
 	private File file;
@@ -46,9 +51,9 @@ public final class GameSettings {
 	public int hacks;
 
 	public GameSettings(Minecraft mc, File path) {
-		this.bindings = new KeyBinding[] { this.forwardKey, this.leftKey, this.backKey, this.rightKey, this.jumpKey, this.buildKey, this.chatKey, this.fogKey, this.saveLocKey, this.loadLocKey };
+		this.bindings = new KeyBinding[] { this.forwardKey, this.leftKey, this.backKey, this.rightKey, this.jumpKey, this.buildKey, this.chatKey, this.fogKey, this.saveLocKey, this.loadLocKey, this.speedHackKey, this.flyDownKey };
 		this.count = 10;
-		this.hacks = 1;
+		this.hacks = 2;
 		this.mc = mc;
 		this.file = new File(path, "options.txt");
 		this.load();
@@ -148,6 +153,7 @@ public final class GameSettings {
 	public final String getHackName(int id) {
 		switch(id) {
 			case 0: return OpenClassic.getGame().getTranslator().translate("options.hacks.speed");
+			case 1: return OpenClassic.getGame().getTranslator().translate("options.hacks.fly");
 			default: return "";
 		}
 	}
@@ -155,6 +161,7 @@ public final class GameSettings {
 	public final String getHackValue(int id) {
 		switch(id) {
 			case 0: return this.speed ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off");
+			case 1: return this.flying ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off");
 			default: return "";
 		}
 	}
@@ -163,6 +170,11 @@ public final class GameSettings {
 		switch(id) {
 			case 0: {
 				this.speed = !this.speed;
+				break;
+			}
+			case 1: {
+				this.flying = !this.flying;
+				((PlayerAI) this.mc.player.ai).flying = false;
 				break;
 			}
 		}

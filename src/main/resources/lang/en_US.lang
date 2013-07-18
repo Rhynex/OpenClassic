@@ -249,8 +249,11 @@ options:
         toggle-fog: Toggle Fog
         save-loc: Save Location
         load-loc: Load Location
+        speedhack: Speed Hack
+        fly-down: Fly Down
     hacks:
         speed: Speedhack
+        fly: Fly Hack
 screenshot:
     saved: Saved screenshot "%s"!
     error: "Error saving screenshot: %s"

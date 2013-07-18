@@ -1753,6 +1753,9 @@ public final class Minecraft implements Runnable {
 
 		while (Keyboard.next()) {
 			this.player.setKey(Keyboard.getEventKey(), Keyboard.getEventKeyState());
+			if(Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
+				this.player.keyPress(Keyboard.getEventKey());
+			}
 			if (Keyboard.getEventKeyState()) {
 				if (this.currentScreen != null) {
 					if (Keyboard.getEventKeyState()) {

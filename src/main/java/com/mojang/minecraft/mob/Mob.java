@@ -396,35 +396,45 @@ public class Mob extends Entity {
 	}
 
 	public void travel(float x, float z) {
+		boolean flying = this.ai instanceof BasicAI && ((BasicAI) this.ai).flying;
 		if (this.isInWater()) {
 			float y = this.y;
-			this.moveRelative(x, z, 0.02F);
+			this.moveRelative(x, z, flying ? 0.125F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
 			this.xd *= 0.8F;
 			this.yd *= 0.8F;
 			this.zd *= 0.8F;
-			this.yd = (float) (this.yd - 0.02D);
+			if(!flying) {
+				this.yd = (float) (this.yd - 0.02D);
+			}
+			
 			if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
 				this.yd = 0.3F;
 			}
 		} else if (this.isInLava()) {
 			float y = this.y;
-			this.moveRelative(x, z, 0.02F);
+			this.moveRelative(x, z, flying ? 0.125F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
 			this.xd *= 0.5F;
 			this.yd *= 0.5F;
 			this.zd *= 0.5F;
-			this.yd = (float) (this.yd - 0.02D);
+			if(!flying) {
+				this.yd = (float) (this.yd - 0.02D);
+			}
+			
 			if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
 				this.yd = 0.3F;
 			}
 		} else {
-			this.moveRelative(x, z, this.onGround ? 0.1F : 0.02F);
+			this.moveRelative(x, z, flying ? 0.125F : this.onGround ? 0.1F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
 			this.xd *= 0.91F;
 			this.yd *= 0.98F;
 			this.zd *= 0.91F;
-			this.yd = (float) (this.yd - 0.08D);
+			if(!flying) {
+				this.yd = (float) (this.yd - 0.08D);
+			}
+			
 			if (this.onGround) {
 				float y = 0.6F;
 				this.xd *= y;
