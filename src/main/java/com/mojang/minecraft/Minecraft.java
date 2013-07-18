@@ -313,8 +313,8 @@ public final class Minecraft implements Runnable {
 			level.setData(8, 8, 8, new byte[512]);
 			this.setLevel(level);
 		} else {
-			VanillaBlock.registerAll();
 			if (this.level == null) {
+				VanillaBlock.registerAll();
 				this.progressBar.setVisible(true);
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
 				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));

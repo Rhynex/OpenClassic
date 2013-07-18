@@ -135,8 +135,22 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public Level openLevel(String name) {
-		if(this.mc.level != null && this.mc.level.name.equals(name)) return this.mc.level.openclassic;
-		return LevelIO.load(name).openclassic;
+		if(this.mc.level != null && this.mc.level.name.equals(name)) {
+			return this.mc.level.openclassic;
+		}
+		
+		VanillaBlock.registerAll();
+		com.mojang.minecraft.level.Level level = LevelIO.load(name);
+		if(level != null) {
+			this.mc.setLevel(level);
+			this.mc.initGame();
+			this.mc.setCurrentScreen(null);
+			return level.openclassic;
+		} else {
+			VanillaBlock.unregisterAll();
+		}
+		
+		return null;
 	}
 
 	@Override

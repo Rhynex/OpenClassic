@@ -2,6 +2,7 @@ package com.mojang.minecraft.gui;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
@@ -91,11 +92,14 @@ public class LoadLevelScreen extends GuiScreen {
 	}
 
 	protected void loadLevel(int id) {
+		VanillaBlock.registerAll();
 		Level level = LevelIO.load(this.getWidget(0, ButtonList.class).getButton(id).getText());
 		if (level != null) {
 			GeneralUtils.getMinecraft().setLevel(level);
 			GeneralUtils.getMinecraft().initGame();
 			GeneralUtils.getMinecraft().setCurrentScreen(null);
+		} else {
+			VanillaBlock.unregisterAll();
 		}
 	}
 
