@@ -40,6 +40,7 @@ import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
 import ch.spacebase.openclassic.api.level.generator.Generator;
+import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.network.msg.PlayerDisconnectMessage;
 import ch.spacebase.openclassic.api.permissions.PermissionManager;
@@ -167,6 +168,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		
 		this.registerExecutor(null, new ServerCommands());
 		
+		this.registerGenerator("normal", new NormalGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
 		
 		VanillaBlock.registerAll();
@@ -463,8 +465,11 @@ public class ClassicServer extends ClassicGame implements Server {
 
 	public ServerLevel createLevel(LevelInfo info, Generator generator) {
 		ServerLevel level = new ServerLevel(info);
+		level.setAuthor(this.getServerName());
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
+		level.setGenerating(true);
 		generator.generate(level, data);
+		level.setGenerating(false);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
 		
 		if(level.getSpawn() == null) {

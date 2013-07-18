@@ -77,7 +77,7 @@ public class FavoriteServersScreen extends GuiScreen {
 		mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 		mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 		mc.progressBar.setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
-		mc.progressBar.setProgress(0);
+		mc.progressBar.setProgress(-1);
 		mc.progressBar.render();
 		String play = HTTPUtil.fetchUrl(url, "", Constants.MINECRAFT_URL + "classic/list");
 		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");

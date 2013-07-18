@@ -65,6 +65,12 @@ public final class ClientProgressBar implements ProgressBar {
 	@Override
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+		if(!this.visible) {
+			this.progress = -1;
+			this.title = "";
+			this.subtitle = "";
+			this.text = "";
+		}
 	}
 	
 	@Override
@@ -94,24 +100,7 @@ public final class ClientProgressBar implements ProgressBar {
 			ClientRenderHelper.getHelper().drawDefaultBG();
 			int width = RenderHelper.getHelper().getGuiWidth();
 			int height = RenderHelper.getHelper().getGuiHeight();
-			int y = height - 30;
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			ShapeRenderer.instance.begin();
-			ShapeRenderer.instance.color(8421504);
-			ShapeRenderer.instance.vertex(0, y, 0);
-			ShapeRenderer.instance.vertex(0, y + 2, 0);
-			ShapeRenderer.instance.vertex(width, y + 2, 0);
-			ShapeRenderer.instance.vertex(width, y, 0);
-			if(this.getProgress() >= 0) {
-				ShapeRenderer.instance.color(8454016);
-				ShapeRenderer.instance.vertex(0, y, 0);
-				ShapeRenderer.instance.vertex(0, y + 2, 0);
-				ShapeRenderer.instance.vertex(this.progress * 4.27f, y + 2, 0);
-				ShapeRenderer.instance.vertex(this.progress * 4.27f, y, 0);
-			}
-
-			ShapeRenderer.instance.end();
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			this.renderBar(false);
 			ClientRenderHelper.getHelper().drawBlackBG(0, height - 28, width, height - (height - 28));
 			GL11.glEnable(GL11.GL_BLEND);
 			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0), 10, 10, 0, 0.5625f, 1);
@@ -122,6 +111,37 @@ public final class ClientProgressBar implements ProgressBar {
 			if(fresh) {
 				Display.update();
 			}
+		}
+	}
+	
+	@Override
+	public void renderBar() {
+		this.renderBar(true);
+	}
+	
+	public void renderBar(boolean fresh) {
+		int width = RenderHelper.getHelper().getGuiWidth();
+		int height = RenderHelper.getHelper().getGuiHeight();
+		int y = height - 30;
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		ShapeRenderer.instance.begin();
+		ShapeRenderer.instance.color(8421504);
+		ShapeRenderer.instance.vertex(0, y, 0);
+		ShapeRenderer.instance.vertex(0, y + 2, 0);
+		ShapeRenderer.instance.vertex(width, y + 2, 0);
+		ShapeRenderer.instance.vertex(width, y, 0);
+		if(this.getProgress() >= 0) {
+			ShapeRenderer.instance.color(8454016);
+			ShapeRenderer.instance.vertex(0, y, 0);
+			ShapeRenderer.instance.vertex(0, y + 2, 0);
+			ShapeRenderer.instance.vertex(this.progress * 4.27f, y + 2, 0);
+			ShapeRenderer.instance.vertex(this.progress * 4.27f, y, 0);
+		}
+
+		ShapeRenderer.instance.end();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		if(fresh) {
+			Display.update();
 		}
 	}
 	

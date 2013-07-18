@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.level.LevelIO;
-import com.mojang.minecraft.level.generator.LevelGenerator;
 
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
@@ -26,6 +25,7 @@ import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
 import ch.spacebase.openclassic.api.level.generator.Generator;
+import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
@@ -79,7 +79,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
 		
 		this.registerExecutor(null, new ClientCommands());
-		this.registerGenerator("normal", new LevelGenerator());
+		this.registerGenerator("normal", new NormalGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
 		
 
@@ -96,17 +96,20 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public Level createLevel(LevelInfo info, Generator generator) {
-		if(generator instanceof LevelGenerator) {
-			((LevelGenerator) generator).setInfo(info.getName(), this.mc.data != null ? this.mc.data.username : "unknown", info.getWidth(), info.getHeight(), info.getDepth());
-		}
-		
 		com.mojang.minecraft.level.Level level = new com.mojang.minecraft.level.Level();
 		level.name = info.getName();
 		level.creator = this.mc.data != null ? this.mc.data.username : "unknown";
 		level.createTime = System.currentTimeMillis();
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
+		this.mc.progressBar.setVisible(true);
+		this.mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
+		this.mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
+		this.mc.progressBar.render();
+		level.openclassic.setGenerating(true);
 		generator.generate(level.openclassic, data);
+		level.openclassic.setGenerating(false);
+		this.mc.progressBar.setVisible(false);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
 		level.openclassic.setSpawn(generator.findSpawn(level.openclassic));
 		if(info.getSpawn() != null) {

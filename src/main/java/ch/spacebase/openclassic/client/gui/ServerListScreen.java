@@ -183,7 +183,7 @@ public class ServerListScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 			OpenClassic.getClient().getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
-			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().render();
 
 			String page = HTTPUtil.fetchUrl(server.getUrl(), "", Constants.MINECRAFT_URL + "classic/list/");

@@ -7,11 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
-import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
+import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.api.util.io.IOUtils;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
@@ -72,7 +73,7 @@ public class OpenClassicLevelFormat {
 		if(!levelFile.exists()) {
 			if(create) {
 				OpenClassic.getLogger().info(String.format(OpenClassic.getGame().getTranslator().translate("level.auto-create"), name));
-				return OpenClassic.getGame().createLevel(new LevelInfo(name, new Position(null, 0, 65, 0), (short) 256, (short) 64, (short) 256), new FlatLandGenerator());
+				return OpenClassic.getGame().createLevel(new LevelInfo(name, new Position(null, 0, 65, 0), (short) 256, (short) 64, (short) 256), new NormalGenerator());
 			} else {
 				return null;
 			}

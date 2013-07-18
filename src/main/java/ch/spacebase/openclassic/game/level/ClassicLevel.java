@@ -11,5 +11,7 @@ public interface ClassicLevel extends Level {
 	public void setCreationTime(long time);
 	
 	public void setData(int width, int height, int depth, byte blocks[]);
+
+	public void setGenerating(boolean generating);
 	
 }

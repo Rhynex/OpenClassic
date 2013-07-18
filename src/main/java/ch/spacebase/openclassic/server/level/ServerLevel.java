@@ -42,14 +42,14 @@ public class ServerLevel implements ClassicLevel {
 
 	private static final Random rand = new Random();
 	
+	private String name;
+	private String author;
 	private long creationTime;
 	private short width;
 	private short height;
 	private short depth;
 	private byte[] blocks;
 	private Position spawn;
-	private String name;
-	private String author;
 	private short waterLevel;
 	private boolean generating;
 	private int skyColor = 10079487;

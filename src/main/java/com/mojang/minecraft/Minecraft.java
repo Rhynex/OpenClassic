@@ -319,7 +319,7 @@ public final class Minecraft implements Runnable {
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
 				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
 				this.progressBar.setText("");
-				this.progressBar.setProgress(0);
+				this.progressBar.setProgress(-1);
 				this.progressBar.render();
 				OpenClassic.getClient().createLevel(new LevelInfo(!this.levelName.equals("") ? this.levelName : "A Nice World", null, (short) (128 << this.levelSize), (short) 128, (short) (128 << this.levelSize)), gen);
 				this.progressBar.setVisible(false);
@@ -518,7 +518,7 @@ public final class Minecraft implements Runnable {
 		this.progressBar.setVisible(true);
 		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.loading"));
 		this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
-		this.progressBar.setProgress(0);
+		this.progressBar.setProgress(-1);
 		this.progressBar.render();
 
 		ShaderManager.setup();
@@ -1357,7 +1357,7 @@ public final class Minecraft implements Runnable {
 				this.progressBar.setVisible(true);
 				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
-				this.progressBar.setProgress(0);
+				this.progressBar.setProgress(-1);
 				this.progressBar.render();
 			} else {
 				if (this.netManager.successful) {

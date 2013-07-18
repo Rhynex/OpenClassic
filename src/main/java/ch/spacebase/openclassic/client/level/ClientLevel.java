@@ -16,8 +16,6 @@ import ch.spacebase.openclassic.game.level.ClassicLevel;
 public class ClientLevel implements ClassicLevel {
 
 	private com.mojang.minecraft.level.Level handle;
-	private boolean generating = false;
-	
 	private boolean physics = true;
 	public NBTData data;
 	
@@ -206,13 +204,7 @@ public class ClientLevel implements ClassicLevel {
 	}
 
 	@Override
-	public boolean isGenerating() {
-		return this.generating;
-	}
-
-	@Override
 	public void setGenerating(boolean generating) {
-		this.generating = generating;
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public final class MenuScreen extends GuiScreen {
 				mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
 				mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.saving"));
 				mc.progressBar.setText("");
-				mc.progressBar.setProgress(0);
+				mc.progressBar.setProgress(-1);
 				mc.progressBar.render();
 				LevelIO.save(mc.level);
 				mc.progressBar.setVisible(false);

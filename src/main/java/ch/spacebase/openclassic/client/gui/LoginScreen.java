@@ -105,15 +105,18 @@ public class LoginScreen extends GuiScreen {
 				this.getLoginFile(false).delete();
 			}
 			
+			OpenClassic.getClient().getProgressBar().setVisible(true);
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.loading"));
 			OpenClassic.getClient().getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("gui.login.logging-in"));
-			OpenClassic.getClient().getProgressBar().setProgress(0);
+			OpenClassic.getClient().getProgressBar().setProgress(-1);
 			OpenClassic.getClient().getProgressBar().render();
 			if (!auth(user, pass)) {
 				this.title = Color.RED + OpenClassic.getGame().getTranslator().translate("gui.login.failed");
+				OpenClassic.getClient().getProgressBar().setVisible(false);
 				return;
 			}
 			
+			OpenClassic.getClient().getProgressBar().setVisible(false);
 			GeneralUtils.getMinecraft().setCurrentScreen(new MainMenuScreen());
 		}
 		
