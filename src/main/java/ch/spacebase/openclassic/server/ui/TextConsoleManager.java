@@ -1,22 +1,20 @@
 package ch.spacebase.openclassic.server.ui;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.command.Console;
+import ch.spacebase.openclassic.game.util.DateOutputFormatter;
+import ch.spacebase.openclassic.game.util.LoggerOutputStream;
+import ch.spacebase.openclassic.game.util.MessageFormatter;
 import ch.spacebase.openclassic.server.ClassicServer;
 
 
@@ -44,10 +42,17 @@ public class TextConsoleManager implements ConsoleManager {
 			e.printStackTrace();
 		}
 
-		this.consoleHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss")));
+		MessageFormatter f = new MessageFormatter() {
+			@Override
+			public String format(String message) {
+				return formatOutput(message);
+			}
+		};
+		
+		this.consoleHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss"), f));
 		
 		if(this.fileHandler != null) {
-			this.fileHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")));
+			this.fileHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"), f));
 		}
 
 		Logger logger = Logger.getLogger("");
@@ -70,7 +75,6 @@ public class TextConsoleManager implements ConsoleManager {
 		}
 
 		Runtime.getRuntime().addShutdownHook(new Thread(new ServerShutdownHandler()));
-		
 		System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO), true));
 		System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE), true));
 	}
@@ -136,57 +140,6 @@ public class TextConsoleManager implements ConsoleManager {
 			} catch (IOException ex) {
 				OpenClassic.getLogger().severe("Exception flushing console output");
 				ex.printStackTrace();
-			}
-		}
-	}
-
-	private class DateOutputFormatter extends Formatter {
-		private final SimpleDateFormat date;
-
-		public DateOutputFormatter(SimpleDateFormat date) {
-			this.date = date;
-		}
-
-		@Override
-		public String format(LogRecord record) {
-			StringBuilder builder = new StringBuilder();
-
-			builder.append(date.format(record.getMillis()));
-			builder.append(" [");
-			builder.append(record.getLevel().getLocalizedName().toUpperCase());
-			builder.append("] ");
-			builder.append(formatOutput(formatMessage(record)));
-			builder.append('\n');
-
-			if (record.getThrown() != null) {
-				StringWriter writer = new StringWriter();
-				record.getThrown().printStackTrace(new PrintWriter(writer));
-				builder.append(writer.toString());
-			}
-
-			return builder.toString();
-		}
-	}
-
-	private class LoggerOutputStream extends ByteArrayOutputStream {
-		private final String separator = System.getProperty("line.separator");
-		private final Level level;
-
-		public LoggerOutputStream(Level level) {
-			super();
-			this.level = level;
-		}
-
-		@Override
-		public synchronized void flush() throws IOException {
-			super.flush();
-
-			String record = this.toString();
-
-			super.reset();
-
-			if (record.length() > 0 && !record.equals(separator)) {
-				OpenClassic.getLogger().logp(level, "LoggerOutputStream", "log" + level, record);
 			}
 		}
 	}

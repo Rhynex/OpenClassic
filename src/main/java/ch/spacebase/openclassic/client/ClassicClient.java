@@ -1,14 +1,11 @@
 package ch.spacebase.openclassic.client;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
 import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.mojang.minecraft.Minecraft;
@@ -40,6 +37,9 @@ import ch.spacebase.openclassic.client.input.ClientInputHelper;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.util.DateOutputFormatter;
+import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
+import ch.spacebase.openclassic.game.util.LoggerOutputStream;
 
 public class ClassicClient extends ClassicGame implements Client {
 	
@@ -50,11 +50,10 @@ public class ClassicClient extends ClassicGame implements Client {
 		RenderHelper.setHelper(new ClientRenderHelper());
 		InputHelper.setHelper(new ClientInputHelper());
 		this.mc = mc;
-	}
-	
-	public void init() {
+		
+		// Init logger
 		ConsoleHandler console = new ConsoleHandler();
-		console.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss")));
+		console.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss"), new EmptyMessageFormatter()));
 
 		Logger logger = Logger.getLogger("");
 		for (Handler handler : logger.getHandlers()) {
@@ -65,13 +64,18 @@ public class ClassicClient extends ClassicGame implements Client {
 		
 		try {
 			FileHandler handler = new FileHandler(this.getDirectory().getPath() + "/client.log");
-			handler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")));
+			handler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"), new EmptyMessageFormatter()));
 			OpenClassic.getLogger().addHandler(handler);
 		} catch(IOException e) {
 			OpenClassic.getLogger().severe(this.getTranslator().translate("log.create-fail"));
 			e.printStackTrace();
 		}
-
+		
+		System.setOut(new PrintStream(new LoggerOutputStream(java.util.logging.Level.INFO), true));
+		System.setErr(new PrintStream(new LoggerOutputStream(java.util.logging.Level.SEVERE), true));
+	}
+	
+	public void init() {
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
 		
 		this.registerExecutor(null, new ClientCommands());
@@ -214,34 +218,6 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public String getServerVersion() {
 		return this.mc.openclassicVersion;
-	}
-	
-	private static class DateOutputFormatter extends Formatter {
-		private final SimpleDateFormat date;
-
-		public DateOutputFormatter(SimpleDateFormat date) {
-			this.date = date;
-		}
-
-		@Override
-		public String format(LogRecord record) {
-			StringBuilder builder = new StringBuilder();
-
-			builder.append(date.format(record.getMillis()));
-			builder.append(" [");
-			builder.append(record.getLevel().getLocalizedName().toUpperCase());
-			builder.append("] ");
-			builder.append(formatMessage(record));
-			builder.append('\n');
-
-			if (record.getThrown() != null) {
-				StringWriter writer = new StringWriter();
-				record.getThrown().printStackTrace(new PrintWriter(writer));
-				builder.append(writer.toString());
-			}
-
-			return builder.toString();
-		}
 	}
 
 }
