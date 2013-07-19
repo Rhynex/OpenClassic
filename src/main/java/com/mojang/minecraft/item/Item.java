@@ -79,11 +79,10 @@ public class Item extends Entity {
 
 	public void render(TextureManager var1, float var2) {
 		this.textureId = RenderHelper.getHelper().bindTexture("/terrain.png", true);
-		float var5 = this.level.getBrightness((int) this.x, (int) this.y, (int) this.z);
 		float var3 = this.rot + (this.tickCount + var2) * 3.0F;
 		GL11.glPushMatrix();
-		GL11.glColor4f(var5, var5, var5, 1.0F);
-		float var4 = (var5 = MathHelper.sin(var3 / 10.0F)) * 0.1F + 0.1F;
+		float var5 = MathHelper.sin(var3 / 10.0F);
+		float var4 = var5 * 0.1F + 0.1F;
 		GL11.glTranslatef(this.xo + (this.x - this.xo) * var2, this.yo + (this.y - this.yo) * var2 + var4, this.zo + (this.z - this.zo) * var2);
 		GL11.glRotatef(var3, 0.0F, 1.0F, 0.0F);
 		
@@ -93,19 +92,8 @@ public class Item extends Entity {
 		}
 		
 		models[this.resource].render();
-		var5 = (var5 = (var5 = var5 * 0.5F + 0.5F) * var5) * var5;
-		GL11.glColor4f(1, 1, 1, var5 * 0.4F);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		models[this.resource].render();
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glPopMatrix();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
 	public void playerTouch(Entity entity) {

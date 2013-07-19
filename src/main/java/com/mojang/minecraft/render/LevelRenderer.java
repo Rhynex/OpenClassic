@@ -147,7 +147,7 @@ public final class LevelRenderer {
 
 		for (int var1000 = -var100 * var5; var1000 < this.level.width + var100 * var5; var1000 += var100) {
 			for (int var7 = -var100 * var5; var7 < this.level.depth + var100 * var5; var7 += var100) {
-				float var13 = waterLevel - 0.1F;
+				float var13 = waterLevel - 0.05F;
 				if (var1000 < 0 || var7 < 0 || var1000 >= this.level.width || var7 >= this.level.depth) {
 					ShapeRenderer.instance.vertexUV(var1000, var13, (var7 + var100), 0.0F, var100);
 					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, (var7 + var100), var100, var100);

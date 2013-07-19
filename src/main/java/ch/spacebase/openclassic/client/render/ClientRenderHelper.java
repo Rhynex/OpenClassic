@@ -515,6 +515,10 @@ public class ClientRenderHelper extends RenderHelper {
 				return false;
 			}
 			
+			if(y <= OpenClassic.getClient().getLevel().getWaterLevel() - 1 && (face.getModX() < 0 && x <= 0 || face.getModX() > 0 && x >= OpenClassic.getClient().getLevel().getWidth() - 1 || face.getModZ() < 0 && z <= 0 || face.getModZ() > 0 && z >= OpenClassic.getClient().getLevel().getDepth() - 1)) {
+				return false;
+			}
+			
 			return !relative.getPreventsRendering();
 		}
 		
