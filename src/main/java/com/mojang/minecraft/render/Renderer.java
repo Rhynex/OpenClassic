@@ -50,7 +50,7 @@ public final class Renderer {
 		}
 
 		if (effect >= 0) {
-			effect = MathHelper.sin((effect /= this.mc.player.hurtDuration) * effect * effect * effect * (float) Math.PI);
+			effect = MathHelper.sin((effect /= this.mc.player.hurtDuration) * effect * effect * effect * MathHelper.PI);
 			GL11.glRotatef(-this.mc.player.hurtDir, 0, 1, 0);
 			GL11.glRotatef(-effect * 14.0F, 0, 0, 1);
 			GL11.glRotatef(this.mc.player.hurtDir, 0, 1, 0);
@@ -61,9 +61,9 @@ public final class Renderer {
 		float dist = this.mc.player.walkDist + (this.mc.player.walkDist - this.mc.player.walkDistO) * delta;
 		float bob = this.mc.player.oBob + (this.mc.player.bob - this.mc.player.oBob) * delta;
 		float tilt = this.mc.player.oTilt + (this.mc.player.tilt - this.mc.player.oTilt) * delta;
-		GL11.glTranslatef(MathHelper.sin(dist * (float) Math.PI) * bob * 0.5F, -Math.abs(MathHelper.cos(dist * (float) Math.PI) * bob), 0);
-		GL11.glRotatef(MathHelper.sin(dist * (float) Math.PI) * bob * 3.0F, 0, 0, 1);
-		GL11.glRotatef(Math.abs(MathHelper.cos(dist * (float) Math.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
+		GL11.glTranslatef(MathHelper.sin(dist * MathHelper.PI) * bob * 0.5F, -Math.abs(MathHelper.cos(dist * MathHelper.PI) * bob), 0);
+		GL11.glRotatef(MathHelper.sin(dist * MathHelper.PI) * bob * 3.0F, 0, 0, 1);
+		GL11.glRotatef(Math.abs(MathHelper.cos(dist * MathHelper.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
 		GL11.glRotatef(tilt, 1, 0, 0);
 	}
 

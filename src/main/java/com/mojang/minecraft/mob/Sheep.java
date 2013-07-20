@@ -126,8 +126,8 @@ public class Sheep extends QuadrupedMob {
 		}
 		
 		public final void update() {
-			float xDiff = -0.7F * MathHelper.sin(parent.yRot * (float) Math.PI / 180.0F);
-			float zDiff = 0.7F * MathHelper.cos(parent.yRot * (float) Math.PI / 180.0F);
+			float xDiff = -0.7F * MathHelper.sin(parent.yRot * MathHelper.DEG_TO_RAD);
+			float zDiff = 0.7F * MathHelper.cos(parent.yRot * MathHelper.DEG_TO_RAD);
 			int x = (int) (this.mob.x + xDiff);
 			int y = (int) (this.mob.y - 2.0F);
 			int z = (int) (this.mob.z + zDiff);

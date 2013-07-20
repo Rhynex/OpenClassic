@@ -100,7 +100,6 @@ public final class ResourceDownloadThread extends Thread {
 	
 	private void download(URL url, File file, int size) {
 		System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloading"), file.getName()));
-		this.mc.progressBar.setVisible(true);
 		this.mc.progressBar.setText(file.getName());
 		byte[] data = new byte[4096];
 		DataInputStream in = null;
@@ -134,7 +133,6 @@ public final class ResourceDownloadThread extends Thread {
 		}
 		
 		this.mc.progressBar.setText("");
-		this.mc.progressBar.setVisible(false);
 		System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
 	}
 	

@@ -106,8 +106,8 @@ public class HUDScreen extends MainScreen {
 					
 					if (this.mc.player.inventory.popTime[slot] > 0) {
 						float off = (this.mc.player.inventory.popTime[slot] - renderPartialTicks) / 5;
-						GL11.glTranslatef(10, (-MathHelper.sin(off * off * (float) Math.PI) * 8) + 10, 0);
-						GL11.glScalef(MathHelper.sin(off * off * (float) Math.PI) + 1, MathHelper.sin(off * (float) Math.PI) + 1, 1);
+						GL11.glTranslatef(10, (-MathHelper.sin(off * off * MathHelper.PI) * 8) + 10, 0);
+						GL11.glScalef(MathHelper.sin(off * off * MathHelper.PI) + 1, MathHelper.sin(off * MathHelper.PI) + 1, 1);
 						GL11.glTranslatef(-10, -10, 0);
 					}
 	

@@ -369,8 +369,8 @@ public abstract class Entity implements Serializable {
 			var4 = speed / var4;
 			relX *= var4;
 			relZ *= var4;
-			speed = MathHelper.sin(this.yRot * (float) Math.PI / 180);
-			var4 = MathHelper.cos(this.yRot * (float) Math.PI / 180);
+			speed = MathHelper.sin(this.yRot * MathHelper.DEG_TO_RAD);
+			var4 = MathHelper.cos(this.yRot * MathHelper.DEG_TO_RAD);
 			
 			this.xd += relX * var4 - relZ * speed;
 			this.zd += relZ * var4 + relX * speed;

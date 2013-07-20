@@ -81,8 +81,6 @@ import com.mojang.minecraft.render.LevelRenderer;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 import com.mojang.minecraft.render.animation.WaterTexture;
 
-import de.matthiasmann.twl.utils.PNGDecoder;
-
 import java.awt.AWTException;
 import java.awt.Canvas;
 import java.awt.Robot;
@@ -361,7 +359,12 @@ public final class Minecraft implements Runnable {
 				setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, e.toString(), OpenClassic.getGame().getTranslator().translate("core.fail-start"), 0);
+			String msg = "Failed to start the game.";
+			if(OpenClassic.getGame() != null && OpenClassic.getGame().getTranslator() != null) {
+				msg = OpenClassic.getGame().getTranslator().translate("core.fail-start");
+			}
+			
+			JOptionPane.showMessageDialog(null, e.toString(), msg, 0);
 			this.running = false;
 		}
 
@@ -369,15 +372,12 @@ public final class Minecraft implements Runnable {
 	}
 
 	private ByteBuffer loadIcon(InputStream in) throws IOException {
-		try {
-			PNGDecoder decoder = new PNGDecoder(in);
-			ByteBuffer bb = ByteBuffer.allocateDirect(decoder.getWidth()*decoder.getHeight()*4);
-			decoder.decode(bb, decoder.getWidth()*4, PNGDecoder.Format.RGBA);
-			bb.flip();
-			return bb;
-		} finally {
-			in.close();
-		}
+		ByteBuffer buffer = ByteBuffer.allocateDirect(4 * 128 * 128);
+		buffer.clear();
+		byte[] data = (byte[]) ImageIO.read(in).getRaster().getDataElements(0, 0, 128, 128, null);
+		buffer.put(data);
+		buffer.rewind();
+		return buffer;
 	}
 
 	@SuppressWarnings({"unused"})
@@ -628,10 +628,10 @@ public final class Minecraft implements Runnable {
 							float var29 = (this.player = this.renderer.mc.player).xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks;
 							float var30 = this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks;
 							Vector var31 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
-							float var32 = MathHelper.cos(-var30 * 0.017453292F - (float) Math.PI);
-							float var69 = MathHelper.sin(-var30 * 0.017453292F - (float) Math.PI);
-							float var74 = MathHelper.cos(-var29 * 0.017453292F);
-							float var33 = MathHelper.sin(-var29 * 0.017453292F);
+							float var32 = MathHelper.cos(-var30 * MathHelper.DEG_TO_RAD - MathHelper.PI);
+							float var69 = MathHelper.sin(-var30 * MathHelper.DEG_TO_RAD - MathHelper.PI);
+							float var74 = MathHelper.cos(-var29 * MathHelper.DEG_TO_RAD);
+							float var33 = MathHelper.sin(-var29 * MathHelper.DEG_TO_RAD);
 							float var34 = var69 * var74;
 							float var87 = var32 * var74;
 							float reach = this.mode.getReachDistance();
