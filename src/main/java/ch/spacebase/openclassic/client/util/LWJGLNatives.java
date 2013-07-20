@@ -45,8 +45,9 @@ public class LWJGLNatives {
 			throw new RuntimeException(OpenClassic.getGame().getTranslator().translate("core.no-lwjgl"));
 		}
 		
-		System.setProperty("java.library.path", System.getProperty("java.library.path") + ":" + dir.getPath());
+		System.setProperty("java.library.path", dir.getPath());
 		System.setProperty("org.lwjgl.librarypath", dir.getPath());
+		System.setProperty("net.java.games.input.librarypath", dir.getPath());
 	}
 
 	private static void load(String dir, String lib, String arch) {

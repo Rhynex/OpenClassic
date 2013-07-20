@@ -471,7 +471,8 @@ public final class Minecraft implements Runnable {
 
 		try {
 			Controllers.create();
-		} catch (Throwable t) {
+		} catch (LWJGLException e) {
+			e.printStackTrace();
 		}
 
 		checkGLError("Pre startup");

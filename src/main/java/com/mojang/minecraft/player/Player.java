@@ -43,7 +43,6 @@ public class Player extends Mob {
 	
 	public Player(Level level) {
 		super(level);
-		
 		if (level != null) {
 			level.player = this;
 			level.removeEntity(this);
