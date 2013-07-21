@@ -15,9 +15,9 @@ import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 
-import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.MovingObjectPosition;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.PrimedTnt;
 import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.model.Vector;

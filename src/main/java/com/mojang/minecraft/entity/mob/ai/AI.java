@@ -2,7 +2,7 @@ package com.mojang.minecraft.entity.mob.ai;
 
 import java.io.Serializable;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.Mob;
 import com.mojang.minecraft.level.Level;
 

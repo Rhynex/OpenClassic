@@ -70,6 +70,7 @@ import ch.spacebase.openclassic.client.util.LWJGLNatives;
 import ch.spacebase.openclassic.client.util.ShaderManager;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.particle.ParticleManager;
@@ -881,8 +882,6 @@ public final class Minecraft implements Runnable {
 								GL11.glPushMatrix();
 								int bid = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
 								BlockType btype = bid > 0 ? Blocks.fromId(bid) : null;
-								Renderer.get().begin();
-								Renderer.get().disableColors();
 								GL11.glDepthMask(false);
 								if (btype == null) {
 									btype = VanillaBlock.STONE;
@@ -892,7 +891,6 @@ public final class Minecraft implements Runnable {
 									ClientRenderHelper.getHelper().drawCracks(btype.getModel().getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
 								}
 
-								Renderer.get().end();
 								GL11.glDepthMask(true);
 								GL11.glPopMatrix();
 							}

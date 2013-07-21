@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.particle.SmokeParticle;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.entity.player.LocalPlayer;

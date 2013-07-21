@@ -21,6 +21,8 @@ import paulscode.sound.codecs.CodecWav;
 import paulscode.sound.libraries.LibraryJavaSound;
 import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.math.Vector;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 
@@ -64,7 +66,8 @@ public class ClientAudioManager implements AudioManager {
 	public void update(com.mojang.minecraft.entity.player.LocalPlayer player) {
 		if(player != null && OpenClassic.getClient().isInGame()) {
 			this.system.setListenerPosition(player.x, player.y, player.z);
-			this.system.setListenerOrientation(0, 0, -1, (float) Math.sin(Math.toRadians(player.pitch)), (float) Math.sin(Math.toRadians(player.yaw)), 1);
+			Vector vec = MathHelper.toForwardVec(player.yaw, player.pitch);
+			this.system.setListenerOrientation(vec.getX(), vec.getY(), vec.getZ(), (float) Math.sin(Math.toRadians(player.pitch)), (float) Math.sin(Math.toRadians(player.yaw)), 1);
 		} else {
 			this.system.setListenerPosition(0, 0, 0);
 			this.system.setListenerOrientation(0, 0, -1, 0, 1, 0);

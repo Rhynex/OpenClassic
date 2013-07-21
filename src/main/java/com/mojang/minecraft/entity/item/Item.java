@@ -7,7 +7,7 @@ import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;

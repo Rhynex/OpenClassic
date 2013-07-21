@@ -9,7 +9,7 @@ import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
 import com.mojang.minecraft.level.Level;

@@ -1,6 +1,6 @@
 package com.mojang.minecraft.entity.item;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
@@ -40,7 +40,7 @@ public class TakeEntityAnim extends Entity {
 		this.setPos(this.x, this.y, this.z);
 	}
 
-	public void render(TextureManager textureManager, float dt) {
-		this.item.render(textureManager, dt);
+	public void render(TextureManager textures, float dt) {
+		this.item.render(textures, dt);
 	}
 }

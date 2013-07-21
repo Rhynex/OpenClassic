@@ -2,7 +2,7 @@ package com.mojang.minecraft.entity.mob;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.level.Level;
 

@@ -3,7 +3,7 @@ package com.mojang.minecraft.level;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.ClientProgressBar;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.Creeper;
 import com.mojang.minecraft.entity.mob.Mob;
 import com.mojang.minecraft.entity.mob.Pig;

@@ -376,6 +376,7 @@ public class ClientRenderHelper extends RenderHelper {
 	
 	public void drawCracks(Quad quad, int x, int y, int z, int crackTexture) {
 		Renderer.get().begin();
+		Renderer.get().disableColors();
 		this.bindTexture(BlockType.TERRAIN_TEXTURE.getTexture(), true);
 		
 		SubTexture texture = quad.getTexture().getParent().getSubTexture(crackTexture);

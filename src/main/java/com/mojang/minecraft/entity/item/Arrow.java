@@ -8,7 +8,7 @@ import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.phys.AABB;
@@ -45,8 +45,8 @@ public class Arrow extends Entity {
 		}
 
 		this.heightOffset = 0.25F;
-		float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD);
-		float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD);
+		float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
+		float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
 		float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
 		float psin = MathHelper.sin(-pitch * MathHelper.DEG_TO_RAD);
 		this.slide = false;
@@ -60,9 +60,9 @@ public class Arrow extends Entity {
 		this.zd = ycos * pcos * power;
 		this.setPos(x, y, z);
 		float len = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
-		this.yaw = (float) (Math.atan2(this.xd, this.zd) * MathHelper.DDEG_TO_RAD);
+		this.yaw = (float) (Math.atan2(this.xd, this.zd) * MathHelper.DRAD_TO_DEG);
 		this.oYaw = this.yaw;
-		this.pitch = (float) (Math.atan2(this.yd, len) * MathHelper.DDEG_TO_RAD);
+		this.pitch = (float) (Math.atan2(this.yd, len) * MathHelper.DRAD_TO_DEG);
 		this.oPitch = this.pitch;
 		this.makeStepSound = false;
 	}

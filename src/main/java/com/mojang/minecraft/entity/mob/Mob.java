@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.ai.AI;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
 import com.mojang.minecraft.level.Level;
@@ -56,7 +56,7 @@ public class Mob extends Entity {
 		super(level);
 		this.setPos(this.x, this.y, this.z);
 		this.timeOffs = (float) Math.random() * 12398.0F;
-		this.rot = (float) (Math.random() * MathHelper.DDEG_TO_RAD);
+		this.rot = (float) (Math.random() * MathHelper.DTWO_PI);
 		this.speed = 1.0F;
 		this.ai = new BasicAI();
 		this.footSize = 0.5F;

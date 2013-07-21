@@ -3,7 +3,7 @@ package com.mojang.minecraft.entity.mob.ai;
 import java.util.List;
 import java.util.Random;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.Mob;
 import com.mojang.minecraft.level.Level;
 

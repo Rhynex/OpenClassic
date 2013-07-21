@@ -1,5 +1,6 @@
 package com.mojang.minecraft;
 
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.model.Vector;
 
 public final class MovingObjectPosition {

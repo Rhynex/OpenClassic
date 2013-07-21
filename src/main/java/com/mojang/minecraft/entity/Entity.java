@@ -1,4 +1,4 @@
-package com.mojang.minecraft;
+package com.mojang.minecraft.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;

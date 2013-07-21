@@ -2,7 +2,7 @@ package com.mojang.minecraft.entity.particle;
 
 import ch.spacebase.openclassic.client.render.Renderer;
 
-import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.level.Level;
 
 public class Particle extends Entity {
