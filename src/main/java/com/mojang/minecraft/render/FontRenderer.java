@@ -1,14 +1,16 @@
 package com.mojang.minecraft.render;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.GameSettings;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-
-import org.lwjgl.opengl.GL11;
 
 public final class FontRenderer {
 

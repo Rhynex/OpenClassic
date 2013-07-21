@@ -1,14 +1,14 @@
 package ch.spacebase.openclassic.client.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LanguageScreen extends GuiScreen {
 

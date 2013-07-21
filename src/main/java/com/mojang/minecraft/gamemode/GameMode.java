@@ -4,7 +4,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
@@ -12,6 +11,7 @@ import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.player.LocalPlayer;
+import com.zachsthings.onevent.EventManager;
 
 public class GameMode {
 
@@ -41,7 +41,7 @@ public class GameMode {
 	public void breakBlock(int x, int y, int z) {
 		Block block = this.mc.level.openclassic.getBlockAt(x, y, z);
 		if(block == null) return;
-		if(!this.mc.isInMultiplayer() && EventFactory.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.renderer.heldBlock.block)).isCancelled()) {
+		if(!this.mc.isInMultiplayer() && EventManager.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.renderer.heldBlock.block)).isCancelled()) {
 			return;
 		}
 		

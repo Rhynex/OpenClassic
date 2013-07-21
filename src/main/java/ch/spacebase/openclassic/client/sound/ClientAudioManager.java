@@ -12,14 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.sound.AudioManager;
-import ch.spacebase.openclassic.api.player.Player;
-
-import com.mojang.minecraft.Minecraft;
-
-import de.cuina.fireandfuel.CodecJLayerMP3;
-
 import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
@@ -28,6 +20,13 @@ import paulscode.sound.codecs.CodecJOrbis;
 import paulscode.sound.codecs.CodecWav;
 import paulscode.sound.libraries.LibraryJavaSound;
 import paulscode.sound.libraries.LibraryLWJGLOpenAL;
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.sound.AudioManager;
+
+import com.mojang.minecraft.Minecraft;
+
+import de.cuina.fireandfuel.CodecJLayerMP3;
 
 public class ClientAudioManager implements AudioManager {
 	

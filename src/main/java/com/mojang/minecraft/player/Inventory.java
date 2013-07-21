@@ -1,9 +1,9 @@
 package com.mojang.minecraft.player;
 
+import java.io.Serializable;
+
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-
-import java.io.Serializable;
 
 public class Inventory implements Serializable {
 

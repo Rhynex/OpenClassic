@@ -2,17 +2,17 @@ package ch.spacebase.openclassic.client.util;
 
 import java.util.Random;
 
-import com.mojang.minecraft.MovingObjectPosition;
-import com.mojang.minecraft.item.Item;
-import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.Vector;
-import com.mojang.minecraft.phys.AABB;
-
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.Model;
+
+import com.mojang.minecraft.MovingObjectPosition;
+import com.mojang.minecraft.item.Item;
+import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.model.Vector;
+import com.mojang.minecraft.phys.AABB;
 
 public class BlockUtils {
 

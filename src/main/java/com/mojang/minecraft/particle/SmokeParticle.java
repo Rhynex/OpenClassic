@@ -1,7 +1,6 @@
 package com.mojang.minecraft.particle;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.particle.Particle;
 
 public class SmokeParticle extends Particle {
 

@@ -1,12 +1,12 @@
 package ch.spacebase.openclassic.client.network.handler;
 
-import com.mojang.minecraft.player.net.NetworkPlayer;
-
 import ch.spacebase.openclassic.api.network.msg.PlayerPositionMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+
+import com.mojang.minecraft.player.net.NetworkPlayer;
 
 public class PlayerPositionMessageHandler extends MessageHandler<PlayerPositionMessage> {
 

@@ -1,8 +1,11 @@
 package com.mojang.minecraft.player;
 
+import java.io.Serializable;
+import java.util.List;
+
 import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
@@ -11,12 +14,8 @@ import com.mojang.minecraft.item.Item;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.ai.BasicAI;
 import com.mojang.minecraft.model.HumanoidModel;
-import com.mojang.minecraft.player.InputHandler;
-import com.mojang.minecraft.player.Inventory;
 import com.mojang.minecraft.render.TextureManager;
-import ch.spacebase.openclassic.api.math.MathHelper;
-import java.io.Serializable;
-import java.util.List;
+import com.zachsthings.onevent.EventManager;
 
 public class LocalPlayer extends Player {
 
@@ -185,7 +184,7 @@ public class LocalPlayer extends Player {
 	public void moveTo(float x, float y, float z, float yaw, float pitch) {
 		Position from = new Position(this.level.openclassic, this.x, this.y, this.z, (byte) this.yRot, (byte) this.xRot);
 		Position to = new Position(this.level.openclassic, x, y, z, (byte) yaw, (byte) pitch);
-		PlayerMoveEvent event = EventFactory.callEvent(new PlayerMoveEvent(this.openclassic, from, to));
+		PlayerMoveEvent event = EventManager.callEvent(new PlayerMoveEvent(this.openclassic, from, to));
 		if(event.isCancelled()) {
 			return;
 		}

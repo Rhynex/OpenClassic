@@ -1,7 +1,5 @@
 package com.mojang.minecraft;
 
-import com.mojang.minecraft.SessionData;
-import com.mojang.minecraft.Minecraft;
 import java.applet.Applet;
 import java.awt.BorderLayout;
 

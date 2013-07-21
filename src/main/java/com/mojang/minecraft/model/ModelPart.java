@@ -1,8 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.Vector;
-import com.mojang.minecraft.model.Quad;
-import com.mojang.minecraft.model.Vertex;
 import org.lwjgl.opengl.GL11;
 
 public final class ModelPart {

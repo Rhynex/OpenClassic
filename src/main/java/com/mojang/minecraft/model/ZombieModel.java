@@ -1,6 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.HumanoidModel;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
 public class ZombieModel extends HumanoidModel {

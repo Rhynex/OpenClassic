@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
@@ -15,7 +14,6 @@ import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.api.util.io.IOUtils;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
-
 import ch.spacebase.opennbt.TagBuilder;
 import ch.spacebase.opennbt.stream.NBTInputStream;
 import ch.spacebase.opennbt.stream.NBTOutputStream;

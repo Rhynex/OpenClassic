@@ -12,7 +12,6 @@ import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
@@ -31,6 +30,8 @@ import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.network.ServerSession;
+
+import com.zachsthings.onevent.EventManager;
 
 public class ServerPlayer implements Player {
 	
@@ -116,7 +117,7 @@ public class ServerPlayer implements Player {
 		Position to = new Position(level, x, y, z, yaw, pitch);
 		Level old = this.pos.getLevel();
 		
-		PlayerTeleportEvent event = EventFactory.callEvent(new PlayerTeleportEvent(this, this.getPosition(), to));
+		PlayerTeleportEvent event = EventManager.callEvent(new PlayerTeleportEvent(this, this.getPosition(), to));
 		if(event.isCancelled()) return;
 		
 		this.pos = event.getTo();

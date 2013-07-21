@@ -1,5 +1,12 @@
 package com.mojang.minecraft.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.MainScreen;
 import ch.spacebase.openclassic.api.math.MathHelper;
@@ -7,16 +14,10 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
-import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.ChatLine;
+import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.gui.ChatInputScreen;
 import com.mojang.minecraft.render.ShapeRenderer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 public class HUDScreen extends MainScreen {
 

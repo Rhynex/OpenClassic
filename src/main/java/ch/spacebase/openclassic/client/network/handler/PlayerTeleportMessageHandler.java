@@ -1,12 +1,12 @@
 package ch.spacebase.openclassic.client.network.handler;
 
-import com.mojang.minecraft.player.net.NetworkPlayer;
-
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+
+import com.mojang.minecraft.player.net.NetworkPlayer;
 
 public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportMessage> {
 

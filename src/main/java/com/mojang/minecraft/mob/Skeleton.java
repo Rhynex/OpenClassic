@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import com.mojang.minecraft.item.Arrow;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.Zombie;
 import com.mojang.minecraft.mob.ai.BasicAttackAI;
 
 public class Skeleton extends Zombie {

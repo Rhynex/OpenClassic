@@ -1,18 +1,18 @@
 package com.mojang.minecraft.item;
 
+import java.util.Random;
+
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
 import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.item.Item;
-import com.mojang.minecraft.item.TakeEntityAnim;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.particle.SmokeParticle;
 import com.mojang.minecraft.particle.TerrainParticle;
 import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.TextureManager;
-import java.util.Random;
-import org.lwjgl.opengl.GL11;
 
 public class PrimedTnt extends Entity {
 

@@ -1,72 +1,5 @@
 package com.mojang.minecraft;
 
-import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.StepSound;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.Color;
-import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.event.EventFactory;
-import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.level.LevelInfo;
-import ch.spacebase.openclassic.api.level.generator.Generator;
-import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.KeyChangeMessage;
-import ch.spacebase.openclassic.api.player.Session.State;
-import ch.spacebase.openclassic.api.plugin.Plugin;
-import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
-import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.ClassicClient;
-import ch.spacebase.openclassic.client.ClientProgressBar;
-import ch.spacebase.openclassic.client.gui.LoginScreen;
-import ch.spacebase.openclassic.client.gui.MainMenuScreen;
-import ch.spacebase.openclassic.client.network.ClientSession;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
-import ch.spacebase.openclassic.client.sound.ClientAudioManager;
-import ch.spacebase.openclassic.client.util.BlockUtils;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-import ch.spacebase.openclassic.client.util.LWJGLNatives;
-import ch.spacebase.openclassic.client.util.ShaderManager;
-import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
-
-import com.mojang.minecraft.gamemode.CreativeGameMode;
-import com.mojang.minecraft.gamemode.GameMode;
-import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.gui.ChatInputScreen;
-import com.mojang.minecraft.gui.GameOverScreen;
-import com.mojang.minecraft.gui.HUDScreen;
-import com.mojang.minecraft.gui.ErrorScreen;
-import com.mojang.minecraft.gui.MenuScreen;
-import com.mojang.minecraft.item.Arrow;
-import com.mojang.minecraft.item.Item;
-import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.ModelPart;
-import com.mojang.minecraft.model.Vector;
-import com.mojang.minecraft.particle.ParticleManager;
-import com.mojang.minecraft.particle.WaterDropParticle;
-import com.mojang.minecraft.phys.AABB;
-import com.mojang.minecraft.player.InputHandler;
-import com.mojang.minecraft.player.LocalPlayer;
-import com.mojang.minecraft.player.net.NetworkPlayer;
-import com.mojang.minecraft.render.Chunk;
-import com.mojang.minecraft.render.ChunkVisibleAndDistanceComparator;
-import com.mojang.minecraft.render.ClippingHelper;
-import com.mojang.minecraft.render.FontRenderer;
-import com.mojang.minecraft.render.Renderer;
-import com.mojang.minecraft.render.ShapeRenderer;
-import com.mojang.minecraft.render.TextureManager;
-import com.mojang.minecraft.render.LevelRenderer;
-import com.mojang.minecraft.render.animation.AnimatedTexture;
-import com.mojang.minecraft.render.animation.WaterTexture;
-
 import java.awt.AWTException;
 import java.awt.Canvas;
 import java.awt.Robot;
@@ -99,6 +32,73 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.GLU;
+
+import ch.spacebase.openclassic.api.Color;
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.block.StepSound;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
+import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
+import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
+import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
+import ch.spacebase.openclassic.api.gui.GuiScreen;
+import ch.spacebase.openclassic.api.level.LevelInfo;
+import ch.spacebase.openclassic.api.level.generator.Generator;
+import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.api.network.msg.custom.KeyChangeMessage;
+import ch.spacebase.openclassic.api.player.Session.State;
+import ch.spacebase.openclassic.api.plugin.Plugin;
+import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
+import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.ClassicClient;
+import ch.spacebase.openclassic.client.ClientProgressBar;
+import ch.spacebase.openclassic.client.gui.LoginScreen;
+import ch.spacebase.openclassic.client.gui.MainMenuScreen;
+import ch.spacebase.openclassic.client.network.ClientSession;
+import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.sound.ClientAudioManager;
+import ch.spacebase.openclassic.client.util.BlockUtils;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.util.LWJGLNatives;
+import ch.spacebase.openclassic.client.util.ShaderManager;
+import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
+
+import com.mojang.minecraft.gamemode.CreativeGameMode;
+import com.mojang.minecraft.gamemode.GameMode;
+import com.mojang.minecraft.gamemode.SurvivalGameMode;
+import com.mojang.minecraft.gui.ChatInputScreen;
+import com.mojang.minecraft.gui.ErrorScreen;
+import com.mojang.minecraft.gui.GameOverScreen;
+import com.mojang.minecraft.gui.HUDScreen;
+import com.mojang.minecraft.gui.MenuScreen;
+import com.mojang.minecraft.item.Arrow;
+import com.mojang.minecraft.item.Item;
+import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.model.ModelPart;
+import com.mojang.minecraft.model.Vector;
+import com.mojang.minecraft.particle.ParticleManager;
+import com.mojang.minecraft.particle.WaterDropParticle;
+import com.mojang.minecraft.phys.AABB;
+import com.mojang.minecraft.player.InputHandler;
+import com.mojang.minecraft.player.LocalPlayer;
+import com.mojang.minecraft.player.net.NetworkPlayer;
+import com.mojang.minecraft.render.Chunk;
+import com.mojang.minecraft.render.ChunkVisibleAndDistanceComparator;
+import com.mojang.minecraft.render.Frustum;
+import com.mojang.minecraft.render.FontRenderer;
+import com.mojang.minecraft.render.LevelRenderer;
+import com.mojang.minecraft.render.Renderer;
+import com.mojang.minecraft.render.ShapeRenderer;
+import com.mojang.minecraft.render.TextureManager;
+import com.mojang.minecraft.render.animation.AnimatedTexture;
+import com.mojang.minecraft.render.animation.WaterTexture;
+import com.zachsthings.onevent.EventManager;
 
 public final class Minecraft implements Runnable {
 
@@ -254,7 +254,7 @@ public final class Minecraft implements Runnable {
 
 		if(this.isInMultiplayer()) {
 			if(this.player != null) {
-				EventFactory.callEvent(new PlayerQuitEvent(OpenClassic.getClient().getPlayer(), "Quit"));
+				EventManager.callEvent(new PlayerQuitEvent(OpenClassic.getClient().getPlayer(), "Quit"));
 			}
 
 			this.session.disconnect(null);
@@ -725,7 +725,7 @@ public final class Minecraft implements Runnable {
 						float var1000 = this.player.yo + (this.player.y - this.player.yo) * this.timer.renderPartialTicks;
 						var33 = this.player.zo + (this.player.z - this.player.zo) * this.timer.renderPartialTicks;
 						GL11.glTranslatef(-var69, -var1000, -var33);
-						ClippingHelper clipping = ClippingHelper.getInstance();
+						Frustum clipping = Frustum.getInstance();
 
 						for (int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
 							this.levelRenderer.chunkCache[count].clip(clipping);
@@ -1247,7 +1247,7 @@ public final class Minecraft implements Runnable {
 								this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, button == 1, (byte) id));
 							}
 
-							if(!this.isInMultiplayer() && EventFactory.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.renderer.heldBlock.block)).isCancelled()) {
+							if(!this.isInMultiplayer() && EventManager.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.renderer.heldBlock.block)).isCancelled()) {
 								return;
 							}
 
@@ -1482,7 +1482,7 @@ public final class Minecraft implements Runnable {
 				}
 			}
 
-			EventFactory.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), Keyboard.getEventKey(), Keyboard.getEventKeyState()));
+			EventManager.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), Keyboard.getEventKey(), Keyboard.getEventKeyState()));
 			if(this.isInMultiplayer() && this.session.isConnected() && this.openclassicServer) {
 				this.session.send(new KeyChangeMessage(Keyboard.getEventKey(), Keyboard.getEventKeyState()));
 			}

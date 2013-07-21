@@ -2,10 +2,10 @@ package ch.spacebase.openclassic.client.util;
 
 import java.io.File;
 
-import com.mojang.minecraft.Minecraft;
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.client.ClassicClient;
+
+import com.mojang.minecraft.Minecraft;
 
 public class GeneralUtils {
 

@@ -31,7 +31,6 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.command.Console;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
@@ -49,10 +48,11 @@ import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.game.ClassicGame;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
+import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
+import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ServerPipelineFactory;
 import ch.spacebase.openclassic.server.network.SessionRegistry;
@@ -60,6 +60,8 @@ import ch.spacebase.openclassic.server.sound.ServerAudioManager;
 import ch.spacebase.openclassic.server.ui.ConsoleManager;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 import ch.spacebase.openclassic.server.ui.TextConsoleManager;
+
+import com.zachsthings.onevent.EventManager;
 
 // TODO: Server-side GUIs
 public class ClassicServer extends ClassicGame implements Server {
@@ -481,7 +483,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		}
 		
 		this.levels.add(level);
-		EventFactory.callEvent(new LevelCreateEvent(level));
+		EventManager.callEvent(new LevelCreateEvent(level));
 		OpenClassic.getLogger().info("Level \"" + level.getName() + "\" was successfully created!");
 
 		return level;
@@ -509,7 +511,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				if(model.capacity() == model.size()) model.setSize(model.getSize() + 1);
 			}
 			
-			EventFactory.callEvent(new LevelLoadEvent(level));
+			EventManager.callEvent(new LevelLoadEvent(level));
 			this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.load-success"), name));
 			return level;
 		} catch (IOException e) {
@@ -532,7 +534,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				return;
 			}
 			
-			if(EventFactory.callEvent(new LevelUnloadEvent(this.getLevel(name))).isCancelled()) {
+			if(EventManager.callEvent(new LevelUnloadEvent(this.getLevel(name))).isCancelled()) {
 				return;
 			}
 			
@@ -583,7 +585,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		level.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.getName() + ".nbt");
 		
 		try {
-			if(EventFactory.callEvent(new LevelSaveEvent(level)).isCancelled()) {
+			if(EventManager.callEvent(new LevelSaveEvent(level)).isCancelled()) {
 				return;
 			}
 			

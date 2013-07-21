@@ -5,7 +5,6 @@ import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Quad;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.particle.Particle;
 import com.mojang.minecraft.render.ShapeRenderer;
 
 public class TerrainParticle extends Particle {

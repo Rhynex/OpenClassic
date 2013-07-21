@@ -1,7 +1,6 @@
 package com.mojang.minecraft.player;
 
 import com.mojang.minecraft.GameSettings;
-import com.mojang.minecraft.player.InputHandler;
 
 public final class InputHandler {
 

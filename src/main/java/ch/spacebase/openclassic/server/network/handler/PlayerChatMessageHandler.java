@@ -1,7 +1,6 @@
 package ch.spacebase.openclassic.server.network.handler;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.player.Player;
@@ -9,6 +8,8 @@ import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.ClassicServer;
+
+import com.zachsthings.onevent.EventManager;
 
 public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> {
 
@@ -31,7 +32,7 @@ public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> 
 		if(chat.startsWith("/")) {
 			((ClassicServer) OpenClassic.getGame()).processCommand(player, chat.substring(1, chat.length()));
 		} else {
-			PlayerChatEvent event = EventFactory.callEvent(new PlayerChatEvent(player, chat));
+			PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(player, chat));
 			if(event.isCancelled()) return;
 			
 			OpenClassic.getServer().sendToAll(new PlayerChatMessage(player.getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));

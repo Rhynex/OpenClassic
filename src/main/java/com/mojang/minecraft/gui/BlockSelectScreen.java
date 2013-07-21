@@ -1,5 +1,7 @@
 package com.mojang.minecraft.gui;
 
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -8,8 +10,6 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.render.ShapeRenderer;
-
-import org.lwjgl.opengl.GL11;
 
 public final class BlockSelectScreen extends GuiScreen {
 

@@ -1,13 +1,14 @@
 package ch.spacebase.openclassic.server.network.handler;
 
 import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+
+import com.zachsthings.onevent.EventManager;
 
 public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportMessage> {
 
@@ -17,7 +18,7 @@ public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportM
 		
 		Position to = new Position(player.getPosition().getLevel(), message.getX(), message.getY(), message.getZ(), message.getYaw(), message.getPitch());
 		/* TODO: detect teleports properly if(!player.teleported && (to.getX() - player.getPosition().getX() >= 3 || to.getX() - player.getPosition().getX() <= -3 || to.getZ() - player.getPosition().getZ() >= 3 || to.getZ() - player.getPosition().getZ() <= -3)) {
-			PlayerRespawnEvent event = EventFactory.callEvent(new PlayerRespawnEvent(player, to));
+			PlayerRespawnEvent event = EventManager.callEvent(new PlayerRespawnEvent(player, to));
 			if(event.isCancelled()) {
 				session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
 				return;
@@ -26,7 +27,7 @@ public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportM
 			to = event.getPosition();
 		} */
 		
-		PlayerMoveEvent event = EventFactory.callEvent(new PlayerMoveEvent(player, player.getPosition(), to));
+		PlayerMoveEvent event = EventManager.callEvent(new PlayerMoveEvent(player, player.getPosition(), to));
 		Position old = to;
 		to = event.getTo();
 		

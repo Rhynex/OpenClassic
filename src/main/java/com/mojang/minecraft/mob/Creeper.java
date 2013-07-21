@@ -7,7 +7,6 @@ import ch.spacebase.openclassic.api.math.MathHelper;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.mob.ai.BasicAttackAI;
 import com.mojang.minecraft.particle.TerrainParticle;
 

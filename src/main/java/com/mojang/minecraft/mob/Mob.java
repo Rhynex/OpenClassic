@@ -1,5 +1,7 @@
 package com.mojang.minecraft.mob;
 
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
@@ -9,7 +11,6 @@ import com.mojang.minecraft.mob.ai.AI;
 import com.mojang.minecraft.mob.ai.BasicAI;
 import com.mojang.minecraft.model.ModelManager;
 import com.mojang.minecraft.render.TextureManager;
-import org.lwjgl.opengl.GL11;
 
 public class Mob extends Entity {
 

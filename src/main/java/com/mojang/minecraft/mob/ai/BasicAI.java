@@ -1,12 +1,11 @@
 package com.mojang.minecraft.mob.ai;
 
+import java.util.List;
+import java.util.Random;
+
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.Mob;
-import com.mojang.minecraft.mob.ai.AI;
-
-import java.util.List;
-import java.util.Random;
 
 public class BasicAI extends AI {
 

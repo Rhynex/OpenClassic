@@ -1,13 +1,14 @@
 package ch.spacebase.openclassic.client;
 
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.GuiTextures;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import com.mojang.minecraft.render.ShapeRenderer;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
 public final class ClientProgressBar implements ProgressBar {
 

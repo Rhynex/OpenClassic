@@ -8,7 +8,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerKickEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
@@ -20,6 +19,8 @@ import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
+
+import com.zachsthings.onevent.EventManager;
 
 public class ServerSession extends ClassicSession {
 
@@ -70,12 +71,12 @@ public class ServerSession extends ClassicSession {
 
 	public void disconnect(String reason) {
 		if(this.getPlayer() != null && this.getState() == State.GAME) {
-			PlayerKickEvent event = EventFactory.callEvent(new PlayerKickEvent(this.getPlayer(), reason, this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
+			PlayerKickEvent event = EventManager.callEvent(new PlayerKickEvent(this.getPlayer(), reason, this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
 			if(event.isCancelled()) {
 				return;
 			}
 			
-			EventFactory.callEvent(new PlayerQuitEvent(this.getPlayer(), this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
+			EventManager.callEvent(new PlayerQuitEvent(this.getPlayer(), this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
 			OpenClassic.getServer().broadcastMessage(event.getMessage());
 		} else {
 			OpenClassic.getLogger().info(this.getAddress() + " disconnected by server: \"" + reason + "\"");

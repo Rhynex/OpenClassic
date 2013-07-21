@@ -1,5 +1,7 @@
 package com.mojang.minecraft.gui;
 
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
@@ -8,8 +10,6 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.player.LocalPlayer;
-
-import org.lwjgl.opengl.GL11;
 
 public final class GameOverScreen extends GuiScreen {
 

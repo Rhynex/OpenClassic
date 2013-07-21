@@ -1,12 +1,12 @@
 package com.mojang.minecraft.mob;
 
+import org.lwjgl.opengl.GL11;
+
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.model.HumanoidModel;
 import com.mojang.minecraft.render.TextureManager;
-import org.lwjgl.opengl.GL11;
 
 public class HumanoidMob extends Mob {
 

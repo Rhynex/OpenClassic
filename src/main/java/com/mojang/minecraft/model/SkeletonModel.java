@@ -1,7 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.ModelPart;
-import com.mojang.minecraft.model.ZombieModel;
 
 public final class SkeletonModel extends ZombieModel {
 

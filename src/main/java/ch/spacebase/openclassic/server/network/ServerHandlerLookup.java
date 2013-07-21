@@ -1,11 +1,23 @@
 package ch.spacebase.openclassic.server.network;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.network.msg.*;
-import ch.spacebase.openclassic.api.network.msg.custom.*;
+import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.api.network.msg.custom.CustomMessage;
+import ch.spacebase.openclassic.api.network.msg.custom.GameInfoMessage;
+import ch.spacebase.openclassic.api.network.msg.custom.KeyChangeMessage;
+import ch.spacebase.openclassic.api.network.msg.custom.PluginMessage;
 import ch.spacebase.openclassic.game.network.HandlerLookup;
-import ch.spacebase.openclassic.server.network.handler.*;
-import ch.spacebase.openclassic.server.network.handler.custom.*;
+import ch.spacebase.openclassic.server.network.handler.IdentificationMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.PlayerChatMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.PlayerSetBlockMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.PlayerTeleportMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.custom.CustomMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.custom.GameInfoMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.custom.KeyChangeMessageHandler;
+import ch.spacebase.openclassic.server.network.handler.custom.PluginMessageHandler;
 
 public class ServerHandlerLookup extends HandlerLookup {
 

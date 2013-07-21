@@ -1,6 +1,5 @@
 package com.mojang.minecraft.mob.ai;
 
-import com.mojang.minecraft.mob.ai.BasicAttackAI;
 
 public class JumpAttackAI extends BasicAttackAI {
 

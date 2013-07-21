@@ -17,13 +17,12 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.physics.FallingBlockPhysics;
 import ch.spacebase.openclassic.api.block.physics.FlowerPhysics;
-import ch.spacebase.openclassic.api.block.physics.SpreadPhysics;
 import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 import ch.spacebase.openclassic.api.block.physics.MushroomPhysics;
-import ch.spacebase.openclassic.api.block.physics.TreeGrowthPhysics;
 import ch.spacebase.openclassic.api.block.physics.SpongePhysics;
+import ch.spacebase.openclassic.api.block.physics.SpreadPhysics;
+import ch.spacebase.openclassic.api.block.physics.TreeGrowthPhysics;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.LevelInfo;
@@ -37,6 +36,8 @@ import ch.spacebase.openclassic.api.util.CoordUtil;
 import ch.spacebase.openclassic.api.util.set.TripleIntHashMap;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
+
+import com.zachsthings.onevent.EventManager;
 
 public class ServerLevel implements ClassicLevel {
 
@@ -248,7 +249,7 @@ public class ServerLevel implements ClassicLevel {
 	public void setSpawn(Position spawn) {
 		Position old = this.spawn;
 		this.spawn = spawn;
-		EventFactory.callEvent(new SpawnChangeEvent(this, old));
+		EventManager.callEvent(new SpawnChangeEvent(this, old));
 	}
 
 	public short getWidth() {
@@ -428,7 +429,7 @@ public class ServerLevel implements ClassicLevel {
 	private static boolean physicsAllowed(Block block) {
 		if(block.getType().getPhysics() == null) return false;
 		
-		BlockPhysicsEvent event = EventFactory.callEvent(new BlockPhysicsEvent(block));
+		BlockPhysicsEvent event = EventManager.callEvent(new BlockPhysicsEvent(block));
 		if(block.getType().getPhysics() instanceof FallingBlockPhysics) {
 			return OpenClassic.getGame().getConfig().getBoolean("physics.falling", true) && !event.isCancelled();
 		}

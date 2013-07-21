@@ -1,9 +1,9 @@
 package com.mojang.minecraft.render;
 
-import com.mojang.minecraft.player.LocalPlayer;
-
 import java.io.Serializable;
 import java.util.Comparator;
+
+import com.mojang.minecraft.player.LocalPlayer;
 
 public final class ChunkVisibleAndDistanceComparator implements Comparator<com.mojang.minecraft.render.Chunk>, Serializable {
 

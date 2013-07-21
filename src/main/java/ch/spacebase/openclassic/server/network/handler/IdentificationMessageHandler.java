@@ -6,12 +6,10 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.swing.DefaultListModel;
 
-
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerJoinEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerLoginEvent;
@@ -33,6 +31,8 @@ import ch.spacebase.openclassic.server.network.ServerSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 
+import com.zachsthings.onevent.EventManager;
+
 public class IdentificationMessageHandler extends MessageHandler<IdentificationMessage> {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -41,7 +41,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		if(session.getState() == State.GAME) return;
 		
 		String ip = session.getAddress().toString().replace("/", "").split(":")[0];
-		PlayerConnectEvent event = EventFactory.callEvent(new PlayerConnectEvent(message.getUsernameOrServerName(), session.getAddress()));
+		PlayerConnectEvent event = EventManager.callEvent(new PlayerConnectEvent(message.getUsernameOrServerName(), session.getAddress()));
 		if(event.getResult() != PlayerConnectEvent.Result.ALLOWED) {
 			if(event.getKickMessage() == null || event.getKickMessage().equals("")) {
 				this.kickFromResult(message.getUsernameOrServerName(), ip, session, event.getResult());
@@ -119,7 +119,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		}
 
 		final ServerPlayer player = new ServerPlayer(message.getUsernameOrServerName(), OpenClassic.getServer().getDefaultLevel().getSpawn().clone(), (ServerSession) session);
-		PlayerLoginEvent e = EventFactory.callEvent(new PlayerLoginEvent(player, session.getAddress(), result, msg));
+		PlayerLoginEvent e = EventManager.callEvent(new PlayerLoginEvent(player, session.getAddress(), result, msg));
 		if(e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
 			if(e.getKickMessage() == null || e.getKickMessage().equals("")) {
 				this.kickFromLoginResult(message.getUsernameOrServerName(), ip, session, e.getResult());
@@ -175,7 +175,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
 		
 		session.setState(State.GAME);
-		OpenClassic.getServer().broadcastMessage(EventFactory.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());
+		OpenClassic.getServer().broadcastMessage(EventManager.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());
 	}
 
 	private void kickFromLoginResult(String user, String ip, Session session, PlayerLoginEvent.Result result) {

@@ -1,13 +1,14 @@
 package com.mojang.minecraft.level;
 
-import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.model.Vector;
-import com.mojang.minecraft.phys.AABB;
-import com.mojang.minecraft.render.TextureManager;
-import com.mojang.minecraft.render.ClippingHelper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.mojang.minecraft.Entity;
+import com.mojang.minecraft.model.Vector;
+import com.mojang.minecraft.phys.AABB;
+import com.mojang.minecraft.render.Frustum;
+import com.mojang.minecraft.render.TextureManager;
 
 public class BlockMap implements Serializable {
 
@@ -173,7 +174,7 @@ public class BlockMap implements Serializable {
 
 	}
 
-	public void render(Vector model, ClippingHelper var2, TextureManager textureManager, float var4) {
+	public void render(Vector model, Frustum var2, TextureManager textureManager, float var4) {
 		for (int var5 = 0; var5 < this.width; ++var5) {
 			float var6 = ((var5 << 4) - 2);
 			float var7 = ((var5 + 1 << 4) + 2);
@@ -187,14 +188,14 @@ public class BlockMap implements Serializable {
 					if ((var12 = this.entityGrid[(var11 * this.depth + var8) * this.width + var5]).size() != 0) {
 						float var13 = ((var11 << 4) - 2);
 						float var14 = ((var11 + 1 << 4) + 2);
-						if (var2.isBoxInFrustrum(var6, var9, var13, var7, var10, var14)) {
+						if (var2.isBoxInFrustum(var6, var9, var13, var7, var10, var14)) {
 							float var16 = var14;
 							float var17 = var10;
 							float var15 = var7;
 							var14 = var13;
 							var13 = var9;
 							float var18 = var6;
-							ClippingHelper var19 = var2;
+							Frustum var19 = var2;
 							int var20 = 0;
 
 							boolean var10000;
@@ -204,42 +205,42 @@ public class BlockMap implements Serializable {
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var18 + var19.frustrum[var20][1] * var13 + var19.frustrum[var20][2] * var14 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var15 + var19.frustrum[var20][1] * var13 + var19.frustrum[var20][2] * var14 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var18 + var19.frustrum[var20][1] * var17 + var19.frustrum[var20][2] * var14 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var15 + var19.frustrum[var20][1] * var17 + var19.frustrum[var20][2] * var14 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var18 + var19.frustrum[var20][1] * var13 + var19.frustrum[var20][2] * var16 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var15 + var19.frustrum[var20][1] * var13 + var19.frustrum[var20][2] * var16 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var18 + var19.frustrum[var20][1] * var17 + var19.frustrum[var20][2] * var16 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
 
-								if (var19.frustrum[var20][0] * var15 + var19.frustrum[var20][1] * var17 + var19.frustrum[var20][2] * var16 + var19.frustrum[var20][3] <= 0.0F) {
+								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
 									var10000 = false;
 									break;
 								}
@@ -254,7 +255,7 @@ public class BlockMap implements Serializable {
 								if ((var22 = (Entity) var12.get(var23)).shouldRender(model)) {
 									if (!var21) {
 										AABB var24 = var22.bb;
-										if (!var2.isBoxInFrustrum(var24.x0, var24.y0, var24.z0, var24.x1, var24.y1, var24.z1)) {
+										if (!var2.isBoxInFrustum(var24.x0, var24.y0, var24.z0, var24.x1, var24.y1, var24.z1)) {
 											continue;
 										}
 									}

@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.client.gui.HacksScreen;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.GameSettings;
-import com.mojang.minecraft.gui.ControlsScreen;
 
 public final class OptionsScreen extends GuiScreen {
 

@@ -1,7 +1,5 @@
 package com.mojang.minecraft;
 
-import ch.spacebase.openclassic.client.util.Server;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import ch.spacebase.openclassic.client.util.Server;
 
 public final class SessionData {
 

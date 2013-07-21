@@ -8,15 +8,11 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.level.LevelIO;
-
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.MainScreen;
@@ -40,6 +36,10 @@ import ch.spacebase.openclassic.game.ClassicGame;
 import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
 import ch.spacebase.openclassic.game.util.LoggerOutputStream;
+
+import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.level.LevelIO;
+import com.zachsthings.onevent.EventManager;
 
 public class ClassicClient extends ClassicGame implements Client {
 	
@@ -120,7 +120,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
 		this.mc.mode.prepareLevel(level);
 		this.mc.setLevel(level);
-		EventFactory.callEvent(new LevelCreateEvent(level.openclassic));
+		EventManager.callEvent(new LevelCreateEvent(level.openclassic));
 		return level.openclassic;
 	}
 

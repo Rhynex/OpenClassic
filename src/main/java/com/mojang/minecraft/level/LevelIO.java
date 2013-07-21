@@ -1,15 +1,5 @@
 package com.mojang.minecraft.level;
 
-import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.event.EventFactory;
-import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
-import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
-import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
-
-import com.mojang.minecraft.level.Level;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -20,10 +10,20 @@ import java.io.ObjectOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.data.NBTData;
+import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
+import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
+import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
+
+import com.zachsthings.onevent.EventManager;
+
 public final class LevelIO {
 
 	public static boolean save(Level level) {	
-		if(EventFactory.callEvent(new LevelSaveEvent(level.openclassic)).isCancelled()) {
+		if(EventManager.callEvent(new LevelSaveEvent(level.openclassic)).isCancelled()) {
 			return true;
 		}
 		
@@ -62,7 +62,7 @@ public final class LevelIO {
 			level = ((ClientLevel) OpenClassicLevelFormat.load(level.openclassic, name, false)).getHandle();
 			level.openclassic.data = new NBTData(level.name);
 			level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
-			EventFactory.callEvent(new LevelLoadEvent(level.openclassic));
+			EventManager.callEvent(new LevelLoadEvent(level.openclassic));
 			GeneralUtils.getMinecraft().progressBar.setVisible(false);
 			return level;
 		} catch (IOException e) {
@@ -83,7 +83,7 @@ public final class LevelIO {
 	}
 	
 	public static void saveOld(Level level) {
-		if(EventFactory.callEvent(new LevelSaveEvent(level.openclassic)).isCancelled()) {
+		if(EventManager.callEvent(new LevelSaveEvent(level.openclassic)).isCancelled()) {
 			return;
 		}
 		

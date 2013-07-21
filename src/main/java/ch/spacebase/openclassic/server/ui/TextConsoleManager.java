@@ -9,6 +9,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jline.ConsoleOperations;
+import jline.ConsoleReader;
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.command.Console;
@@ -16,10 +18,6 @@ import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.LoggerOutputStream;
 import ch.spacebase.openclassic.game.util.MessageFormatter;
 import ch.spacebase.openclassic.server.ClassicServer;
-
-
-import jline.ConsoleOperations;
-import jline.ConsoleReader;
 
 public class TextConsoleManager implements ConsoleManager {
 

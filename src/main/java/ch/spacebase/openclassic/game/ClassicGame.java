@@ -17,7 +17,6 @@ import ch.spacebase.openclassic.api.command.Command;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
 import ch.spacebase.openclassic.api.config.Configuration;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.game.CommandNotFoundEvent;
 import ch.spacebase.openclassic.api.event.game.PreCommandEvent;
 import ch.spacebase.openclassic.api.level.generator.Generator;
@@ -28,6 +27,8 @@ import ch.spacebase.openclassic.api.scheduler.Scheduler;
 import ch.spacebase.openclassic.api.translate.Language;
 import ch.spacebase.openclassic.api.translate.Translator;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
+
+import com.zachsthings.onevent.EventManager;
 
 public abstract class ClassicGame implements Game {
 
@@ -112,7 +113,7 @@ public abstract class ClassicGame implements Game {
 	@Override
 	public void processCommand(Sender sender, String command) {
 		if(command.length() == 0) return;
-		PreCommandEvent event = EventFactory.callEvent(new PreCommandEvent(sender, command));
+		PreCommandEvent event = EventManager.callEvent(new PreCommandEvent(sender, command));
 		if(event.isCancelled()) {
 			return;
 		}
@@ -202,7 +203,7 @@ public abstract class ClassicGame implements Game {
 			break;
 		}
 		
-		CommandNotFoundEvent e = EventFactory.callEvent(new CommandNotFoundEvent(sender, command));
+		CommandNotFoundEvent e = EventManager.callEvent(new CommandNotFoundEvent(sender, command));
 		if(e.showMessage()) {
 			sender.sendMessage(Color.RED + this.translator.translate("command.unknown", sender.getLanguage()));
 		}

@@ -6,7 +6,6 @@ import java.util.List;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
@@ -17,6 +16,8 @@ import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+
+import com.zachsthings.onevent.EventManager;
 
 public class ClientPlayer implements Player {
 	
@@ -106,7 +107,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void moveTo(Level level, float x, float y, float z, float yaw, float pitch) {
-		PlayerTeleportEvent event = EventFactory.callEvent(new PlayerTeleportEvent(this, this.getPosition(), new Position(level, x, y, z, yaw, pitch)));
+		PlayerTeleportEvent event = EventManager.callEvent(new PlayerTeleportEvent(this, this.getPosition(), new Position(level, x, y, z, yaw, pitch)));
 		if(event.isCancelled()) {
 			return;
 		}

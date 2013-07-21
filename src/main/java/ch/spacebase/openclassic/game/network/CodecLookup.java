@@ -4,8 +4,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ch.spacebase.openclassic.api.network.msg.Message;
-import ch.spacebase.openclassic.game.network.codec.*;
-import ch.spacebase.openclassic.game.network.codec.custom.*;
+import ch.spacebase.openclassic.game.network.codec.BlockChangeCodec;
+import ch.spacebase.openclassic.game.network.codec.IdentificationCodec;
+import ch.spacebase.openclassic.game.network.codec.LevelDataCodec;
+import ch.spacebase.openclassic.game.network.codec.LevelFinalizeCodec;
+import ch.spacebase.openclassic.game.network.codec.LevelInitializeCodec;
+import ch.spacebase.openclassic.game.network.codec.MessageCodec;
+import ch.spacebase.openclassic.game.network.codec.PingCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerChatCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerDespawnCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerDisconnectCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerOpCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerPositionCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerPositionRotationCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerRotationCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerSetBlockCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerSpawnCodec;
+import ch.spacebase.openclassic.game.network.codec.PlayerTeleportCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.AudioPlayCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.AudioRegisterCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.CustomBlockCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.CustomCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.GameInfoCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.KeyChangeCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.LevelColorCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.MusicStopCodec;
+import ch.spacebase.openclassic.game.network.codec.custom.PluginCodec;
 
 public final class CodecLookup {
 

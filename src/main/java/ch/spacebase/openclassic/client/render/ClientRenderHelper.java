@@ -241,7 +241,7 @@ public class ClientRenderHelper extends RenderHelper {
 		float y1 = quad.getTexture().getY1();
 		float y2 = quad.getTexture().getY2();
 		
-		if(quad.getParent() instanceof CuboidModel) {
+		if(quad.getParent() instanceof CuboidModel && !((CuboidModel) quad.getParent()).isFullCube()) {
 			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
 			switch(face) {
 				case UP:
@@ -318,7 +318,7 @@ public class ClientRenderHelper extends RenderHelper {
 		float y1 = quad.getTexture().getY1();
 		float y2 = quad.getTexture().getY2();
 		
-		if(quad.getParent() instanceof CuboidModel) {
+		if(quad.getParent() instanceof CuboidModel && !((CuboidModel) quad.getParent()).isFullCube()) {
 			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
 			switch(face) {
 				case UP:
@@ -388,7 +388,7 @@ public class ClientRenderHelper extends RenderHelper {
 		float y1 = texture.getY1();
 		float y2 = texture.getY2();
 		
-		if(quad.getParent() instanceof CuboidModel) {
+		if(quad.getParent() instanceof CuboidModel && !((CuboidModel) quad.getParent()).isFullCube()) {
 			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
 			switch(face) {
 				case UP:

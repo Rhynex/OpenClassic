@@ -1,11 +1,5 @@
 package com.mojang.minecraft.render;
 
-import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-
-import com.mojang.minecraft.GameSettings;
-import com.mojang.minecraft.render.animation.AnimatedTexture;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,11 +12,18 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL30;
+
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
+
+import com.mojang.minecraft.GameSettings;
+import com.mojang.minecraft.render.animation.AnimatedTexture;
 
 public class TextureManager {
 

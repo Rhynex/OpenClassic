@@ -1,6 +1,5 @@
 package com.mojang.minecraft.render.animation;
 
-import com.mojang.minecraft.render.animation.AnimatedTexture;
 
 public final class WaterTexture extends AnimatedTexture {
 

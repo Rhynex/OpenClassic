@@ -1,5 +1,8 @@
 package com.mojang.minecraft.gui;
 
+import java.io.File;
+import java.util.Arrays;
+
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
@@ -12,9 +15,6 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.LevelIO;
-
-import java.io.File;
-import java.util.Arrays;
 
 public class LoadLevelScreen extends GuiScreen {
 

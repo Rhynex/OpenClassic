@@ -4,7 +4,6 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.ClientProgressBar;
 
 import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.Creeper;
 import com.mojang.minecraft.mob.Mob;
 import com.mojang.minecraft.mob.Pig;

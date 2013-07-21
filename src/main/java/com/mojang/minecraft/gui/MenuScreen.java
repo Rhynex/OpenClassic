@@ -1,7 +1,6 @@
 package com.mojang.minecraft.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.level.LevelUnloadEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
@@ -9,8 +8,8 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.gui.OptionsScreen;
 import com.mojang.minecraft.level.LevelIO;
+import com.zachsthings.onevent.EventManager;
 
 public final class MenuScreen extends GuiScreen {
 
@@ -39,7 +38,7 @@ public final class MenuScreen extends GuiScreen {
 
 		if (button.getId() == 2) {
 			if(!mc.isInMultiplayer()) {
-				if(EventFactory.callEvent(new LevelUnloadEvent(OpenClassic.getClient().getLevel())).isCancelled()) {
+				if(EventManager.callEvent(new LevelUnloadEvent(OpenClassic.getClient().getLevel())).isCancelled()) {
 					return;
 				}
 				

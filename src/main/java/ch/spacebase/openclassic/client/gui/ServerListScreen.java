@@ -10,6 +10,7 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
+
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.SessionData;
 import com.mojang.minecraft.gui.ErrorScreen;

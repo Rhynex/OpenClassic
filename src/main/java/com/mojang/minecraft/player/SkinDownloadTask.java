@@ -1,11 +1,12 @@
 package com.mojang.minecraft.player;
 
-import ch.spacebase.openclassic.api.Color;
-import ch.spacebase.openclassic.api.util.Constants;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
+
 import javax.imageio.ImageIO;
+
+import ch.spacebase.openclassic.api.Color;
+import ch.spacebase.openclassic.api.util.Constants;
 
 public final class SkinDownloadTask implements Runnable {
 

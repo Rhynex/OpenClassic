@@ -1,10 +1,15 @@
 package com.mojang.minecraft.level;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.client.level.ClientLevel;
@@ -14,16 +19,10 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.MovingObjectPosition;
 import com.mojang.minecraft.item.PrimedTnt;
-import com.mojang.minecraft.level.BlockMap;
-import com.mojang.minecraft.level.TickNextTick;
 import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.particle.ParticleManager;
 import com.mojang.minecraft.phys.AABB;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import com.zachsthings.onevent.EventManager;
 
 public class Level implements Serializable {
 
@@ -369,7 +368,7 @@ public class Level implements Serializable {
 			int z = y >> var1 & (this.depth - 1);
 			y = y >> var1 + var2 & (this.height - 1);
 			BlockType block = Blocks.fromId(this.blocks[(y * this.depth + z) * this.width + x]);
-			if(block != null && block.getPhysics() != null && this.openclassic.getPhysicsEnabled() && !EventFactory.callEvent(new BlockPhysicsEvent(this.openclassic.getBlockAt(x, y, z))).isCancelled()) {
+			if(block != null && block.getPhysics() != null && this.openclassic.getPhysicsEnabled() && !EventManager.callEvent(new BlockPhysicsEvent(this.openclassic.getBlockAt(x, y, z))).isCancelled()) {
 				block.getPhysics().update(this.openclassic.getBlockAt(x, y, z));
 			}
 		}
@@ -570,7 +569,7 @@ public class Level implements Serializable {
 		this.yawSpawn = yaw;
 		this.pitchSpawn = pitch;
 		
-		EventFactory.callEvent(new SpawnChangeEvent(this.openclassic, old));
+		EventManager.callEvent(new SpawnChangeEvent(this.openclassic, old));
 	}
 
 	public float getBrightness(int x, int y, int z) {

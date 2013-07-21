@@ -1,5 +1,8 @@
 package com.mojang.minecraft;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
@@ -12,8 +15,6 @@ import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.player.net.PositionUpdate;
 import com.mojang.minecraft.render.TextureManager;
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public abstract class Entity implements Serializable {
 

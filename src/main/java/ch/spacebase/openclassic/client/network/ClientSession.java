@@ -14,17 +14,17 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
-import com.mojang.minecraft.gui.ErrorScreen;
-import com.mojang.minecraft.level.LevelIO;
-
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent.Result;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+
+import com.mojang.minecraft.gui.ErrorScreen;
+import com.mojang.minecraft.level.LevelIO;
+import com.zachsthings.onevent.EventManager;
 
 public class ClientSession extends ClassicSession {
 
@@ -53,7 +53,7 @@ public class ClientSession extends ClassicSession {
 						ClientSession.this.channel = channel;
 						group.add(channel);
 			
-						PlayerConnectEvent event = EventFactory.callEvent(new PlayerConnectEvent(player.getName(), getAddress()));
+						PlayerConnectEvent event = EventManager.callEvent(new PlayerConnectEvent(player.getName(), getAddress()));
 						if(event.getResult() != Result.ALLOWED) {
 							disconnect(String.format(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
 							return;

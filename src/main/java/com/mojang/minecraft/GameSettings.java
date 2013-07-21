@@ -1,20 +1,19 @@
 package com.mojang.minecraft;
 
-import ch.spacebase.openclassic.api.OpenClassic;
-
-import com.mojang.minecraft.KeyBinding;
-import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.gamemode.CreativeGameMode;
-import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.player.LocalPlayer.PlayerAI;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import org.lwjgl.input.Keyboard;
+
+import ch.spacebase.openclassic.api.OpenClassic;
+
+import com.mojang.minecraft.gamemode.CreativeGameMode;
+import com.mojang.minecraft.gamemode.SurvivalGameMode;
+import com.mojang.minecraft.player.LocalPlayer.PlayerAI;
 
 public final class GameSettings {
 

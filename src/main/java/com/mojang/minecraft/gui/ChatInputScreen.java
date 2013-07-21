@@ -1,14 +1,15 @@
 package com.mojang.minecraft.gui;
 
+import org.lwjgl.input.Keyboard;
+
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import org.lwjgl.input.Keyboard;
+import com.zachsthings.onevent.EventManager;
 
 public final class ChatInputScreen extends GuiScreen {
 
@@ -23,7 +24,7 @@ public final class ChatInputScreen extends GuiScreen {
 			String message = this.getWidget(0, TextBox.class).getText().trim();
 			if (message.length() > 0) {
 				if(GeneralUtils.getMinecraft().isInMultiplayer()) {
-					PlayerChatEvent event = EventFactory.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
+					PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
 					if(event.isCancelled()) return;
 					
 					GeneralUtils.getMinecraft().session.send(new PlayerChatMessage((byte) -1, event.getMessage()));

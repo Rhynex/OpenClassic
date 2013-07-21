@@ -8,7 +8,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
-
 import ch.spacebase.opennbt.stream.NBTInputStream;
 import ch.spacebase.opennbt.tag.ByteArrayTag;
 import ch.spacebase.opennbt.tag.CompoundTag;

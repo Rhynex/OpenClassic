@@ -1,19 +1,17 @@
 package com.mojang.minecraft.render;
 
-import ch.spacebase.openclassic.api.render.RenderHelper;
-
-import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.LocalPlayer;
-import com.mojang.minecraft.render.TextureManager;
-import com.mojang.minecraft.render.ShapeRenderer;
-import com.mojang.minecraft.render.ChunkDistanceComparator;
-import com.mojang.minecraft.render.Chunk;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+
+import ch.spacebase.openclassic.api.render.RenderHelper;
+
+import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.player.LocalPlayer;
 
 public final class LevelRenderer {
 

@@ -1,14 +1,16 @@
 package com.mojang.minecraft.player.net;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.lwjgl.opengl.GL11;
+
+import ch.spacebase.openclassic.api.Color;
+
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.player.Player;
 import com.mojang.minecraft.render.FontRenderer;
 import com.mojang.minecraft.render.TextureManager;
-import java.util.LinkedList;
-import java.util.List;
-import org.lwjgl.opengl.GL11;
-
-import ch.spacebase.openclassic.api.Color;
 
 public class NetworkPlayer extends Player {
 

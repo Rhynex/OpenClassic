@@ -5,6 +5,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import org.jboss.netty.channel.Channel;
+
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session;

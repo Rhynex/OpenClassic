@@ -1,6 +1,5 @@
 package com.mojang.minecraft.model;
 
-import com.mojang.minecraft.model.Vector;
 
 public class Vertex {
 
