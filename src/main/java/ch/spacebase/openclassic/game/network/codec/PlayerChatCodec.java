@@ -8,7 +8,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
-
 public class PlayerChatCodec extends MessageCodec<PlayerChatMessage> {
 
 	public PlayerChatCodec() {

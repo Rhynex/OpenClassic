@@ -91,7 +91,7 @@ public class TextConsoleManager implements ConsoleManager {
 	}
 
 	public String formatOutput(String message) {
-		if (!message.contains(Color.COLOR_CHARACTER.toString())) {
+		if (!message.contains(Color.COLOR_CHARACTER_STRING)) {
 			return message;
 		} else {
 			return message.replace(Color.RED.toString(), "\033[1;31m").replace(Color.YELLOW.toString(), "\033[1;33m").replace(Color.GREEN.toString(), "\033[1;32m").replace(Color.AQUA.toString(), "\033[1;36m").replace(Color.BLUE.toString(), "\033[1;34m").replace(Color.PINK.toString(), "\033[1;35m").replace(Color.BLACK.toString(), "\033[0;0m").replace(Color.DARK_GRAY.toString(), "\033[1;30m").replace(Color.DARK_RED.toString(), "\033[0;31m").replace(Color.GOLD.toString(), "\033[0;33m").replace(Color.DARK_GREEN.toString(), "\033[0;32m").replace(Color.CYAN.toString(), "\033[0;36m").replace(Color.DARK_BLUE.toString(), "\033[0;34m").replace(Color.PURPLE.toString(), "\033[0;35m").replace(Color.GRAY.toString(), "\033[0;37m").replace(Color.WHITE.toString(), "\033[1;37m") + "\033[0m";

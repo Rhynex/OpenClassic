@@ -1,10 +1,7 @@
 package ch.spacebase.openclassic.client.util;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import ch.spacebase.openclassic.api.OpenClassic;
@@ -73,7 +70,7 @@ public class LWJGLNatives {
 			
 			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
 			System.out.println("Writing " + lib + " to " + file.getPath());
-			copy(in, file);
+			IOUtils.copy(in, file);
 			in.close();
 			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
 				System.load(file.getPath());
@@ -82,40 +79,6 @@ public class LWJGLNatives {
 			System.err.println(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
 			e.printStackTrace();
 		}
-	}
-	
-	private static void copy(InputStream in, File to) throws IOException {
-		if(!to.exists()) {
-			if(!to.getParentFile().exists()) {
-				try {
-					to.getParentFile().mkdirs();
-				} catch(SecurityException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			try {
-				to.createNewFile();
-			} catch(SecurityException e) {
-				e.printStackTrace();
-			}
-		} else {
-			try {
-				to.delete();
-				to.createNewFile();
-			} catch(SecurityException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		DataOutputStream out = new DataOutputStream(new FileOutputStream(to));
-		
-		int next;
-		while((next = in.read()) != -1) {
-			out.write(next);
-		}
-		
-		out.close();
 	}
 
 }

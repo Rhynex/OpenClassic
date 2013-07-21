@@ -7,21 +7,17 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
-
-import com.mojang.minecraft.GameSettings;
 
 public final class FontRenderer {
 
 	private int[] font = new int[256];
 	private int fontId = 0;
-	private GameSettings settings;
 
-	public FontRenderer(GameSettings settings, String fontImage, TextureManager textures) {
-		this.settings = settings;
-
+	public FontRenderer(String fontImage, TextureManager textures) {
 		BufferedImage font;
 		
 		try {
@@ -95,21 +91,14 @@ public final class FontRenderer {
 			int width = 0;
 			for (int count = 0; count < chars.length; count++) {
 				if (chars[count] == '&' && chars.length > count + 1) {
-					int code = "0123456789abcdef".indexOf(chars[count + 1]);
-					if (code < 0) {
-						code = 15;
+					Color code = Color.getByChar(chars[count + 1]);
+					if (code == null) {
+						code = Color.WHITE;
 					}
 
-					int alpha = (code & 8) << 3;
-					int red = ((code & 4) >> 2) * 191 + alpha;
-					int green = ((code & 2) >> 1) * 191 + alpha;
-					int blue = (code & 1) * 191 + alpha;
-					if (this.settings.anaglyph) {
-						red = (code * 30 + green * 59 + blue * 11) / 100;
-						green = (code * 30 + green * 70) / 100;
-						blue = (code * 30 + blue * 70) / 100;
-					}
-
+					int red = code.getRed();
+					int green = code.getGreen();
+					int blue = code.getBlue();
 					int c = red << 16 | green << 8 | blue;
 					if (shadow) {
 						c = (c & 16579836) >> 2;

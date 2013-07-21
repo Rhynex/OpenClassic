@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.GZIPOutputStream;
 
+import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -186,7 +187,12 @@ public class ServerPlayer implements Player {
 	}
 	
 	@Override
-	public void sendMessage(String message) {		
+	public void sendMessage(String message) {
+		if(!this.hasCustomClient()) {
+			message.replace(Color.ORANGE.toString(), Color.RED.toString());
+			message.replace(Color.BROWN.toString(), Color.RED.toString());
+		}
+		
 		this.getSession().send(new PlayerChatMessage(this.getPlayerId(), message));
 	}
 	

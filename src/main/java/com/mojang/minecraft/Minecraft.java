@@ -486,7 +486,7 @@ public final class Minecraft implements Runnable {
 		this.textureManager = new TextureManager(this.settings);
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.LavaTexture()));
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.WaterTexture()));
-		this.fontRenderer = new FontRenderer(this.settings, "/default.png", this.textureManager);
+		this.fontRenderer = new FontRenderer("/default.png", this.textureManager);
 		this.levelRenderer = new LevelRenderer(this.textureManager);
 		Item.initModels();
 		GL11.glViewport(0, 0, this.width, this.height);
