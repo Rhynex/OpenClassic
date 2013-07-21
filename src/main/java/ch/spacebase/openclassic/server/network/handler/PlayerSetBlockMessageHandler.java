@@ -9,21 +9,21 @@ import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session.State;
+import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.level.ServerLevel;
-import ch.spacebase.openclassic.server.player.ServerPlayer;
-import ch.spacebase.openclassic.server.player.ServerSession;
 
 public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockMessage> {
 
 	@Override
-	public void handle(ServerSession session, ServerPlayer player, PlayerSetBlockMessage message) {
-		if(session == null || player == null) return;
+	public void handle(ClassicSession session, Player player, PlayerSetBlockMessage message) {
 		if(session.getState() != State.GAME) return;
 		
 		BlockType b = Blocks.fromId(message.getBlock());
 		if(b == null || !b.isSelectable()) {
-			session.disconnect("Block type hack detected.");
+			player.sendMessage("Denied block type hack.");
 			return;
 		}
 		
@@ -31,7 +31,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		
 		BlockType old = player.getPosition().getLevel().getBlockTypeAt(message.getX(), message.getY(), message.getZ());
 		if(!message.isPlacing() && old == VanillaBlock.BEDROCK && !player.hasPermission("openclassic.commands.solid")) {
-			session.disconnect("Block break hack detected.");
+			player.sendMessage("Denied block break hack.");
 			return;
 		}
 			
@@ -58,7 +58,6 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		}
 		
 		((ServerLevel) player.getPosition().getLevel()).updatePhysics(message.getX(), message.getY(), message.getZ());
-		
 		if(block != null && block.getType() != null && block.getType().getPhysics() != null) {
 			if(message.isPlacing()) {
 				block.getType().getPhysics().onPlace(block);

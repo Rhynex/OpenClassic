@@ -124,7 +124,6 @@ disconnect:
     disallowed: Login disallowed.
     plugin-disallow: Connect disallowed by plugin!
     generic: Disconnected!
-    by-server: Disconnected by server!
 gui:
     "yes": "Yes"
     "no": "No"

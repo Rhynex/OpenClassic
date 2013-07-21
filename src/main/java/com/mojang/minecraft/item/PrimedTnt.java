@@ -9,7 +9,7 @@ import com.mojang.minecraft.item.TakeEntityAnim;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.particle.SmokeParticle;
 import com.mojang.minecraft.particle.TerrainParticle;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.TextureManager;
 import java.util.Random;
 import org.lwjgl.opengl.GL11;
@@ -42,7 +42,7 @@ public class PrimedTnt extends Entity {
 	public void hurt(Entity var1, int var2) {
 		if (!this.removed) {
 			super.hurt(var1, var2);
-			if (var1 instanceof Player) {
+			if (var1 instanceof LocalPlayer) {
 				this.remove();
 				this.level.addEntity(new Item(this.level, this.x, this.y, this.z, VanillaBlock.TNT.getId()));
 			}
@@ -94,7 +94,7 @@ public class PrimedTnt extends Entity {
 
 	public void playerTouch(Entity entity) {
 		if (this.defused) {
-			if (((Player) entity).addResource(VanillaBlock.TNT.getId())) {
+			if (((LocalPlayer) entity).addResource(VanillaBlock.TNT.getId())) {
 				this.level.addEntity(new TakeEntityAnim(this.level, this, entity));
 				this.remove();
 			}

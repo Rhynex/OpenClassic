@@ -4,10 +4,11 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session.State;
+import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.ClassicServer;
-import ch.spacebase.openclassic.server.player.ServerPlayer;
-import ch.spacebase.openclassic.server.player.ServerSession;
 
 public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> {
 
@@ -15,8 +16,7 @@ public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> 
 	private static final String illegalChars = "[^0-9a-zA-Z!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«]";
 	
 	@Override
-	public void handle(ServerSession session, ServerPlayer player, PlayerChatMessage message) {
-		if(player == null || session == null) return;
+	public void handle(ClassicSession session, Player player, PlayerChatMessage message) {
 		if(session.getState() != State.GAME) return;
 		
 		String chat = message.getMessage().trim();

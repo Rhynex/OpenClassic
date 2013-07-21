@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.config.Configuration;
 
 
 public class PersistanceManager {
 	
-	private Configuration players = new Configuration(new File("players.yml"));
+	private Configuration players = new Configuration(new File(OpenClassic.getGame().getDirectory(), "players.yml"));
 	
 	public void load() {
 		this.players.load();

@@ -7,10 +7,10 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 public class ChannelBufferUtils {
 
-	private static final Charset US_ASCII = Charset.forName("US-ASCII");
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
 	
 	public static void writeString(ChannelBuffer buffer, String string) {		
-		byte data[] = string.getBytes(US_ASCII);
+		byte data[] = string.getBytes(UTF_8);
 		
 		if (data.length > 64) {
 			data = Arrays.copyOfRange(data, 0, 64);
@@ -18,6 +18,7 @@ public class ChannelBufferUtils {
 		
 		if(data.length < 64) {
 			byte[] newData = new byte[64];
+			Arrays.fill(newData, (byte) 32);
 			System.arraycopy(data, 0, newData, 0, data.length);
 			
 			data = newData;
@@ -35,7 +36,7 @@ public class ChannelBufferUtils {
 			data[i] = buffer.readByte();
 		}
 
-		return new String(data, US_ASCII).trim();
+		return new String(data, UTF_8).trim();
 	}
 
 	private ChannelBufferUtils() {

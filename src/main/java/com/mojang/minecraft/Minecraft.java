@@ -4,33 +4,22 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.model.BoundingBox;
-import ch.spacebase.openclassic.api.block.model.CubeModel;
-import ch.spacebase.openclassic.api.block.model.CuboidModel;
-import ch.spacebase.openclassic.api.block.model.EmptyModel;
-import ch.spacebase.openclassic.api.block.model.LiquidModel;
-import ch.spacebase.openclassic.api.block.model.Model;
-import ch.spacebase.openclassic.api.block.model.Quad;
-import ch.spacebase.openclassic.api.block.model.Texture;
-import ch.spacebase.openclassic.api.block.model.Vertex;
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
-import ch.spacebase.openclassic.api.event.player.CustomMessageEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerJoinEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerKickEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerLoginEvent;
-import ch.spacebase.openclassic.api.event.player.PlayerLoginEvent.Result;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.network.msg.custom.CustomMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
+import ch.spacebase.openclassic.api.network.msg.custom.KeyChangeMessage;
+import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.render.RenderHelper;
@@ -39,7 +28,7 @@ import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.ClientProgressBar;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
-import ch.spacebase.openclassic.client.player.ClientPlayer;
+import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.sound.ClientAudioManager;
 import ch.spacebase.openclassic.client.util.BlockUtils;
@@ -59,17 +48,14 @@ import com.mojang.minecraft.gui.MenuScreen;
 import com.mojang.minecraft.item.Arrow;
 import com.mojang.minecraft.item.Item;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.level.LevelIO;
 import com.mojang.minecraft.model.ModelPart;
 import com.mojang.minecraft.model.Vector;
-import com.mojang.minecraft.net.NetworkManager;
-import com.mojang.minecraft.net.NetworkPlayer;
-import com.mojang.minecraft.net.PacketType;
 import com.mojang.minecraft.particle.ParticleManager;
 import com.mojang.minecraft.particle.WaterDropParticle;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.player.InputHandler;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
+import com.mojang.minecraft.player.net.NetworkPlayer;
 import com.mojang.minecraft.render.Chunk;
 import com.mojang.minecraft.render.ChunkVisibleAndDistanceComparator;
 import com.mojang.minecraft.render.ClippingHelper;
@@ -85,21 +71,15 @@ import java.awt.AWTException;
 import java.awt.Canvas;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.InetSocketAddress;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -130,7 +110,7 @@ public final class Minecraft implements Runnable {
 	private Timer timer = new Timer(Constants.TICKS_PER_SECOND);
 	public Level level;
 	public LevelRenderer levelRenderer;
-	public Player player;
+	public LocalPlayer player;
 	public ParticleManager particleManager;
 	public SessionData data = null;
 	public Canvas canvas;
@@ -146,8 +126,7 @@ public final class Minecraft implements Runnable {
 	private int blockHitTime;
 	public Robot robot;
 	public HUDScreen hud;
-	public boolean online;
-	public NetworkManager netManager;
+	public boolean awaitingLevel;
 	public MovingObjectPosition selected;
 	public GameSettings settings;
 	public String server;
@@ -168,13 +147,14 @@ public final class Minecraft implements Runnable {
 	public String openclassicVersion = "";
 	public boolean hacks = true;
 	public List<RemotePluginInfo> serverPlugins = new ArrayList<RemotePluginInfo>();
-	private boolean ctf;
+	public boolean ctf;
 	public int mipmapMode = 0;
+	public ClientSession session;
+	public HashMap<Byte, NetworkPlayer> netPlayers = new HashMap<Byte, NetworkPlayer>();
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
 		this.blockHitTime = 0;
-		this.online = false;
 		this.selected = null;
 		this.server = null;
 		this.port = 0;
@@ -220,10 +200,9 @@ public final class Minecraft implements Runnable {
 			if(this.player != null) {
 				this.player.releaseAllKeys();
 			}
-			
+
 			Mouse.setGrabbed(false);
 			screen.open(this.width, this.height);
-			this.online = false;
 		} else {
 			this.grabMouse();
 		}
@@ -244,43 +223,42 @@ public final class Minecraft implements Runnable {
 		if(this.shutdown) {
 			return;
 		}
-		
+
 		this.shutdown = true;
 		this.running = false;
 		if(this.ingame) this.stopGame(false);
 		if (this.resourceThread != null) {
 			this.resourceThread.running = false;
 		}
-		
-		if(OpenClassic.getServer() != null) {
-			OpenClassic.getServer().shutdown();
-		}
 
 		((ClassicScheduler) OpenClassic.getClient().getScheduler()).stop();
 		this.audio.cleanup();
+		OpenClassic.setGame(null);
 		Display.destroy();
-		
+
 		System.exit(0);
 	}
 
 	public void stopGame(boolean menu) {
 		this.audio.stopMusic();
-
+		this.serverPlugins.clear();
 		if(menu) this.setCurrentScreen(new MainMenuScreen());
 		if(this.data != null) this.data.key = "";
 
 		this.level = null;
 		this.particleManager = null;
 		this.hud = null;
-		if(this.player != null && this.player.openclassic.getData() != null && this.netManager == null) this.player.openclassic.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
+		if(this.player != null && this.player.openclassic.getData() != null && !this.isInMultiplayer()) {
+			this.player.openclassic.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
+		}
 
-		if(this.netManager != null) {
-			if(this.player != null) EventFactory.callEvent(new PlayerQuitEvent(OpenClassic.getClient().getPlayer(), "Quit"));
-			if(this.netManager.isConnected()) {
-				this.netManager.netHandler.close();
+		if(this.isInMultiplayer()) {
+			if(this.player != null) {
+				EventFactory.callEvent(new PlayerQuitEvent(OpenClassic.getClient().getPlayer(), "Quit"));
 			}
 
-			this.netManager = null;
+			this.session.disconnect(null);
+			this.session = null;
 		}
 
 		for(BlockType block : Blocks.getBlocks()) {
@@ -288,15 +266,16 @@ public final class Minecraft implements Runnable {
 				Blocks.unregister(block.getId());
 			}
 		}
-		
+
+		this.netPlayers.clear();
 		this.openclassicServer = false;
 		this.server = null;
 		this.port = 0;
-		this.online = false;
 		this.ingame = false;
 		this.hacks = true;
 		this.player = null;
 		this.settings.speed = false;
+		this.settings.flying = false;
 		this.hideGui = false;
 	}
 
@@ -329,13 +308,12 @@ public final class Minecraft implements Runnable {
 		this.particleManager = new ParticleManager(this.level, this.textureManager);
 		this.hud = new HUDScreen(this);
 
-		OpenClassic.getGame().getScheduler().scheduleTask(this, new SkinDownloadTask(this));
-		if (this.server != null && this.data != null) {
-			this.netManager = new NetworkManager(this, this.server, this.port, this.data.username, this.data.key);
+		if (this.server != null && this.data != null && this.player != null) {
+			this.session = new ClientSession(this.player.openclassic, this.data.key, this.server, this.port);
 			this.hacks = false;
 		}
 
-		this.mode = this.settings.survival && this.netManager == null ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		this.mode = this.settings.survival && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		if(this.level != null) {
 			this.mode.apply(this.level);
 		}
@@ -351,7 +329,7 @@ public final class Minecraft implements Runnable {
 		if(!this.running) {
 			return;
 		}
-		
+
 		if(this.started) {
 			if(e instanceof LWJGLException) {
 				this.running = false;
@@ -363,7 +341,7 @@ public final class Minecraft implements Runnable {
 			if(OpenClassic.getGame() != null && OpenClassic.getGame().getTranslator() != null) {
 				msg = OpenClassic.getGame().getTranslator().translate("core.fail-start");
 			}
-			
+
 			JOptionPane.showMessageDialog(null, e.toString(), msg, 0);
 			this.running = false;
 		}
@@ -388,7 +366,7 @@ public final class Minecraft implements Runnable {
 				running = false;
 			}
 		});
-		
+
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
@@ -458,7 +436,7 @@ public final class Minecraft implements Runnable {
 			this.handleException(e);
 			return;
 		}
-		
+
 		Display.setTitle("OpenClassic " + Constants.VERSION);
 		try {
 			Display.create();
@@ -599,566 +577,560 @@ public final class Minecraft implements Runnable {
 					this.ticks++;
 					this.tick();
 				}
-				
+
 				checkGLError("Pre render");
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
+				this.mode.applyBlockCracks(this.timer.renderPartialTicks);
+				if (this.renderer.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) { // Fixed focus bug for some computers/OS's
+					this.displayMenu();
+				}
 
-				if (!this.online) {
-					this.mode.applyBlockCracks(this.timer.renderPartialTicks);
-					if (this.renderer.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) { // Fixed focus bug for some computers/OS's
-						this.displayMenu();
+				this.renderer.displayActive = Display.isActive();
+				if (Mouse.isGrabbed()) {
+					int x = Mouse.getDX();
+					int y = Mouse.getDY();
+					byte direction = 1;
+					if (this.settings.invertMouse) {
+						direction = -1;
 					}
 
-					this.renderer.displayActive = Display.isActive();
-					if (Mouse.isGrabbed()) {
-						int x = Mouse.getDX();
-						int y = Mouse.getDY();
-						byte direction = 1;
-						if (this.settings.invertMouse) {
-							direction = -1;
+					this.player.turn(x, (y * direction));
+					Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+				}
+
+				int width = ClientRenderHelper.getHelper().getGuiWidth();
+				int height = ClientRenderHelper.getHelper().getGuiHeight();
+				if (this.level != null) {
+					float var29 = this.player.xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks;
+					float var30 = this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks;
+					Vector var31 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
+					float var32 = MathHelper.cos(-var30 * MathHelper.DEG_TO_RAD - MathHelper.PI);
+					float var69 = MathHelper.sin(-var30 * MathHelper.DEG_TO_RAD - MathHelper.PI);
+					float var74 = MathHelper.cos(-var29 * MathHelper.DEG_TO_RAD);
+					float var33 = MathHelper.sin(-var29 * MathHelper.DEG_TO_RAD);
+					float var34 = var69 * var74;
+					float var87 = var32 * var74;
+					float reach = this.mode.getReachDistance();
+					this.selected = this.level.clip(var31, var31.add(var34 * reach, var33 * reach, var87 * reach), true);
+					if (this.selected != null) {
+						reach = this.selected.blockPos.distance(this.renderer.getPlayerVector(this.timer.renderPartialTicks));
+					}
+
+					var31 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
+					if (this.mode instanceof CreativeGameMode) {
+						reach = 32;
+					}
+
+					this.renderer.entity = null;
+					List<Entity> entities = this.level.blockMap.getEntities(this.player, this.player.bb.expand(var34 * reach, var33 * reach, var87 * reach));
+
+					float distance = 0;
+					for (int count = 0; count < entities.size(); ++count) {
+						Entity entity = entities.get(count);
+						if (entity.isPickable()) {
+							MovingObjectPosition pos = entity.bb.grow(0.1F, 0.1F, 0.1F).clip(var31, var31.add(var34 * reach, var33 * reach, var87 * reach));
+							if (pos != null && (var31.distance(pos.blockPos) < distance || distance == 0)) {
+								this.renderer.entity = entity;
+								distance = var31.distance(pos.blockPos);
+							}
+						}
+					}
+
+					if (this.renderer.entity != null && !(this.mode instanceof CreativeGameMode)) {
+						this.renderer.mc.selected = new MovingObjectPosition(this.renderer.entity);
+					}
+
+					int var77 = 0;
+
+					while (true) {
+						if (var77 >= 2) {
+							GL11.glColorMask(true, true, true, false);
+							break;
 						}
 
-						this.player.turn(x, (y * direction));
-						Mouse.setCursorPosition(this.width / 2, this.height / 2);
-					}
-
-					if (!this.online) {
-						int width = ClientRenderHelper.getHelper().getGuiWidth();
-						int height = ClientRenderHelper.getHelper().getGuiHeight();
-						if (this.level != null) {
-							float var29 = (this.player = this.renderer.mc.player).xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks;
-							float var30 = this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks;
-							Vector var31 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
-							float var32 = MathHelper.cos(-var30 * MathHelper.DEG_TO_RAD - MathHelper.PI);
-							float var69 = MathHelper.sin(-var30 * MathHelper.DEG_TO_RAD - MathHelper.PI);
-							float var74 = MathHelper.cos(-var29 * MathHelper.DEG_TO_RAD);
-							float var33 = MathHelper.sin(-var29 * MathHelper.DEG_TO_RAD);
-							float var34 = var69 * var74;
-							float var87 = var32 * var74;
-							float reach = this.mode.getReachDistance();
-							this.selected = this.level.clip(var31, var31.add(var34 * reach, var33 * reach, var87 * reach), true);
-							if (this.selected != null) {
-								reach = this.selected.blockPos.distance(this.renderer.getPlayerVector(this.timer.renderPartialTicks));
+						if (this.settings.anaglyph) {
+							if (var77 == 0) {
+								GL11.glColorMask(false, true, true, false);
+							} else {
+								GL11.glColorMask(true, false, false, false);
 							}
+						}
 
-							var31 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
-							if (this.mode instanceof CreativeGameMode) {
-								reach = 32;
+						GL11.glViewport(0, 0, this.width, this.height);
+						var29 = 1.0F / (4 - this.settings.viewDistance);
+						var29 = 1.0F - (float) Math.pow(var29, 0.25D);
+						var30 = (this.level.skyColor >> 16 & 255) / 255.0F;
+						float var117 = (this.level.skyColor >> 8 & 255) / 255.0F;
+						var32 = (this.level.skyColor & 255) / 255.0F;
+						this.renderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
+						this.renderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
+						this.renderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
+						this.renderer.fogRed += (var30 - this.renderer.fogRed) * var29;
+						this.renderer.fogBlue += (var117 - this.renderer.fogBlue) * var29;
+						this.renderer.fogGreen += (var32 - this.renderer.fogGreen) * var29;
+						BlockType type = Blocks.fromId(this.level.getTile((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z));
+						if (type != null && type.isLiquid()) {
+							if (type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER) {
+								this.renderer.fogRed = 0.02F;
+								this.renderer.fogBlue = 0.02F;
+								this.renderer.fogGreen = 0.2F;
+							} else if (type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
+								this.renderer.fogRed = 0.6F;
+								this.renderer.fogBlue = 0.1F;
+								this.renderer.fogGreen = 0.0F;
 							}
+						}
 
-							this.renderer.entity = null;
-							List<Entity> entities = this.level.blockMap.getEntities(this.player, this.player.bb.expand(var34 * reach, var33 * reach, var87 * reach));
-							
-							float distance = 0;
-							for (int count = 0; count < entities.size(); ++count) {
-								Entity entity = entities.get(count);
-								if (entity.isPickable()) {
-									MovingObjectPosition pos = entity.bb.grow(0.1F, 0.1F, 0.1F).clip(var31, var31.add(var34 * reach, var33 * reach, var87 * reach));
-									if (pos != null && (var31.distance(pos.blockPos) < distance || distance == 0)) {
-										this.renderer.entity = entity;
-										distance = var31.distance(pos.blockPos);
-									}
-								}
-							}
+						if (this.renderer.mc.settings.anaglyph) {
+							float var1000 = (this.renderer.fogRed * 30.0F + this.renderer.fogBlue * 59.0F + this.renderer.fogGreen * 11.0F) / 100.0F;
+							var33 = (this.renderer.fogRed * 30.0F + this.renderer.fogBlue * 70.0F) / 100.0F;
+							var34 = (this.renderer.fogRed * 30.0F + this.renderer.fogGreen * 70.0F) / 100.0F;
+							this.renderer.fogRed = var1000;
+							this.renderer.fogBlue = var33;
+							this.renderer.fogGreen = var34;
+						}
 
-							if (this.renderer.entity != null && !(this.mode instanceof CreativeGameMode)) {
-								this.renderer.mc.selected = new MovingObjectPosition(this.renderer.entity);
-							}
+						GL11.glClearColor(this.renderer.fogRed, this.renderer.fogBlue, this.renderer.fogGreen, 0.0F);
+						GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
+						GL11.glEnable(GL11.GL_CULL_FACE);
+						this.renderer.fogEnd = (512 >> (this.renderer.mc.settings.viewDistance << 1));
+						GL11.glMatrixMode(GL11.GL_PROJECTION);
+						GL11.glLoadIdentity();
+						var29 = 0.07F;
+						if (this.renderer.mc.settings.anaglyph) {
+							GL11.glTranslatef((-((var77 << 1) - 1)) * var29, 0.0F, 0.0F);
+						}
 
-							int var77 = 0;
+						var69 = 70;
+						if (this.player.health <= 0) {
+							var69 /= (1.0F - 500.0F / (this.player.deathTime + this.timer.renderPartialTicks + 500.0F)) * 2.0F + 1.0F;
+						}
 
-							while (true) {
-								if (var77 >= 2) {
-									GL11.glColorMask(true, true, true, false);
-									break;
-								}
+						GLU.gluPerspective(var69, (float) this.renderer.mc.width / (float) this.renderer.mc.height, 0.05F, this.renderer.fogEnd);
+						GL11.glMatrixMode(GL11.GL_MODELVIEW);
+						GL11.glLoadIdentity();
+						if (this.settings.anaglyph) {
+							GL11.glTranslatef(((var77 << 1) - 1) * 0.1F, 0.0F, 0.0F);
+						}
 
-								if (this.settings.anaglyph) {
-									if (var77 == 0) {
-										GL11.glColorMask(false, true, true, false);
-									} else {
-										GL11.glColorMask(true, false, false, false);
-									}
-								}
+						this.renderer.hurtEffect(this.timer.renderPartialTicks);
+						if (this.settings.viewBobbing) {
+							this.renderer.applyBobbing(this.timer.renderPartialTicks);
+						}
 
-								GL11.glViewport(0, 0, this.width, this.height);
-								var29 = 1.0F / (4 - this.settings.viewDistance);
-								var29 = 1.0F - (float) Math.pow(var29, 0.25D);
-								var30 = (this.level.skyColor >> 16 & 255) / 255.0F;
-								float var117 = (this.level.skyColor >> 8 & 255) / 255.0F;
-								var32 = (this.level.skyColor & 255) / 255.0F;
-								this.renderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
-								this.renderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
-								this.renderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
-								this.renderer.fogRed += (var30 - this.renderer.fogRed) * var29;
-								this.renderer.fogBlue += (var117 - this.renderer.fogBlue) * var29;
-								this.renderer.fogGreen += (var32 - this.renderer.fogGreen) * var29;
-								BlockType type = Blocks.fromId(this.level.getTile((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z));
-								if (type != null && type.isLiquid()) {
-									if (type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER) {
-										this.renderer.fogRed = 0.02F;
-										this.renderer.fogBlue = 0.02F;
-										this.renderer.fogGreen = 0.2F;
-									} else if (type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
-										this.renderer.fogRed = 0.6F;
-										this.renderer.fogBlue = 0.1F;
-										this.renderer.fogGreen = 0.0F;
-									}
-								}
+						GL11.glTranslatef(0.0F, 0.0F, -0.1F);
+						GL11.glRotatef(this.player.xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks, 1.0F, 0.0F, 0.0F);
+						GL11.glRotatef(this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks, 0.0F, 1.0F, 0.0F);
+						var69 = this.player.xo + (this.player.x - this.player.xo) * this.timer.renderPartialTicks;
+						float var1000 = this.player.yo + (this.player.y - this.player.yo) * this.timer.renderPartialTicks;
+						var33 = this.player.zo + (this.player.z - this.player.zo) * this.timer.renderPartialTicks;
+						GL11.glTranslatef(-var69, -var1000, -var33);
+						ClippingHelper clipping = ClippingHelper.getInstance();
 
-								if (this.renderer.mc.settings.anaglyph) {
-									float var1000 = (this.renderer.fogRed * 30.0F + this.renderer.fogBlue * 59.0F + this.renderer.fogGreen * 11.0F) / 100.0F;
-									var33 = (this.renderer.fogRed * 30.0F + this.renderer.fogBlue * 70.0F) / 100.0F;
-									var34 = (this.renderer.fogRed * 30.0F + this.renderer.fogGreen * 70.0F) / 100.0F;
-									this.renderer.fogRed = var1000;
-									this.renderer.fogBlue = var33;
-									this.renderer.fogGreen = var34;
-								}
+						for (int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
+							this.levelRenderer.chunkCache[count].clip(clipping);
+						}
 
-								GL11.glClearColor(this.renderer.fogRed, this.renderer.fogBlue, this.renderer.fogGreen, 0.0F);
-								GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
-								GL11.glEnable(GL11.GL_CULL_FACE);
-								this.renderer.fogEnd = (512 >> (this.renderer.mc.settings.viewDistance << 1));
-								GL11.glMatrixMode(GL11.GL_PROJECTION);
-								GL11.glLoadIdentity();
-								var29 = 0.07F;
-								if (this.renderer.mc.settings.anaglyph) {
-									GL11.glTranslatef((-((var77 << 1) - 1)) * var29, 0.0F, 0.0F);
-								}
+						try {
+							Collections.sort(this.levelRenderer.chunks, new ChunkVisibleAndDistanceComparator(this.player));
+						} catch(Exception e) {
+						}
 
-								var69 = 70;
-								if (this.player.health <= 0) {
-									var69 /= (1.0F - 500.0F / (this.player.deathTime + this.timer.renderPartialTicks + 500.0F)) * 2.0F + 1.0F;
-								}
+						int var98 = this.levelRenderer.chunks.size() - 1;
+						int var105 = this.levelRenderer.chunks.size();
+						if (var105 > 3) {
+							var105 = 3;
+						}
 
-								GLU.gluPerspective(var69, (float) this.renderer.mc.width / (float) this.renderer.mc.height, 0.05F, this.renderer.fogEnd);
-								GL11.glMatrixMode(GL11.GL_MODELVIEW);
-								GL11.glLoadIdentity();
-								if (this.settings.anaglyph) {
-									GL11.glTranslatef(((var77 << 1) - 1) * 0.1F, 0.0F, 0.0F);
-								}
+						for (int count = 0; count < var105; ++count) {
+							Chunk chunk = this.levelRenderer.chunks.remove(var98 - count);
+							chunk.update();
+							chunk.loaded = false;
+						}
 
-								this.renderer.hurtEffect(this.timer.renderPartialTicks);
-								if (this.settings.viewBobbing) {
-									this.renderer.applyBobbing(this.timer.renderPartialTicks);
-								}
+						this.renderer.updateFog();
+						GL11.glEnable(GL11.GL_FOG);
+						this.levelRenderer.sortChunks(this.player, 0);
+						if (this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
+							for (int var122 = (int) this.player.x - 1; var122 <= (int) this.player.x + 1; ++var122) {
+								for (int var125 = (int) this.player.y - 1; var125 <= (int) this.player.y + 1; ++var125) {
+									for (int var38 = (int) this.player.z - 1; var38 <= (int) this.player.z + 1; ++var38) {
+										var105 = var38;
+										var98 = var125;
+										int var99 = this.levelRenderer.level.getTile(var122, var125, var38);
+										if (var99 != 0 && Blocks.fromId(var99) != null && Blocks.fromId(var99).getPreventsRendering()) {
+											GL11.glColor4f(0.2F, 0.2F, 0.2F, 1.0F);
+											GL11.glDepthFunc(GL11.GL_LESS);
+											ShapeRenderer.instance.begin();
 
-								this.player = this.renderer.mc.player;
-								GL11.glTranslatef(0.0F, 0.0F, -0.1F);
-								GL11.glRotatef(this.player.xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks, 1.0F, 0.0F, 0.0F);
-								GL11.glRotatef(this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks, 0.0F, 1.0F, 0.0F);
-								var69 = this.player.xo + (this.player.x - this.player.xo) * this.timer.renderPartialTicks;
-								float var1000 = this.player.yo + (this.player.y - this.player.yo) * this.timer.renderPartialTicks;
-								var33 = this.player.zo + (this.player.z - this.player.zo) * this.timer.renderPartialTicks;
-								GL11.glTranslatef(-var69, -var1000, -var33);
-								ClippingHelper clipping = ClippingHelper.getInstance();
+											Blocks.fromId(var99).getModel().renderAll(var122, var98, var105, 0.2F);
 
-								for (int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
-									this.levelRenderer.chunkCache[count].clip(clipping);
-								}
+											ShapeRenderer.instance.end();
+											GL11.glCullFace(GL11.GL_FRONT);
+											ShapeRenderer.instance.begin();
 
-								try {
-									Collections.sort(this.levelRenderer.chunks, new ChunkVisibleAndDistanceComparator(this.player));
-								} catch(Exception e) {
-								}
+											Blocks.fromId(var99).getModel().renderAll(var122, var98, var105, 0.2F);
 
-								int var98 = this.levelRenderer.chunks.size() - 1;
-								int var105 = this.levelRenderer.chunks.size();
-								if (var105 > 3) {
-									var105 = 3;
-								}
-
-								for (int count = 0; count < var105; ++count) {
-									Chunk chunk = this.levelRenderer.chunks.remove(var98 - count);
-									chunk.update();
-									chunk.loaded = false;
-								}
-
-								this.renderer.updateFog();
-								GL11.glEnable(GL11.GL_FOG);
-								this.levelRenderer.sortChunks(this.player, 0);
-								if (this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
-									for (int var122 = (int) this.player.x - 1; var122 <= (int) this.player.x + 1; ++var122) {
-										for (int var125 = (int) this.player.y - 1; var125 <= (int) this.player.y + 1; ++var125) {
-											for (int var38 = (int) this.player.z - 1; var38 <= (int) this.player.z + 1; ++var38) {
-												var105 = var38;
-												var98 = var125;
-												int var99 = this.levelRenderer.level.getTile(var122, var125, var38);
-												if (var99 != 0 && Blocks.fromId(var99) != null && Blocks.fromId(var99).getPreventsRendering()) {
-													GL11.glColor4f(0.2F, 0.2F, 0.2F, 1.0F);
-													GL11.glDepthFunc(GL11.GL_LESS);
-													ShapeRenderer.instance.begin();
-
-													Blocks.fromId(var99).getModel().renderAll(var122, var98, var105, 0.2F);
-
-													ShapeRenderer.instance.end();
-													GL11.glCullFace(GL11.GL_FRONT);
-													ShapeRenderer.instance.begin();
-
-													Blocks.fromId(var99).getModel().renderAll(var122, var98, var105, 0.2F);
-
-													ShapeRenderer.instance.end();
-													GL11.glCullFace(GL11.GL_BACK);
-													GL11.glDepthFunc(GL11.GL_LEQUAL);
-												}
-											}
+											ShapeRenderer.instance.end();
+											GL11.glCullFace(GL11.GL_BACK);
+											GL11.glDepthFunc(GL11.GL_LEQUAL);
 										}
 									}
 								}
+							}
+						}
 
-								this.renderer.setLighting(true);
-								Vector var103 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
-								this.levelRenderer.level.blockMap.render(var103, clipping, this.levelRenderer.textures, this.timer.renderPartialTicks);
-								this.renderer.setLighting(false);
-								this.renderer.updateFog();
-								float var107 = this.timer.renderPartialTicks;
-								var29 = -MathHelper.cos(this.player.yRot * 3.1415927F / 180.0F);
-								var117 = -(var30 = -MathHelper.sin(this.player.yRot * 3.1415927F / 180.0F)) * MathHelper.sin(this.player.xRot * 3.1415927F / 180.0F);
-								var32 = var29 * MathHelper.sin(this.player.xRot * 3.1415927F / 180.0F);
-								var69 = MathHelper.cos(this.player.xRot * 3.1415927F / 180.0F);
+						this.renderer.setLighting(true);
+						Vector var103 = this.renderer.getPlayerVector(this.timer.renderPartialTicks);
+						this.levelRenderer.level.blockMap.render(var103, clipping, this.levelRenderer.textures, this.timer.renderPartialTicks);
+						this.renderer.setLighting(false);
+						this.renderer.updateFog();
+						float var107 = this.timer.renderPartialTicks;
+						var29 = -MathHelper.cos(this.player.yRot * 3.1415927F / 180.0F);
+						var117 = -(var30 = -MathHelper.sin(this.player.yRot * 3.1415927F / 180.0F)) * MathHelper.sin(this.player.xRot * 3.1415927F / 180.0F);
+						var32 = var29 * MathHelper.sin(this.player.xRot * 3.1415927F / 180.0F);
+						var69 = MathHelper.cos(this.player.xRot * 3.1415927F / 180.0F);
 
-								for (int particle = 0; particle < 2; ++particle) {
-									if (this.particleManager.particles[particle].size() != 0) {
-										int textureId = 0;
-										if (particle == 0) {
-											textureId = this.particleManager.textureManager.bindTexture("/particles.png");
-										}
+						for (int particle = 0; particle < 2; ++particle) {
+							if (this.particleManager.particles[particle].size() != 0) {
+								int textureId = 0;
+								if (particle == 0) {
+									textureId = this.particleManager.textureManager.bindTexture("/particles.png");
+								}
 
-										if (particle == 1) {
-											textureId = this.particleManager.textureManager.bindTexture("/terrain.png");
-										}
+								if (particle == 1) {
+									textureId = this.particleManager.textureManager.bindTexture("/terrain.png");
+								}
 
-										RenderHelper.getHelper().bindTexture(textureId);
+								RenderHelper.getHelper().bindTexture(textureId);
+								ShapeRenderer.instance.begin();
+
+								for (int count = 0; count < this.particleManager.particles[particle].size(); ++count) {
+									this.particleManager.particles[particle].get(count).render(ShapeRenderer.instance, var107, var29, var69, var30, var117, var32);
+								}
+
+								ShapeRenderer.instance.end();
+							}
+						}
+
+						RenderHelper.getHelper().bindTexture("/rock.png", true);
+						GL11.glEnable(GL11.GL_TEXTURE_2D);
+						GL11.glCallList(this.levelRenderer.listId);
+						this.renderer.updateFog();
+						RenderHelper.getHelper().bindTexture("/clouds.png", true);
+						GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+						var107 = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255.0F;
+						var29 = (this.levelRenderer.level.cloudColor >> 8 & 255) / 255.0F;
+						var30 = (this.levelRenderer.level.cloudColor & 255) / 255.0F;
+						if (this.settings.anaglyph) {
+							var117 = (var107 * 30.0F + var29 * 59.0F + var30 * 11.0F) / 100.0F;
+							var32 = (var107 * 30.0F + var29 * 70.0F) / 100.0F;
+							var69 = (var107 * 30.0F + var30 * 70.0F) / 100.0F;
+							var107 = var117;
+							var29 = var32;
+							var30 = var69;
+						}
+
+						var33 = 4.8828125E-4F;
+						var1000 = (this.levelRenderer.level.height + 2);
+						var34 = (this.levelRenderer.ticks + this.timer.renderPartialTicks) * var33 * 0.03F;
+						float var35 = 0;
+						ShapeRenderer.instance.begin();
+						ShapeRenderer.instance.color(var107, var29, var30);
+
+						for (int var86 = -2048; var86 < this.levelRenderer.level.width + 2048; var86 += 512) {
+							for (int var125 = -2048; var125 < this.levelRenderer.level.depth + 2048; var125 += 512) {
+								ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
+								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
+								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
+								ShapeRenderer.instance.vertexUV(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
+								ShapeRenderer.instance.vertexUV(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
+								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
+								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
+								ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
+							}
+						}
+
+						ShapeRenderer.instance.end();
+						GL11.glDisable(GL11.GL_TEXTURE_2D);
+						ShapeRenderer.instance.begin();
+						var34 = (this.levelRenderer.level.skyColor >> 16 & 255) / 255.0F;
+						var35 = (this.levelRenderer.level.skyColor >> 8 & 255) / 255.0F;
+						var87 = (this.levelRenderer.level.skyColor & 255) / 255.0F;
+						if (this.settings.anaglyph) {
+							float var36 = (var34 * 30.0F + var35 * 59.0F + var87 * 11.0F) / 100.0F;
+							var69 = (var34 * 30.0F + var35 * 70.0F) / 100.0F;
+							var1000 = (var34 * 30.0F + var87 * 70.0F) / 100.0F;
+							var34 = var36;
+							var35 = var69;
+							var87 = var1000;
+						}
+
+						ShapeRenderer.instance.color(var34, var35, var87);
+						var1000 = (this.levelRenderer.level.height + 10);
+
+						for (int var125 = -2048; var125 < this.levelRenderer.level.width + 2048; var125 += 512) {
+							for (int var68 = -2048; var68 < this.levelRenderer.level.depth + 2048; var68 += 512) {
+								ShapeRenderer.instance.vertex(var125, var1000, var68);
+								ShapeRenderer.instance.vertex((var125 + 512), var1000, var68);
+								ShapeRenderer.instance.vertex((var125 + 512), var1000, (var68 + 512));
+								ShapeRenderer.instance.vertex(var125, var1000, (var68 + 512));
+							}
+						}
+
+						ShapeRenderer.instance.end();
+						GL11.glEnable(GL11.GL_TEXTURE_2D);
+						this.renderer.updateFog();
+						int var108;
+						if (this.renderer.mc.selected != null) {
+							GL11.glDisable(GL11.GL_ALPHA_TEST);
+							MovingObjectPosition var10001 = this.renderer.mc.selected;
+							var105 = this.player.inventory.getSelected();
+							MovingObjectPosition var102 = var10001;
+							com.mojang.minecraft.render.ShapeRenderer var113 = com.mojang.minecraft.render.ShapeRenderer.instance;
+							GL11.glEnable(GL11.GL_BLEND);
+							GL11.glEnable(GL11.GL_ALPHA_TEST);
+							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+							GL11.glColor4f(1.0F, 1.0F, 1.0F, (MathHelper.sin(System.currentTimeMillis() / 100.0F) * 0.2F + 0.4F) * 0.5F);
+							if (this.levelRenderer.cracks > 0) {
+								GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR);
+								RenderHelper.getHelper().bindTexture("/terrain.png", true);
+								GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+								GL11.glPushMatrix();
+								int var114 = this.levelRenderer.level.getTile(var102.x, var102.y, var102.z);
+								BlockType var10000 = var114 > 0 ? Blocks.fromId(var114) : null;
+								var113.begin();
+								var113.noColor();
+								GL11.glDepthMask(false);
+								if (var10000 == null) {
+									var10000 = VanillaBlock.STONE;
+								}
+
+								for (int var86 = 0; var86 < var10000.getModel().getQuads().size(); ++var86) {
+									ClientRenderHelper.getHelper().drawCracks(var10000.getModel().getQuad(var86), var102.x, var102.y, var102.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
+								}
+
+								var113.end();
+								GL11.glDepthMask(true);
+								GL11.glPopMatrix();
+							}
+
+
+							GL11.glDisable(GL11.GL_BLEND);
+							GL11.glDisable(GL11.GL_ALPHA_TEST);
+							var10001 = this.renderer.mc.selected;
+							this.player.inventory.getSelected();
+							var102 = var10001;
+							GL11.glEnable(GL11.GL_BLEND);
+							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+							GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.4F);
+							GL11.glLineWidth(2.0F);
+							GL11.glDisable(GL11.GL_TEXTURE_2D);
+							GL11.glDepthMask(false);
+							var29 = 0.002F;
+							int block = this.levelRenderer.level.getTile(var102.x, var102.y, var102.z);
+							if (block > 0) {
+								AABB aabb = BlockUtils.getSelectionBox(block, var102.x, var102.y, var102.z).grow(var29, var29, var29);
+								GL11.glBegin(GL11.GL_LINE_STRIP);
+								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
+								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
+								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
+								GL11.glEnd();
+								GL11.glBegin(GL11.GL_LINE_STRIP);
+								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
+								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
+								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
+								GL11.glEnd();
+								GL11.glBegin(GL11.GL_LINES);
+								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
+								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
+								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
+								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
+								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
+								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
+								GL11.glEnd();
+							}
+
+							GL11.glDepthMask(true);
+							GL11.glEnable(GL11.GL_TEXTURE_2D);
+							GL11.glDisable(GL11.GL_BLEND);
+							GL11.glEnable(GL11.GL_ALPHA_TEST);
+						}
+
+						GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+						this.renderer.updateFog();
+						GL11.glEnable(GL11.GL_TEXTURE_2D);
+						GL11.glEnable(GL11.GL_BLEND);
+						RenderHelper.getHelper().bindTexture("/water.png", true);
+						GL11.glCallList(this.levelRenderer.listId + 1);
+						GL11.glDisable(GL11.GL_BLEND);
+						GL11.glEnable(GL11.GL_BLEND);
+						GL11.glColorMask(false, false, false, false);
+						int cy = this.levelRenderer.sortChunks(this.player, 1);
+						GL11.glColorMask(true, true, true, true);
+						if (this.renderer.mc.settings.anaglyph) {
+							if (var77 == 0) {
+								GL11.glColorMask(false, true, true, false);
+							} else {
+								GL11.glColorMask(true, false, false, false);
+							}
+						}
+
+						if (cy > 0) {
+							RenderHelper.getHelper().bindTexture("/terrain.png", true);
+							GL11.glCallLists(this.levelRenderer.buffer);
+						}
+
+						GL11.glDepthMask(true);
+						GL11.glDisable(GL11.GL_BLEND);
+						GL11.glDisable(GL11.GL_FOG);
+						if (this.renderer.mc.raining) {
+							int x = (int) this.player.x;
+							int y = (int) this.player.y;
+							int z = (int) this.player.z;
+							GL11.glDisable(GL11.GL_CULL_FACE);
+							GL11.glNormal3f(0, 1, 0);
+							GL11.glEnable(GL11.GL_BLEND);
+							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+							RenderHelper.getHelper().bindTexture("/rain.png", true);
+
+							for (int cx = x - 5; cx <= x + 5; ++cx) {
+								for (int cz = z - 5; cz <= z + 5; ++cz) {
+									cy = this.level.getHighestTile(cx, cz);
+									int var86 = y - 5;
+									int var125 = y + 5;
+									if (var86 < cy) {
+										var86 = cy;
+									}
+
+									if (var125 < cy) {
+										var125 = cy;
+									}
+
+									if (var86 != var125) {
+										var1000 = (((this.renderer.levelTicks + cx * 3121 + cz * 418711) % 32) + this.timer.renderPartialTicks) / 32.0F;
+										float var124 = cx + 0.5F - this.player.x;
+										var35 = cz + 0.5F - this.player.z;
+										float var92 = (float) Math.sqrt(var124 * var124 + var35 * var35) / 5;
+										GL11.glColor4f(1.0F, 1.0F, 1.0F, (1.0F - var92 * var92) * 0.7F);
 										ShapeRenderer.instance.begin();
-
-										for (int count = 0; count < this.particleManager.particles[particle].size(); ++count) {
-											this.particleManager.particles[particle].get(count).render(ShapeRenderer.instance, var107, var29, var69, var30, var117, var32);
-										}
-
+										ShapeRenderer.instance.vertexUV(cx, var86, cz, 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV((cx + 1), var86, (cz + 1), 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV((cx + 1), var125, (cz + 1), 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV(cx, var125, cz, 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV(cx, var86, (cz + 1), 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV((cx + 1), var86, cz, 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV((cx + 1), var125, cz, 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										ShapeRenderer.instance.vertexUV(cx, var125, (cz + 1), 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
 										ShapeRenderer.instance.end();
 									}
 								}
-
-								RenderHelper.getHelper().bindTexture("/rock.png", true);
-								GL11.glEnable(GL11.GL_TEXTURE_2D);
-								GL11.glCallList(this.levelRenderer.listId);
-								this.renderer.updateFog();
-								RenderHelper.getHelper().bindTexture("/clouds.png", true);
-								GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-								var107 = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255.0F;
-								var29 = (this.levelRenderer.level.cloudColor >> 8 & 255) / 255.0F;
-								var30 = (this.levelRenderer.level.cloudColor & 255) / 255.0F;
-								if (this.settings.anaglyph) {
-									var117 = (var107 * 30.0F + var29 * 59.0F + var30 * 11.0F) / 100.0F;
-									var32 = (var107 * 30.0F + var29 * 70.0F) / 100.0F;
-									var69 = (var107 * 30.0F + var30 * 70.0F) / 100.0F;
-									var107 = var117;
-									var29 = var32;
-									var30 = var69;
-								}
-
-								var33 = 4.8828125E-4F;
-								var1000 = (this.levelRenderer.level.height + 2);
-								var34 = (this.levelRenderer.ticks + this.timer.renderPartialTicks) * var33 * 0.03F;
-								float var35 = 0;
-								ShapeRenderer.instance.begin();
-								ShapeRenderer.instance.color(var107, var29, var30);
-
-								for (int var86 = -2048; var86 < this.levelRenderer.level.width + 2048; var86 += 512) {
-									for (int var125 = -2048; var125 < this.levelRenderer.level.depth + 2048; var125 += 512) {
-										ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
-										ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
-										ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
-										ShapeRenderer.instance.vertexUV(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
-										ShapeRenderer.instance.vertexUV(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
-										ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
-										ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
-										ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
-									}
-								}
-
-								ShapeRenderer.instance.end();
-								GL11.glDisable(GL11.GL_TEXTURE_2D);
-								ShapeRenderer.instance.begin();
-								var34 = (this.levelRenderer.level.skyColor >> 16 & 255) / 255.0F;
-								var35 = (this.levelRenderer.level.skyColor >> 8 & 255) / 255.0F;
-								var87 = (this.levelRenderer.level.skyColor & 255) / 255.0F;
-								if (this.settings.anaglyph) {
-									float var36 = (var34 * 30.0F + var35 * 59.0F + var87 * 11.0F) / 100.0F;
-									var69 = (var34 * 30.0F + var35 * 70.0F) / 100.0F;
-									var1000 = (var34 * 30.0F + var87 * 70.0F) / 100.0F;
-									var34 = var36;
-									var35 = var69;
-									var87 = var1000;
-								}
-
-								ShapeRenderer.instance.color(var34, var35, var87);
-								var1000 = (this.levelRenderer.level.height + 10);
-
-								for (int var125 = -2048; var125 < this.levelRenderer.level.width + 2048; var125 += 512) {
-									for (int var68 = -2048; var68 < this.levelRenderer.level.depth + 2048; var68 += 512) {
-										ShapeRenderer.instance.vertex(var125, var1000, var68);
-										ShapeRenderer.instance.vertex((var125 + 512), var1000, var68);
-										ShapeRenderer.instance.vertex((var125 + 512), var1000, (var68 + 512));
-										ShapeRenderer.instance.vertex(var125, var1000, (var68 + 512));
-									}
-								}
-
-								ShapeRenderer.instance.end();
-								GL11.glEnable(GL11.GL_TEXTURE_2D);
-								this.renderer.updateFog();
-								int var108;
-								if (this.renderer.mc.selected != null) {
-									GL11.glDisable(GL11.GL_ALPHA_TEST);
-									MovingObjectPosition var10001 = this.renderer.mc.selected;
-									var105 = this.player.inventory.getSelected();
-									MovingObjectPosition var102 = var10001;
-									com.mojang.minecraft.render.ShapeRenderer var113 = com.mojang.minecraft.render.ShapeRenderer.instance;
-									GL11.glEnable(GL11.GL_BLEND);
-									GL11.glEnable(GL11.GL_ALPHA_TEST);
-									GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-									GL11.glColor4f(1.0F, 1.0F, 1.0F, (MathHelper.sin(System.currentTimeMillis() / 100.0F) * 0.2F + 0.4F) * 0.5F);
-									if (this.levelRenderer.cracks > 0) {
-										GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR);
-										RenderHelper.getHelper().bindTexture("/terrain.png", true);
-										GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
-										GL11.glPushMatrix();
-										int var114 = this.levelRenderer.level.getTile(var102.x, var102.y, var102.z);
-										BlockType var10000 = var114 > 0 ? Blocks.fromId(var114) : null;
-										var113.begin();
-										var113.noColor();
-										GL11.glDepthMask(false);
-										if (var10000 == null) {
-											var10000 = VanillaBlock.STONE;
-										}
-
-										for (int var86 = 0; var86 < var10000.getModel().getQuads().size(); ++var86) {
-											ClientRenderHelper.getHelper().drawCracks(var10000.getModel().getQuad(var86), var102.x, var102.y, var102.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
-										}
-
-										var113.end();
-										GL11.glDepthMask(true);
-										GL11.glPopMatrix();
-									}
-
-									
-									GL11.glDisable(GL11.GL_BLEND);
-									GL11.glDisable(GL11.GL_ALPHA_TEST);
-									var10001 = this.renderer.mc.selected;
-									this.player.inventory.getSelected();
-									var102 = var10001;
-									GL11.glEnable(GL11.GL_BLEND);
-									GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-									GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.4F);
-									GL11.glLineWidth(2.0F);
-									GL11.glDisable(GL11.GL_TEXTURE_2D);
-									GL11.glDepthMask(false);
-									var29 = 0.002F;
-									int block = this.levelRenderer.level.getTile(var102.x, var102.y, var102.z);
-									if (block > 0) {
-										AABB aabb = BlockUtils.getSelectionBox(block, var102.x, var102.y, var102.z).grow(var29, var29, var29);
-										GL11.glBegin(GL11.GL_LINE_STRIP);
-										GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
-										GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
-										GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
-										GL11.glEnd();
-										GL11.glBegin(GL11.GL_LINE_STRIP);
-										GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
-										GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
-										GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
-										GL11.glEnd();
-										GL11.glBegin(GL11.GL_LINES);
-										GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
-										GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
-										GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
-										GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
-										GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
-										GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
-										GL11.glEnd();
-									}
-
-									GL11.glDepthMask(true);
-									GL11.glEnable(GL11.GL_TEXTURE_2D);
-									GL11.glDisable(GL11.GL_BLEND);
-									GL11.glEnable(GL11.GL_ALPHA_TEST);
-								}
-
-								GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-								this.renderer.updateFog();
-								GL11.glEnable(GL11.GL_TEXTURE_2D);
-								GL11.glEnable(GL11.GL_BLEND);
-								RenderHelper.getHelper().bindTexture("/water.png", true);
-								GL11.glCallList(this.levelRenderer.listId + 1);
-								GL11.glDisable(GL11.GL_BLEND);
-								GL11.glEnable(GL11.GL_BLEND);
-								GL11.glColorMask(false, false, false, false);
-								int cy = this.levelRenderer.sortChunks(this.player, 1);
-								GL11.glColorMask(true, true, true, true);
-								if (this.renderer.mc.settings.anaglyph) {
-									if (var77 == 0) {
-										GL11.glColorMask(false, true, true, false);
-									} else {
-										GL11.glColorMask(true, false, false, false);
-									}
-								}
-
-								if (cy > 0) {
-									RenderHelper.getHelper().bindTexture("/terrain.png", true);
-									GL11.glCallLists(this.levelRenderer.buffer);
-								}
-
-								GL11.glDepthMask(true);
-								GL11.glDisable(GL11.GL_BLEND);
-								GL11.glDisable(GL11.GL_FOG);
-								if (this.renderer.mc.raining) {
-									int x = (int) this.player.x;
-									int y = (int) this.player.y;
-									int z = (int) this.player.z;
-									GL11.glDisable(GL11.GL_CULL_FACE);
-									GL11.glNormal3f(0, 1, 0);
-									GL11.glEnable(GL11.GL_BLEND);
-									GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-									RenderHelper.getHelper().bindTexture("/rain.png", true);
-
-									for (int cx = x - 5; cx <= x + 5; ++cx) {
-										for (int cz = z - 5; cz <= z + 5; ++cz) {
-											cy = this.level.getHighestTile(cx, cz);
-											int var86 = y - 5;
-											int var125 = y + 5;
-											if (var86 < cy) {
-												var86 = cy;
-											}
-
-											if (var125 < cy) {
-												var125 = cy;
-											}
-
-											if (var86 != var125) {
-												var1000 = (((this.renderer.levelTicks + cx * 3121 + cz * 418711) % 32) + this.timer.renderPartialTicks) / 32.0F;
-												float var124 = cx + 0.5F - this.player.x;
-												var35 = cz + 0.5F - this.player.z;
-												float var92 = (float) Math.sqrt(var124 * var124 + var35 * var35) / 5;
-												GL11.glColor4f(1.0F, 1.0F, 1.0F, (1.0F - var92 * var92) * 0.7F);
-												ShapeRenderer.instance.begin();
-												ShapeRenderer.instance.vertexUV(cx, var86, cz, 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV((cx + 1), var86, (cz + 1), 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV((cx + 1), var125, (cz + 1), 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV(cx, var125, cz, 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV(cx, var86, (cz + 1), 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV((cx + 1), var86, cz, 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV((cx + 1), var125, cz, 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.vertexUV(cx, var125, (cz + 1), 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-												ShapeRenderer.instance.end();
-											}
-										}
-									}
-
-									GL11.glEnable(GL11.GL_CULL_FACE);
-									GL11.glDisable(GL11.GL_BLEND);
-								}
-
-								if (this.renderer.entity != null) {
-									this.renderer.entity.renderHover(this.renderer.mc.textureManager, this.timer.renderPartialTicks);
-								}
-
-								GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-								GL11.glLoadIdentity();
-								if (this.renderer.mc.settings.anaglyph) {
-									GL11.glTranslatef(((var77 << 1) - 1) * 0.1F, 0.0F, 0.0F);
-								}
-
-								this.renderer.hurtEffect(this.timer.renderPartialTicks);
-								if (this.renderer.mc.settings.viewBobbing) {
-									this.renderer.applyBobbing(this.timer.renderPartialTicks);
-								}
-
-								var117 = this.renderer.heldBlock.lastPosition + (this.renderer.heldBlock.heldPosition - this.renderer.heldBlock.lastPosition) * this.timer.renderPartialTicks;
-								GL11.glPushMatrix();
-								GL11.glRotatef(this.player.xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks, 1.0F, 0.0F, 0.0F);
-								GL11.glRotatef(this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks, 0.0F, 1.0F, 0.0F);
-								this.renderer.setLighting(true);
-								GL11.glPopMatrix();
-								GL11.glPushMatrix();
-								var69 = 0.8F;
-								if (this.renderer.heldBlock.moving) {
-									var33 = MathHelper.sin((var1000 = (this.renderer.heldBlock.heldOffset + this.timer.renderPartialTicks) / 7.0F) * 3.1415927F);
-									GL11.glTranslatef(-MathHelper.sin((float) Math.sqrt(var1000) * 3.1415927F) * 0.4F, MathHelper.sin((float) Math.sqrt(var1000) * 3.1415927F * 2.0F) * 0.2F, -var33 * 0.2F);
-								}
-
-								GL11.glTranslatef(0.7F * var69, -0.65F * var69 - (1.0F - var117) * 0.6F, -0.9F * var69);
-								GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-								GL11.glEnable(GL11.GL_NORMALIZE);
-								if (this.renderer.heldBlock.moving) {
-									var33 = MathHelper.sin((var1000 = (this.renderer.heldBlock.heldOffset + this.timer.renderPartialTicks) / 7.0F) * var1000 * 3.1415927F);
-									GL11.glRotatef(MathHelper.sin((float) Math.sqrt(var1000) * 3.1415927F) * 80.0F, 0.0F, 1.0F, 0.0F);
-									GL11.glRotatef(-var33 * 20.0F, 1.0F, 0.0F, 0.0F);
-								}
-
-								float brightness = this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z);
-								GL11.glColor4f(brightness, brightness, brightness, 1);
-								com.mojang.minecraft.render.ShapeRenderer var123 = com.mojang.minecraft.render.ShapeRenderer.instance;
-								
-								if(!this.hideGui) {
-									if (this.renderer.heldBlock.block != null) {
-										var34 = 0.4F;
-										GL11.glScalef(0.4F, var34, var34);
-										GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-										this.renderer.heldBlock.block.getModel().renderAll(0, 0, 0, this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z));
-									} else {
-										this.player.bindTexture(this.textureManager);
-										GL11.glScalef(1.0F, -1.0F, -1.0F);
-										GL11.glTranslatef(0.0F, 0.2F, 0.0F);
-										GL11.glRotatef(-120.0F, 0.0F, 0.0F, 1.0F);
-										GL11.glScalef(1.0F, 1.0F, 1.0F);
-										ModelPart arm = this.player.getModel().leftArm;
-										if (!arm.hasList) {
-											arm.generateList(0.0625F);
-										}
-	
-										GL11.glCallList(arm.list);
-									}
-								}
-								
-								GL11.glDisable(GL11.GL_NORMALIZE);
-								GL11.glPopMatrix();
-								this.renderer.setLighting(false);
-								if (!this.renderer.mc.settings.anaglyph) {
-									break;
-								}
-
-								var77++;
 							}
 
-							this.hud.render(this.timer.renderPartialTicks, this.currentScreen != null, Mouse.getX() * width / this.width, height - Mouse.getY() * height / this.height - 1);
-						} else {
-							GL11.glViewport(0, 0, this.width, this.height);
-							GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-							GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
-							GL11.glMatrixMode(GL11.GL_PROJECTION);
-							GL11.glLoadIdentity();
-							GL11.glMatrixMode(GL11.GL_MODELVIEW);
-							GL11.glLoadIdentity();
-							this.renderer.enableGuiMode();
+							GL11.glEnable(GL11.GL_CULL_FACE);
+							GL11.glDisable(GL11.GL_BLEND);
 						}
 
-						if (this.currentScreen != null) {
-							this.currentScreen.render();
-						}
-						
-						if(this.progressBar.isVisible()) {
-							this.progressBar.render(false);
+						if (this.renderer.entity != null) {
+							this.renderer.entity.renderHover(this.renderer.mc.textureManager, this.timer.renderPartialTicks);
 						}
 
-						Thread.yield();
-						Display.update();
+						GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+						GL11.glLoadIdentity();
+						if (this.renderer.mc.settings.anaglyph) {
+							GL11.glTranslatef(((var77 << 1) - 1) * 0.1F, 0.0F, 0.0F);
+						}
+
+						this.renderer.hurtEffect(this.timer.renderPartialTicks);
+						if (this.renderer.mc.settings.viewBobbing) {
+							this.renderer.applyBobbing(this.timer.renderPartialTicks);
+						}
+
+						var117 = this.renderer.heldBlock.lastPosition + (this.renderer.heldBlock.heldPosition - this.renderer.heldBlock.lastPosition) * this.timer.renderPartialTicks;
+						GL11.glPushMatrix();
+						GL11.glRotatef(this.player.xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks, 1.0F, 0.0F, 0.0F);
+						GL11.glRotatef(this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks, 0.0F, 1.0F, 0.0F);
+						this.renderer.setLighting(true);
+						GL11.glPopMatrix();
+						GL11.glPushMatrix();
+						var69 = 0.8F;
+						if (this.renderer.heldBlock.moving) {
+							var33 = MathHelper.sin((var1000 = (this.renderer.heldBlock.heldOffset + this.timer.renderPartialTicks) / 7.0F) * 3.1415927F);
+							GL11.glTranslatef(-MathHelper.sin((float) Math.sqrt(var1000) * 3.1415927F) * 0.4F, MathHelper.sin((float) Math.sqrt(var1000) * 3.1415927F * 2.0F) * 0.2F, -var33 * 0.2F);
+						}
+
+						GL11.glTranslatef(0.7F * var69, -0.65F * var69 - (1.0F - var117) * 0.6F, -0.9F * var69);
+						GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+						GL11.glEnable(GL11.GL_NORMALIZE);
+						if (this.renderer.heldBlock.moving) {
+							var33 = MathHelper.sin((var1000 = (this.renderer.heldBlock.heldOffset + this.timer.renderPartialTicks) / 7.0F) * var1000 * 3.1415927F);
+							GL11.glRotatef(MathHelper.sin((float) Math.sqrt(var1000) * 3.1415927F) * 80.0F, 0.0F, 1.0F, 0.0F);
+							GL11.glRotatef(-var33 * 20.0F, 1.0F, 0.0F, 0.0F);
+						}
+
+						float brightness = this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z);
+						GL11.glColor4f(brightness, brightness, brightness, 1);
+						com.mojang.minecraft.render.ShapeRenderer var123 = com.mojang.minecraft.render.ShapeRenderer.instance;
+
+						if(!this.hideGui) {
+							if (this.renderer.heldBlock.block != null) {
+								var34 = 0.4F;
+								GL11.glScalef(0.4F, var34, var34);
+								GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
+								this.renderer.heldBlock.block.getModel().renderAll(0, 0, 0, this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z));
+							} else {
+								this.player.bindTexture(this.textureManager);
+								GL11.glScalef(1.0F, -1.0F, -1.0F);
+								GL11.glTranslatef(0.0F, 0.2F, 0.0F);
+								GL11.glRotatef(-120.0F, 0.0F, 0.0F, 1.0F);
+								GL11.glScalef(1.0F, 1.0F, 1.0F);
+								ModelPart arm = this.player.getModel().leftArm;
+								if (!arm.hasList) {
+									arm.generateList(0.0625F);
+								}
+
+								GL11.glCallList(arm.list);
+							}
+						}
+
+						GL11.glDisable(GL11.GL_NORMALIZE);
+						GL11.glPopMatrix();
+						this.renderer.setLighting(false);
+						if (!this.renderer.mc.settings.anaglyph) {
+							break;
+						}
+
+						var77++;
 					}
+
+					this.hud.render(this.timer.renderPartialTicks, this.currentScreen != null, Mouse.getX() * width / this.width, height - Mouse.getY() * height / this.height - 1);
+				} else {
+					GL11.glViewport(0, 0, this.width, this.height);
+					GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+					GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
+					GL11.glMatrixMode(GL11.GL_PROJECTION);
+					GL11.glLoadIdentity();
+					GL11.glMatrixMode(GL11.GL_MODELVIEW);
+					GL11.glLoadIdentity();
+					this.renderer.enableGuiMode();
 				}
+
+				if (this.currentScreen != null) {
+					this.currentScreen.render();
+				}
+
+				if(this.progressBar.isVisible()) {
+					this.progressBar.render(false);
+				}
+
+				Thread.yield();
+				Display.update();
 
 				if (this.settings.limitFPS) {
 					try {
@@ -1178,7 +1150,7 @@ public final class Minecraft implements Runnable {
 				}
 			}
 		}
-		
+
 		ShaderManager.cleanup();
 		this.shutdown();
 		return;
@@ -1193,7 +1165,7 @@ public final class Minecraft implements Runnable {
 	}
 
 	public final void displayMenu() {
-		if (this.currentScreen == null && this.ingame && (this.netManager == null || this.netManager.isConnected() && this.netManager.levelLoaded)) {
+		if (this.currentScreen == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
 			this.setCurrentScreen(new MenuScreen());
 		}
 	}
@@ -1271,11 +1243,11 @@ public final class Minecraft implements Runnable {
 								return;
 							}
 
-							if (this.isConnected()) {
-								this.netManager.sendBlockChange(x, y, z, button, id);
+							if (this.isInMultiplayer()) {
+								this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, button == 1, (byte) id));
 							}
 
-							if(this.netManager == null && EventFactory.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.renderer.heldBlock.block)).isCancelled()) {
+							if(!this.isInMultiplayer() && EventFactory.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.renderer.heldBlock.block)).isCancelled()) {
 								return;
 							}
 
@@ -1359,397 +1331,30 @@ public final class Minecraft implements Runnable {
 			}
 		}
 
-		if (this.netManager != null && !(this.currentScreen instanceof ErrorScreen)) {
-			if (!this.netManager.isConnected()) {
-				this.progressBar.setVisible(true);
-				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
-				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
-				this.progressBar.setProgress(-1);
-				this.progressBar.render();
+		if (this.isInMultiplayer()) {
+			if(this.currentScreen instanceof ErrorScreen) {
+				this.progressBar.setVisible(false);
 			} else {
-				if (this.netManager.successful) {
-					if (this.netManager.netHandler.connected) {
+				if (!this.session.isConnected()) {
+					this.progressBar.setVisible(true);
+					this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
+					this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+					this.progressBar.setProgress(-1);
+					this.progressBar.render();
+				} else {
+					if (this.session.connectSuccess()) {
 						try {
-							this.netManager.netHandler.channel.read(this.netManager.netHandler.in);
-							int count = 0;
-
-							while (this.netManager.netHandler.in.position() > 0 && count++ != 100) {
-								this.netManager.netHandler.in.flip();
-								int packetId = this.netManager.netHandler.in.get(0);
-								PacketType type = PacketType.packets[packetId];
-								if (type == null) {
-									System.err.println("Bad packet: " + packetId);
-									this.netManager.netHandler.close();
-									break;
-								}
-
-								if (this.netManager.netHandler.in.remaining() < type.length + 1) {
-									this.netManager.netHandler.in.compact();
-									break;
-								}
-
-								this.netManager.netHandler.in.get();
-								Object[] params = new Object[type.params.length];
-
-								for (int param = 0; param < params.length; ++param) {
-									params[param] = this.netManager.netHandler.recieveData(type.params[param]);
-								}
-
-								if (this.netManager.successful) {
-									if (type == PacketType.IDENTIFICATION) {
-										if(!this.netManager.identified) {
-											PlayerLoginEvent event = EventFactory.callEvent(new PlayerLoginEvent(OpenClassic.getClient().getPlayer(), InetSocketAddress.createUnresolved(this.server, this.port)));
-											if(event.getResult() != Result.ALLOWED) {
-												this.stopGame(false);
-												this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
-											}
-										}
-
-										this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
-										this.progressBar.setSubtitle(params[1].toString());
-										this.progressBar.setText(params[2].toString());
-										this.player.userType = (Byte) params[3];
-
-										if(!this.netManager.identified) {
-											if(params[1].toString().indexOf("+hax") > -1 || params[2].toString().indexOf("+hax") > -1) {
-												this.hacks = true;
-											} else {
-												this.hacks = false;
-											}
-
-											if(this.player.userType == Constants.OP && (params[1].toString().indexOf("+ophax") > -1 || params[2].toString().indexOf("+ophax") > -1)) {
-												this.hacks = true;
-											}
-
-											if(params[1].toString().indexOf("+ctf") > -1 || params[2].toString().indexOf("+ctf") > -1) {
-												this.ctf = true;
-											}
-
-											EventFactory.callEvent(new PlayerJoinEvent(OpenClassic.getClient().getPlayer(), "Joined"));
-										}
-
-										this.netManager.identified = true;
-									} else if (type == PacketType.LEVEL_INIT) {
-										if(!this.openclassicServer) {
-											VanillaBlock.registerAll();
-										}
-										
-										this.setLevel(null);
-										this.setCurrentScreen(null);
-										this.netManager.levelData = new ByteArrayOutputStream();
-										this.netManager.levelLoaded = false;
-									} else if (type == PacketType.LEVEL_DATA) {
-										short length = (Short) params[0];
-										byte[] data = (byte[]) params[1];
-										byte percent = (Byte) params[2];
-										this.progressBar.setProgress(percent);
-										this.netManager.levelData.write(data, 0, length);
-									} else if (type == PacketType.LEVEL_FINALIZE) {
-										this.netManager.levelData.close();
-										byte[] processed = LevelIO.processData(new ByteArrayInputStream(this.netManager.levelData.toByteArray()));
-										this.netManager.levelData = null;
-										short width = (Short) params[0];
-										short depth = (Short) params[1];
-										short height = (Short) params[2];
-										Level level = new Level();
-										level.setNetworkMode(true);
-										level.setData(width, depth, height, processed);
-										this.setLevel(level);
-										this.online = false;
-										this.netManager.levelLoaded = true;
-										this.progressBar.setVisible(false);
-									} else if (type == PacketType.SET_BLOCK) {
-										if (this.level != null) {
-											this.level.netSetTile((Short) params[0], (Short) params[1], (Short) params[2], (Byte) params[3]);
-										}
-									} else if (type == PacketType.SPAWN_PLAYER) {
-										byte playerId = (Byte) params[0];
-										String name = (String) params[1];
-										short x = (Short) params[2];
-										short y = (Short) params[3];
-										short z = (Short) params[4];
-										byte yaw = (Byte) params[5];
-										byte pitch = (Byte) params[6];
-
-										if (playerId >= 0) {
-											NetworkPlayer player = new NetworkPlayer(this, playerId, name, x, (short) (y - 22), z, ((yaw + 128) * 360) / 256.0F, (pitch * 360) / 256.0F);
-											this.netManager.players.put(playerId, player);
-											this.level.addEntity(player);
-										} else {
-											this.level.setSpawnPos(x / 32f, y / 32f, z / 32f, (yaw * 360) / 256f, (pitch * 360) / 256f);
-											this.player.moveTo(x / 32f, y / 32f, z / 32f, (yaw * 360) / 256f, (pitch * 360) / 256f);
-										}
-									} else if (type == PacketType.POSITION_ROTATION) {
-										byte playerId = (Byte) params[0];
-										short x = (Short) params[1];
-										short y = (Short) params[2];
-										short z = (Short) params[3];
-										byte yaw = ((Byte) params[4]).byteValue();
-										byte pitch = ((Byte) params[5]).byteValue();
-										if (playerId < 0) {
-											this.player.moveTo(x / 32.0F, y / 32.0F, z / 32.0F, (yaw * 360) / 256.0F, (pitch * 360) / 256.0F);
-										} else {
-											NetworkPlayer var61 = this.netManager.players.get(Byte.valueOf(playerId));
-											if (var61 != null) {
-												var61.teleport(x, (short) (y - 22), z, ((byte) (yaw + 128) * 360) / 256.0F, (pitch * 360) / 256.0F);
-											}
-										}
-									} else if (type == PacketType.POSITION_ROTATION_UPDATE) {
-										byte playerId = ((Byte) params[0]).byteValue();
-										byte x = ((Byte) params[1]).byteValue();
-										byte y = ((Byte) params[2]).byteValue();
-										byte z = ((Byte) params[3]).byteValue();
-										byte yaw = ((Byte) params[4]).byteValue();
-										byte pitch = ((Byte) params[5]).byteValue();
-										if (playerId >= 0) {
-											NetworkPlayer moving = this.netManager.players.get(Byte.valueOf(playerId));
-											if (moving != null) {
-												moving.queue(x, y, z, ((byte) (yaw + 128) * 360) / 256.0F, (pitch * 360) / 256.0F);
-											}
-										}
-									} else if (type == PacketType.ROTATION_UPDATE) {
-										byte playerId = (Byte) params[0];
-										byte yaw = (Byte) params[1];
-										byte pitch = (Byte) params[2];
-										if (playerId >= 0) {
-											NetworkPlayer moving = this.netManager.players.get(Byte.valueOf(playerId));
-											if (moving != null) {
-												moving.queue(((byte) (yaw + 128) * 360) / 256.0F, (pitch * 360) / 256.0F);
-											}
-										}
-									} else if (type == PacketType.POSITION_UPDATE) {
-										byte x = (Byte) params[1];
-										byte y = (Byte) params[2];
-										byte z = (Byte) params[3];
-										byte playerId = (Byte) params[0];
-										NetworkPlayer moving = this.netManager.players.get(playerId);
-										if (playerId >= 0 && moving != null) {
-											moving.queue(x, y, z);
-										}
-									} else if (type == PacketType.DESPAWN_PLAYER) {
-										NetworkPlayer despawning = this.netManager.players.remove(params[0]);
-										if ((Byte) params[0] >= 0 && despawning != null) {
-											despawning.clear();
-											this.level.removeEntity(despawning);
-										}
-									} else if (type == PacketType.CHAT_MESSAGE) {
-										byte id = (Byte) params[0];
-										String message = (String) params[1];
-										if (id < 0) {
-											this.hud.addChat(Color.YELLOW + message);
-										} else {
-											this.hud.addChat(message);
-										}
-									} else if (type == PacketType.DISCONNECT) {
-										EventFactory.callEvent(new PlayerKickEvent(OpenClassic.getClient().getPlayer(), (String) params[0], ""));
-										this.netManager.netHandler.close();
-										this.setCurrentScreen((new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.by-server"), (String) params[0])));
-									} else if (type == PacketType.UPDATE_PLAYER_TYPE) {
-										this.player.userType = (Byte) params[0];
-										// Custom begins
-									} else if (type == PacketType.GAME_INFO) {
-										OpenClassic.getLogger().info("Connected to OpenClassic v" + (String) params[0] + "!");
-										this.openclassicServer = true;
-										this.openclassicVersion = (String) params[0];
-										this.netManager.netHandler.send(PacketType.GAME_INFO, Constants.VERSION, OpenClassic.getGame().getLanguage());
-										for(Plugin plugin : OpenClassic.getClient().getPluginManager().getPlugins()) {
-											this.netManager.netHandler.send(PacketType.PLUGIN, plugin.getDescription().getName(), plugin.getDescription().getVersion());
-										}
-									} else if (type == PacketType.CUSTOM_BLOCK) {
-										byte id = (Byte) params[0];
-										boolean opaque = (Byte) params[1] == 1;
-										boolean selectable = (Byte) params[2] == 1;
-										StepSound sound = StepSound.valueOf((String) params[3]);
-										boolean liquid = (Byte) params[4] == 1;
-										int delay = (Integer) params[5];
-										boolean preventsRendering = (Byte) params[6] == 1;
-										boolean placeIn = (Byte) params[7] == 1;
-										boolean gas = (Byte) params[8] == 1;
-										boolean preventsOwnRendering = (Byte) params[9] == 1;
-
-										BlockType block = new BlockType(id, sound, (Model) null);
-										block.setOpaque(opaque);
-										block.setLiquid(liquid);
-										block.setSelectable(selectable);
-										block.setTickDelay(delay);
-										block.setPreventsRendering(preventsRendering);
-										block.setPlaceIn(placeIn);
-										block.setGas(gas);
-										block.setPreventsOwnRendering(preventsOwnRendering);
-										Blocks.register(block);
-									} else if (type == PacketType.BLOCK_MODEL) {
-										byte block = (Byte) params[0];
-										String modelType = (String) params[1];
-										Model model = modelType.equals("EmptyModel") ? new EmptyModel() : modelType.equals("TransparentModel") ? new LiquidModel("/terrain.png", 16) : (modelType.equals("CuboidModel") ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (modelType.equals("CubeModel") ? new CubeModel("/terrain.png", 16) : new Model()));
-										model.clearQuads();
-
-										float x1 = (Float) params[2];
-										float x2 = (Float) params[3];
-										float y1 = (Float) params[4];
-										float y2 = (Float) params[5];
-										float z1 = (Float) params[6];
-										float z2 = (Float) params[7];
-										if(x1 != -1) {
-											model.setCollisionBox(new BoundingBox(x1, y1, z1, x2, y2, z2));
-										} else {
-											model.setCollisionBox(null);
-										}
-
-										float sx1 = (Float) params[8];
-										float sx2 = (Float) params[9];
-										float sy1 = (Float) params[10];
-										float sy2 = (Float) params[11];
-										float sz1 = (Float) params[12];
-										float sz2 = (Float) params[13];
-										if(sx1 != -1) {
-											model.setSelectionBox(new BoundingBox(sx1, sy1, sz1, sx2, sy2, sz2));
-										} else {
-											model.setSelectionBox(null);
-										}
-										
-										Blocks.fromId(block).setModel(model);
-									} else if (type == PacketType.QUAD) {
-										byte block = (Byte) params[0];
-										int id = (Integer) params[1];
-
-										Vertex vertices[] = new Vertex[4];
-										for(int vCount = 0; vCount < 4; vCount++) {
-											float x = (Float) params[2 + vCount * 3];
-											float y = (Float) params[3 + vCount * 3];
-											float z = (Float) params[4 + vCount * 3];
-
-											vertices[vCount] = new Vertex(x, y, z);
-										}
-
-										String texture = (String) params[14];
-										boolean jar = (Byte) params[15] == 1;
-										int width = (Integer) params[16];
-										int height = (Integer) params[17];
-										int swidth = (Integer) params[18];
-										int sheight = (Integer) params[19];
-
-										if(!jar) {
-											File file = new File(this.dir, "cache/" + this.server + "/" + block + ".png");
-											if(!file.exists()) {
-												if(!file.getParentFile().exists()) {
-													try {
-														file.getParentFile().mkdirs();
-													} catch(SecurityException e) {
-														e.printStackTrace();
-													}
-												}
-
-												try {
-													file.createNewFile();
-												} catch(SecurityException e) {
-													e.printStackTrace();
-												}
-
-												System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloading"), file.getName()));
-
-												byte[] data = new byte[4096];
-												DataInputStream in = null;
-												DataOutputStream out = null;
-
-												try {
-													in = new DataInputStream((new URL(texture)).openStream());
-													out = new DataOutputStream(new FileOutputStream(file));
-
-													int length = 0;
-													while (this.running) {
-														length = in.read(data);
-														if (length < 0) break;
-														out.write(data, 0, length);
-													}
-												} catch (IOException e) {
-													e.printStackTrace();
-												} finally {
-													try {
-														if (in != null)
-															in.close();
-														if (out != null)
-															out.close();
-													} catch (IOException e) {
-														e.printStackTrace();
-													}
-												}
-
-												System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
-											}
-
-											texture = file.getPath();
-										}
-
-										Texture t = new Texture(texture, jar, width, height, swidth, sheight);
-										Quad quad = new Quad(id, t.getSubTexture((Integer) params[20]), vertices[0], vertices[1], vertices[2], vertices[3]);
-
-										Blocks.fromId(block).getModel().addQuad(quad);
-									} else if (type == PacketType.LEVEL_COLOR) {
-										if (params[0].equals("sky")) {
-											this.level.skyColor = (Integer) params[1];
-										} else if (params[0].equals("fog")) {
-											this.level.fogColor = (Integer) params[1];
-										} else if (params[0].equals("cloud")) {
-											this.level.cloudColor = (Integer) params[1];
-										}
-									} else if (type == PacketType.AUDIO_REGISTER) {
-										if(((Byte) params[3]) == 1) {
-											this.audio.registerMusic((String) params[0], new URL((String) params[1]), ((Byte) params[2]) == 1);
-										} else {
-											this.audio.registerSound((String) params[0], new URL((String) params[1]), ((Byte) params[2]) == 1);
-										}
-									} else if (type == PacketType.AUDIO_PLAY) {
-										if(((Byte) params[6]) == 1) {
-											this.audio.playMusic((String) params[0], ((Byte) params[7]) == 1);
-										} else {
-											this.audio.playSound((String) params[0], (Float) params[1], (Float) params[2], (Float) params[3], (Float) params[4], (Float) params[5]);
-										}
-									} else if (type == PacketType.MUSIC_STOP) {
-										if(((String) params[0]).equals("all_music")) {
-											this.audio.stopMusic();
-										} else {
-											this.audio.stop((String) params[0]);
-										}
-									} else if (type == PacketType.PLUGIN) {
-										this.serverPlugins.add(new RemotePluginInfo((String) params[0], (String) params[1]));
-									} else if (type == PacketType.CUSTOM) {
-										EventFactory.callEvent(new CustomMessageEvent(this.player.openclassic, new CustomMessage((String) params[0], (byte[]) params[1])));
-									}
-								}
-
-								if (!this.netManager.netHandler.connected) {
-									break;
-								}
-
-								this.netManager.netHandler.in.compact();
-							}
-
-							if (this.netManager.netHandler.out.position() > 0) {
-								this.netManager.netHandler.out.flip();
-
-								if(this.netManager.netHandler.channel != null) {
-									this.netManager.netHandler.channel.write(this.netManager.netHandler.out);
-								}
-
-								this.netManager.netHandler.out.compact();
-							}
-						} catch (IOException e) {
-							this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.generic"), e.toString()));
+							this.session.tick();
+						} catch (Exception e) {
 							e.printStackTrace();
-							this.online = false;
-							this.netManager.netHandler.close();
-							this.netManager = null;
+							this.session.disconnect(e.toString());
+							this.session = null;
 						}
 					}
-				}
 
-				if (this.netManager != null && this.netManager.levelLoaded) {
-					int x = (int) (this.player.x * 32.0F);
-					int y = (int) (this.player.y * 32.0F);
-					int z = (int) (this.player.z * 32.0F);
-					int yaw = (int) (this.player.yRot * 256.0F / 360.0F) & 255;
-					int pitch = (int) (this.player.xRot * 256.0F / 360.0F) & 255;
-					this.netManager.netHandler.send(PacketType.POSITION_ROTATION, new Object[] { (byte) -1, (short) x, (short) y, (short) z, (byte) yaw, (byte) pitch });
+					if (this.isInMultiplayer() && this.session.getState() == State.GAME) {
+						this.session.send(new PlayerTeleportMessage((byte) -1, this.player.x, this.player.y, this.player.z, this.player.yRot, this.player.xRot));
+					}
 				}
 			}
 		}
@@ -1789,12 +1394,12 @@ public final class Minecraft implements Runnable {
 
 					this.resize();
 				}
-				
+
 				if(Keyboard.getEventKey() == Keyboard.KEY_F1) {
 					this.hideGui = !this.hideGui;
 				}
 
-				if (this.ingame && (this.netManager == null || this.netManager.isConnected() && this.netManager.levelLoaded)) {					
+				if (this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {					
 					if(Keyboard.getEventKey() == Keyboard.KEY_F2) {
 						GL11.glReadBuffer(GL11.GL_FRONT);
 
@@ -1876,10 +1481,10 @@ public final class Minecraft implements Runnable {
 					this.settings.toggleSetting(4, !Keyboard.isKeyDown(42) && !Keyboard.isKeyDown(54) ? 1 : -1);
 				}
 			}
-			
+
 			EventFactory.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), Keyboard.getEventKey(), Keyboard.getEventKeyState()));
-			if(this.netManager != null && this.netManager.isConnected() && this.openclassicServer) {
-				this.netManager.netHandler.send(PacketType.KEY_CHANGE, Keyboard.getEventKey(), Keyboard.getEventKeyState() ? (byte) 1 : (byte) 0);
+			if(this.isInMultiplayer() && this.session.isConnected() && this.openclassicServer) {
+				this.session.send(new KeyChangeMessage(Keyboard.getEventKey(), Keyboard.getEventKeyState()));
 			}
 		}
 
@@ -2006,7 +1611,7 @@ public final class Minecraft implements Runnable {
 
 			this.levelRenderer.ticks++;
 			this.level.tickEntities();
-			if (!this.isConnected()) {
+			if (!this.isInMultiplayer()) {
 				this.level.tick();
 			}
 
@@ -2032,8 +1637,8 @@ public final class Minecraft implements Runnable {
 		}
 	}
 
-	public boolean isConnected() {
-		return this.netManager != null;
+	public boolean isInMultiplayer() {
+		return this.session != null;
 	}
 
 	public void setLevel(Level level) {
@@ -2043,10 +1648,7 @@ public final class Minecraft implements Runnable {
 			this.mode.apply(level);
 			level.font = this.fontRenderer;
 			level.rendererContext = this;
-			if (!this.isConnected()) {
-				this.player = (Player) level.findSubclassOf(Player.class);
-				if(this.player != null && this.player.openclassic == null) this.player.openclassic = new ClientPlayer(this.player);
-			} else if (this.player != null) {
+			if (this.isInMultiplayer() && this.player != null) {
 				this.player.resetPos();
 				this.mode.preparePlayer(this.player);
 				level.player = this.player;
@@ -2054,8 +1656,8 @@ public final class Minecraft implements Runnable {
 			}
 		}
 
-		if (this.player == null) {
-			this.player = new Player(level);
+		if(this.player == null) {
+			this.player = new LocalPlayer(level);
 			this.player.resetPos();
 			this.mode.preparePlayer(this.player);
 			if (level != null) {
@@ -2088,5 +1690,17 @@ public final class Minecraft implements Runnable {
 				this.particleManager.particles[particle].clear();
 			}
 		}
+	}
+
+	public List<String> getPlayers() {
+		ArrayList<String> players = new ArrayList<String>();
+		players.add(this.data != null ? this.data.username : "Player");
+		if(this.isInMultiplayer()) {
+			for(NetworkPlayer player : this.netPlayers.values()) {
+				players.add(player.name);
+			}
+		}
+
+		return players;
 	}
 }

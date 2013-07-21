@@ -1,6 +1,6 @@
 package com.mojang.minecraft.render;
 
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -9,9 +9,9 @@ public final class ChunkDistanceComparator implements Comparator<com.mojang.mine
 
 	private static final long serialVersionUID = 1L;
 	
-	private Player player;
+	private LocalPlayer player;
 
-	public ChunkDistanceComparator(Player player) {
+	public ChunkDistanceComparator(LocalPlayer player) {
 		this.player = player;
 	}
 

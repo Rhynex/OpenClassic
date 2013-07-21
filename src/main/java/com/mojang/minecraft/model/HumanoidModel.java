@@ -7,7 +7,7 @@ import ch.spacebase.openclassic.api.math.MathHelper;
 public class HumanoidModel extends Model {
 
 	public ModelPart head;
-	public ModelPart headwear;
+	public ModelPart hair;
 	public ModelPart body;
 	public ModelPart rightArm;
 	public ModelPart leftArm;
@@ -21,8 +21,8 @@ public class HumanoidModel extends Model {
 	public HumanoidModel(float var1) {
 		this.head = new ModelPart(0, 0);
 		this.head.setBounds(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1);
-		this.headwear = new ModelPart(32, 0);
-		this.headwear.setBounds(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1 + 0.5F);
+		this.hair = new ModelPart(32, 0);
+		this.hair.setBounds(-4.0F, -8.0F, -4.0F, 8, 8, 8, var1 + 0.5F);
 		this.body = new ModelPart(16, 16);
 		this.body.setBounds(-4.0F, 0.0F, -2.0F, 8, 12, 4, var1);
 		this.rightArm = new ModelPart(40, 16);

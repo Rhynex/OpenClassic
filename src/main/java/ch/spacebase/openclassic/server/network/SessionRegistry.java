@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
-import ch.spacebase.openclassic.server.player.ServerSession;
 
 public class SessionRegistry {
 

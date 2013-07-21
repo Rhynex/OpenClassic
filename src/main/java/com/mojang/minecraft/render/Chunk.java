@@ -5,7 +5,7 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.ClippingHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -78,7 +78,7 @@ public final class Chunk {
 
 	}
 
-	public final float distanceSquared(Player player) {
+	public final float distanceSquared(LocalPlayer player) {
 		float xDistance = player.x - this.x;
 		float yDistance = player.y - this.y;
 		float zDistance = player.z - this.z;

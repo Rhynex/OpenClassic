@@ -30,9 +30,9 @@ public class HumanoidMob extends Mob {
 
 		if (this.hasHair) {
 			GL11.glDisable(GL11.GL_CULL_FACE);
-			model.headwear.yaw = model.head.yaw;
-			model.headwear.pitch = model.head.pitch;
-			model.headwear.render(scale);
+			model.hair.yaw = model.head.yaw;
+			model.hair.pitch = model.head.pitch;
+			model.hair.render(scale);
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 

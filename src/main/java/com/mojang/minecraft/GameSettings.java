@@ -6,7 +6,7 @@ import com.mojang.minecraft.KeyBinding;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.player.Player.PlayerAI;
+import com.mojang.minecraft.player.LocalPlayer.PlayerAI;
 
 import java.io.BufferedReader;
 import java.io.File;

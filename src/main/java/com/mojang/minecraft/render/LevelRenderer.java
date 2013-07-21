@@ -3,7 +3,7 @@ package com.mojang.minecraft.render;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.minecraft.render.ChunkDistanceComparator;
@@ -167,7 +167,7 @@ public final class LevelRenderer {
 		this.queueChunks(0, 0, 0, this.level.width, this.level.height, this.level.depth);
 	}
 
-	public final int sortChunks(Player player, int var2) {
+	public final int sortChunks(LocalPlayer player, int var2) {
 		float xDiff = player.x - this.lastLoadX;
 		float yDiff = player.y - this.lastLoadY;
 		float zDiff = player.z - this.lastLoadZ;

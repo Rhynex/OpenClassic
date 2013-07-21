@@ -30,6 +30,7 @@ import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.server.ClassicServer;
+import ch.spacebase.openclassic.server.network.ServerSession;
 
 public class ServerPlayer implements Player {
 	
@@ -39,12 +40,11 @@ public class ServerPlayer implements Player {
 	private String displayName;
 	private ServerSession session;
 	private byte placeMode = 0;
-	//private int airTicks = 0;
+	// private int airTicks = 0;
 	private ClientInfo client = new ClientInfo(this);
 	private NBTData data;
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
 	
-	public boolean teleported = false;
 	private boolean sendingLevel = false;
 	
 	public ServerPlayer(String name, Position pos, ServerSession session) {
@@ -120,7 +120,6 @@ public class ServerPlayer implements Player {
 		if(event.isCancelled()) return;
 		
 		this.pos = event.getTo();
-		this.teleported = true;
 		if(!old.getName().equals(this.pos.getLevel().getName())) {
 			this.pos.getLevel().addPlayer(this);
 			old.removePlayer(this.getName());
@@ -128,8 +127,8 @@ public class ServerPlayer implements Player {
 			this.session.send(new IdentificationMessage(Constants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.getGroup().hasPermission("openclassic.commands.solid") ? Constants.OP : Constants.NOT_OP));
 			this.sendLevel(this.pos.getLevel());
 		} else {
-			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), (byte) this.getPosition().getYaw(), (byte) this.getPosition().getPitch()));
-			this.getPosition().getLevel().sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375, this.getPosition().getZ(), (byte) this.getPosition().getYaw(), (byte) this.getPosition().getPitch()));
+			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
+			this.getPosition().getLevel().sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375f, this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
 		}
 	}
 	

@@ -11,7 +11,6 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerJoinEvent;
@@ -21,27 +20,24 @@ import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.network.msg.custom.GameInfoMessage;
 import ch.spacebase.openclassic.api.network.msg.custom.PluginMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.block.BlockModelMessage;
 import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.block.QuadMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.ClassicServer;
+import ch.spacebase.openclassic.server.network.ServerSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
-import ch.spacebase.openclassic.server.player.ServerSession;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 
 public class IdentificationMessageHandler extends MessageHandler<IdentificationMessage> {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void handle(ServerSession session, ServerPlayer pl, IdentificationMessage message) {
-		if (session == null) 
-			return;
-		
+	public void handle(ClassicSession session, Player pl, IdentificationMessage message) {
 		if(session.getState() == State.GAME) return;
 		
 		String ip = session.getAddress().toString().replace("/", "").split(":")[0];
@@ -122,7 +118,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			msg = OpenClassic.getGame().getTranslator().translate("disconnect.server-full");
 		}
 
-		final ServerPlayer player = new ServerPlayer(message.getUsernameOrServerName(), OpenClassic.getServer().getDefaultLevel().getSpawn().clone(), session);
+		final ServerPlayer player = new ServerPlayer(message.getUsernameOrServerName(), OpenClassic.getServer().getDefaultLevel().getSpawn().clone(), (ServerSession) session);
 		PlayerLoginEvent e = EventFactory.callEvent(new PlayerLoginEvent(player, session.getAddress(), result, msg));
 		if(e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
 			if(e.getKickMessage() == null || e.getKickMessage().equals("")) {
@@ -167,10 +163,6 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 				for(BlockType block : Blocks.getBlocks()) {
 					if(block != null) {
 						player.getSession().send(new CustomBlockMessage(block));
-						player.getSession().send(new BlockModelMessage(block.getId(), block.getModel()));
-						for(Quad quad : block.getModel().getQuads()) {
-							player.getSession().send(new QuadMessage(block.getId(), quad));
-						}
 					}
 				}
 			} else {
@@ -180,7 +172,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		}
 		
 		player.sendLevel(player.getPosition().getLevel());
-		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
+		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
 		
 		session.setState(State.GAME);
 		OpenClassic.getServer().broadcastMessage(EventFactory.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());

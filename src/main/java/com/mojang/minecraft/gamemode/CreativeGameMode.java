@@ -7,7 +7,7 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gamemode.GameMode;
 import com.mojang.minecraft.gui.BlockSelectScreen;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 
 public final class CreativeGameMode extends GameMode {
 
@@ -28,7 +28,7 @@ public final class CreativeGameMode extends GameMode {
 		level.growTrees = false;
 	}
 
-	public final void apply(Player player) {
+	public final void apply(LocalPlayer player) {
 		int slot = 0;
 		for (BlockType block : Blocks.getBlocks()) {
 			if(slot >= 9) break;

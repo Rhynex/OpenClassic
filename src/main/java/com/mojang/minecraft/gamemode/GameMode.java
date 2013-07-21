@@ -6,11 +6,12 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.event.EventFactory;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
+import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 
 public class GameMode {
 
@@ -40,15 +41,15 @@ public class GameMode {
 	public void breakBlock(int x, int y, int z) {
 		Block block = this.mc.level.openclassic.getBlockAt(x, y, z);
 		if(block == null) return;
-		if(this.mc.netManager == null && EventFactory.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.renderer.heldBlock.block)).isCancelled()) {
+		if(!this.mc.isInMultiplayer() && EventFactory.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.renderer.heldBlock.block)).isCancelled()) {
 			return;
 		}
 		
 		BlockType old = block.getType();
 		boolean success = this.mc.level.netSetTile(x, y, z, 0);
 		if (old != null && success) {
-			if (this.mc.isConnected()) {
-				this.mc.netManager.sendBlockChange(x, y, z, 0, this.mc.player.inventory.getSelected());
+			if (this.mc.isInMultiplayer()) {
+				this.mc.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, false, (byte) this.mc.player.inventory.getSelected()));
 			} else if(old.getPhysics() != null) {
 				old.getPhysics().onBreak(block);
 			}
@@ -78,11 +79,11 @@ public class GameMode {
 		return 5.0F;
 	}
 
-	public boolean useItem(Player player, int type) {
+	public boolean useItem(LocalPlayer player, int type) {
 		return false;
 	}
 
-	public void preparePlayer(Player player) {
+	public void preparePlayer(LocalPlayer player) {
 	}
 
 	public void spawnMobs() {
@@ -95,6 +96,6 @@ public class GameMode {
 		return true;
 	}
 
-	public void apply(Player player) {
+	public void apply(LocalPlayer player) {
 	}
 }

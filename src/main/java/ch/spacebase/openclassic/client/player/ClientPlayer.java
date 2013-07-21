@@ -20,15 +20,13 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class ClientPlayer implements Player {
 	
-	private com.mojang.minecraft.player.Player handle;
-	private ClientSession session;
+	private com.mojang.minecraft.player.LocalPlayer handle;
 	private byte placeMode = 0;
+	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
 	
-	public ClientPlayer(com.mojang.minecraft.player.Player handle) {
+	public ClientPlayer(com.mojang.minecraft.player.LocalPlayer handle) {
 		this.handle = handle;
-		this.session = new ClientSession(this);
-		
 		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 	}
 	
@@ -49,7 +47,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public Session getSession() {
-		return this.session;
+		return GeneralUtils.getMinecraft().isInMultiplayer() ? GeneralUtils.getMinecraft().session : this.dummySession;
 	}
 
 	@Override
@@ -64,8 +62,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public String getName() {
-		if(GeneralUtils.getMinecraft().data == null) return "Player";
-		return GeneralUtils.getMinecraft().data.username;
+		return this.handle.getName();
 	}
 
 	@Override
@@ -114,7 +111,7 @@ public class ClientPlayer implements Player {
 			return;
 		}
 		
-		if(event.getTo().getLevel() != null && !this.handle.level.name.equals(event.getTo().getLevel().getName())) {
+		if(event.getTo().getLevel() != null && this.handle.level != null && !this.handle.level.name.equals(event.getTo().getLevel().getName())) {
 			this.handle.setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
 			GeneralUtils.getMinecraft().setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
 		}
@@ -138,15 +135,15 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public SocketAddress getAddress() {
-		return this.session.getAddress();
+		return this.getSession().getAddress();
 	}
 
 	@Override
 	public void disconnect(String reason) {
-		this.session.disconnect(reason);
+		this.getSession().disconnect(reason);
 	}
 	
-	public com.mojang.minecraft.player.Player getHandle() {
+	public com.mojang.minecraft.player.LocalPlayer getHandle() {
 		return this.handle;
 	}
 
@@ -172,7 +169,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void chat(String message) {
-		this.session.send(new PlayerChatMessage((byte) -1, message));
+		this.getSession().send(new PlayerChatMessage((byte) -1, message));
 	}
 
 	@Override

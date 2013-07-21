@@ -21,7 +21,7 @@ public final class MenuScreen extends GuiScreen {
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 2, this, OpenClassic.getGame().getTranslator().translate("gui.menu.main-menu")));
 		this.attachWidget(new Button(3, this.getWidth() / 2 - 100, this.getHeight() / 2 + 60, this, OpenClassic.getGame().getTranslator().translate("gui.menu.back")));
 	
-		if(GeneralUtils.getMinecraft().netManager == null) {
+		if(!GeneralUtils.getMinecraft().isInMultiplayer()) {
 			this.getWidget(1, Button.class).setActive(false);
 		}
 	}
@@ -38,7 +38,7 @@ public final class MenuScreen extends GuiScreen {
 		}
 
 		if (button.getId() == 2) {
-			if(mc.netManager == null) {
+			if(!mc.isInMultiplayer()) {
 				if(EventFactory.callEvent(new LevelUnloadEvent(OpenClassic.getClient().getLevel())).isCancelled()) {
 					return;
 				}

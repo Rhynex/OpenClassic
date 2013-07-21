@@ -54,11 +54,10 @@ import ch.spacebase.openclassic.game.ClassicGame;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 import ch.spacebase.openclassic.server.level.ServerLevel;
-import ch.spacebase.openclassic.server.network.ClassicPipelineFactory;
+import ch.spacebase.openclassic.server.network.ServerPipelineFactory;
 import ch.spacebase.openclassic.server.network.SessionRegistry;
 import ch.spacebase.openclassic.server.sound.ServerAudioManager;
 import ch.spacebase.openclassic.server.ui.ConsoleManager;
-import ch.spacebase.openclassic.server.ui.EmbeddedConsoleManager;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 import ch.spacebase.openclassic.server.ui.TextConsoleManager;
 
@@ -99,7 +98,7 @@ public class ClassicServer extends ClassicGame implements Server {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 
 	/**
-	 * A list of all the active {@link ServerSession}s.
+	 * A list of all the active {@link ClassicSession}s.
 	 */
 	private final SessionRegistry sessions = new SessionRegistry();
 	
@@ -145,14 +144,12 @@ public class ClassicServer extends ClassicGame implements Server {
 		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
 		this.bootstrap.setFactory(factory);
 		
-		ChannelPipelineFactory pipelineFactory = new ClassicPipelineFactory();
+		ChannelPipelineFactory pipelineFactory = new ServerPipelineFactory();
 		this.bootstrap.setPipelineFactory(pipelineFactory);
 		this.setupConfig();
 		
 		if(Arrays.asList(args).contains("gui")) {
 			this.console = new GuiConsoleManager();
-		} else if(Arrays.asList(args).contains("embedded")) {
-			this.console = new EmbeddedConsoleManager();
 		} else {
 			this.console = new TextConsoleManager();
 		}
@@ -259,7 +256,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		
 		OpenClassic.getLogger().info("Stopping console...");
 		this.console.stop();
-		OpenClassic.setServer(null);
+		OpenClassic.setGame(null);
 	}
 	
 	public ChannelGroup getChannelGroup() {

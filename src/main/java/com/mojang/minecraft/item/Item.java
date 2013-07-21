@@ -9,7 +9,7 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.item.ItemModel;
 import com.mojang.minecraft.item.TakeEntityAnim;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.TextureManager;
 import org.lwjgl.opengl.GL11;
 
@@ -97,7 +97,7 @@ public class Item extends Entity {
 	}
 
 	public void playerTouch(Entity entity) {
-		if (((Player) entity).addResource(this.resource, this.count)) {
+		if (((LocalPlayer) entity).addResource(this.resource, this.count)) {
 			this.level.addEntity(new TakeEntityAnim(this.level, this, entity));
 			this.remove();
 		}

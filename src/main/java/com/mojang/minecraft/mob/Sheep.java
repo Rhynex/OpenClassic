@@ -12,7 +12,7 @@ import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.mob.QuadrupedMob;
 import com.mojang.minecraft.mob.ai.BasicAI;
 import com.mojang.minecraft.model.AnimalModel;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.TextureManager;
 
 import org.lwjgl.opengl.GL11;
@@ -70,7 +70,7 @@ public class Sheep extends QuadrupedMob {
 	}
 
 	public void hurt(Entity cause, int damage) {
-		if (this.hasFur && cause instanceof Player) {
+		if (this.hasFur && cause instanceof LocalPlayer) {
 			this.hasFur = false;
 			int wool = (int) (Math.random() * 3.0D + 1.0D);
 

@@ -1,245 +1,61 @@
 package com.mojang.minecraft.player;
 
-import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.event.EventFactory;
-import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
-import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.player.ClientPlayer;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-
-import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.item.Item;
-import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.mob.Mob;
-import com.mojang.minecraft.mob.ai.BasicAI;
-import com.mojang.minecraft.model.HumanoidModel;
-import com.mojang.minecraft.player.InputHandler;
-import com.mojang.minecraft.player.Inventory;
-import com.mojang.minecraft.render.TextureManager;
-import ch.spacebase.openclassic.api.math.MathHelper;
 import java.awt.image.BufferedImage;
-import java.io.Serializable;
-import java.util.List;
 
-public class Player extends Mob {
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.render.RenderHelper;
 
-	public static final long serialVersionUID = 0L;
-	public static final int MAX_HEALTH = 20;
-	public static final int MAX_ARROWS = 99;
-	
-	private static int newTextureId = -1;
-	public static BufferedImage newTexture;
-	
-	public transient InputHandler input;
-	public Inventory inventory = new Inventory();
-	public byte userType = 0;
-	public float oBob;
-	public float bob;
-	public int score = 0;
-	public int arrows = 20;
-	public transient boolean speedHack = false;
-	
-	public transient ClientPlayer openclassic = new ClientPlayer(this);
-	
-	public Player(Level level) {
-		super(level);
-		if (level != null) {
-			level.player = this;
-			level.removeEntity(this);
-			level.addEntity(this);
-		}
+import com.mojang.minecraft.level.Level;
+import com.mojang.minecraft.mob.HumanoidMob;
+import com.mojang.minecraft.render.TextureManager;
 
-		this.heightOffset = 1.62F;
-		this.health = 20;
-		this.modelName = "humanoid";
-		this.rotOffs = 180.0F;
-		this.ai = new PlayerAI(this);
-	}
+public abstract class Player extends HumanoidMob {
 
-	public void resetPos() {
-		this.resetPos(null);
+	private static final long serialVersionUID = -2700951438056228150L;
+	
+	protected int newTextureId = -1;
+	protected BufferedImage newTexture = null;
+	protected TextureManager textures;
+	
+	public Player(Level level, float x, float y, float z) {
+		super(level, x, y, z);
+		OpenClassic.getGame().getScheduler().scheduleTask(this, new SkinDownloadTask(this));
 	}
 	
-	public void resetPos(Position pos) {
-		this.heightOffset = 1.62F;
-		this.setSize(0.6F, 1.8F);
-		super.resetPos(pos);
-		if (this.level != null) {
-			this.level.player = this;
-		}
+	public void bindTexture(TextureManager textures) {
+		this.textures = textures;
+		if (this.newTexture != null) {
+			int[] imageData = new int[512];
+			this.newTexture.getRGB(32, 0, 32, 16, imageData, 0, 32);
+			int index = 0;
 
-		this.deathTime = 0;
-	}
+			boolean hair;
+			while (true) {
+				if (index >= imageData.length) {
+					hair = false;
+					break;
+				}
 
-	public void aiStep() {
-		this.inventory.tick();
-		this.oBob = this.bob;
-		this.input.updateMovement();
-		super.aiStep();
-		float bob = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
-		float tilt = (float) Math.atan((-this.yd * 0.2F)) * 15.0F;
-		if (bob > 0.1F) {
-			bob = 0.1F;
-		}
+				if (imageData[index] >>> 24 < 128) {
+					hair = true;
+					break;
+				}
 
-		if (!this.onGround || this.health <= 0) {
-			bob = 0.0F;
-		}
-
-		if (this.onGround || this.health <= 0) {
-			tilt = 0.0F;
-		}
-
-		this.bob += (bob - this.bob) * 0.4F;
-		this.tilt += (tilt - this.tilt) * 0.8F;
-		
-		List<Entity> entities = this.level.findEntities(this, this.bb.grow(1, 0, 1));
-		if (this.health > 0 && entities != null) {
-			for (Entity entity : entities) {
-				entity.playerTouch(this);
+				index++;
 			}
-		}
-	}
 
-	public void render(TextureManager textureManager, float var2) {
-	}
-
-	public void releaseAllKeys() {
-		this.input.resetKeys();
-	}
-
-	public void setKey(int key, boolean pressed) {
-		this.input.setKeyState(key, pressed);
-	}
-	
-	public void keyPress(int key) {
-		this.input.keyPress(key);
-	}
-
-	public boolean addResource(int block) {
-		return this.inventory.addResource(block);
-	}
-	
-	public boolean addResource(int block, int count) {
-		boolean result = false;
-		for(int cnt = 0; cnt < count; cnt++) {
-			if(this.addResource(block)) result = true;
-		}
-		
-		return result;
-	}
-
-	public int getScore() {
-		return this.score;
-	}
-
-	public HumanoidModel getModel() {
-		return (HumanoidModel) modelCache.getModel(this.modelName);
-	}
-
-	public void die(Entity cause) {
-		this.setSize(0.2F, 0.2F);
-		this.setPos(this.x, this.y, this.z);
-		this.yd = 0.1F;
-		
-		if (cause != null) {
-			this.xd = -MathHelper.cos((this.hurtDir + this.yRot) * 3.1415927F / 180.0F) * 0.1F;
-			this.zd = -MathHelper.sin((this.hurtDir + this.yRot) * 3.1415927F / 180.0F) * 0.1F;
-		} else {
-			this.xd = this.zd = 0.0F;
-		}
-		
-		for(int slot = 0; slot < this.inventory.slots.length; slot++) {
-			if(this.inventory.slots[slot] != -1) {
-				this.level.addEntity(new Item(this.level, this.x, this.y, this.z, this.inventory.slots[slot], this.inventory.count[slot]));
-			}
+			this.hasHair = hair;
+			this.newTextureId = textures.bindTexture(this.newTexture);
+			this.newTexture = null;
 		}
 
-		this.heightOffset = 0.1F;
-	}
-
-	public void remove() {
-	}
-
-	public void awardKillScore(Entity killed, int score) {
-		this.score += score;
-	}
-
-	public boolean isShootable() {
-		return true;
-	}
-
-	public void bindTexture(TextureManager textureManager) {
-		if (newTexture != null) {
-			newTextureId = textureManager.bindTexture(newTexture);
-			newTexture = null;
-		}
-
-		if (newTextureId < 0) {
+		if (this.newTextureId < 0) {
 			RenderHelper.getHelper().bindTexture("/char.png", true);
 		} else {
-			RenderHelper.getHelper().bindTexture(newTextureId);
-		}
-	}
-
-	public void hurt(Entity entity, int damage) {
-		if (!this.level.creativeMode) {
-			super.hurt(entity, damage);
-		}
-	}
-
-	public boolean isCreativeModeAllowed() {
-		return true;
-	}
-	
-	public void moveRelative(float relX, float relZ, float var3) {
-		if(GeneralUtils.getMinecraft().settings.speed && this.speedHack &&  GeneralUtils.getMinecraft().hacks) {
-			super.moveRelative(relX, relZ, 2.5F);
-		} else {
-			super.moveRelative(relX, relZ, var3);
+			RenderHelper.getHelper().bindTexture(this.newTextureId);
 		}
 	}
 	
-	@Override
-	public void moveTo(float x, float y, float z, float yaw, float pitch) {
-		Position from = new Position(this.level.openclassic, this.x, this.y, this.z, (byte) this.yRot, (byte) this.xRot);
-		Position to = new Position(this.level.openclassic, x, y, z, (byte) yaw, (byte) pitch);
-		PlayerMoveEvent event = EventFactory.callEvent(new PlayerMoveEvent(this.openclassic, from, to));
-		if(event.isCancelled()) {
-			return;
-		}
-		
-		super.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
-	}
-	
-	public static class PlayerAI extends BasicAI implements Serializable {
-		public static final long serialVersionUID = 0L;
-
-		private Player parent;
-		
-		public PlayerAI(Player parent) {
-			this.parent = parent;
-		}
-		
-		public void update() {
-			this.jumping = this.parent.input.jumping;
-			this.flyDown = this.parent.input.flyDown;
-			this.parent.speedHack = this.parent.input.speed;
-			this.xxa = this.parent.input.xxa;
-			this.yya = this.parent.input.yya;
-			if(this.parent.input.toggleFly && GeneralUtils.getMinecraft().settings.flying &&  GeneralUtils.getMinecraft().hacks) {
-				this.flying = !this.flying; 
-				if(this.flying) {
-					this.mob.yd = 0;
-				}
-			}
-			
-			if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().settings.flying) {
-				this.flying = false;
-			}
-			
-			this.parent.input.toggleFly = false;
-		}
-	}
+	public abstract String getName();
 
 }

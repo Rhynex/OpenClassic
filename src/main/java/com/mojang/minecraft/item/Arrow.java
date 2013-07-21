@@ -7,7 +7,7 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.item.TakeEntityAnim;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.phys.AABB;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.ShapeRenderer;
 import java.util.List;
@@ -37,7 +37,7 @@ public class Arrow extends Entity {
 		this.setSize(0.3F, 0.5F);
 		this.heightOffset = this.bbHeight / 2.0F;
 		this.damage = 3;
-		if (!(owner instanceof Player)) {
+		if (!(owner instanceof LocalPlayer)) {
 			this.type = 1;
 		} else {
 			this.damage = 7;
@@ -204,7 +204,7 @@ public class Arrow extends Entity {
 	}
 
 	public void playerTouch(Entity var1) {
-		Player var2 = (Player) var1;
+		LocalPlayer var2 = (LocalPlayer) var1;
 		if (this.hasHit && this.owner == var2 && var2.arrows < 99) {
 			this.level.addEntity(new TakeEntityAnim(this.level, this, var2));
 			var2.arrows++;

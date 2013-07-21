@@ -157,8 +157,8 @@ public class HUDScreen extends MainScreen {
 		}
 
 		this.clickedPlayer = null;
-		if (Keyboard.isKeyDown(Keyboard.KEY_TAB) && this.mc.netManager != null && this.mc.netManager.isConnected()) {
-			List<String> players = this.mc.netManager.getPlayers();
+		if (Keyboard.isKeyDown(Keyboard.KEY_TAB) && this.mc.isInMultiplayer()) {
+			List<String> players = this.mc.getPlayers();
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

@@ -13,7 +13,6 @@ import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.Game;
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.Server;
 import ch.spacebase.openclassic.api.command.Command;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
@@ -63,12 +62,7 @@ public abstract class ClassicGame implements Game {
 			}
 		}
 		
-		if(this instanceof Server) {
-			OpenClassic.setServer((Server) this);
-		} else {
-			OpenClassic.setClient((Client) this);
-		}
-		
+		OpenClassic.setGame(this);
 		this.pkgManager = new PackageManager();
 		this.config = new Configuration(file);
 		this.config.load();

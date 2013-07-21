@@ -32,7 +32,7 @@ public final class OptionsScreen extends GuiScreen {
 		this.attachWidget(new Button(100, this.getWidth() / 2 - 100, this.getHeight() / 6 + 148, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")));
 		this.attachWidget(new Button(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
 		
-		if(GeneralUtils.getMinecraft().netManager != null) {
+		if(GeneralUtils.getMinecraft().isInMultiplayer()) {
 			this.getWidget(8, Button.class).setActive(false);
 		}
 		
@@ -47,11 +47,11 @@ public final class OptionsScreen extends GuiScreen {
 	
 	public void update() {
 		Button button = this.getWidget(8, Button.class);
-		if(button.isActive() && GeneralUtils.getMinecraft().netManager != null) {
+		if(button.isActive() && GeneralUtils.getMinecraft().isInMultiplayer()) {
 			button.setActive(false);
 		}
 		
-		if(!button.isActive() && GeneralUtils.getMinecraft().netManager == null) {
+		if(!button.isActive() && !GeneralUtils.getMinecraft().isInMultiplayer()) {
 			button.setActive(true);
 		}
 		

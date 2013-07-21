@@ -11,7 +11,7 @@ import com.mojang.minecraft.gamemode.GameMode;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.MobSpawner;
 import com.mojang.minecraft.mob.Mob;
-import com.mojang.minecraft.player.Player;
+import com.mojang.minecraft.player.LocalPlayer;
 
 public final class SurvivalGameMode extends GameMode {
 
@@ -27,7 +27,7 @@ public final class SurvivalGameMode extends GameMode {
 		super(mc);
 	}
 
-	public final void preparePlayer(Player player) {
+	public final void preparePlayer(LocalPlayer player) {
 		player.inventory.slots[8] = VanillaBlock.TNT.getId();
 		player.inventory.count[8] = 10;
 	}
@@ -91,7 +91,7 @@ public final class SurvivalGameMode extends GameMode {
 		return 4.0F;
 	}
 
-	public final boolean useItem(Player player, int type) {
+	public final boolean useItem(LocalPlayer player, int type) {
 		BlockType block = Blocks.fromId(type);
 		if (block == VanillaBlock.RED_MUSHROOM && this.mc.player.inventory.removeSelected(type)) {
 			player.hurt(null, 3);
@@ -109,7 +109,7 @@ public final class SurvivalGameMode extends GameMode {
 		this.spawner = new MobSpawner(level);
 	}
 	
-	public final void apply(Player player) {
+	public final void apply(LocalPlayer player) {
 		for(int slot = 0; slot < 9; slot++) {
 			player.inventory.slots[slot] = -1;
 			player.inventory.count[slot] = 0;
