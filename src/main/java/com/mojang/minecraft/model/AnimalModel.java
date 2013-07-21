@@ -34,10 +34,10 @@ public class AnimalModel extends Model {
 	public final void render(float var1, float var2, float var3, float var4, float var5, float var6) {
 		this.head.yaw = var4 / 57.295776F;
 		this.head.pitch = var5 / 57.295776F;
-		this.body.pitch = 1.5707964F;
+		this.body.pitch = MathHelper.HALF_PI;
 		this.leg1.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
-		this.leg2.pitch = MathHelper.cos(var1 * 0.6662F + 3.1415927F) * 1.4F * var2;
-		this.leg3.pitch = MathHelper.cos(var1 * 0.6662F + 3.1415927F) * 1.4F * var2;
+		this.leg2.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
+		this.leg3.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
 		this.leg4.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
 		this.head.render(var6);
 		this.body.render(var6);

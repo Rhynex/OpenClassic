@@ -52,12 +52,12 @@ public class HumanoidModel extends Model {
 	public void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6) {
 		this.head.yaw = var4 / 57.295776F;
 		this.head.pitch = var5 / 57.295776F;
-		this.rightArm.pitch = MathHelper.cos(var1 * 0.6662F + 3.1415927F) * 2.0F * var2;
+		this.rightArm.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 2.0F * var2;
 		this.rightArm.roll = (MathHelper.cos(var1 * 0.2312F) + 1.0F) * var2;
 		this.leftArm.pitch = MathHelper.cos(var1 * 0.6662F) * 2.0F * var2;
 		this.leftArm.roll = (MathHelper.cos(var1 * 0.2812F) - 1.0F) * var2;
 		this.rightLeg.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
-		this.leftLeg.pitch = MathHelper.cos(var1 * 0.6662F + 3.1415927F) * 1.4F * var2;
+		this.leftLeg.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
 		this.rightArm.roll += MathHelper.cos(var3 * 0.09F) * 0.05F + 0.05F;
 		this.leftArm.roll -= MathHelper.cos(var3 * 0.09F) * 0.05F + 0.05F;
 		this.rightArm.pitch += MathHelper.sin(var3 * 0.067F) * 0.05F;

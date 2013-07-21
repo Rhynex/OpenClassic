@@ -56,7 +56,7 @@ public class Mob extends Entity {
 		super(level);
 		this.setPos(this.x, this.y, this.z);
 		this.timeOffs = (float) Math.random() * 12398.0F;
-		this.rot = (float) (Math.random() * 3.1415927410125732D * 2.0D);
+		this.rot = (float) (Math.random() * MathHelper.DDEG_TO_RAD);
 		this.speed = 1.0F;
 		this.ai = new BasicAI();
 		this.footSize = 0.5F;
@@ -258,7 +258,7 @@ public class Mob extends Entity {
 				if (var11 < 0.0F) {
 					var11 = 0.0F;
 				} else {
-					var11 = MathHelper.sin((var11 /= this.hurtDuration) * var11 * var11 * var11 * 3.1415927F) * 14.0F;
+					var11 = MathHelper.sin((var11 /= this.hurtDuration) * var11 * var11 * var11 * MathHelper.PI) * 14.0F;
 				}
 
 				float var12 = 0.0F;

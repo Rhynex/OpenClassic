@@ -136,8 +136,8 @@ public class LocalPlayer extends Player {
 		this.yd = 0.1F;
 		
 		if (cause != null) {
-			this.xd = -MathHelper.cos((this.hurtDir + this.yRot) * 3.1415927F / 180.0F) * 0.1F;
-			this.zd = -MathHelper.sin((this.hurtDir + this.yRot) * 3.1415927F / 180.0F) * 0.1F;
+			this.xd = -MathHelper.cos((this.hurtDir + this.yRot) * MathHelper.DEG_TO_RAD) * 0.1F;
+			this.zd = -MathHelper.sin((this.hurtDir + this.yRot) * MathHelper.DEG_TO_RAD) * 0.1F;
 		} else {
 			this.xd = this.zd = 0.0F;
 		}

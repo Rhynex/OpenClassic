@@ -1,5 +1,7 @@
 package com.mojang.minecraft.mob.ai;
 
+import ch.spacebase.openclassic.api.math.MathHelper;
+
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.item.Arrow;
 import com.mojang.minecraft.model.Vector;
@@ -45,8 +47,8 @@ public class BasicAttackAI extends BasicAI {
 
 			if (this.attackTarget != null) {
 				float distance = (float) Math.sqrt(sqDistance);
-				this.mob.yRot = (float) (Math.atan2(zDistance, xDistance) * 180.0D / 3.1415927410125732D) - 90.0F;
-				this.mob.xRot = -((float) (Math.atan2(yDistance, (float) Math.sqrt(distance)) * 180.0D / 3.1415927410125732D));
+				this.mob.yRot = (float) (Math.atan2(zDistance, xDistance) * MathHelper.DDEG_TO_RAD) - 90.0F;
+				this.mob.xRot = -((float) (Math.atan2(yDistance, (float) Math.sqrt(distance)) * MathHelper.DDEG_TO_RAD));
 				if ((float) Math.sqrt(sqDistance) < 2 && this.attackDelay == 0) {
 					this.attack(this.attackTarget);
 				}

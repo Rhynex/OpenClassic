@@ -33,8 +33,8 @@ public final class CreeperModel extends Model {
 		this.head.yaw = var4 / 57.295776F;
 		this.head.pitch = var5 / 57.295776F;
 		this.leg1.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
-		this.leg2.pitch = MathHelper.cos(var1 * 0.6662F + 3.1415927F) * 1.4F * var2;
-		this.leg3.pitch = MathHelper.cos(var1 * 0.6662F + 3.1415927F) * 1.4F * var2;
+		this.leg2.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
+		this.leg3.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
 		this.leg4.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
 		this.head.render(var6);
 		this.body.render(var6);

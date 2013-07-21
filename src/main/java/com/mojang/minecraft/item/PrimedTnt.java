@@ -28,8 +28,8 @@ public class PrimedTnt extends Entity {
 		this.setSize(0.98F, 0.98F);
 		this.heightOffset = this.bbHeight / 2.0F;
 		this.setPos(var2, var3, var4);
-		float var5 = (float) (Math.random() * 3.1415927410125732D * 2.0D);
-		this.xd = -MathHelper.sin(var5 * 3.1415927F / 180.0F) * 0.02F;
+		float var5 = (float) (Math.random() * MathHelper.DTWO_PI);
+		this.xd = -MathHelper.sin(var5 * MathHelper.DEG_TO_RAD) * 0.02F;
 		this.yd = 0.2F;
 		this.zd = -MathHelper.cos(var5 * MathHelper.DEG_TO_RAD) * 0.02F;
 		this.makeStepSound = false;
