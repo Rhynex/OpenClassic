@@ -19,6 +19,8 @@ public abstract class Player extends HumanoidMob {
 	
 	public Player(Level level, float x, float y, float z) {
 		super(level, x, y, z);
+		this.armor = false;
+		this.helmet = false;
 		OpenClassic.getGame().getScheduler().scheduleTask(this, new SkinDownloadTask(this));
 	}
 	

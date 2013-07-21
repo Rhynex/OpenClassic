@@ -47,7 +47,7 @@ public class ServerURLScreen extends GuiScreen {
 			mc.progressBar.setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 			mc.progressBar.setProgress(-1);
 			mc.progressBar.render();
-			String play = HTTPUtil.fetchUrl(this.getWidget(2, TextBox.class).getText(), "", Constants.MINECRAFT_URL + "classic/list");
+			String play = HTTPUtil.fetchUrl(this.getWidget(2, TextBox.class).getText(), "", Constants.MINECRAFT_URL_HTTPS + "classic/list");
 			String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 			
 			if (mppass.length() > 0) {
@@ -56,7 +56,7 @@ public class ServerURLScreen extends GuiScreen {
 				mc.data.key = mppass;
 				
 				try {
-					mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
+					mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
 				} catch(UnsupportedEncodingException e) {
 				}
 				

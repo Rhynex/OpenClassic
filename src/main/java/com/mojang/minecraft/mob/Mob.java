@@ -130,7 +130,6 @@ public class Mob extends Entity {
 		if (xzDistance > 0.05F) {
 			friction = 1.0F;
 			animStep = xzDistance * 3.0F;
-			yaw = (float) Math.atan2(zDistance, xDistance) * 180.0F / 3.1415927F - 90.0F;
 		}
 
 		if (!this.onGround) {
@@ -139,37 +138,37 @@ public class Mob extends Entity {
 
 		this.run += (friction - this.run) * 0.3F;
 
-		xDistance = yaw - this.yBodyRot;
-		while (xDistance < -180.0F) {
-			xDistance += 360.0F;
+		float change = yaw - this.yBodyRot;
+		while (change < -180.0F) {
+			change += 360.0F;
 		}
 
-		while (xDistance >= 180) {
-			xDistance -= 360;
+		while (change >= 180) {
+			change -= 360;
 		}
 
-		this.yBodyRot += xDistance * 0.1;
+		this.yBodyRot += change * 0.1;
 		
-		xDistance = this.yRot - this.yBodyRot;
-		while (xDistance < -180.0F) {
-			xDistance += 360.0F;
+		change = this.yRot - this.yBodyRot;
+		while (change < -180.0F) {
+			change += 360.0F;
 		}
 
-		while (xDistance >= 180) {
-			xDistance -= 360;
+		while (change >= 180) {
+			change -= 360;
 		}
 
-		boolean negative = xDistance < -90 || xDistance >= 90;
-		if (xDistance < -75) {
-			xDistance = -75;
+		boolean negative = change < -90 || change >= 90;
+		if (change < -75) {
+			change = -75;
 		}
 
-		if (xDistance >= 75) {
-			xDistance = 75;
+		if (change >= 75) {
+			change = 75;
 		}
 
-		this.yBodyRot = this.yRot - xDistance;
-		this.yBodyRot += xDistance * 0.1F;
+		this.yBodyRot = this.yRot - change;
+		this.yBodyRot += change * 0.1F;
 		if (negative) {
 			animStep = -animStep;
 		}
@@ -211,10 +210,10 @@ public class Mob extends Entity {
 		this.textureId = RenderHelper.getHelper().bindTexture(this.textureName, true);
 	}
 
-	public void render(TextureManager textures, float var2) {
+	public void render(TextureManager textures, float dt) {
 		if (this.modelName != null) {
 			float var3;
-			if ((var3 = this.attackTime - var2) < 0.0F) {
+			if ((var3 = this.attackTime - dt) < 0.0F) {
 				var3 = 0.0F;
 			}
 
@@ -242,20 +241,20 @@ public class Mob extends Entity {
 				this.yRotO -= 360.0F;
 			}
 
-			float var4 = this.yBodyRotO + (this.yBodyRot - this.yBodyRotO) * var2;
-			float var5 = this.oRun + (this.run - this.oRun) * var2;
-			float var6 = this.yRotO + (this.yRot - this.yRotO) * var2;
-			float var7 = this.xRotO + (this.xRot - this.xRotO) * var2;
+			float var4 = this.yBodyRotO + (this.yBodyRot - this.yBodyRotO) * dt;
+			float var5 = this.oRun + (this.run - this.oRun) * dt;
+			float var6 = this.yRotO + (this.yRot - this.yRotO) * dt;
+			float var7 = this.xRotO + (this.xRot - this.xRotO) * dt;
 			var6 -= var4;
 			GL11.glPushMatrix();
-			float var8 = this.animStepO + (this.animStep - this.animStepO) * var2;
+			float var8 = this.animStepO + (this.animStep - this.animStepO) * dt;
 			float var9;
-			GL11.glColor3f(var9 = this.getBrightness(var2), var9, var9);
+			GL11.glColor3f(var9 = this.getBrightness(dt), var9, var9);
 			var9 = 0.0625F;
 			float var10 = -Math.abs(MathHelper.cos(var8 * 0.6662F)) * 5.0F * var5 * this.bobStrength - 23.0F;
-			GL11.glTranslatef(this.xo + (this.x - this.xo) * var2, this.yo + (this.y - this.yo) * var2 - 1.62F + this.renderOffset, this.zo + (this.z - this.zo) * var2);
+			GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt - 1.62F + this.renderOffset, this.zo + (this.z - this.zo) * dt);
 			float var11;
-			if ((var11 = this.hurtTime - var2) > 0.0F || this.health <= 0) {
+			if ((var11 = this.hurtTime - dt) > 0.0F || this.health <= 0) {
 				if (var11 < 0.0F) {
 					var11 = 0.0F;
 				} else {
@@ -264,7 +263,7 @@ public class Mob extends Entity {
 
 				float var12 = 0.0F;
 				if (this.health <= 0) {
-					var12 = (this.deathTime + var2) / 20.0F;
+					var12 = (this.deathTime + dt) / 20.0F;
 					if ((var11 += var12 * var12 * 800.0F) > 90.0F) {
 						var11 = 90.0F;
 					}
@@ -291,13 +290,13 @@ public class Mob extends Entity {
 			GL11.glScalef(-1.0F, 1.0F, 1.0F);
 			modelCache.getModel(this.modelName).grounded = var3 / 5.0F;
 			this.bindTexture(textures);
-			this.renderModel(textures, var8, var2, var5, var6, var7, var9);
+			this.renderModel(textures, var8, dt, var5, var6, var7, var9);
 			if (this.invulnerableTime > this.invulnerableDuration - 10) {
 				GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.75F);
 				GL11.glEnable(GL11.GL_BLEND);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				this.bindTexture(textures);
-				this.renderModel(textures, var8, var2, var5, var6, var7, var9);
+				this.renderModel(textures, var8, dt, var5, var6, var7, var9);
 				GL11.glDisable(GL11.GL_BLEND);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			}

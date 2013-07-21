@@ -37,8 +37,6 @@ public class NetworkPlayer extends Player {
 		this.pushthrough = 0.8F;
 		this.xRot = pitch;
 		this.yRot = yaw;
-		this.armor = false;
-		this.helmet = false;
 		this.renderOffset = 0.6875F;
 		this.allowAlpha = false;
 	}

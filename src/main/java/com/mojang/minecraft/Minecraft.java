@@ -721,10 +721,10 @@ public final class Minecraft implements Runnable {
 						GL11.glTranslatef(0.0F, 0.0F, -0.1F);
 						GL11.glRotatef(this.player.xRotO + (this.player.xRot - this.player.xRotO) * this.timer.renderPartialTicks, 1.0F, 0.0F, 0.0F);
 						GL11.glRotatef(this.player.yRotO + (this.player.yRot - this.player.yRotO) * this.timer.renderPartialTicks, 0.0F, 1.0F, 0.0F);
-						var69 = this.player.xo + (this.player.x - this.player.xo) * this.timer.renderPartialTicks;
-						float var1000 = this.player.yo + (this.player.y - this.player.yo) * this.timer.renderPartialTicks;
-						var33 = this.player.zo + (this.player.z - this.player.zo) * this.timer.renderPartialTicks;
-						GL11.glTranslatef(-var69, -var1000, -var33);
+						float rx = this.player.xo + (this.player.x - this.player.xo) * this.timer.renderPartialTicks;
+						float ry = this.player.yo + (this.player.y - this.player.yo) * this.timer.renderPartialTicks;
+						float rz = this.player.zo + (this.player.z - this.player.zo) * this.timer.renderPartialTicks;
+						GL11.glTranslatef(-rx, -ry, -rz);
 						Frustum clipping = Frustum.getInstance();
 
 						for (int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
@@ -832,7 +832,7 @@ public final class Minecraft implements Runnable {
 						}
 
 						var33 = 4.8828125E-4F;
-						var1000 = (this.levelRenderer.level.height + 2);
+						float var1000 = (this.levelRenderer.level.height + 2);
 						var34 = (this.levelRenderer.ticks + this.timer.renderPartialTicks) * var33 * 0.03F;
 						float var35 = 0;
 						ShapeRenderer.instance.begin();

@@ -26,7 +26,7 @@ public final class SkinDownloadTask implements Runnable {
 					name = name.substring(0, name.indexOf('@'));
 				}
 
-				conn = (HttpURLConnection) new URL(Constants.MINECRAFT_URL + "skin/" + Color.stripColor(name) + ".png").openConnection();
+				conn = (HttpURLConnection) new URL(Constants.MINECRAFT_URL_HTTP + "skin/" + Color.stripColor(name) + ".png").openConnection();
 				conn.setDoInput(true);
 				conn.setDoOutput(false);
 				conn.connect();

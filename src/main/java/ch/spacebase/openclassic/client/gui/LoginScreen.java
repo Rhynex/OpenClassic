@@ -162,28 +162,28 @@ public class LoginScreen extends GuiScreen {
 		CookieHandler.setDefault(cookies);
 		String result = "";
 
-		HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "login", "", Constants.MINECRAFT_URL);
+		HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "login", "", Constants.MINECRAFT_URL_HTTPS);
 
 		try {
-			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), Constants.MINECRAFT_URL);
+			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), Constants.MINECRAFT_URL_HTTPS);
 		} catch (UnsupportedEncodingException e) {
 			System.err.println("UTF-8 not supported!");
 			return false;
 		}
 
-		Cookie cookie = cookies.getCookie(Constants.MINECRAFT_URL, "PLAY_SESSION");
+		Cookie cookie = cookies.getCookie(Constants.MINECRAFT_URL_HTTPS, "PLAY_SESSION");
 		if (cookie != null)
-			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL, "", Constants.MINECRAFT_URL + "login");
+			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS, "", Constants.MINECRAFT_URL_HTTPS + "login");
 
 		if (result.contains("Logged in as")) {
 			GeneralUtils.getMinecraft().data = new SessionData(result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | ")));
 			
 			try {
-				GeneralUtils.getMinecraft().data.haspaid = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL + "haspaid.jsp", "user=" + URLEncoder.encode(GeneralUtils.getMinecraft().data.username, "UTF-8")).equals("true");
+				GeneralUtils.getMinecraft().data.haspaid = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(GeneralUtils.getMinecraft().data.username, "UTF-8")).equals("true");
 			} catch (UnsupportedEncodingException e) {
 			}
 
-			parseServers(HTTPUtil.rawFetchUrl(Constants.MINECRAFT_URL + "classic/list", "", Constants.MINECRAFT_URL));
+			parseServers(HTTPUtil.rawFetchUrl(Constants.MINECRAFT_URL_HTTPS + "classic/list", "", Constants.MINECRAFT_URL_HTTPS));
 			return true;
 		}
 		

@@ -17,7 +17,7 @@ public class Server {
 	}
 
 	public String getUrl() {
-		return Constants.MINECRAFT_URL + "classic/play/" + this.serverId;
+		return Constants.MINECRAFT_URL_HTTPS + "classic/play/" + this.serverId;
 	}
 
 }
