@@ -4,9 +4,9 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 
 import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.gui.BlockSelectScreen;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.LocalPlayer;
 
 public final class CreativeGameMode extends GameMode {
 

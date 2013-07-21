@@ -4,96 +4,91 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.ClientProgressBar;
 
 import com.mojang.minecraft.Entity;
-import com.mojang.minecraft.mob.Creeper;
-import com.mojang.minecraft.mob.Mob;
-import com.mojang.minecraft.mob.Pig;
-import com.mojang.minecraft.mob.Sheep;
-import com.mojang.minecraft.mob.Skeleton;
-import com.mojang.minecraft.mob.Spider;
-import com.mojang.minecraft.mob.Zombie;
+import com.mojang.minecraft.entity.mob.Creeper;
+import com.mojang.minecraft.entity.mob.Mob;
+import com.mojang.minecraft.entity.mob.Pig;
+import com.mojang.minecraft.entity.mob.Sheep;
+import com.mojang.minecraft.entity.mob.Skeleton;
+import com.mojang.minecraft.entity.mob.Spider;
+import com.mojang.minecraft.entity.mob.Zombie;
 
 public final class MobSpawner {
 
 	public Level level;
 
-	public MobSpawner(Level var1) {
-		this.level = var1;
+	public MobSpawner(Level level) {
+		this.level = level;
 	}
 
-	public final int spawn(int max, Entity var2, ClientProgressBar var3) {
+	public final int spawn(int max, Entity player, ClientProgressBar progress) {
 		int count = 0;
-
-		for (int mob = 0; mob < max; ++mob) {
-			if (var3 != null) {
-				var3.setProgress(mob * 100 / (max - 1));
-				var3.render();
+		for (int mob = 0; mob < max; mob++) {
+			if (progress != null) {
+				progress.setProgress(mob * 100 / (max - 1));
+				progress.render();
 			}
 
-			int var6 = this.level.random.nextInt(6);
-			int var7 = this.level.random.nextInt(this.level.width);
-			int var8 = (int) (Math.min(this.level.random.nextFloat(), this.level.random.nextFloat()) * this.level.height);
-			int var9 = this.level.random.nextInt(this.level.depth);
-			if (!this.level.getPreventsRendering(var7, var8, var9) && !(Blocks.fromId(this.level.getTile(var7, var8, var9)) != null && Blocks.fromId(this.level.getTile(var7, var8, var9)).isLiquid()) && (!this.level.isLit(var7, var8, var9) || this.level.random.nextInt(5) == 0)) {
-				for (int var10 = 0; var10 < 3; ++var10) {
-					int var11 = var7;
-					int var12 = var8;
-					int var13 = var9;
-
-					for (int var14 = 0; var14 < 3; ++var14) {
-						var11 += this.level.random.nextInt(6) - this.level.random.nextInt(6);
-						var12 += this.level.random.nextInt(1) - this.level.random.nextInt(1);
-						var13 += this.level.random.nextInt(6) - this.level.random.nextInt(6);
-						if (var11 >= 0 && var13 >= 1 && var12 >= 0 && var12 < this.level.height - 2 && var11 < this.level.width && var13 < this.level.depth && this.level.getPreventsRendering(var11, var12 - 1, var13) && !this.level.getPreventsRendering(var11, var12, var13) && !this.level.getPreventsRendering(var11, var12 + 1, var13)) {
-							float var15 = var11 + 0.5F;
-							float var16 = var12 + 1.0F;
-							float var17 = var13 + 0.5F;
-							float var19;
-							float var18;
-							float var20;
-							if (var2 != null) {
-								var18 = var15 - var2.x;
-								var19 = var16 - var2.y;
-								var20 = var17 - var2.z;
-								if (var18 * var18 + var19 * var19 + var20 * var20 < 256.0F) {
+			int type = this.level.random.nextInt(6);
+			int rx = this.level.random.nextInt(this.level.width);
+			int ry = (int) (Math.min(this.level.random.nextFloat(), this.level.random.nextFloat()) * this.level.height);
+			int rz = this.level.random.nextInt(this.level.depth);
+			if (!this.level.getPreventsRendering(rx, ry, rz) && !(Blocks.fromId(this.level.getTile(rx, ry, rz)) != null && Blocks.fromId(this.level.getTile(rx, ry, rz)).isLiquid()) && (!this.level.isLit(rx, ry, rz) || this.level.random.nextInt(5) == 0)) {
+				for (int pass = 0; pass < 3; pass++) {
+					int bx = rx;
+					int by = ry;
+					int bz = rz;
+					for (int run = 0; run < 3; run++) {
+						bx += this.level.random.nextInt(6) - this.level.random.nextInt(6);
+						by += this.level.random.nextInt(1) - this.level.random.nextInt(1);
+						bz += this.level.random.nextInt(6) - this.level.random.nextInt(6);
+						if (bx >= 0 && bz >= 1 && by >= 0 && by < this.level.height - 2 && bx < this.level.width && bz < this.level.depth && this.level.getPreventsRendering(bx, by - 1, bz) && !this.level.getPreventsRendering(bx, by, bz) && !this.level.getPreventsRendering(bx, by + 1, bz)) {
+							float sx = bx + 0.5F;
+							float sy = by + 1.0F;
+							float sz = bz + 0.5F;
+							if (player != null) {
+								float dx = sx - player.x;
+								float dy = sy - player.y;
+								float dz = sz - player.z;
+								if (dx * dx + dy * dy + dz * dz < 256.0F) {
 									continue;
 								}
 							} else {
-								var18 = var15 - this.level.xSpawn;
-								var19 = var16 - this.level.ySpawn;
-								var20 = var17 - this.level.zSpawn;
-								if (var18 * var18 + var19 * var19 + var20 * var20 < 256.0F) {
+								float dx = sx - this.level.xSpawn;
+								float dy = sy - this.level.ySpawn;
+								float dz = sz - this.level.zSpawn;
+								if (dx * dx + dy * dy + dz * dz < 256.0F) {
 									continue;
 								}
 							}
 
-							Object var21 = null;
-							if (var6 == 0) {
-								var21 = new Zombie(this.level, var15, var16, var17);
+							Mob spawning = null;
+							if (type == 0) {
+								spawning = new Zombie(this.level, sx, sy, sz);
 							}
 
-							if (var6 == 1) {
-								var21 = new Skeleton(this.level, var15, var16, var17);
+							if (type == 1) {
+								spawning = new Skeleton(this.level, sx, sy, sz);
 							}
 
-							if (var6 == 2) {
-								var21 = new Pig(this.level, var15, var16, var17);
+							if (type == 2) {
+								spawning = new Pig(this.level, sx, sy, sz);
 							}
 
-							if (var6 == 3) {
-								var21 = new Creeper(this.level, var15, var16, var17);
+							if (type == 3) {
+								spawning = new Creeper(this.level, sx, sy, sz);
 							}
 
-							if (var6 == 4) {
-								var21 = new Spider(this.level, var15, var16, var17);
+							if (type == 4) {
+								spawning = new Spider(this.level, sx, sy, sz);
 							}
 
-							if (var6 == 5) {
-								var21 = new Sheep(this.level, var15, var16, var17);
+							if (type == 5) {
+								spawning = new Sheep(this.level, sx, sy, sz);
 							}
 
-							if (this.level.isFree(((Mob) var21).bb)) {
-								++count;
-								this.level.addEntity((Entity) var21);
+							if (this.level.isFree(spawning.bb)) {
+								count++;
+								this.level.addEntity(spawning);
 							}
 						}
 					}

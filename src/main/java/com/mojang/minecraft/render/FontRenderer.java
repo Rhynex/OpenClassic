@@ -35,19 +35,17 @@ public final class FontRenderer {
 		int[] fontData = new int[width * height];
 		font.getRGB(0, 0, width, height, fontData, 0, width);
 
-		for (int character = 0; character < 256; ++character) {
-			int var6 = character % 16;
-			int var7 = character / 16;
+		for (int character = 0; character < 256; character++) {
+			int tx = character % 16;
+			int ty = character / 16;
 			int chWidth = 0;
-
-			for (boolean var9 = false; chWidth < 8 && !var9; chWidth++) {
-				int var10 = (var6 << 3) + chWidth;
-				var9 = true;
-
-				for (int var11 = 0; var11 < 8 && var9; ++var11) {
-					int var12 = ((var7 << 3) + var11) * width;
-					if ((fontData[var10 + var12] & 255) > 128) {
-						var9 = false;
+			for (boolean empty = false; chWidth < 8 && !empty; chWidth++) {
+				int xk = (tx << 3) + chWidth;
+				empty = true;
+				for (int y = 0; y < 8 && empty; y++) {
+					int yk = ((ty << 3) + y) * width;
+					if ((fontData[xk + yk] & 255) > 128) {
+						empty = false;
 					}
 				}
 			}
@@ -94,27 +92,25 @@ public final class FontRenderer {
 			RenderHelper.getHelper().bindTexture(this.fontId);
 			Renderer.get().begin();
 			Renderer.get().color(color);
-			int var7 = 0;
-
-			for (int count = 0; count < chars.length; ++count) {
+			int width = 0;
+			for (int count = 0; count < chars.length; count++) {
 				if (chars[count] == '&' && chars.length > count + 1) {
 					int code = "0123456789abcdef".indexOf(chars[count + 1]);
 					if (code < 0) {
 						code = 15;
 					}
 
-					int var9 = (code & 8) << 3;
-					int var10 = (code & 1) * 191 + var9;
-					int var11 = ((code & 2) >> 1) * 191 + var9;
-					int blue = ((code & 4) >> 2) * 191 + var9;
+					int alpha = (code & 8) << 3;
+					int red = ((code & 4) >> 2) * 191 + alpha;
+					int green = ((code & 2) >> 1) * 191 + alpha;
+					int blue = (code & 1) * 191 + alpha;
 					if (this.settings.anaglyph) {
-						var9 = (code * 30 + var11 * 59 + var10 * 11) / 100;
-						var11 = (code * 30 + var11 * 70) / 100;
-						var10 = (code * 30 + var10 * 70) / 100;
-						blue = var9;
+						red = (code * 30 + green * 59 + blue * 11) / 100;
+						green = (code * 30 + green * 70) / 100;
+						blue = (code * 30 + blue * 70) / 100;
 					}
 
-					int c = blue << 16 | var11 << 8 | var10;
+					int c = red << 16 | green << 8 | blue;
 					if (shadow) {
 						c = (c & 16579836) >> 2;
 					}
@@ -123,15 +119,14 @@ public final class FontRenderer {
 					count += 2;
 				}
 
-				color = chars[count] % 16 << 3;
-				int var9 = chars[count] / 16 << 3;
-				float var13 = 7.99F;
-				Renderer.get().vertexuv((x + var7), y + var13, 0.0F, color / 128.0F, (var9 + var13) / 128.0F);
-				Renderer.get().vertexuv((x + var7) + var13, y + var13, 0.0F, (color + var13) / 128.0F, (var9 + var13) / 128.0F);
-				Renderer.get().vertexuv((x + var7) + var13, y, 0.0F, (color + var13) / 128.0F, var9 / 128.0F);
-				Renderer.get().vertexuv((x + var7), y, 0.0F, color / 128.0F, var9 / 128.0F);
+				int tx = chars[count] % 16 << 3;
+				int ty = chars[count] / 16 << 3;
+				Renderer.get().vertexuv((x + width), y + 7.99F, 0.0F, tx / 128.0F, (ty + 7.99F) / 128.0F);
+				Renderer.get().vertexuv((x + width) + 7.99F, y + 7.99F, 0.0F, (tx + 7.99F) / 128.0F, (ty + 7.99F) / 128.0F);
+				Renderer.get().vertexuv((x + width) + 7.99F, y, 0.0F, (tx + 7.99F) / 128.0F, ty / 128.0F);
+				Renderer.get().vertexuv((x + width), y, 0.0F, tx / 128.0F, ty / 128.0F);
 				if (chars[count] < this.font.length) {
-					var7 += this.font[chars[count]];
+					width += this.font[chars[count]];
 				}
 			}
 

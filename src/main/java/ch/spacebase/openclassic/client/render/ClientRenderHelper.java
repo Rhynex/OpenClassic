@@ -21,9 +21,9 @@ import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
+import com.mojang.minecraft.entity.particle.ParticleManager;
+import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.particle.ParticleManager;
-import com.mojang.minecraft.particle.TerrainParticle;
 import com.mojang.minecraft.render.FontRenderer;
 
 /**
@@ -545,9 +545,9 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	public void spawnDestructionParticles(BlockType block, Level level, int x, int y, int z, ParticleManager particles) {
-		for (int xMod = 0; xMod < 4; ++xMod) {
-			for (int yMod = 0; yMod < 4; ++yMod) {
-				for (int zMod = 0; zMod < 4; ++zMod) {
+		for (int xMod = 0; xMod < 4; xMod++) {
+			for (int yMod = 0; yMod < 4; yMod++) {
+				for (int zMod = 0; zMod < 4; zMod++) {
 					float particleX = x + (xMod + 0.5F) / 4;
 					float particleY = y + (yMod + 0.5F) / 4;
 					float particleZ = z + (zMod + 0.5F) / 4;

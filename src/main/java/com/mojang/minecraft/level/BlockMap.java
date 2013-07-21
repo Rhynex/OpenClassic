@@ -14,8 +14,8 @@ public class BlockMap implements Serializable {
 
 	public static final long serialVersionUID = 0L;
 	private int width;
-	private int depth;
 	private int height;
+	private int depth;
 	private Slot slot = new Slot();
 	private Slot slot2 = new Slot();
 	public List<Entity>[] entityGrid;
@@ -25,26 +25,25 @@ public class BlockMap implements Serializable {
 	@SuppressWarnings("unchecked")
 	public BlockMap(int width, int height, int depth) {
 		this.width = width / 16;
-		this.depth = height / 16;
-		this.height = depth / 16;
+		this.height = height / 16;
+		this.depth = depth / 16;
 		if (this.width == 0) {
 			this.width = 1;
-		}
-
-		if (this.depth == 0) {
-			this.depth = 1;
 		}
 
 		if (this.height == 0) {
 			this.height = 1;
 		}
 
-		this.entityGrid = new ArrayList[this.width * this.depth * this.height];
+		if (this.depth == 0) {
+			this.depth = 1;
+		}
 
-		for (width = 0; width < this.width; ++width) {
-			for (height = 0; height < this.depth; ++height) {
-				for (depth = 0; depth < this.height; ++depth) {
-					this.entityGrid[(depth * this.depth + height) * this.width + width] = new ArrayList<Entity>();
+		this.entityGrid = new ArrayList[this.width * this.height * this.depth];
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				for (int z = 0; z < this.depth; z++) {
+					this.entityGrid[(z * this.height + y) * this.width + x] = new ArrayList<Entity>();
 				}
 			}
 		}
@@ -66,11 +65,11 @@ public class BlockMap implements Serializable {
 	}
 
 	public void moved(Entity entity) {
-		Slot var2 = this.slot.init(this, entity.xOld, entity.yOld, entity.zOld);
-		Slot var3 = this.slot2.init(this, entity.x, entity.y, entity.z);
-		if (!var2.equals(var3)) {
-			var2.remove(entity);
-			var3.add(entity);
+		Slot old = this.slot.init(this, entity.xOld, entity.yOld, entity.zOld);
+		Slot newSlot = this.slot2.init(this, entity.x, entity.y, entity.z);
+		if (!old.equals(newSlot)) {
+			old.remove(entity);
+			newSlot.add(entity);
 			entity.xOld = entity.x;
 			entity.yOld = entity.y;
 			entity.zOld = entity.z;
@@ -85,13 +84,11 @@ public class BlockMap implements Serializable {
 	public List<Entity> getEntities(Entity exclude, float x, float y, float z, float x2, float y2, float z2, List<Entity> result) {
 		Slot slot = this.slot.init(this, x, y, z);
 		Slot slot2 = this.slot2.init(this, x2, y2, z2);
-
-		for (int var11 = slot.xSlot - 1; var11 <= slot2.xSlot + 1; ++var11) {
-			for (int var12 = slot.ySlot - 1; var12 <= slot2.ySlot + 1; ++var12) {
-				for (int var13 = slot.zSlot - 1; var13 <= slot2.zSlot + 1; ++var13) {
-					if (var11 >= 0 && var12 >= 0 && var13 >= 0 && var11 < this.width && var12 < this.depth && var13 < this.height) {
-						List<Entity> entities = this.entityGrid[(var13 * this.depth + var12) * this.width + var11];
-
+		for (int ex = slot.xSlot - 1; ex <= slot2.xSlot + 1; ex++) {
+			for (int ey = slot.ySlot - 1; ey <= slot2.ySlot + 1; ey++) {
+				for (int ez = slot.zSlot - 1; ez <= slot2.zSlot + 1; ez++) {
+					if (ex >= 0 && ey >= 0 && ez >= 0 && ex < this.width && ey < this.height && ez < this.depth) {
+						List<Entity> entities = this.entityGrid[(ez * this.height + ey) * this.width + ex];
 						for (Entity entity : entities) {
 							if (entity != exclude && entity.intersects(x, y, z, x2, y2, z2)) {
 								result.add(entity);
@@ -108,10 +105,10 @@ public class BlockMap implements Serializable {
 	public void removeAllNonCreativeModeEntities() {
 		List<Entity> cache = new ArrayList<Entity>();
 		
-		for (int x = 0; x < this.width; ++x) {
-			for (int z = 0; z < this.depth; ++z) {
-				for (int y = 0; y < this.height; ++y) {
-					List<Entity> entities = this.entityGrid[(y * this.depth + z) * this.width + x];
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				for (int z = 0; z < this.depth; z++) {
+					List<Entity> entities = this.entityGrid[(z * this.height + y) * this.width + x];
 					cache.addAll(entities);
 					
 					for (Entity entity : cache) {
@@ -134,133 +131,121 @@ public class BlockMap implements Serializable {
 	}
 
 	public void clear() {
-		for (int x = 0; x < this.width; ++x) {
-			for (int var2 = 0; var2 < this.depth; ++var2) {
-				for (int var3 = 0; var3 < this.height; ++var3) {
-					this.entityGrid[(var3 * this.depth + var2) * this.width + x].clear();
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				for (int z = 0; z < this.depth; z++) {
+					this.entityGrid[(z * this.height + y) * this.width + x].clear();
 				}
 			}
 		}
 	}
 
-	public List<Entity> getEntities(Entity var1, AABB var2) {
+	public List<Entity> getEntities(Entity exclude, AABB bb) {
 		this.tmp.clear();
-		return this.getEntities(var1, var2.x0, var2.y0, var2.z0, var2.x1, var2.y1, var2.z1, this.tmp);
+		return this.getEntities(exclude, bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1, this.tmp);
 	}
 
-	public List<Entity> getEntities(Entity var1, AABB var2, List<Entity> var3) {
-		return this.getEntities(var1, var2.x0, var2.y0, var2.z0, var2.x1, var2.y1, var2.z1, var3);
+	public List<Entity> getEntities(Entity exclude, AABB bb, List<Entity> to) {
+		return this.getEntities(exclude, bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1, to);
 	}
 
 	public void tickAll() {
-		for (int var1 = 0; var1 < this.all.size(); ++var1) {
-			Entity var2;
-			(var2 = this.all.get(var1)).tick();
-			if (var2.removed) {
-				this.all.remove(var1--);
-				this.slot.init(this, var2.xOld, var2.yOld, var2.zOld).remove(var2);
+		for (int index = 0; index < this.all.size(); index++) {
+			Entity entity = this.all.get(index);
+			entity.tick();
+			if (entity.removed) {
+				this.all.remove(index--);
+				this.slot.init(this, entity.xOld, entity.yOld, entity.zOld).remove(entity);
 			} else {
-				int var3 = (int) (var2.xOld / 16.0F);
-				int var4 = (int) (var2.yOld / 16.0F);
-				int var5 = (int) (var2.zOld / 16.0F);
-				int var6 = (int) (var2.x / 16.0F);
-				int var7 = (int) (var2.y / 16.0F);
-				int var8 = (int) (var2.z / 16.0F);
-				if (var3 != var6 || var4 != var7 || var5 != var8) {
-					this.moved(var2);
+				int omx = (int) (entity.xOld / 16.0F);
+				int omy = (int) (entity.yOld / 16.0F);
+				int omz = (int) (entity.zOld / 16.0F);
+				int mx = (int) (entity.x / 16.0F);
+				int my = (int) (entity.y / 16.0F);
+				int mz = (int) (entity.z / 16.0F);
+				if (omx != mx || omy != my || omz != mz) {
+					this.moved(entity);
 				}
 			}
 		}
 
 	}
 
-	public void render(Vector model, Frustum var2, TextureManager textureManager, float var4) {
-		for (int var5 = 0; var5 < this.width; ++var5) {
-			float var6 = ((var5 << 4) - 2);
-			float var7 = ((var5 + 1 << 4) + 2);
-
-			for (int var8 = 0; var8 < this.depth; ++var8) {
-				float var9 = ((var8 << 4) - 2);
-				float var10 = ((var8 + 1 << 4) + 2);
-
-				for (int var11 = 0; var11 < this.height; ++var11) {
-					List<?> var12;
-					if ((var12 = this.entityGrid[(var11 * this.depth + var8) * this.width + var5]).size() != 0) {
-						float var13 = ((var11 << 4) - 2);
-						float var14 = ((var11 + 1 << 4) + 2);
-						if (var2.isBoxInFrustum(var6, var9, var13, var7, var10, var14)) {
-							float var16 = var14;
-							float var17 = var10;
-							float var15 = var7;
-							var14 = var13;
-							var13 = var9;
-							float var18 = var6;
-							Frustum var19 = var2;
-							int var20 = 0;
-
-							boolean var10000;
+	public void render(Vector pos, Frustum frustum, TextureManager textureManager, float dt) {
+		for (int x = 0; x < this.width; x++) {
+			float x1 = (x << 4) - 2;
+			float x2 = (x + 1 << 4) + 2;
+			for (int y = 0; y < this.height; y++) {
+				float y1 = (y << 4) - 2;
+				float y2 = (y + 1 << 4) + 2;
+				for (int z = 0; z < this.depth; z++) {
+					List<Entity> entities = this.entityGrid[(z * this.height + y) * this.width + x];
+					if (entities.size() != 0) {
+						float z1 = (z << 4) - 2;
+						float z2 = (z + 1 << 4) + 2;
+						if (frustum.isBoxInFrustum(x1, y1, z1, x2, y2, z2)) {
+							int plane = 0;
+							boolean empty = true;
 							while (true) {
-								if (var20 >= 6) {
-									var10000 = true;
+								if (plane >= 6) {
+									empty = true;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var14 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var13 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var18 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								if (var19.frustum[var20][0] * var15 + var19.frustum[var20][1] * var17 + var19.frustum[var20][2] * var16 + var19.frustum[var20][3] <= 0.0F) {
-									var10000 = false;
+								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+									empty = false;
 									break;
 								}
 
-								++var20;
+								plane++;
 							}
 
-							boolean var21 = var10000;
-
-							for (int var23 = 0; var23 < var12.size(); ++var23) {
-								Entity var22;
-								if ((var22 = (Entity) var12.get(var23)).shouldRender(model)) {
-									if (!var21) {
-										AABB var24 = var22.bb;
-										if (!var2.isBoxInFrustum(var24.x0, var24.y0, var24.z0, var24.x1, var24.y1, var24.z1)) {
+							for (int index = 0; index < entities.size(); index++) {
+								Entity entity = entities.get(index);
+								if (entity.shouldRender(pos)) {
+									if (!empty) {
+										AABB aabb = entity.bb;
+										if (!frustum.isBoxInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1)) {
 											continue;
 										}
 									}
 
-									var22.render(textureManager, var4);
+									entity.render(textureManager, dt);
 								}
 							}
 						}
@@ -300,12 +285,12 @@ public class BlockMap implements Serializable {
 				this.xSlot = parent.width - 1;
 			}
 
-			if (this.ySlot >= parent.depth) {
-				this.ySlot = parent.depth - 1;
+			if (this.ySlot >= parent.height) {
+				this.ySlot = parent.height - 1;
 			}
 
-			if (this.zSlot >= parent.height) {
-				this.zSlot = parent.height - 1;
+			if (this.zSlot >= parent.depth) {
+				this.zSlot = parent.depth - 1;
 			}
 
 			return this;
@@ -313,14 +298,14 @@ public class BlockMap implements Serializable {
 
 		public void add(Entity entity) {
 			if (this.xSlot >= 0 && this.ySlot >= 0 && this.zSlot >= 0) {
-				parent.entityGrid[(this.zSlot * parent.depth + this.ySlot) * parent.width + this.xSlot].add(entity);
+				parent.entityGrid[(this.zSlot * parent.height + this.ySlot) * parent.width + this.xSlot].add(entity);
 			}
 
 		}
 
 		public void remove(Entity entity) {
 			if (this.xSlot >= 0 && this.ySlot >= 0 && this.zSlot >= 0) {
-				parent.entityGrid[(this.zSlot * parent.depth + this.ySlot) * parent.width + this.xSlot].remove(entity);
+				parent.entityGrid[(this.zSlot * parent.height + this.ySlot) * parent.width + this.xSlot].remove(entity);
 			}
 		}
 	}

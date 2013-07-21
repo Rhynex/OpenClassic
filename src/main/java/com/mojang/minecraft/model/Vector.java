@@ -2,6 +2,8 @@ package com.mojang.minecraft.model;
 
 public final class Vector {
 
+	private static final float EPSILON = 0.0000001f;
+	
 	public float x;
 	public float y;
 	public float z;
@@ -40,21 +42,24 @@ public final class Vector {
 		float x = other.x - this.x;
 		float y = other.y - this.y;
 		float z = other.z - this.z;
-		return x * x < 1.0E-7F ? null : ((intersectX = (intersectX - this.x) / x) >= 0.0F && intersectX <= 1.0F ? new Vector(this.x + x * intersectX, this.y + y * intersectX, this.z + z * intersectX) : null);
+		float ln = (intersectX - this.x) / x;
+		return x * x < EPSILON ? null : (ln >= 0.0F && ln <= 1.0F ? new Vector(this.x + x * ln, this.y + y * ln, this.z + z * ln) : null);
 	}
 
 	public final Vector getYIntersection(Vector other, float intersectY) {
 		float x = other.x - this.x;
 		float y = other.y - this.y;
 		float z = other.z - this.z;
-		return y * y < 1.0E-7F ? null : ((intersectY = (intersectY - this.y) / y) >= 0.0F && intersectY <= 1.0F ? new Vector(this.x + x * intersectY, this.y + y * intersectY, this.z + z * intersectY) : null);
+		float ln = (intersectY - this.y) / y;
+		return y * y < EPSILON ? null : (ln >= 0.0F && ln <= 1.0F ? new Vector(this.x + x * ln, this.y + y * ln, this.z + z * ln) : null);
 	}
 
 	public final Vector getZIntersection(Vector other, float intersectZ) {
 		float x = other.x - this.x;
 		float y = other.y - this.y;
 		float z = other.z - this.z;
-		return z * z < 1.0E-7F ? null : ((intersectZ = (intersectZ - this.z) / z) >= 0.0F && intersectZ <= 1.0F ? new Vector(this.x + x * intersectZ, this.y + y * intersectZ, this.z + z * intersectZ) : null);
+		float ln = (intersectZ - this.z) / z;
+		return z * z < EPSILON ? null : (ln >= 0.0F && ln <= 1.0F ? new Vector(this.x + x * ln, this.y + y * ln, this.z + z * ln) : null);
 	}
 
 	public final String toString() {

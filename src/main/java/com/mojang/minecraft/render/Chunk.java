@@ -7,8 +7,8 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.client.render.Renderer;
 
+import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.LocalPlayer;
 
 public final class Chunk {
 
@@ -86,7 +86,7 @@ public final class Chunk {
 	}
 
 	private void setAllDirty() {
-		for (int index = 0; index < 2; ++index) {
+		for (int index = 0; index < 2; index++) {
 			this.dirty[index] = true;
 		}
 	}
@@ -96,12 +96,12 @@ public final class Chunk {
 		this.level = null;
 	}
 
-	public final int appendData(int[] data, int start, int var3) {
+	public final int appendData(int[] data, int start, int pass) {
 		if (!this.visible) {
 			return start;
 		} else {
-			if (!this.dirty[var3]) {
-				data[start++] = this.baseListId + var3;
+			if (!this.dirty[pass]) {
+				data[start++] = this.baseListId + pass;
 			}
 
 			return start;

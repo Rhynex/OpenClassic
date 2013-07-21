@@ -11,9 +11,9 @@ import org.lwjgl.input.Keyboard;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 
+import com.mojang.minecraft.entity.player.LocalPlayer.PlayerAI;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.player.LocalPlayer.PlayerAI;
 
 public final class GameSettings {
 
@@ -261,7 +261,7 @@ public final class GameSettings {
 			writer.println("smoothing:" + this.smoothing);
 			writer.println("texturepack:" + this.texturePack);
 
-			for (int binding = 0; binding < this.bindings.length; ++binding) {
+			for (int binding = 0; binding < this.bindings.length; binding++) {
 				writer.println("key_" + this.bindings[binding].key + ":" + this.bindings[binding].key);
 			}
 

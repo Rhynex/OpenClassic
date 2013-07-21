@@ -5,7 +5,7 @@ public final class Timer {
 	public float tps;
 	public double lastHR;
 	public int elapsedTicks;
-	public float renderPartialTicks;
+	public float delta;
 	public float speed = 1;
 	public float elapsedPartialTicks = 0;
 	public long lastSysClock;

@@ -9,7 +9,7 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.player.LocalPlayer;
+import com.mojang.minecraft.entity.player.LocalPlayer;
 
 public final class GameOverScreen extends GuiScreen {
 

@@ -9,11 +9,12 @@ import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
+import com.mojang.minecraft.entity.player.LocalPlayer;
+import com.mojang.minecraft.entity.player.net.PositionUpdate;
 import com.mojang.minecraft.level.BlockMap;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.phys.AABB;
-import com.mojang.minecraft.player.net.PositionUpdate;
 import com.mojang.minecraft.render.TextureManager;
 
 public abstract class Entity implements Serializable {
@@ -29,10 +30,10 @@ public abstract class Entity implements Serializable {
 	public float xd;
 	public float yd;
 	public float zd;
-	public float yRot;
-	public float xRot;
-	public float yRotO;
-	public float xRotO;
+	public float yaw;
+	public float pitch;
+	public float oYaw;
+	public float oPitch;
 	public AABB bb;
 	public boolean onGround = false;
 	public boolean horizontalCollision = false;
@@ -78,8 +79,8 @@ public abstract class Entity implements Serializable {
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
-			this.yRot = pos.getYaw();
-			this.xRot = pos.getPitch();
+			this.yaw = pos.getYaw();
+			this.pitch = pos.getPitch();
 		} else if (this.level != null) {
 			float x = this.level.xSpawn + 0.5F;
 			float y = this.level.ySpawn;
@@ -96,8 +97,8 @@ public abstract class Entity implements Serializable {
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
-			this.yRot = this.level.yawSpawn;
-			this.xRot = this.level.pitchSpawn;
+			this.yaw = this.level.yawSpawn;
+			this.pitch = this.level.pitchSpawn;
 		}
 	}
 
@@ -120,13 +121,13 @@ public abstract class Entity implements Serializable {
 		if (pos.rotation) {
 			this.setRot(pos.yaw, pos.pitch);
 		} else {
-			this.setRot(this.yRot, this.xRot);
+			this.setRot(this.yaw, this.pitch);
 		}
 	}
 
 	protected void setRot(float yaw, float pitch) {
-		this.yRot = yaw;
-		this.xRot = pitch;
+		this.yaw = yaw;
+		this.pitch = pitch;
 	}
 
 	public void setPos(float x, float y, float z) {
@@ -139,31 +140,31 @@ public abstract class Entity implements Serializable {
 	}
 
 	public void turn(float yaw, float pitch) {
-		float oldPitch = this.xRot;
-		float oldYaw = this.yRot;
-		this.yRot = (float) (this.yRot + yaw * 0.15D);
-		this.xRot = (float) (this.xRot - pitch * 0.15D);
-		if (this.xRot < -90.0F) {
-			this.xRot = -90.0F;
+		float oldPitch = this.pitch;
+		float oldYaw = this.yaw;
+		this.yaw = (float) (this.yaw + yaw * 0.15D);
+		this.pitch = (float) (this.pitch - pitch * 0.15D);
+		if (this.pitch < -90.0F) {
+			this.pitch = -90.0F;
 		}
 
-		if (this.xRot > 90.0F) {
-			this.xRot = 90.0F;
+		if (this.pitch > 90.0F) {
+			this.pitch = 90.0F;
 		}
 
-		this.xRotO += this.xRot - oldPitch;
-		this.yRotO += this.yRot - oldYaw;
+		this.oPitch += this.pitch - oldPitch;
+		this.oYaw += this.yaw - oldYaw;
 	}
 
 	public void interpolateTurn(float yaw, float pitch) {
-		this.yRot = (float) (this.yRot + yaw * 0.15D);
-		this.xRot = (float) (this.xRot - pitch * 0.15D);
-		if (this.xRot < -90.0F) {
-			this.xRot = -90.0F;
+		this.yaw = (float) (this.yaw + yaw * 0.15D);
+		this.pitch = (float) (this.pitch - pitch * 0.15D);
+		if (this.pitch < -90.0F) {
+			this.pitch = -90.0F;
 		}
 
-		if (this.xRot > 90.0F) {
-			this.xRot = 90.0F;
+		if (this.pitch > 90.0F) {
+			this.pitch = 90.0F;
 		}
 	}
 
@@ -172,8 +173,8 @@ public abstract class Entity implements Serializable {
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		this.xRotO = this.xRot;
-		this.yRotO = this.yRot;
+		this.oPitch = this.pitch;
+		this.oYaw = this.yaw;
 	}
 
 	public boolean isFree(float x, float y, float z, float radius) {
@@ -355,21 +356,20 @@ public abstract class Entity implements Serializable {
 		return this.level.containsLiquid(this.bb.grow(0.0F, -0.4F, 0.0F), VanillaBlock.LAVA);
 	}
 
-	public void moveRelative(float relX, float relZ, float speed) {
-		float var4 = (float) Math.sqrt(relX * relX + relZ * relZ);
-		if (var4 >= 0.01F) {
-			if (var4 < 1.0F) {
-				var4 = 1.0F;
+	public void moveRelative(float forward, float strafe, float speed) {
+		float len = (float) Math.sqrt(forward * forward + strafe * strafe);
+		if (len >= 0.01F) {
+			if (len < 1.0F) {
+				len = 1.0F;
 			}
 
-			var4 = speed / var4;
-			relX *= var4;
-			relZ *= var4;
-			speed = MathHelper.sin(this.yRot * MathHelper.DEG_TO_RAD);
-			var4 = MathHelper.cos(this.yRot * MathHelper.DEG_TO_RAD);
+			float mforward = forward * (speed / len);
+			float mstrafe = strafe * (speed / len);
+			float xangle = MathHelper.cos(this.yaw * MathHelper.DEG_TO_RAD);
+			float zangle = MathHelper.sin(this.yaw * MathHelper.DEG_TO_RAD);
 			
-			this.xd += relX * var4 - relZ * speed;
-			this.zd += relZ * var4 + relX * speed;
+			this.xd += mforward * xangle - mstrafe * zangle;
+			this.zd += mstrafe * xangle + mforward * zangle;
 		}
 	}
 
@@ -377,12 +377,12 @@ public abstract class Entity implements Serializable {
 		return this.level.isLit((int) this.x, (int) this.y, (int) this.z);
 	}
 
-	public float getBrightness(float var1) {
+	public float getBrightness(float dt) {
 		int y = (int) (this.y + this.heightOffset / 2.0F - 0.5F);
 		return this.level.getBrightness((int) this.x, y, (int) this.z);
 	}
 
-	public void render(TextureManager textures, float var2) {
+	public void render(TextureManager textures, float dt) {
 	}
 
 	public void setLevel(Level level) {
@@ -400,8 +400,8 @@ public abstract class Entity implements Serializable {
 		this.y = y;
 		this.zo = z;
 		this.z = z;
-		this.yRot = yaw;
-		this.xRot = pitch;
+		this.yaw = yaw;
+		this.pitch = pitch;
 		this.setPos(x, y, z);
 	}
 
@@ -426,7 +426,7 @@ public abstract class Entity implements Serializable {
 		return xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
 	}
 
-	public void playerTouch(Entity player) {
+	public void playerTouch(LocalPlayer player) {
 	}
 
 	public void push(Entity entity) {
@@ -497,6 +497,6 @@ public abstract class Entity implements Serializable {
 		return false;
 	}
 
-	public void renderHover(TextureManager textures, float var2) {
+	public void renderHover(TextureManager textures, float dt) {
 	}
 }

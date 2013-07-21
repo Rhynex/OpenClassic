@@ -24,52 +24,48 @@ public final class ModelPart {
 		this.v = v;
 	}
 
-	public final void setBounds(float x1, float y1, float z1, int x2, int y2, int z2, float var7) {
+	public final void setBounds(float x, float y, float z, int width, int height, int depth, float offset) {
 		this.vertices = new Vertex[8];
 		this.quads = new Quad[6];
-		float var8 = x1 + x2;
-		float var9 = y1 + y2;
-		float var10 = z1 + z2;
-		x1 -= var7;
-		y1 -= var7;
-		z1 -= var7;
-		var8 += var7;
-		var9 += var7;
-		var10 += var7;
+		float x2 = x + width + offset;
+		float y2 = y + height + offset;
+		float z2 = z + depth + offset;
+		x -= offset;
+		y -= offset;
+		z -= offset;
 		if (this.mirror) {
-			var7 = var8;
-			var8 = x1;
-			x1 = var7;
+			offset = x2;
+			x2 = x;
+			x = offset;
 		}
 
-		Vertex var20 = new Vertex(x1, y1, z1, 0.0F, 0.0F);
-		Vertex var11 = new Vertex(var8, y1, z1, 0.0F, 8.0F);
-		Vertex var12 = new Vertex(var8, var9, z1, 8.0F, 8.0F);
-		Vertex var18 = new Vertex(x1, var9, z1, 8.0F, 0.0F);
-		Vertex var13 = new Vertex(x1, y1, var10, 0.0F, 0.0F);
-		Vertex var15 = new Vertex(var8, y1, var10, 0.0F, 8.0F);
-		Vertex var21 = new Vertex(var8, var9, var10, 8.0F, 8.0F);
-		Vertex var14 = new Vertex(x1, var9, var10, 8.0F, 0.0F);
-		this.vertices[0] = var20;
-		this.vertices[1] = var11;
-		this.vertices[2] = var12;
-		this.vertices[3] = var18;
-		this.vertices[4] = var13;
-		this.vertices[5] = var15;
-		this.vertices[6] = var21;
-		this.vertices[7] = var14;
-		this.quads[0] = new Quad(new Vertex[] { var15, var11, var12, var21 }, this.u + z2 + x2, this.v + z2, this.u + z2 + x2 + z2, this.v + z2 + y2);
-		this.quads[1] = new Quad(new Vertex[] { var20, var13, var14, var18 }, this.u, this.v + z2, this.u + z2, this.v + z2 + y2);
-		this.quads[2] = new Quad(new Vertex[] { var15, var13, var20, var11 }, this.u + z2, this.v, this.u + z2 + x2, this.v + z2);
-		this.quads[3] = new Quad(new Vertex[] { var12, var18, var14, var21 }, this.u + z2 + x2, this.v, this.u + z2 + x2 + x2, this.v + z2);
-		this.quads[4] = new Quad(new Vertex[] { var11, var20, var18, var12 }, this.u + z2, this.v + z2, this.u + z2 + x2, this.v + z2 + y2);
-		this.quads[5] = new Quad(new Vertex[] { var13, var15, var21, var14 }, this.u + z2 + x2 + z2, this.v + z2, this.u + z2 + x2 + z2 + x2, this.v + z2 + y2);
+		Vertex v0 = new Vertex(x, y, z, 0.0F, 0.0F);
+		Vertex v1 = new Vertex(x2, y, z, 0.0F, 8.0F);
+		Vertex v2 = new Vertex(x2, y2, z, 8.0F, 8.0F);
+		Vertex v3 = new Vertex(x, y2, z, 8.0F, 0.0F);
+		Vertex v4 = new Vertex(x, y, z2, 0.0F, 0.0F);
+		Vertex v5 = new Vertex(x2, y, z2, 0.0F, 8.0F);
+		Vertex v6 = new Vertex(x2, y2, z2, 8.0F, 8.0F);
+		Vertex v7 = new Vertex(x, y2, z2, 8.0F, 0.0F);
+		this.vertices[0] = v0;
+		this.vertices[1] = v1;
+		this.vertices[2] = v2;
+		this.vertices[3] = v3;
+		this.vertices[4] = v4;
+		this.vertices[5] = v5;
+		this.vertices[6] = v6;
+		this.vertices[7] = v7;
+		this.quads[0] = new Quad(new Vertex[] { v5, v1, v2, v6 }, this.u + depth + width, this.v + depth, this.u + depth + width + depth, this.v + depth + height);
+		this.quads[1] = new Quad(new Vertex[] { v0, v4, v7, v3 }, this.u, this.v + depth, this.u + depth, this.v + depth + height);
+		this.quads[2] = new Quad(new Vertex[] { v5, v4, v0, v1 }, this.u + depth, this.v, this.u + depth + width, this.v + depth);
+		this.quads[3] = new Quad(new Vertex[] { v2, v3, v7, v6 }, this.u + depth + width, this.v, this.u + depth + width + width, this.v + depth);
+		this.quads[4] = new Quad(new Vertex[] { v1, v0, v3, v2 }, this.u + depth, this.v + depth, this.u + depth + width, this.v + depth + height);
+		this.quads[5] = new Quad(new Vertex[] { v4, v5, v6, v7 }, this.u + depth + width + depth, this.v + depth, this.u + depth + width + depth + width, this.v + depth + height);
 		if (this.mirror) {
-			for (int q = 0; q < this.quads.length; ++q) {
+			for (int q = 0; q < this.quads.length; q++) {
 				Quad quad = this.quads[q];
 				Vertex[] vecs = new Vertex[quad.vertices.length];
-
-				for (int vert = 0; vert < quad.vertices.length; ++vert) {
+				for (int vert = 0; vert < quad.vertices.length; vert++) {
 					vecs[vert] = quad.vertices[quad.vertices.length - vert - 1];
 				}
 
@@ -124,15 +120,13 @@ public final class ModelPart {
 		this.list = GL11.glGenLists(1);
 		GL11.glNewList(this.list, 4864);
 		GL11.glBegin(GL11.GL_QUADS);
-
-		for (int q = 0; q < this.quads.length; ++q) {
+		for (int q = 0; q < this.quads.length; q++) {
 			Quad quad = this.quads[q];
-			Vector var5 = quad.vertices[1].vector.subtract(quad.vertices[0].vector).normalize();
-			Vector var6 = quad.vertices[1].vector.subtract(quad.vertices[2].vector).normalize();
-			var5 = (new Vector(var5.y * var6.z - var5.z * var6.y, var5.z * var6.x - var5.x * var6.z, var5.x * var6.y - var5.y * var6.x)).normalize();
-			GL11.glNormal3f(var5.x, var5.y, var5.z);
-
-			for (int vertex = 0; vertex < 4; ++vertex) {
+			Vector min = quad.vertices[1].vector.subtract(quad.vertices[0].vector).normalize();
+			Vector max = quad.vertices[1].vector.subtract(quad.vertices[2].vector).normalize();
+			Vector normal = (new Vector(min.y * max.z - min.z * max.y, min.z * max.x - min.x * max.z, min.x * max.y - min.y * max.x)).normalize();
+			GL11.glNormal3f(normal.x, normal.y, normal.z);
+			for (int vertex = 0; vertex < 4; vertex++) {
 				Vertex vert = quad.vertices[vertex];
 				GL11.glTexCoord2f(vert.u, vert.v);
 				GL11.glVertex3f(vert.vector.x * scale, vert.vector.y * scale, vert.vector.z * scale);

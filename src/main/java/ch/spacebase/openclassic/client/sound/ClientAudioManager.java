@@ -61,10 +61,10 @@ public class ClientAudioManager implements AudioManager {
 		}
 	}
 	
-	public void update(com.mojang.minecraft.player.LocalPlayer player) {
+	public void update(com.mojang.minecraft.entity.player.LocalPlayer player) {
 		if(player != null && OpenClassic.getClient().isInGame()) {
 			this.system.setListenerPosition(player.x, player.y, player.z);
-			this.system.setListenerOrientation(0, 0, -1, (float) Math.sin(Math.toRadians(player.xRot)), (float) Math.sin(Math.toRadians(player.yRot)), 1);
+			this.system.setListenerOrientation(0, 0, -1, (float) Math.sin(Math.toRadians(player.pitch)), (float) Math.sin(Math.toRadians(player.yaw)), 1);
 		} else {
 			this.system.setListenerPosition(0, 0, 0);
 			this.system.setListenerOrientation(0, 0, -1, 0, 1, 0);

@@ -76,15 +76,15 @@ public final class Frustum {
 	}
 
 	private static void normalize(float[][] frustum, int plane) {
-		float var2 = (float) Math.sqrt(frustum[plane][0] * frustum[plane][0] + frustum[plane][1] * frustum[plane][1] + frustum[plane][2] * frustum[plane][2]);
-		frustum[plane][0] /= var2;
-		frustum[plane][1] /= var2;
-		frustum[plane][2] /= var2;
-		frustum[plane][3] /= var2;
+		float len = (float) Math.sqrt(frustum[plane][0] * frustum[plane][0] + frustum[plane][1] * frustum[plane][1] + frustum[plane][2] * frustum[plane][2]);
+		frustum[plane][0] /= len;
+		frustum[plane][1] /= len;
+		frustum[plane][2] /= len;
+		frustum[plane][3] /= len;
 	}
 	
 	public boolean isBoxInFrustum(float x1, float y1, float z1, float x2, float y2, float z2) {
-		for (int plane = 0; plane < 6; ++plane) {
+		for (int plane = 0; plane < 6; plane++) {
 			if (this.frustum[plane][0] * x1 + this.frustum[plane][1] * y1 + this.frustum[plane][2] * z1 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x2 + this.frustum[plane][1] * y1 + this.frustum[plane][2] * z1 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x1 + this.frustum[plane][1] * y2 + this.frustum[plane][2] * z1 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x2 + this.frustum[plane][1] * y2 + this.frustum[plane][2] * z1 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x1 + this.frustum[plane][1] * y1 + this.frustum[plane][2] * z2 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x2 + this.frustum[plane][1] * y1 + this.frustum[plane][2] * z2 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x1 + this.frustum[plane][1] * y2 + this.frustum[plane][2] * z2 + this.frustum[plane][3] <= 0.0F && this.frustum[plane][0] * x2 + this.frustum[plane][1] * y2 + this.frustum[plane][2] * z2 + this.frustum[plane][3] <= 0.0F) {
 				return false;
 			}

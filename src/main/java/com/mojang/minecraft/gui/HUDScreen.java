@@ -80,11 +80,11 @@ public class HUDScreen extends MainScreen {
 				}
 	
 				if (this.mc.player.isUnderWater()) {
-					int var100 = (int) Math.ceil((this.mc.player.airSupply - 2) * 10.0D / 300.0D);
-					int var101 = (int) Math.ceil(this.mc.player.airSupply * 10.0D / 300.0D) - var100;
+					int full = (int) Math.ceil((this.mc.player.airSupply - 2) * 10.0D / 300.0D);
+					int pop = (int) Math.ceil(this.mc.player.airSupply * 10.0D / 300.0D) - full;
 	
-					for (int count = 0; count < var100 + var101; count++) {
-						if (count < var100) {
+					for (int count = 0; count < full + pop; count++) {
+						if (count < full) {
 							ClientRenderHelper.getHelper().drawImage(this.width / 2 - 91 + (count << 3), this.height - 32 - 9, -90, 16, 18, 9, 9);
 						} else {
 							ClientRenderHelper.getHelper().drawImage(this.width / 2 - 91 + (count << 3), this.height - 32 - 9, -90, 25, 18, 9, 9);
@@ -174,7 +174,7 @@ public class HUDScreen extends MainScreen {
 			
 			this.mc.fontRenderer.renderWithShadow("Connected players:", this.width / 2 - this.mc.fontRenderer.getWidth("Connected players:") / 2, this.height / 2 - 64 - 12, 16777215);
 
-			for (int count = 0; count < players.size(); ++count) {
+			for (int count = 0; count < players.size(); count++) {
 				int x = this.width / 2 + count % 2 * 120 - 120;
 				int y = this.height / 2 - 64 + (count / 2 << 3);
 				if (focus && mouseX >= x && mouseY >= y && mouseX < x + 120 && mouseY < y + 8) {

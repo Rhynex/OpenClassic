@@ -9,8 +9,8 @@ import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.player.LocalPlayer;
 import com.zachsthings.onevent.EventManager;
 
 public class GameMode {

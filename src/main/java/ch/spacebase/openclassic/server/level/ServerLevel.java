@@ -480,8 +480,8 @@ public class ServerLevel implements ClassicLevel {
 				leaf = 2;
 			}
 
-			for (int currX = x - leaf; currX <= x + leaf && freespace; ++currX) {
-				for (int currZ = z - leaf; currZ <= z + leaf && freespace; ++currZ) {
+			for (int currX = x - leaf; currX <= x + leaf && freespace; currX++) {
+				for (int currZ = z - leaf; currZ <= z + leaf && freespace; currZ++) {
 					if (currX >= 0 && currY >= 0 && currZ >= 0 && currX < this.width && currY < this.depth && currZ < this.height) {
 						if (this.getBlockTypeAt(currX, currY, currZ) != VanillaBlock.AIR) {
 							freespace = false;
@@ -497,23 +497,23 @@ public class ServerLevel implements ClassicLevel {
 			return false;
 		} else if (this.getBlockTypeAt(x, y, z) == VanillaBlock.GRASS && y < this.depth - logHeight - 1) {
 			this.setBlockAt(x, y - 1, z, VanillaBlock.DIRT);
-			for (int count = y - 3 + logHeight; count <= y + logHeight; ++count) {
-				int var8 = count - (y + logHeight);
-				int leafMax = 1 - var8 / 2;
+			for (int count = y - 3 + logHeight; count <= y + logHeight; count++) {
+				int baseDist = count - (y + logHeight);
+				int leafMax = 1 - baseDist / 2;
 
-				for (int currX = x - leafMax; currX <= x + leafMax; ++currX) {
+				for (int currX = x - leafMax; currX <= x + leafMax; currX++) {
 					int diffX = currX - x;
 
-					for (int currZ = z - leafMax; currZ <= z + leafMax; ++currZ) {
+					for (int currZ = z - leafMax; currZ <= z + leafMax; currZ++) {
 						int diffZ = currZ - z;
-						if (Math.abs(diffX) != leafMax || Math.abs(diffZ) != leafMax || rand.nextInt(2) != 0 && var8 != 0) {
+						if (Math.abs(diffX) != leafMax || Math.abs(diffZ) != leafMax || rand.nextInt(2) != 0 && baseDist != 0) {
 							this.setBlockAt(currX, count, currZ, VanillaBlock.LEAVES);
 						}
 					}
 				}
 			}
 
-			for (int count = 0; count < logHeight; ++count) {
+			for (int count = 0; count < logHeight; count++) {
 				this.setBlockAt(x, y + count, z, VanillaBlock.LOG);
 			}
 

@@ -7,10 +7,10 @@ import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 
 import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.entity.mob.Mob;
+import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.MobSpawner;
-import com.mojang.minecraft.mob.Mob;
-import com.mojang.minecraft.player.LocalPlayer;
 
 public final class SurvivalGameMode extends GameMode {
 

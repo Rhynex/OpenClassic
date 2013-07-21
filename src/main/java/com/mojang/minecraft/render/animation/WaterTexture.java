@@ -14,11 +14,11 @@ public final class WaterTexture extends AnimatedTexture {
 		int var4;
 		int var5;
 		int var6;
-		for (var1 = 0; var1 < 16; ++var1) {
-			for (var2 = 0; var2 < 16; ++var2) {
+		for (var1 = 0; var1 < 16; var1++) {
+			for (var2 = 0; var2 < 16; var2++) {
 				var3 = 0.0F;
 
-				for (var4 = var1 - 1; var4 <= var1 + 1; ++var4) {
+				for (var4 = var1 - 1; var4 <= var1 + 1; var4++) {
 					var5 = var4 & 15;
 					var6 = var2 & 15;
 					var3 += this.red[var5 + (var6 << 4)];
@@ -28,8 +28,8 @@ public final class WaterTexture extends AnimatedTexture {
 			}
 		}
 
-		for (var1 = 0; var1 < 16; ++var1) {
-			for (var2 = 0; var2 < 16; ++var2) {
+		for (var1 = 0; var1 < 16; var1++) {
+			for (var2 = 0; var2 < 16; var2++) {
 				this.blue[var1 + (var2 << 4)] += this.alpha[var1 + (var2 << 4)] * 0.05F;
 				if (this.blue[var1 + (var2 << 4)] < 0.0F) {
 					this.blue[var1 + (var2 << 4)] = 0.0F;
@@ -46,7 +46,7 @@ public final class WaterTexture extends AnimatedTexture {
 		this.green = this.red;
 		this.red = var8;
 
-		for (var2 = 0; var2 < 256; ++var2) {
+		for (var2 = 0; var2 < 256; var2++) {
 			if ((var3 = this.red[var2]) > 1.0F) {
 				var3 = 1.0F;
 			}

@@ -9,7 +9,7 @@ import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.Model;
 
 import com.mojang.minecraft.MovingObjectPosition;
-import com.mojang.minecraft.item.Item;
+import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.phys.AABB;

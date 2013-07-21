@@ -21,12 +21,12 @@ import com.zachsthings.onevent.EventManager;
 
 public class ClientPlayer implements Player {
 	
-	private com.mojang.minecraft.player.LocalPlayer handle;
+	private com.mojang.minecraft.entity.player.LocalPlayer handle;
 	private byte placeMode = 0;
 	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
 	
-	public ClientPlayer(com.mojang.minecraft.player.LocalPlayer handle) {
+	public ClientPlayer(com.mojang.minecraft.entity.player.LocalPlayer handle) {
 		this.handle = handle;
 		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 	}
@@ -58,7 +58,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public Position getPosition() {
-		return new Position(this.handle.level.openclassic, this.handle.x, this.handle.y, this.handle.z, (byte) this.handle.yRot, (byte) this.handle.xRot);
+		return new Position(this.handle.level.openclassic, this.handle.x, this.handle.y, this.handle.z, (byte) this.handle.yaw, (byte) this.handle.pitch);
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class ClientPlayer implements Player {
 		this.getSession().disconnect(reason);
 	}
 	
-	public com.mojang.minecraft.player.LocalPlayer getHandle() {
+	public com.mojang.minecraft.entity.player.LocalPlayer getHandle() {
 		return this.handle;
 	}
 

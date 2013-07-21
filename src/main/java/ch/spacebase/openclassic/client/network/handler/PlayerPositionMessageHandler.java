@@ -6,7 +6,7 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
 
-import com.mojang.minecraft.player.net.NetworkPlayer;
+import com.mojang.minecraft.entity.player.net.NetworkPlayer;
 
 public class PlayerPositionMessageHandler extends MessageHandler<PlayerPositionMessage> {
 

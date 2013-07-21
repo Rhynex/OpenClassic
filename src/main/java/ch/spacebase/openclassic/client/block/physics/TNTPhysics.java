@@ -4,7 +4,7 @@ import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.physics.BlockPhysics;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 
-import com.mojang.minecraft.item.PrimedTnt;
+import com.mojang.minecraft.entity.item.PrimedTnt;
 
 public class TNTPhysics implements BlockPhysics {
 

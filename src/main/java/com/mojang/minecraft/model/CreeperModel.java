@@ -29,18 +29,18 @@ public final class CreeperModel extends Model {
 		this.leg4.setPosition(2.0F, 12.0F, -4.0F);
 	}
 
-	public final void render(float var1, float var2, float var3, float var4, float var5, float var6) {
-		this.head.yaw = var4 / 57.295776F;
-		this.head.pitch = var5 / 57.295776F;
-		this.leg1.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
-		this.leg2.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
-		this.leg3.pitch = MathHelper.cos(var1 * 0.6662F + MathHelper.PI) * 1.4F * var2;
-		this.leg4.pitch = MathHelper.cos(var1 * 0.6662F) * 1.4F * var2;
-		this.head.render(var6);
-		this.body.render(var6);
-		this.leg1.render(var6);
-		this.leg2.render(var6);
-		this.leg3.render(var6);
-		this.leg4.render(var6);
+	public final void render(float animStep, float runProgress, float dt, float yaw, float pitch, float scale) {
+		this.head.yaw = yaw / 57.295776F;
+		this.head.pitch = pitch / 57.295776F;
+		this.leg1.pitch = MathHelper.cos(animStep * 0.6662F) * 1.4F * runProgress;
+		this.leg2.pitch = MathHelper.cos(animStep * 0.6662F + MathHelper.PI) * 1.4F * runProgress;
+		this.leg3.pitch = MathHelper.cos(animStep * 0.6662F + MathHelper.PI) * 1.4F * runProgress;
+		this.leg4.pitch = MathHelper.cos(animStep * 0.6662F) * 1.4F * runProgress;
+		this.head.render(scale);
+		this.body.render(scale);
+		this.leg1.render(scale);
+		this.leg2.render(scale);
+		this.leg3.render(scale);
+		this.leg4.render(scale);
 	}
 }
