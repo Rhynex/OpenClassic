@@ -69,7 +69,7 @@ public abstract class Entity implements Serializable {
 	public void resetPos(Position pos) {
 		if (pos != null) {
 			pos = pos.clone();
-			while(pos.getY() > 0 && this.level.getCubes(this.bb).size() != 0) {
+			while(pos.getY() < this.level.height && this.level.getCubes(this.bb).size() != 0) {
 				pos.setY(pos.getY() + 1);
 			}
 			
@@ -83,7 +83,7 @@ public abstract class Entity implements Serializable {
 			float x = this.level.xSpawn + 0.5F;
 			float y = this.level.ySpawn;
 			float z = this.level.zSpawn + 0.5F;
-			while (y > 0.0F) {
+			while (y < this.level.height) {
 				this.setPos(x, y, z);
 				if (this.level.getCubes(this.bb).size() == 0) {
 					break;
