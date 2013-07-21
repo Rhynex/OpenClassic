@@ -13,6 +13,7 @@ import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.block.model.EmptyModel;
 import ch.spacebase.openclassic.api.block.model.LiquidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
+import ch.spacebase.openclassic.api.block.model.PlantModel;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
@@ -39,7 +40,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().canPlaceIn() ? 1 : 0);
 		buffer.writeByte(message.getBlock().isGas() ? 1 : 0);
 		buffer.writeByte(message.getBlock().getPreventsOwnRenderingRaw() ? 1 : 0);
-		ChannelBufferUtils.writeString(buffer, message.getBlock().getModel().getClass().getSimpleName());
+		ChannelBufferUtils.writeString(buffer, message.getBlock().getModel().getNetworkClass().getSimpleName());
 		
 		buffer.writeByte(message.getBlock().getModel().getDefaultCollisionBox() != null ? (byte) 1 : (byte) 0);
 		if(message.getBlock().getModel().getDefaultCollisionBox() != null) {
@@ -97,7 +98,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		boolean preventsOwnRendering = buffer.readByte() == 1;
 		
 		String type = ChannelBufferUtils.readString(buffer);
-		Model model = type.equals("EmptyModel") ? new EmptyModel() : type.equals("TransparentModel") ? new LiquidModel("/terrain.png", 16) : (type.equals("CuboidModel") ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (type.equals("CubeModel") ? new CubeModel("/terrain.png", 16) : new Model()));
+		Model model = type.equals(EmptyModel.class.getName()) ? new EmptyModel() : type.equals(LiquidModel.class.getName()) ? new LiquidModel("/terrain.png", 16) : (type.equals(CuboidModel.class.getName()) ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (type.equals(CubeModel.class.getName()) ? new CubeModel("/terrain.png", 16) : type.equals(PlantModel.class.getName()) ? new PlantModel("/terrain.png", 16) : new Model()));
 		model.clearQuads();
 		
 		if(buffer.readByte() == 1) {
