@@ -9,6 +9,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.player.LocalPlayer;
@@ -81,7 +82,7 @@ public final class LevelRenderer {
 		}
 
 		int var6 = 2048 / var5;
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 
 		for (int var7 = -var5 * var6; var7 < this.level.width + var5 * var6; var7 += var5) {
 			for (int var8 = -var5 * var6; var8 < this.level.depth + var5 * var6; var8 += var5) {
@@ -90,42 +91,42 @@ public final class LevelRenderer {
 					var10 = 0;
 				}
 
-				ShapeRenderer.instance.vertexUV(var7, var10, (var8 + var5), 0.0F, var5);
-				ShapeRenderer.instance.vertexUV((var7 + var5), var10, (var8 + var5), var5, var5);
-				ShapeRenderer.instance.vertexUV((var7 + var5), var10, var8, var5, 0.0F);
-				ShapeRenderer.instance.vertexUV(var7, var10, var8, 0.0F, 0.0F);
+				Renderer.get().vertexuv(var7, var10, (var8 + var5), 0.0F, var5);
+				Renderer.get().vertexuv((var7 + var5), var10, (var8 + var5), var5, var5);
+				Renderer.get().vertexuv((var7 + var5), var10, var8, var5, 0.0F);
+				Renderer.get().vertexuv(var7, var10, var8, 0.0F, 0.0F);
 			}
 		}
 
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 		GL11.glColor3f(0.8F, 0.8F, 0.8F);
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 
 		for (int var7 = 0; var7 < this.level.width; var7 += var5) {
-			ShapeRenderer.instance.vertexUV(var7, 0.0F, 0.0F, 0.0F, 0.0F);
-			ShapeRenderer.instance.vertexUV((var7 + var5), 0.0F, 0.0F, var5, 0.0F);
-			ShapeRenderer.instance.vertexUV((var7 + var5), groundLevel, 0.0F, var5, groundLevel);
-			ShapeRenderer.instance.vertexUV(var7, groundLevel, 0.0F, 0.0F, groundLevel);
-			ShapeRenderer.instance.vertexUV(var7, groundLevel, this.level.depth, 0.0F, groundLevel);
-			ShapeRenderer.instance.vertexUV((var7 + var5), groundLevel, this.level.depth, var5, groundLevel);
-			ShapeRenderer.instance.vertexUV((var7 + var5), 0.0F, this.level.depth, var5, 0.0F);
-			ShapeRenderer.instance.vertexUV(var7, 0.0F, this.level.depth, 0.0F, 0.0F);
+			Renderer.get().vertexuv(var7, 0.0F, 0.0F, 0.0F, 0.0F);
+			Renderer.get().vertexuv((var7 + var5), 0.0F, 0.0F, var5, 0.0F);
+			Renderer.get().vertexuv((var7 + var5), groundLevel, 0.0F, var5, groundLevel);
+			Renderer.get().vertexuv(var7, groundLevel, 0.0F, 0.0F, groundLevel);
+			Renderer.get().vertexuv(var7, groundLevel, this.level.depth, 0.0F, groundLevel);
+			Renderer.get().vertexuv((var7 + var5), groundLevel, this.level.depth, var5, groundLevel);
+			Renderer.get().vertexuv((var7 + var5), 0.0F, this.level.depth, var5, 0.0F);
+			Renderer.get().vertexuv(var7, 0.0F, this.level.depth, 0.0F, 0.0F);
 		}
 
 		GL11.glColor3f(0.6F, 0.6F, 0.6F);
 
 		for (int var7 = 0; var7 < this.level.depth; var7 += var5) {
-			ShapeRenderer.instance.vertexUV(0.0F, groundLevel, var7, 0.0F, 0.0F);
-			ShapeRenderer.instance.vertexUV(0.0F, groundLevel, (var7 + var5), var5, 0.0F);
-			ShapeRenderer.instance.vertexUV(0.0F, 0.0F, (var7 + var5), var5, groundLevel);
-			ShapeRenderer.instance.vertexUV(0.0F, 0.0F, var7, 0.0F, groundLevel);
-			ShapeRenderer.instance.vertexUV(this.level.width, 0.0F, var7, 0.0F, groundLevel);
-			ShapeRenderer.instance.vertexUV(this.level.width, 0.0F, (var7 + var5), var5, groundLevel);
-			ShapeRenderer.instance.vertexUV(this.level.width, groundLevel, (var7 + var5), var5, 0.0F);
-			ShapeRenderer.instance.vertexUV(this.level.width, groundLevel, var7, 0.0F, 0.0F);
+			Renderer.get().vertexuv(0.0F, groundLevel, var7, 0.0F, 0.0F);
+			Renderer.get().vertexuv(0.0F, groundLevel, (var7 + var5), var5, 0.0F);
+			Renderer.get().vertexuv(0.0F, 0.0F, (var7 + var5), var5, groundLevel);
+			Renderer.get().vertexuv(0.0F, 0.0F, var7, 0.0F, groundLevel);
+			Renderer.get().vertexuv(this.level.width, 0.0F, var7, 0.0F, groundLevel);
+			Renderer.get().vertexuv(this.level.width, 0.0F, (var7 + var5), var5, groundLevel);
+			Renderer.get().vertexuv(this.level.width, groundLevel, (var7 + var5), var5, 0.0F);
+			Renderer.get().vertexuv(this.level.width, groundLevel, var7, 0.0F, 0.0F);
 		}
 
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 		GL11.glEndList();
 		GL11.glNewList(this.listId + 1, 4864);
 		GL11.glColor3f(1.0F, 1.0F, 1.0F);
@@ -141,25 +142,25 @@ public final class LevelRenderer {
 		}
 
 		var5 = 2048 / var100;
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 
 		for (int var1000 = -var100 * var5; var1000 < this.level.width + var100 * var5; var1000 += var100) {
 			for (int var7 = -var100 * var5; var7 < this.level.depth + var100 * var5; var7 += var100) {
 				float var13 = waterLevel - 0.05F;
 				if (var1000 < 0 || var7 < 0 || var1000 >= this.level.width || var7 >= this.level.depth) {
-					ShapeRenderer.instance.vertexUV(var1000, var13, (var7 + var100), 0.0F, var100);
-					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, (var7 + var100), var100, var100);
-					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, var7, var100, 0.0F);
-					ShapeRenderer.instance.vertexUV(var1000, var13, var7, 0.0F, 0.0F);
-					ShapeRenderer.instance.vertexUV(var1000, var13, var7, 0.0F, 0.0F);
-					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, var7, var100, 0.0F);
-					ShapeRenderer.instance.vertexUV((var1000 + var100), var13, (var7 + var100), var100, var100);
-					ShapeRenderer.instance.vertexUV(var1000, var13, (var7 + var100), 0.0F, var100);
+					Renderer.get().vertexuv(var1000, var13, (var7 + var100), 0.0F, var100);
+					Renderer.get().vertexuv((var1000 + var100), var13, (var7 + var100), var100, var100);
+					Renderer.get().vertexuv((var1000 + var100), var13, var7, var100, 0.0F);
+					Renderer.get().vertexuv(var1000, var13, var7, 0.0F, 0.0F);
+					Renderer.get().vertexuv(var1000, var13, var7, 0.0F, 0.0F);
+					Renderer.get().vertexuv((var1000 + var100), var13, var7, var100, 0.0F);
+					Renderer.get().vertexuv((var1000 + var100), var13, (var7 + var100), var100, var100);
+					Renderer.get().vertexuv(var1000, var13, (var7 + var100), 0.0F, var100);
 				}
 			}
 		}
 
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEndList();
 		this.queueChunks(0, 0, 0, this.level.width, this.level.height, this.level.depth);

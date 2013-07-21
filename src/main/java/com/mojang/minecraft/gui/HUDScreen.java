@@ -17,7 +17,6 @@ import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import com.mojang.minecraft.ChatLine;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.render.ShapeRenderer;
 
 public class HUDScreen extends MainScreen {
 
@@ -119,10 +118,7 @@ public class HUDScreen extends MainScreen {
 					GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
 					GL11.glScalef(-1, -1, -1);
 					
-					ShapeRenderer.instance.begin();
 					Blocks.fromId(block).getModel().renderAll(-2, 0, 0, 1);
-					ShapeRenderer.instance.end();
-					
 					GL11.glPopMatrix();
 					
 					if (this.mc.player.inventory.count[slot] > 1) {

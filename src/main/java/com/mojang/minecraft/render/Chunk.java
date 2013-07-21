@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.player.LocalPlayer;
@@ -44,8 +45,7 @@ public final class Chunk {
 			boolean continuing = false;
 			boolean cleaned = false;
 			GL11.glNewList(this.baseListId + pass, GL11.GL_COMPILE);
-			ShapeRenderer.instance.begin();
-
+			Renderer.get().begin();
 			for (int x = this.x; x < this.x + this.width; x++) {
 				for (int y = this.y; y < this.y + this.height; y++) {
 					for (int z = this.z; z < this.z + this.depth; z++) {
@@ -58,14 +58,14 @@ public final class Chunk {
 							if (requiredPass != pass) {
 								continuing = true;
 							} else {
-								cleaned |= block.getModel().render(x, y, z, block.getId() == VanillaBlock.LAVA.getId() || block.getId() == VanillaBlock.STATIONARY_LAVA.getId() ? 100 : level.getBrightness(x, y, z));
+								cleaned |= block.getModel().render(x, y, z, this.level.getBrightness(x, y, z), true);
 							}
 						}
 					}
 				}
 			}
 
-			ShapeRenderer.instance.end();
+			Renderer.get().end();
 			GL11.glEndList();
 			if (cleaned) {
 				this.dirty[pass] = false;

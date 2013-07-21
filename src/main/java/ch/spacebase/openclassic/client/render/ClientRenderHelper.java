@@ -10,7 +10,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.CubeModel;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
@@ -26,7 +25,6 @@ import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.particle.ParticleManager;
 import com.mojang.minecraft.particle.TerrainParticle;
 import com.mojang.minecraft.render.FontRenderer;
-import com.mojang.minecraft.render.ShapeRenderer;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -47,24 +45,24 @@ public class ClientRenderHelper extends RenderHelper {
 		int width = this.getGuiWidth();
 		int height = this.getGuiHeight();
 
-		ShapeRenderer.instance.begin();
-		ShapeRenderer.instance.color(4210752);
-		ShapeRenderer.instance.vertexUV(0, height, 0, 0, height / 32);
-		ShapeRenderer.instance.vertexUV(width, height, 0, width / 32, height / 32);
-		ShapeRenderer.instance.vertexUV(width, 0, 0, width / 32, 0);
-		ShapeRenderer.instance.vertexUV(0, 0, 0, 0, 0);
-		ShapeRenderer.instance.end();
+		Renderer.get().begin();
+		Renderer.get().color(4210752);
+		Renderer.get().vertexuv(0, height, 0, 0, height / 32);
+		Renderer.get().vertexuv(width, height, 0, width / 32, height / 32);
+		Renderer.get().vertexuv(width, 0, 0, width / 32, 0);
+		Renderer.get().vertexuv(0, 0, 0, 0, 0);
+		Renderer.get().end();
 	}
 	
 	public void drawBlackBG(int x, int y, int width, int height) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		ShapeRenderer.instance.begin();
-		ShapeRenderer.instance.color(0);
-		ShapeRenderer.instance.vertexUV(x, y + height, 0, 0, height / 32);
-		ShapeRenderer.instance.vertexUV(x + width, y + height, 0, width / 32, height / 32);
-		ShapeRenderer.instance.vertexUV(x + width, y, 0, width / 32, 0);
-		ShapeRenderer.instance.vertexUV(x, y, 0, 0, 0);
-		ShapeRenderer.instance.end();
+		Renderer.get().begin();
+		Renderer.get().color(0);
+		Renderer.get().vertexuv(x, y + height, 0, 0, height / 32);
+		Renderer.get().vertexuv(x + width, y + height, 0, width / 32, height / 32);
+		Renderer.get().vertexuv(x + width, y, 0, width / 32, 0);
+		Renderer.get().vertexuv(x, y, 0, 0, 0);
+		Renderer.get().end();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
@@ -137,12 +135,12 @@ public class ClientRenderHelper extends RenderHelper {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		this.glColor(red, green, blue, alpha);
 		
-		ShapeRenderer.instance.begin();
-		ShapeRenderer.instance.vertex(x1, y2, 0);
-		ShapeRenderer.instance.vertex(x2, y2, 0);
-		ShapeRenderer.instance.vertex(x2, y1, 0);
-		ShapeRenderer.instance.vertex(x1, y1, 0);
-		ShapeRenderer.instance.end();
+		Renderer.get().begin();
+		Renderer.get().vertex(x1, y2, 0);
+		Renderer.get().vertex(x2, y2, 0);
+		Renderer.get().vertex(x2, y1, 0);
+		Renderer.get().vertex(x1, y1, 0);
+		Renderer.get().end();
 		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
@@ -181,12 +179,12 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 	
 	public void drawImage(int x, int y, int z, int imgX, int imgY, int imgWidth, int imgHeight) {
-		ShapeRenderer.instance.begin();
-		ShapeRenderer.instance.vertexUV(x, (y + imgHeight), z, imgX * 0.00390625F, (imgY + imgHeight) * 0.00390625F);
-		ShapeRenderer.instance.vertexUV((x + imgWidth), (y + imgHeight), z, (imgX + imgWidth) * 0.00390625F, (imgY + imgHeight) * 0.00390625F);
-		ShapeRenderer.instance.vertexUV((x + imgWidth), y, z, (imgX + imgWidth) * 0.00390625F, imgY * 0.00390625F);
-		ShapeRenderer.instance.vertexUV(x, y, z, imgX * 0.00390625F, imgY * 0.00390625F);
-		ShapeRenderer.instance.end();
+		Renderer.get().begin();
+		Renderer.get().vertexuv(x, (y + imgHeight), z, imgX * 0.00390625F, (imgY + imgHeight) * 0.00390625F);
+		Renderer.get().vertexuv((x + imgWidth), (y + imgHeight), z, (imgX + imgWidth) * 0.00390625F, (imgY + imgHeight) * 0.00390625F);
+		Renderer.get().vertexuv((x + imgWidth), y, z, (imgX + imgWidth) * 0.00390625F, imgY * 0.00390625F);
+		Renderer.get().vertexuv(x, y, z, imgX * 0.00390625F, imgY * 0.00390625F);
+		Renderer.get().end();
 	}
 
 	@Override
@@ -219,19 +217,19 @@ public class ClientRenderHelper extends RenderHelper {
 
 	@Override
 	public void drawQuad(Quad quad, float x, float y, float z) {
-		this.drawQuad(quad, x, y, z, 1);
+		this.drawQuad(quad, x, y, z, 1, false);
 	}
 	
 	@Override
-	public void drawQuad(Quad quad, float x, float y, float z, float brightness) {
-		ShapeRenderer.instance.begin();
+	public void drawQuad(Quad quad, float x, float y, float z, float brightness, boolean batch) {
+		if(!batch) Renderer.get().begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
 		if(id == null || id.intValue() != this.binded) {
 			this.bindTexture(quad.getTexture().getParent().getTexture(), quad.getTexture().getParent().isInJar());
 		}
 		
 		if(brightness >= 0) {
-			ShapeRenderer.instance.color(brightness, brightness, brightness);
+			Renderer.get().color(brightness, brightness, brightness);
 		}
 		
 		float ox1 = quad.getTexture().getX1();
@@ -291,24 +289,24 @@ public class ClientRenderHelper extends RenderHelper {
 	
 		float width = quad.getTexture().getParent().getWidth();
 		float height = quad.getTexture().getParent().getHeight();
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), x2 / width, y2 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), x2 / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), x1 / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), x2 / width, y2 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), x2 / width, y1 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), x1 / width, y1 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 		
-		ShapeRenderer.instance.end();
+		if(!batch) Renderer.get().end();
 	}
 
 	@Override
 	public void drawScaledQuad(Quad quad, float x, float y, float z, float scale, float brightness) {
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 		int id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
 		if(id == -1 || id != this.binded) {
 			this.bindTexture(quad.getTexture().getParent().getTexture(), quad.getTexture().getParent().isInJar());
 		}
 
 		if(brightness >= 0) {
-			ShapeRenderer.instance.color(brightness, brightness, brightness);
+			Renderer.get().color(brightness, brightness, brightness);
 		}
 
 		float ox1 = quad.getTexture().getX1();
@@ -368,16 +366,16 @@ public class ClientRenderHelper extends RenderHelper {
 	
 		float width = quad.getTexture().getParent().getWidth();
 		float height = quad.getTexture().getParent().getHeight();
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX() * scale, y + quad.getVertex(0).getY() * scale, z + quad.getVertex(0).getZ() * scale, x2 / width, y2 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX() * scale, y + quad.getVertex(1).getY() * scale, z + quad.getVertex(1).getZ() * scale, x2 / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX() * scale, y + quad.getVertex(2).getY() * scale, z + quad.getVertex(2).getZ() * scale, x1 / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX() * scale, y + quad.getVertex(3).getY() * scale, z + quad.getVertex(3).getZ() * scale, x1 / width, y2 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(0).getX() * scale, y + quad.getVertex(0).getY() * scale, z + quad.getVertex(0).getZ() * scale, x2 / width, y2 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(1).getX() * scale, y + quad.getVertex(1).getY() * scale, z + quad.getVertex(1).getZ() * scale, x2 / width, y1 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(2).getX() * scale, y + quad.getVertex(2).getY() * scale, z + quad.getVertex(2).getZ() * scale, x1 / width, y1 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(3).getX() * scale, y + quad.getVertex(3).getY() * scale, z + quad.getVertex(3).getZ() * scale, x1 / width, y2 / height);
 		
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 	}
 	
 	public void drawCracks(Quad quad, int x, int y, int z, int crackTexture) {
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 		this.bindTexture(BlockType.TERRAIN_TEXTURE.getTexture(), true);
 		
 		SubTexture texture = quad.getTexture().getParent().getSubTexture(crackTexture);
@@ -438,12 +436,12 @@ public class ClientRenderHelper extends RenderHelper {
 		
 		float width = quad.getTexture().getParent().getWidth();
 		float height = quad.getTexture().getParent().getHeight();
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), x2 / width, y2 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), x2 / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), x1 / width, y1 / height);
-		ShapeRenderer.instance.vertexUV(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(0).getX(), y + quad.getVertex(0).getY(), z + quad.getVertex(0).getZ(), x2 / width, y2 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(1).getX(), y + quad.getVertex(1).getY(), z + quad.getVertex(1).getZ(), x2 / width, y1 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(2).getX(), y + quad.getVertex(2).getY(), z + quad.getVertex(2).getZ(), x1 / width, y1 / height);
+		Renderer.get().vertexuv(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 		
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 	}
 	
 	@Override
@@ -453,18 +451,18 @@ public class ClientRenderHelper extends RenderHelper {
 	
 	@Override
 	public void drawTexture(Texture texture, float x, float y, float z, float brightness) {
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 		if(GeneralUtils.getMinecraft().textureManager.textures.get(texture.getTexture()) == null || GeneralUtils.getMinecraft().textureManager.textures.get(texture.getTexture()) != GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)) {
 			this.bindTexture(texture.getTexture(), texture.isInJar());
 		}
 		
-		ShapeRenderer.instance.color(brightness, brightness, brightness);
-		ShapeRenderer.instance.vertexUV(x, y, z, 0, 0);
-		ShapeRenderer.instance.vertexUV(x, y + texture.getHeight(), z, 0, texture.getHeight() / texture.getHeight());
-		ShapeRenderer.instance.vertexUV(x + texture.getWidth(), y + texture.getHeight(), z, texture.getWidth() / texture.getWidth(), texture.getHeight() / texture.getHeight());
-		ShapeRenderer.instance.vertexUV(x + texture.getWidth(), y, z, texture.getWidth() / texture.getWidth(), 0);
+		Renderer.get().color(brightness, brightness, brightness);
+		Renderer.get().vertexuv(x, y, z, 0, 0);
+		Renderer.get().vertexuv(x, y + texture.getHeight(), z, 0, texture.getHeight() / texture.getHeight());
+		Renderer.get().vertexuv(x + texture.getWidth(), y + texture.getHeight(), z, texture.getWidth() / texture.getWidth(), texture.getHeight() / texture.getHeight());
+		Renderer.get().vertexuv(x + texture.getWidth(), y, z, texture.getWidth() / texture.getWidth(), 0);
 		
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 	}
 	
 	@Override
@@ -484,22 +482,22 @@ public class ClientRenderHelper extends RenderHelper {
 
 	@Override
 	public void drawSubTex(SubTexture texture, float x, float y, float z, float scale, float r, float g, float b) {
-		ShapeRenderer.instance.begin();
+		Renderer.get().begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture());
 		if(id == null || id.intValue() != this.binded) {
 			this.bindTexture(texture.getParent().getTexture(), texture.getParent().isInJar());
 		}
 		
 		if(r >= 0 && g >= 0 && b >= 0) {
-			ShapeRenderer.instance.color(r, g, b);
+			Renderer.get().color(r, g, b);
 		}
 		
-		ShapeRenderer.instance.vertexUV(x, y, z, texture.getX1() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
-		ShapeRenderer.instance.vertexUV(x, y + ((texture.getY2() - texture.getY1()) * scale), z, texture.getX1() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
-		ShapeRenderer.instance.vertexUV(x + ((texture.getX2() - texture.getX1()) * scale), y + ((texture.getY2() - texture.getY1()) * scale), z, texture.getX2() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
-		ShapeRenderer.instance.vertexUV(x + ((texture.getX2() - texture.getX1()) * scale), y, z, texture.getX2() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x, y, z, texture.getX1() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x, y + ((texture.getY2() - texture.getY1()) * scale), z, texture.getX1() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x + ((texture.getX2() - texture.getX1()) * scale), y + ((texture.getY2() - texture.getY1()) * scale), z, texture.getX2() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x + ((texture.getX2() - texture.getX1()) * scale), y, z, texture.getX2() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
 		
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 	}
 	
 	@Override
@@ -543,7 +541,7 @@ public class ClientRenderHelper extends RenderHelper {
 	
 	@Override
 	public float getBrightness(BlockType main, int x, int y, int z) {
-		return main == VanillaBlock.LAVA || main == VanillaBlock.STATIONARY_LAVA ? 100 : ((ClientLevel) OpenClassic.getClient().getLevel()).getHandle().getBrightness(x, y, z);
+		return ((ClientLevel) OpenClassic.getClient().getLevel()).getHandle().getBrightness(x, y, z);
 	}
 	
 	public void spawnDestructionParticles(BlockType block, Level level, int x, int y, int z, ParticleManager particles) {
@@ -617,9 +615,9 @@ public class ClientRenderHelper extends RenderHelper {
 	
 			GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
 			GL11.glScalef(-1, -1, -1);
-			ShapeRenderer.instance.begin();
+			Renderer.get().begin();
 			block.getModel().renderAll(-2, 0, 0, 1);
-			ShapeRenderer.instance.end();
+			Renderer.get().end();
 			GL11.glPopMatrix();
 		}
 	}
@@ -634,12 +632,12 @@ public class ClientRenderHelper extends RenderHelper {
 		GeneralUtils.getMinecraft().textureManager.bindTexture(image);
 		
 		this.glColor(1, 1, 1, 1);
-		ShapeRenderer.instance.begin();
-		ShapeRenderer.instance.vertexUV(x, y, z, 0, 0);
-		ShapeRenderer.instance.vertexUV(x, y + image.getHeight(), z, 0, image.getHeight() / image.getHeight());
-		ShapeRenderer.instance.vertexUV(x + image.getWidth(), y + image.getHeight(), z, image.getWidth() / image.getWidth(), image.getHeight() / image.getHeight());
-		ShapeRenderer.instance.vertexUV(x + image.getWidth(), y, z, image.getWidth() / image.getWidth(), 0);
-		ShapeRenderer.instance.end();
+		Renderer.get().begin();
+		Renderer.get().vertexuv(x, y, z, 0, 0);
+		Renderer.get().vertexuv(x, y + image.getHeight(), z, 0, image.getHeight() / image.getHeight());
+		Renderer.get().vertexuv(x + image.getWidth(), y + image.getHeight(), z, image.getWidth() / image.getWidth(), image.getHeight() / image.getHeight());
+		Renderer.get().vertexuv(x + image.getWidth(), y, z, image.getWidth() / image.getWidth(), 0);
+		Renderer.get().end();
 	}
 
 	@Override

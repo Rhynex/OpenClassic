@@ -16,7 +16,7 @@ import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.model.Vector;
 
-public final class Renderer {
+public final class RenderUtils {
 
 	public Minecraft mc;
 	public boolean displayActive = false;
@@ -30,7 +30,7 @@ public final class Renderer {
 	public float fogBlue;
 	public float fogGreen;
 
-	public Renderer(Minecraft mc) {
+	public RenderUtils(Minecraft mc) {
 		this.mc = mc;
 		this.heldBlock = new HeldBlock();
 	}

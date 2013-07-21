@@ -62,6 +62,7 @@ import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.Renderer;
 import ch.spacebase.openclassic.client.sound.ClientAudioManager;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
@@ -93,8 +94,7 @@ import com.mojang.minecraft.render.ChunkVisibleAndDistanceComparator;
 import com.mojang.minecraft.render.Frustum;
 import com.mojang.minecraft.render.FontRenderer;
 import com.mojang.minecraft.render.LevelRenderer;
-import com.mojang.minecraft.render.Renderer;
-import com.mojang.minecraft.render.ShapeRenderer;
+import com.mojang.minecraft.render.RenderUtils;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 import com.mojang.minecraft.render.animation.WaterTexture;
@@ -119,7 +119,7 @@ public final class Minecraft implements Runnable {
 	public FontRenderer fontRenderer;
 	public GuiScreen currentScreen = null;
 	public ClientProgressBar progressBar = new ClientProgressBar();
-	public Renderer renderer = new Renderer(this);
+	public RenderUtils renderer = new RenderUtils(this);
 	public ClientAudioManager audio;
 	public ResourceDownloadThread resourceThread;
 	private int ticks;
@@ -761,17 +761,17 @@ public final class Minecraft implements Runnable {
 										if (var99 != 0 && Blocks.fromId(var99) != null && Blocks.fromId(var99).getPreventsRendering()) {
 											GL11.glColor4f(0.2F, 0.2F, 0.2F, 1.0F);
 											GL11.glDepthFunc(GL11.GL_LESS);
-											ShapeRenderer.instance.begin();
+											Renderer.get().begin();
 
 											Blocks.fromId(var99).getModel().renderAll(var122, var98, var105, 0.2F);
 
-											ShapeRenderer.instance.end();
+											Renderer.get().end();
 											GL11.glCullFace(GL11.GL_FRONT);
-											ShapeRenderer.instance.begin();
+											Renderer.get().begin();
 
 											Blocks.fromId(var99).getModel().renderAll(var122, var98, var105, 0.2F);
 
-											ShapeRenderer.instance.end();
+											Renderer.get().end();
 											GL11.glCullFace(GL11.GL_BACK);
 											GL11.glDepthFunc(GL11.GL_LEQUAL);
 										}
@@ -803,13 +803,13 @@ public final class Minecraft implements Runnable {
 								}
 
 								RenderHelper.getHelper().bindTexture(textureId);
-								ShapeRenderer.instance.begin();
+								Renderer.get().begin();
 
 								for (int count = 0; count < this.particleManager.particles[particle].size(); ++count) {
-									this.particleManager.particles[particle].get(count).render(ShapeRenderer.instance, var107, var29, var69, var30, var117, var32);
+									this.particleManager.particles[particle].get(count).render(var107, var29, var69, var30, var117, var32);
 								}
 
-								ShapeRenderer.instance.end();
+								Renderer.get().end();
 							}
 						}
 
@@ -835,25 +835,25 @@ public final class Minecraft implements Runnable {
 						float var1000 = (this.levelRenderer.level.height + 2);
 						var34 = (this.levelRenderer.ticks + this.timer.renderPartialTicks) * var33 * 0.03F;
 						float var35 = 0;
-						ShapeRenderer.instance.begin();
-						ShapeRenderer.instance.color(var107, var29, var30);
+						Renderer.get().begin();
+						Renderer.get().color(var107, var29, var30);
 
 						for (int var86 = -2048; var86 < this.levelRenderer.level.width + 2048; var86 += 512) {
 							for (int var125 = -2048; var125 < this.levelRenderer.level.depth + 2048; var125 += 512) {
-								ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
-								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
-								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
-								ShapeRenderer.instance.vertexUV(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
-								ShapeRenderer.instance.vertexUV(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
-								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
-								ShapeRenderer.instance.vertexUV((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
-								ShapeRenderer.instance.vertexUV(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
+								Renderer.get().vertexuv(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
+								Renderer.get().vertexuv((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
+								Renderer.get().vertexuv((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
+								Renderer.get().vertexuv(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
+								Renderer.get().vertexuv(var86, var1000, var125, var86 * var33 + var34, var125 * var33);
+								Renderer.get().vertexuv((var86 + 512), var1000, var125, (var86 + 512) * var33 + var34, var125 * var33);
+								Renderer.get().vertexuv((var86 + 512), var1000, (var125 + 512), (var86 + 512) * var33 + var34, (var125 + 512) * var33);
+								Renderer.get().vertexuv(var86, var1000, (var125 + 512), var86 * var33 + var34, (var125 + 512) * var33);
 							}
 						}
 
-						ShapeRenderer.instance.end();
+						Renderer.get().end();
 						GL11.glDisable(GL11.GL_TEXTURE_2D);
-						ShapeRenderer.instance.begin();
+						Renderer.get().begin();
 						var34 = (this.levelRenderer.level.skyColor >> 16 & 255) / 255.0F;
 						var35 = (this.levelRenderer.level.skyColor >> 8 & 255) / 255.0F;
 						var87 = (this.levelRenderer.level.skyColor & 255) / 255.0F;
@@ -866,19 +866,19 @@ public final class Minecraft implements Runnable {
 							var87 = var1000;
 						}
 
-						ShapeRenderer.instance.color(var34, var35, var87);
+						Renderer.get().color(var34, var35, var87);
 						var1000 = (this.levelRenderer.level.height + 10);
 
 						for (int var125 = -2048; var125 < this.levelRenderer.level.width + 2048; var125 += 512) {
 							for (int var68 = -2048; var68 < this.levelRenderer.level.depth + 2048; var68 += 512) {
-								ShapeRenderer.instance.vertex(var125, var1000, var68);
-								ShapeRenderer.instance.vertex((var125 + 512), var1000, var68);
-								ShapeRenderer.instance.vertex((var125 + 512), var1000, (var68 + 512));
-								ShapeRenderer.instance.vertex(var125, var1000, (var68 + 512));
+								Renderer.get().vertex(var125, var1000, var68);
+								Renderer.get().vertex((var125 + 512), var1000, var68);
+								Renderer.get().vertex((var125 + 512), var1000, (var68 + 512));
+								Renderer.get().vertex(var125, var1000, (var68 + 512));
 							}
 						}
 
-						ShapeRenderer.instance.end();
+						Renderer.get().end();
 						GL11.glEnable(GL11.GL_TEXTURE_2D);
 						this.renderer.updateFog();
 						int var108;
@@ -887,7 +887,6 @@ public final class Minecraft implements Runnable {
 							MovingObjectPosition var10001 = this.renderer.mc.selected;
 							var105 = this.player.inventory.getSelected();
 							MovingObjectPosition var102 = var10001;
-							com.mojang.minecraft.render.ShapeRenderer var113 = com.mojang.minecraft.render.ShapeRenderer.instance;
 							GL11.glEnable(GL11.GL_BLEND);
 							GL11.glEnable(GL11.GL_ALPHA_TEST);
 							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -899,8 +898,8 @@ public final class Minecraft implements Runnable {
 								GL11.glPushMatrix();
 								int var114 = this.levelRenderer.level.getTile(var102.x, var102.y, var102.z);
 								BlockType var10000 = var114 > 0 ? Blocks.fromId(var114) : null;
-								var113.begin();
-								var113.noColor();
+								Renderer.get().begin();
+								Renderer.get().disableColors();
 								GL11.glDepthMask(false);
 								if (var10000 == null) {
 									var10000 = VanillaBlock.STONE;
@@ -910,7 +909,7 @@ public final class Minecraft implements Runnable {
 									ClientRenderHelper.getHelper().drawCracks(var10000.getModel().getQuad(var86), var102.x, var102.y, var102.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
 								}
 
-								var113.end();
+								Renderer.get().end();
 								GL11.glDepthMask(true);
 								GL11.glPopMatrix();
 							}
@@ -1019,16 +1018,16 @@ public final class Minecraft implements Runnable {
 										var35 = cz + 0.5F - this.player.z;
 										float var92 = (float) Math.sqrt(var124 * var124 + var35 * var35) / 5;
 										GL11.glColor4f(1.0F, 1.0F, 1.0F, (1.0F - var92 * var92) * 0.7F);
-										ShapeRenderer.instance.begin();
-										ShapeRenderer.instance.vertexUV(cx, var86, cz, 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV((cx + 1), var86, (cz + 1), 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV((cx + 1), var125, (cz + 1), 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV(cx, var125, cz, 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV(cx, var86, (cz + 1), 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV((cx + 1), var86, cz, 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV((cx + 1), var125, cz, 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.vertexUV(cx, var125, (cz + 1), 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
-										ShapeRenderer.instance.end();
+										Renderer.get().begin();
+										Renderer.get().vertexuv(cx, var86, cz, 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv((cx + 1), var86, (cz + 1), 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv((cx + 1), var125, (cz + 1), 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv(cx, var125, cz, 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv(cx, var86, (cz + 1), 0.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv((cx + 1), var86, cz, 2.0F, var86 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv((cx + 1), var125, cz, 2.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().vertexuv(cx, var125, (cz + 1), 0.0F, var125 * 2.0F / 8.0F + var1000 * 2.0F);
+										Renderer.get().end();
 									}
 								}
 							}
@@ -1076,7 +1075,6 @@ public final class Minecraft implements Runnable {
 
 						float brightness = this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z);
 						GL11.glColor4f(brightness, brightness, brightness, 1);
-						com.mojang.minecraft.render.ShapeRenderer var123 = com.mojang.minecraft.render.ShapeRenderer.instance;
 
 						if(!this.hideGui) {
 							if (this.renderer.heldBlock.block != null) {

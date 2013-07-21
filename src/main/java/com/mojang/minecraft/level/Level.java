@@ -573,7 +573,8 @@ public class Level implements Serializable {
 	}
 
 	public float getBrightness(int x, int y, int z) {
-		return this.isLit(x, y, z) ? 1 : 0.6F;
+		BlockType block = this.openclassic.getBlockTypeAt(x, y, z);
+		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 : 0.6F;
 	}
 
 	public byte[] copyBlocks() {

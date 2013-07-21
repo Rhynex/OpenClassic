@@ -9,8 +9,6 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.render.ShapeRenderer;
-
 public final class BlockSelectScreen extends GuiScreen {
 
 	public BlockSelectScreen() {
@@ -63,9 +61,7 @@ public final class BlockSelectScreen extends GuiScreen {
 	
 				GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
 				GL11.glScalef(-1.0F, -1.0F, -1.0F);
-				ShapeRenderer.instance.begin();
 				b.getModel().renderAll(-2, 0, 0, 1);
-				ShapeRenderer.instance.end();
 				GL11.glPopMatrix();
 				
 				count++;

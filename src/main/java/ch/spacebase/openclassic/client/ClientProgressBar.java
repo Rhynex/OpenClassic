@@ -7,8 +7,8 @@ import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.GuiTextures;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.Renderer;
 
-import com.mojang.minecraft.render.ShapeRenderer;
 
 public final class ClientProgressBar implements ProgressBar {
 
@@ -125,21 +125,21 @@ public final class ClientProgressBar implements ProgressBar {
 		int height = RenderHelper.getHelper().getGuiHeight();
 		int y = height - 30;
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		ShapeRenderer.instance.begin();
-		ShapeRenderer.instance.color(8421504);
-		ShapeRenderer.instance.vertex(0, y, 0);
-		ShapeRenderer.instance.vertex(0, y + 2, 0);
-		ShapeRenderer.instance.vertex(width, y + 2, 0);
-		ShapeRenderer.instance.vertex(width, y, 0);
+		Renderer.get().begin();
+		Renderer.get().color(8421504);
+		Renderer.get().vertex(0, y, 0);
+		Renderer.get().vertex(0, y + 2, 0);
+		Renderer.get().vertex(width, y + 2, 0);
+		Renderer.get().vertex(width, y, 0);
 		if(this.getProgress() >= 0) {
-			ShapeRenderer.instance.color(8454016);
-			ShapeRenderer.instance.vertex(0, y, 0);
-			ShapeRenderer.instance.vertex(0, y + 2, 0);
-			ShapeRenderer.instance.vertex(this.progress * 4.27f, y + 2, 0);
-			ShapeRenderer.instance.vertex(this.progress * 4.27f, y, 0);
+			Renderer.get().color(8454016);
+			Renderer.get().vertex(0, y, 0);
+			Renderer.get().vertex(0, y + 2, 0);
+			Renderer.get().vertex(this.progress * 4.27f, y + 2, 0);
+			Renderer.get().vertex(this.progress * 4.27f, y, 0);
 		}
 
-		ShapeRenderer.instance.end();
+		Renderer.get().end();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(fresh) {
 			Display.update();

@@ -6,12 +6,12 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.Entity;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.player.LocalPlayer;
-import com.mojang.minecraft.render.ShapeRenderer;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Arrow extends Entity {
@@ -158,7 +158,6 @@ public class Arrow extends Entity {
 		GL11.glRotatef(this.yRotO + (this.yRot - this.yRotO) * var2 - 90.0F, 0.0F, 1.0F, 0.0F);
 		GL11.glRotatef(this.xRotO + (this.xRot - this.xRotO) * var2, 0.0F, 0.0F, 1.0F);
 		GL11.glRotatef(45.0F, 1.0F, 0.0F, 0.0F);
-		ShapeRenderer var11 = ShapeRenderer.instance;
 		var2 = 0.5F;
 		float var3 = (0 + this.type * 10) / 32.0F;
 		float var4 = (5 + this.type * 10) / 32.0F;
@@ -167,29 +166,30 @@ public class Arrow extends Entity {
 		float var8 = (10 + this.type * 10) / 32.0F;
 		float var7 = 0.05625F;
 		GL11.glScalef(0.05625F, var7, var7);
-		GL11.glNormal3f(var7, 0.0F, 0.0F);
-		var11.begin();
-		var11.vertexUV(-7.0F, -2.0F, -2.0F, 0.0F, var6);
-		var11.vertexUV(-7.0F, -2.0F, 2.0F, var5, var6);
-		var11.vertexUV(-7.0F, 2.0F, 2.0F, var5, var8);
-		var11.vertexUV(-7.0F, 2.0F, -2.0F, 0.0F, var8);
-		var11.end();
-		GL11.glNormal3f(-var7, 0.0F, 0.0F);
-		var11.begin();
-		var11.vertexUV(-7.0F, 2.0F, -2.0F, 0.0F, var6);
-		var11.vertexUV(-7.0F, 2.0F, 2.0F, var5, var6);
-		var11.vertexUV(-7.0F, -2.0F, 2.0F, var5, var8);
-		var11.vertexUV(-7.0F, -2.0F, -2.0F, 0.0F, var8);
-		var11.end();
+		Renderer.get().begin();
+		Renderer.get().normal(var7, 0.0F, 0.0F);
+		Renderer.get().vertexuv(-7.0F, -2.0F, -2.0F, 0.0F, var6);
+		Renderer.get().vertexuv(-7.0F, -2.0F, 2.0F, var5, var6);
+		Renderer.get().vertexuv(-7.0F, 2.0F, 2.0F, var5, var8);
+		Renderer.get().vertexuv(-7.0F, 2.0F, -2.0F, 0.0F, var8);
+		Renderer.get().end();
+		Renderer.get().begin();
+		Renderer.get().normal(-var7, 0.0F, 0.0F);
+		Renderer.get().vertexuv(-7.0F, 2.0F, -2.0F, 0.0F, var6);
+		Renderer.get().vertexuv(-7.0F, 2.0F, 2.0F, var5, var6);
+		Renderer.get().vertexuv(-7.0F, -2.0F, 2.0F, var5, var8);
+		Renderer.get().vertexuv(-7.0F, -2.0F, -2.0F, 0.0F, var8);
+		Renderer.get().end();
 
 		for (int var9 = 0; var9 < 4; ++var9) {
 			GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
-			GL11.glNormal3f(0.0F, -var7, 0.0F);
-			var11.vertexUV(-8.0F, -2.0F, 0.0F, 0.0F, var3);
-			var11.vertexUV(8.0F, -2.0F, 0.0F, var2, var3);
-			var11.vertexUV(8.0F, 2.0F, 0.0F, var2, var4);
-			var11.vertexUV(-8.0F, 2.0F, 0.0F, 0.0F, var4);
-			var11.end();
+			Renderer.get().begin();
+			Renderer.get().normal(0.0F, -var7, 0.0F);
+			Renderer.get().vertexuv(-8.0F, -2.0F, 0.0F, 0.0F, var3);
+			Renderer.get().vertexuv(8.0F, -2.0F, 0.0F, var2, var3);
+			Renderer.get().vertexuv(8.0F, 2.0F, 0.0F, var2, var4);
+			Renderer.get().vertexuv(-8.0F, 2.0F, 0.0F, 0.0F, var4);
+			Renderer.get().end();
 		}
 
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);

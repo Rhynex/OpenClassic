@@ -3,9 +3,9 @@ package com.mojang.minecraft.particle;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Quad;
+import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.render.ShapeRenderer;
 
 public class TerrainParticle extends Particle {
 
@@ -26,7 +26,7 @@ public class TerrainParticle extends Particle {
 		return 1;
 	}
 
-	public void render(ShapeRenderer renderer, float delta, float xMod, float yMod, float zMod, float yaw, float pitch) {
+	public void render(float delta, float xMod, float yMod, float zMod, float yaw, float pitch) {
 		float var8 = (this.tex % 16) / 16f + 0.02f;
 		float var9 = var8 + 0.015609375F;
 		float var10 = (this.tex / 16f) / 16f;
@@ -40,10 +40,10 @@ public class TerrainParticle extends Particle {
 		float var14 = this.yo + (this.y - this.yo) * delta;
 		float var15 = this.zo + (this.z - this.zo) * delta;
 		delta = this.getBrightness(delta);
-		renderer.color(delta * this.rCol, delta * this.gCol, delta * this.bCol);
-		renderer.vertexUV(var13 - xMod * var12 - yaw * var12, var14 - yMod * var12, var15 - zMod * var12 - pitch * var12, var8, var11);
-		renderer.vertexUV(var13 - xMod * var12 + yaw * var12, var14 + yMod * var12, var15 - zMod * var12 + pitch * var12, var8, var10);
-		renderer.vertexUV(var13 + xMod * var12 + yaw * var12, var14 + yMod * var12, var15 + zMod * var12 + pitch * var12, var9, var10);
-		renderer.vertexUV(var13 + xMod * var12 - yaw * var12, var14 - yMod * var12, var15 + zMod * var12 - pitch * var12, var9, var11);
+		Renderer.get().color(delta * this.rCol, delta * this.gCol, delta * this.bCol);
+		Renderer.get().vertexuv(var13 - xMod * var12 - yaw * var12, var14 - yMod * var12, var15 - zMod * var12 - pitch * var12, var8, var11);
+		Renderer.get().vertexuv(var13 - xMod * var12 + yaw * var12, var14 + yMod * var12, var15 - zMod * var12 + pitch * var12, var8, var10);
+		Renderer.get().vertexuv(var13 + xMod * var12 + yaw * var12, var14 + yMod * var12, var15 + zMod * var12 + pitch * var12, var9, var10);
+		Renderer.get().vertexuv(var13 + xMod * var12 - yaw * var12, var14 - yMod * var12, var15 + zMod * var12 - pitch * var12, var9, var11);
 	}
 }

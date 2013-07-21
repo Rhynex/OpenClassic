@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.GameSettings;
 
@@ -91,8 +92,8 @@ public final class FontRenderer {
 			}
 
 			RenderHelper.getHelper().bindTexture(this.fontId);
-			ShapeRenderer.instance.begin();
-			ShapeRenderer.instance.color(color);
+			Renderer.get().begin();
+			Renderer.get().color(color);
 			int var7 = 0;
 
 			for (int count = 0; count < chars.length; ++count) {
@@ -118,23 +119,23 @@ public final class FontRenderer {
 						c = (c & 16579836) >> 2;
 					}
 
-					ShapeRenderer.instance.color(c);
+					Renderer.get().color(c);
 					count += 2;
 				}
 
 				color = chars[count] % 16 << 3;
 				int var9 = chars[count] / 16 << 3;
 				float var13 = 7.99F;
-				ShapeRenderer.instance.vertexUV((x + var7), y + var13, 0.0F, color / 128.0F, (var9 + var13) / 128.0F);
-				ShapeRenderer.instance.vertexUV((x + var7) + var13, y + var13, 0.0F, (color + var13) / 128.0F, (var9 + var13) / 128.0F);
-				ShapeRenderer.instance.vertexUV((x + var7) + var13, y, 0.0F, (color + var13) / 128.0F, var9 / 128.0F);
-				ShapeRenderer.instance.vertexUV((x + var7), y, 0.0F, color / 128.0F, var9 / 128.0F);
+				Renderer.get().vertexuv((x + var7), y + var13, 0.0F, color / 128.0F, (var9 + var13) / 128.0F);
+				Renderer.get().vertexuv((x + var7) + var13, y + var13, 0.0F, (color + var13) / 128.0F, (var9 + var13) / 128.0F);
+				Renderer.get().vertexuv((x + var7) + var13, y, 0.0F, (color + var13) / 128.0F, var9 / 128.0F);
+				Renderer.get().vertexuv((x + var7), y, 0.0F, color / 128.0F, var9 / 128.0F);
 				if (chars[count] < this.font.length) {
 					var7 += this.font[chars[count]];
 				}
 			}
 
-			ShapeRenderer.instance.end();
+			Renderer.get().end();
 		}
 		
 		if(scaled) {
