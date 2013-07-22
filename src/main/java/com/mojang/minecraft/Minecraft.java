@@ -727,10 +727,9 @@ public final class Minecraft implements Runnable {
 						float ry = this.player.yo + (this.player.y - this.player.yo) * this.timer.delta;
 						float rz = this.player.zo + (this.player.z - this.player.zo) * this.timer.delta;
 						GL11.glTranslatef(-rx, -ry, -rz);
-						Frustum clipping = Frustum.getInstance();
-
+						Frustum.update();
 						for (int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
-							this.levelRenderer.chunkCache[count].clip(clipping);
+							this.levelRenderer.chunkCache[count].clip();
 						}
 
 						try {
@@ -781,7 +780,7 @@ public final class Minecraft implements Runnable {
 						}
 
 						ClientRenderHelper.getHelper().setLighting(true);
-						this.levelRenderer.level.blockMap.render(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), clipping, this.levelRenderer.textures, this.timer.delta);
+						this.levelRenderer.level.blockMap.render(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.levelRenderer.textures, this.timer.delta);
 						ClientRenderHelper.getHelper().setLighting(false);
 						this.fogRenderer.updateFog();
 						float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);

@@ -169,7 +169,7 @@ public class BlockMap {
 
 	}
 
-	public void render(Vector pos, Frustum frustum, TextureManager textureManager, float dt) {
+	public void render(Vector pos, TextureManager textureManager, float dt) {
 		for (int x = 0; x < this.width; x++) {
 			float x1 = (x << 4) - 2;
 			float x2 = (x + 1 << 4) + 2;
@@ -181,7 +181,7 @@ public class BlockMap {
 					if (entities.size() != 0) {
 						float z1 = (z << 4) - 2;
 						float z2 = (z + 1 << 4) + 2;
-						if (frustum.isBoxInFrustum(x1, y1, z1, x2, y2, z2)) {
+						if (Frustum.isBoxInFrustum(x1, y1, z1, x2, y2, z2)) {
 							int plane = 0;
 							boolean empty = true;
 							while (true) {
@@ -190,42 +190,42 @@ public class BlockMap {
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x1 + Frustum.frustum[plane][1] * y1 + Frustum.frustum[plane][2] * y1 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x2 + Frustum.frustum[plane][1] * y1 + Frustum.frustum[plane][2] * y1 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x1 + Frustum.frustum[plane][1] * y2 + Frustum.frustum[plane][2] * y1 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * y1 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x2 + Frustum.frustum[plane][1] * y2 + Frustum.frustum[plane][2] * y1 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x1 + Frustum.frustum[plane][1] * y1 + Frustum.frustum[plane][2] * z2 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y1 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x2 + Frustum.frustum[plane][1] * y1 + Frustum.frustum[plane][2] * z2 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x1 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x1 + Frustum.frustum[plane][1] * y2 + Frustum.frustum[plane][2] * z2 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
 
-								if (frustum.frustum[plane][0] * x2 + frustum.frustum[plane][1] * y2 + frustum.frustum[plane][2] * z2 + frustum.frustum[plane][3] <= 0.0F) {
+								if (Frustum.frustum[plane][0] * x2 + Frustum.frustum[plane][1] * y2 + Frustum.frustum[plane][2] * z2 + Frustum.frustum[plane][3] <= 0.0F) {
 									empty = false;
 									break;
 								}
@@ -238,7 +238,7 @@ public class BlockMap {
 								if (entity.shouldRender(pos)) {
 									if (!empty) {
 										AABB aabb = entity.bb;
-										if (!frustum.isBoxInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1)) {
+										if (!Frustum.isBoxInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1)) {
 											continue;
 										}
 									}

@@ -108,8 +108,8 @@ public final class Chunk {
 		}
 	}
 
-	public final void clip(Frustum check) {
-		this.visible = check.isBoxInFrustum(this.x, this.y, this.z, this.x + this.width, this.y + this.height, this.z + this.depth);
+	public final void clip() {
+		this.visible = Frustum.isBoxInFrustum(this.x, this.y, this.z, this.x + this.width, this.y + this.height, this.z + this.depth);
 	}
 
 }
