@@ -14,7 +14,6 @@ import com.mojang.minecraft.render.TextureManager;
 
 public class NetworkPlayer extends Player {
 
-	public static final long serialVersionUID = 77479605454997290L;
 	private transient List<PositionUpdate> moveQueue = new LinkedList<PositionUpdate>();
 	private transient Minecraft minecraft;
 	public int playerId;

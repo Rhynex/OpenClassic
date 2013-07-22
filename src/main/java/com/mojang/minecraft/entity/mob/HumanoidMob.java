@@ -10,7 +10,6 @@ import com.mojang.minecraft.render.TextureManager;
 
 public class HumanoidMob extends Mob {
 
-	public static final long serialVersionUID = 0L;
 	public boolean helmet = Math.random() < 0.20000000298023224D;
 	public boolean armor = Math.random() < 0.20000000298023224D;
 

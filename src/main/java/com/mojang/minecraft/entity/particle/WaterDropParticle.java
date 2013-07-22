@@ -4,8 +4,6 @@ import com.mojang.minecraft.level.Level;
 
 public class WaterDropParticle extends Particle {
 
-	private static final long serialVersionUID = 1L;
-
 	public WaterDropParticle(Level level, float x, float y, float z) {
 		super(level, x, y, z, 0.0F, 0.0F, 0.0F);
 		this.xd *= 0.3F;

@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import ch.spacebase.openclassic.api.Position;
@@ -17,9 +16,8 @@ import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.TextureManager;
 
-public abstract class Entity implements Serializable {
+public abstract class Entity {
 
-	public static final long serialVersionUID = 0L;
 	public Level level;
 	public float xo;
 	public float yo;

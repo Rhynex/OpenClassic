@@ -11,8 +11,6 @@ import com.mojang.minecraft.render.TextureManager;
 
 public abstract class Player extends HumanoidMob {
 
-	private static final long serialVersionUID = -2700951438056228150L;
-	
 	protected int newTextureId = -1;
 	protected BufferedImage newTexture = null;
 	protected TextureManager textures;

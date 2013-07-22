@@ -8,7 +8,6 @@ import com.mojang.minecraft.entity.model.Vector;
 
 public class BasicAttackAI extends BasicAI {
 
-	public static final long serialVersionUID = 0L;
 	public int damage = 6;
 
 	public void update() {

@@ -1,7 +1,5 @@
 package com.mojang.minecraft.entity.mob;
 
-import java.io.Serializable;
-
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
@@ -11,8 +9,6 @@ import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.level.Level;
 
 public class Creeper extends Mob {
-
-	public static final long serialVersionUID = 0L;
 
 	public Creeper(Level level, float x, float y, float z) {
 		super(level);
@@ -30,8 +26,7 @@ public class Creeper extends Mob {
 		return ((MathHelper.sin(this.tickCount + dt) * 0.5F + 0.5F) * brightness * 0.5F + 0.25F + brightness * 0.25F) * super.getBrightness(dt);
 	}
 	
-	public static class CreeperAI extends BasicAttackAI implements Serializable {
-		public static final long serialVersionUID = 0L;
+	public static class CreeperAI extends BasicAttackAI {
 
 		public final boolean attack(Entity entity) {
 			if (super.attack(entity)) {

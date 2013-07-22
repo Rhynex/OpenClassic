@@ -1,6 +1,5 @@
 package com.mojang.minecraft.level;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +9,8 @@ import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.Frustum;
 import com.mojang.minecraft.render.TextureManager;
 
-public class BlockMap implements Serializable {
+public class BlockMap {
 
-	public static final long serialVersionUID = 0L;
 	private int width;
 	private int height;
 	private int depth;
@@ -256,9 +254,7 @@ public class BlockMap implements Serializable {
 
 	}
 	
-	public static class Slot implements Serializable {
-		public static final long serialVersionUID = 0L;
-		
+	public static class Slot {
 		private BlockMap parent;
 		private int xSlot;
 		private int ySlot;

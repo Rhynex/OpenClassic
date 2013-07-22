@@ -7,7 +7,6 @@ import com.mojang.minecraft.level.Level;
 
 public class Particle extends Entity {
 
-	private static final long serialVersionUID = 1L;
 	protected int tex;
 	protected float uo;
 	protected float vo;

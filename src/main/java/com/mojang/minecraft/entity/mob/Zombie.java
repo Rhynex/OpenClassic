@@ -5,8 +5,6 @@ import com.mojang.minecraft.level.Level;
 
 public class Zombie extends HumanoidMob {
 
-	public static final long serialVersionUID = 0L;
-
 	public Zombie(Level level, float x, float y, float z) {
 		super(level, x, y, z);
 		this.modelName = "zombie";

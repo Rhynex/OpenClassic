@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity.player;
 
-import java.io.Serializable;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.Position;
@@ -19,7 +18,6 @@ import com.zachsthings.onevent.EventManager;
 
 public class LocalPlayer extends Player {
 
-	public static final long serialVersionUID = 0L;
 	public static final int MAX_HEALTH = 20;
 	public static final int MAX_ARROWS = 99;
 	
@@ -192,9 +190,7 @@ public class LocalPlayer extends Player {
 		super.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
 	}
 	
-	public static class PlayerAI extends BasicAI implements Serializable {
-		public static final long serialVersionUID = 0L;
-
+	public static class PlayerAI extends BasicAI {
 		private LocalPlayer parent;
 		
 		public PlayerAI(LocalPlayer parent) {

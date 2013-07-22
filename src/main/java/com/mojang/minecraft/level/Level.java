@@ -1,6 +1,5 @@
 package com.mojang.minecraft.level;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,11 +23,10 @@ import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.phys.AABB;
 import com.zachsthings.onevent.EventManager;
 
-public class Level implements Serializable {
+public class Level {
 
 	private static final Random rand = new Random();
 	
-	public static final long serialVersionUID = 0L;
 	public int width;
 	public int height;
 	public int depth;

@@ -14,7 +14,6 @@ import com.mojang.minecraft.render.TextureManager;
 
 public class Item extends Entity {
 
-	public static final long serialVersionUID = 0L;
 	private static ItemModel[] models = new ItemModel[256];
 	private float xd;
 	private float yd;

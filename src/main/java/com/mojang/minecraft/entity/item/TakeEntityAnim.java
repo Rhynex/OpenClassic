@@ -6,7 +6,6 @@ import com.mojang.minecraft.render.TextureManager;
 
 public class TakeEntityAnim extends Entity {
 
-	private static final long serialVersionUID = 1L;
 	private int time = 0;
 	private Entity item;
 	private Entity player;

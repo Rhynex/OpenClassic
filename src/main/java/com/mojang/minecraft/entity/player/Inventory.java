@@ -1,13 +1,10 @@
 package com.mojang.minecraft.entity.player;
 
-import java.io.Serializable;
-
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 
-public class Inventory implements Serializable {
+public class Inventory {
 
-	public static final long serialVersionUID = 0L;
 	public static final int POP_TIME_DURATION = 5;
 	
 	public int[] slots = new int[9];

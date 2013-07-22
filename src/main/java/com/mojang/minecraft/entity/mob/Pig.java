@@ -8,8 +8,6 @@ import com.mojang.minecraft.level.Level;
 
 public class Pig extends QuadrupedMob {
 
-	public static final long serialVersionUID = 0L;
-
 	public Pig(Level level, float x, float y, float z) {
 		super(level, x, y, z);
 		this.heightOffset = 1.72F;

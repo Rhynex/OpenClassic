@@ -1,14 +1,10 @@
 package com.mojang.minecraft.entity.mob;
 
-import java.io.Serializable;
-
 import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.mob.ai.BasicAttackAI;
 import com.mojang.minecraft.level.Level;
 
 public class Skeleton extends Zombie {
-
-	public static final long serialVersionUID = 0L;
 
 	public Skeleton(Level level, float x, float y, float z) {
 		super(level, x, y, z);
@@ -24,9 +20,7 @@ public class Skeleton extends Zombie {
 		level.addEntity(new Arrow(level, this, this.x, this.y, this.z, this.yaw + 180.0F + (float) (Math.random() * 45.0D - 22.5D), this.pitch - (float) (Math.random() * 45.0D - 10.0D), 1.0F));
 	}
 	
-	public static class SkeletonAI extends BasicAttackAI implements Serializable {
-		public static final long serialVersionUID = 0L;
-
+	public static class SkeletonAI extends BasicAttackAI {
 		private Skeleton parent;
 		
 		public SkeletonAI(Skeleton parent) {

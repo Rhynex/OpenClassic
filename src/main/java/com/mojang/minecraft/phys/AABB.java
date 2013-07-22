@@ -1,13 +1,10 @@
 package com.mojang.minecraft.phys;
 
-import java.io.Serializable;
-
 import com.mojang.minecraft.MovingObjectPosition;
 import com.mojang.minecraft.entity.model.Vector;
 
-public class AABB implements Serializable {
+public class AABB {
 
-	public static final long serialVersionUID = 0L;
 	private float epsilon = 0.0F;
 	public float x0;
 	public float y0;

@@ -3,8 +3,6 @@ package com.mojang.minecraft.entity.mob.ai;
 
 public class JumpAttackAI extends BasicAttackAI {
 
-	public static final long serialVersionUID = 0L;
-
 	public JumpAttackAI() {
 		this.runSpeed *= 0.8F;
 	}

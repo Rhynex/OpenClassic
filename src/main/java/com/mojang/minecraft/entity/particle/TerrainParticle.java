@@ -9,8 +9,6 @@ import com.mojang.minecraft.level.Level;
 
 public class TerrainParticle extends Particle {
 
-	private static final long serialVersionUID = 1L;
-
 	private BlockType block;
 	
 	public TerrainParticle(Level level, float x, float y, float z, float xd, float yd, float zd, BlockType block) {

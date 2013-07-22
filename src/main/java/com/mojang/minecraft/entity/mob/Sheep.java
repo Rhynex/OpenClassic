@@ -1,7 +1,5 @@
 package com.mojang.minecraft.entity.mob;
 
-import java.io.Serializable;
-
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
@@ -18,7 +16,6 @@ import com.mojang.minecraft.render.TextureManager;
 
 public class Sheep extends QuadrupedMob {
 
-	public static final long serialVersionUID = 0L;
 	public boolean hasFur = true;
 	public boolean grazing = false;
 	public int grazingTime = 0;
@@ -115,9 +112,7 @@ public class Sheep extends QuadrupedMob {
 		model.head.z = oHeadZ;
 	}
 	
-	public static class SheepAI extends BasicAI implements Serializable {
-		private static final long serialVersionUID = 1L;
-
+	public static class SheepAI extends BasicAI {
 		private Sheep parent;
 		
 		public SheepAI(Sheep parent) {

@@ -5,8 +5,6 @@ import com.mojang.minecraft.level.Level;
 
 public class Spider extends QuadrupedMob {
 
-	public static final long serialVersionUID = 0L;
-
 	public Spider(Level level, float x, float y, float z) {
 		super(level, x, y, z);
 		this.heightOffset = 0.72F;
