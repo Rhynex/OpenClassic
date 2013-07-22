@@ -522,11 +522,24 @@ public class ClientRenderHelper extends RenderHelper {
 		}
 		
 		if(!(block.getModel() instanceof CubeModel)) {
-			//if(block.getModel() instanceof CuboidModel) {
-				// TODO: non-complete block logic
-			//} else {
+			if(block.getModel() instanceof CuboidModel) {
+				CuboidModel c = (CuboidModel) block.getModel();
+				if(c.getX1() > 0 && face == BlockFace.SOUTH) {
+					return true;
+				} else if(c.getX2() < 1 && face == BlockFace.NORTH) {
+					return true;
+				} else if(c.getY1() > 0 && face == BlockFace.DOWN) {
+					return true;
+				} else if(c.getY2() < 1 && face == BlockFace.UP) {
+					return true;
+				} else if(c.getZ1() > 0 && face == BlockFace.WEST) {
+					return true;
+				} else if(c.getZ2() < 1 && face == BlockFace.EAST) {
+					return true;
+				}
+			} else {
 				return true;
-			//}
+			}
 		}
 		
 		if(relative == block) {
@@ -616,9 +629,7 @@ public class ClientRenderHelper extends RenderHelper {
 	
 			GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
 			GL11.glScalef(-1, -1, -1);
-			Renderer.get().begin();
 			block.getModel().renderAll(-2, 0, 0, 1);
-			Renderer.get().end();
 			GL11.glPopMatrix();
 		}
 	}
