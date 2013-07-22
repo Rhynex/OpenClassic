@@ -17,7 +17,8 @@ import com.mojang.minecraft.gamemode.SurvivalGameMode;
 
 public final class GameSettings {
 
-	private static final String[] fog = new String[] { "FAR", "NORMAL", "SHORT", "TINY" };
+	private static final String[] FOG = new String[] { "FAR", "NORMAL", "SHORT", "TINY" };
+	private static final String[] SURVIVAL = new String[] { "OFF", "PEACEFUL", "NORMAL" };
 	public boolean music = true;
 	public boolean sound = true;
 	public boolean invertMouse = false;
@@ -26,7 +27,7 @@ public final class GameSettings {
 	public boolean viewBobbing = true;
 	public boolean anaglyph = false;
 	public boolean limitFPS = false;
-	public boolean survival = false;
+	public int survival = 0;
 	public boolean smoothing = false;
 	public boolean speed = false;
 	public boolean flying = false;
@@ -75,7 +76,7 @@ public final class GameSettings {
 		this.save();
 	}
 
-	public final void toggleSetting(int setting, int fogValue) {
+	public final void toggleSetting(int setting, int intVal) {
 		if (setting == 0) {
 			this.music = !this.music;
 			if(!this.music) this.mc.audio.stopMusic();
@@ -94,7 +95,7 @@ public final class GameSettings {
 		}
 
 		if (setting == 4) {
-			this.viewDistance = this.viewDistance + fogValue & 3;
+			this.viewDistance = this.viewDistance + intVal & 3;
 		}
 
 		if (setting == 5) {
@@ -114,8 +115,8 @@ public final class GameSettings {
 		}
 		
 		if (setting == 8) {
-			this.survival = !this.survival;
-			this.mc.mode = this.survival ? new SurvivalGameMode(this.mc) : new CreativeGameMode(this.mc);
+			this.survival = (this.survival + intVal) % 3;
+			this.mc.mode = this.survival > 0 ? new SurvivalGameMode(this.mc) : new CreativeGameMode(this.mc);
 			
 			if(this.mc.level != null) {
 				this.mc.mode.apply(this.mc.level);
@@ -146,7 +147,7 @@ public final class GameSettings {
 	}
 	
 	public final String getSettingValue(int id) {
-		return id == 0 ? (this.music ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 1 ? (this.sound ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 2 ? (this.invertMouse ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 3 ? (this.showInfo ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 4 ? fog[this.viewDistance] : (id == 5 ? (this.viewBobbing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 6 ? (this.anaglyph ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 7 ? (this.limitFPS ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 8 ? (this.survival ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : id == 9 ? (this.smoothing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : ""))))))));
+		return id == 0 ? (this.music ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 1 ? (this.sound ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 2 ? (this.invertMouse ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 3 ? (this.showInfo ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 4 ? FOG[this.viewDistance] : (id == 5 ? (this.viewBobbing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 6 ? (this.anaglyph ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 7 ? (this.limitFPS ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 8 ? SURVIVAL[this.survival] : id == 9 ? (this.smoothing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : ""))))))));
 	}
 	
 	public final String getHackName(int id) {
@@ -220,7 +221,10 @@ public final class GameSettings {
 					}
 					
 					if (setting[0].equals("survival")) {
-						this.survival = setting[1].equals("true");
+						this.survival = setting[1].equals("true") ? 2 : setting[1].equals("false") ? 0 : Integer.parseInt(setting[1]);
+						if(this.survival >= SURVIVAL.length) {
+							this.survival = SURVIVAL.length - 1;
+						}
 					}
 					
 					if (setting[0].equals("smoothing")) {

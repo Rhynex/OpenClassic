@@ -1,7 +1,9 @@
 package com.mojang.minecraft.level;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.ClientProgressBar;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.Creeper;
@@ -14,6 +16,11 @@ import com.mojang.minecraft.entity.mob.Zombie;
 
 public final class MobSpawner {
 
+	@SuppressWarnings("unchecked")
+	private static final Class<? extends Mob> ANIMALS[] = new Class[] { Pig.class, Sheep.class };
+	@SuppressWarnings("unchecked")
+	private static final Class<? extends Mob> ALL[] = new Class[] { Zombie.class, Skeleton.class, Creeper.class, Spider.class, Pig.class, Sheep.class };
+	
 	public Level level;
 
 	public MobSpawner(Level level) {
@@ -28,7 +35,12 @@ public final class MobSpawner {
 				progress.render();
 			}
 
-			int type = this.level.random.nextInt(6);
+			Class<? extends Mob> spawnable[] = ANIMALS;
+			if(GeneralUtils.getMinecraft().settings.survival > 1) {
+				spawnable = ALL;
+			}
+			
+			int type = this.level.random.nextInt(spawnable.length);
 			int rx = this.level.random.nextInt(this.level.width);
 			int ry = (int) (Math.min(this.level.random.nextFloat(), this.level.random.nextFloat()) * this.level.height);
 			int rz = this.level.random.nextInt(this.level.depth);
@@ -62,31 +74,14 @@ public final class MobSpawner {
 							}
 
 							Mob spawning = null;
-							if (type == 0) {
-								spawning = new Zombie(this.level, sx, sy, sz);
+							try {
+								spawning = spawnable[type].getConstructor(Level.class, float.class, float.class, float.class).newInstance(level, sx, sy, sz);
+							} catch(Exception e) {
+								OpenClassic.getLogger().severe("Failed to spawn mob \"" + spawnable[type].getSimpleName() + "\"");
+								e.printStackTrace();
 							}
 
-							if (type == 1) {
-								spawning = new Skeleton(this.level, sx, sy, sz);
-							}
-
-							if (type == 2) {
-								spawning = new Pig(this.level, sx, sy, sz);
-							}
-
-							if (type == 3) {
-								spawning = new Creeper(this.level, sx, sy, sz);
-							}
-
-							if (type == 4) {
-								spawning = new Spider(this.level, sx, sy, sz);
-							}
-
-							if (type == 5) {
-								spawning = new Sheep(this.level, sx, sy, sz);
-							}
-
-							if (this.level.isFree(spawning.bb)) {
+							if (spawning != null && this.level.isFree(spawning.bb)) {
 								count++;
 								this.level.addEntity(spawning);
 							}

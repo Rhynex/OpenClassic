@@ -318,7 +318,7 @@ public final class Minecraft implements Runnable {
 			this.hacks = false;
 		}
 
-		this.mode = this.settings.survival && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		this.mode = this.settings.survival > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		if(this.level != null) {
 			this.mode.apply(this.level);
 		}
@@ -486,7 +486,7 @@ public final class Minecraft implements Runnable {
 		this.audio = new ClientAudioManager(this);
 		this.settings = new GameSettings(this, this.dir);
 
-		this.mode = this.settings.survival ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		this.mode = this.settings.survival > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		this.textureManager = new TextureManager(this.settings);
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.LavaTexture()));
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.WaterTexture()));
@@ -1457,7 +1457,7 @@ public final class Minecraft implements Runnable {
 				}
 
 				if (Keyboard.getEventKey() == this.settings.fogKey.key) {
-					this.settings.toggleSetting(4, !Keyboard.isKeyDown(42) && !Keyboard.isKeyDown(54) ? 1 : -1);
+					this.settings.toggleSetting(4, !Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 1 : -1);
 				}
 			}
 
