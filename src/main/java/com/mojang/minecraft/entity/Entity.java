@@ -9,11 +9,11 @@ import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 
+import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.entity.player.net.PositionUpdate;
 import com.mojang.minecraft.level.BlockMap;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.TextureManager;
 

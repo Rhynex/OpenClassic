@@ -4,8 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
+import com.mojang.minecraft.entity.model.HumanoidModel;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.HumanoidModel;
 import com.mojang.minecraft.render.TextureManager;
 
 public class HumanoidMob extends Mob {

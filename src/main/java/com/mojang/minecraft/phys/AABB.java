@@ -3,7 +3,7 @@ package com.mojang.minecraft.phys;
 import java.io.Serializable;
 
 import com.mojang.minecraft.MovingObjectPosition;
-import com.mojang.minecraft.model.Vector;
+import com.mojang.minecraft.entity.model.Vector;
 
 public class AABB implements Serializable {
 

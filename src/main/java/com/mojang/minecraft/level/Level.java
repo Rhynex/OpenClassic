@@ -19,8 +19,8 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.MovingObjectPosition;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.PrimedTnt;
+import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.particle.ParticleManager;
-import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.phys.AABB;
 import com.zachsthings.onevent.EventManager;
 
@@ -692,7 +692,7 @@ public class Level implements Serializable {
 						vec1.z = zmax1;
 					}
 
-					Vector vec = new com.mojang.minecraft.model.Vector(vec1.x, vec1.y, vec1.z);
+					Vector vec = new com.mojang.minecraft.entity.model.Vector(vec1.x, vec1.y, vec1.z);
 					bx1 = (int) (vec.x = (float) Math.floor(vec1.x));
 					if (face == 5) {
 						bx1--;

@@ -8,8 +8,8 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.ai.AI;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
+import com.mojang.minecraft.entity.model.ModelManager;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.ModelManager;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Mob extends Entity {

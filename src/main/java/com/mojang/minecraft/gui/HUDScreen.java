@@ -35,8 +35,7 @@ public class HUDScreen extends MainScreen {
 		//this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
 	}
 
-	public void render(float renderPartialTicks, boolean focus, int mouseX, int mouseY) {
-		this.mc.renderer.enableGuiMode();
+	public void render(float dt, boolean focus, int mouseX, int mouseY) {
 		RenderHelper.getHelper().bindTexture("/gui/gui.png", true);
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_BLEND);
@@ -105,7 +104,7 @@ public class HUDScreen extends MainScreen {
 					GL11.glTranslatef(x, y, -50);
 					
 					if (this.mc.player.inventory.popTime[slot] > 0) {
-						float off = (this.mc.player.inventory.popTime[slot] - renderPartialTicks) / 5;
+						float off = (this.mc.player.inventory.popTime[slot] - dt) / 5;
 						GL11.glTranslatef(10, (-MathHelper.sin(off * off * MathHelper.PI) * 8) + 10, 0);
 						GL11.glScalef(MathHelper.sin(off * off * MathHelper.PI) + 1, MathHelper.sin(off * MathHelper.PI) + 1, 1);
 						GL11.glTranslatef(-10, -10, 0);

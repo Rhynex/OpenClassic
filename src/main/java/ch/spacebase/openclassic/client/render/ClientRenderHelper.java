@@ -1,8 +1,10 @@
 package ch.spacebase.openclassic.client.render;
 
 import java.awt.image.BufferedImage;
+import java.nio.FloatBuffer;
 import java.util.Random;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
@@ -16,13 +18,16 @@ import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Texture;
+import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
+import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
+import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.FontRenderer;
 
@@ -659,6 +664,74 @@ public class ClientRenderHelper extends RenderHelper {
 		} else {
 			GL11.glDisable(GL11.GL_CULL_FACE);
 		}
+	}
+	
+	public FloatBuffer getParamBuffer(float param1, float param2, float param3, float param4) {
+		FloatBuffer paramBuffer = BufferUtils.createFloatBuffer(16);
+		paramBuffer.put(param1).put(param2).put(param3).put(param4);
+		paramBuffer.flip();
+		return paramBuffer;
+	}
+	
+	public void ortho() {
+		int width = ClientRenderHelper.getHelper().getGuiWidth();
+		int height = ClientRenderHelper.getHelper().getGuiHeight();
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GL11.glOrtho(0.0D, width, height, 0.0D, 100.0D, 300.0D);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+		GL11.glTranslatef(0.0F, 0.0F, -200.0F);
+	}
+	
+	public void setLighting(boolean lighting) {
+		if (!lighting) {
+			GL11.glDisable(GL11.GL_LIGHTING);
+			GL11.glDisable(GL11.GL_COLOR_BUFFER_BIT);
+		} else {
+			GL11.glEnable(GL11.GL_LIGHTING);
+			GL11.glEnable(GL11.GL_COLOR_BUFFER_BIT);
+			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+			GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
+			Vector vec = new Vector(0.0F, -1.0F, 0.5F).normalize();
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_POSITION, ClientRenderHelper.getHelper().getParamBuffer(vec.x, vec.y, vec.z, 0));
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_DIFFUSE, ClientRenderHelper.getHelper().getParamBuffer(0.3F, 0.3F, 0.3F, 1));
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(0, 0, 0, 1));
+			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(0.7F, 0.7F, 0.7F, 1));
+		}
+	}
+	
+	public Vector getPlayerVector(LocalPlayer player, float dt) {
+		float x = player.xo + (player.x - player.xo) * dt;
+		float y = player.yo + (player.y - player.yo) * dt;
+		float z = player.zo + (player.z - player.zo) * dt;
+		return new Vector(x, y, z);
+	}
+
+	public void hurtEffect(LocalPlayer player, float dt) {
+		float effect = player.hurtTime - dt;
+		if (player.health <= 0) {
+			dt += player.deathTime;
+			GL11.glRotatef(40.0F - 8000.0F / (dt + 200.0F), 0, 0, 1);
+		}
+
+		if (effect >= 0) {
+			effect = MathHelper.sin((effect /= player.hurtDuration) * effect * effect * effect * MathHelper.PI);
+			GL11.glRotatef(-player.hurtDir, 0, 1, 0);
+			GL11.glRotatef(-effect * 14.0F, 0, 0, 1);
+			GL11.glRotatef(player.hurtDir, 0, 1, 0);
+		}
+	}
+
+	public void applyBobbing(LocalPlayer player, float dt) {
+		float dist = player.walkDist + (player.walkDist - player.walkDistO) * dt;
+		float bob = player.oBob + (player.bob - player.oBob) * dt;
+		float tilt = player.oTilt + (player.tilt - player.oTilt) * dt;
+		GL11.glTranslatef(MathHelper.sin(dist * MathHelper.PI) * bob * 0.5F, -Math.abs(MathHelper.cos(dist * MathHelper.PI) * bob), 0);
+		GL11.glRotatef(MathHelper.sin(dist * MathHelper.PI) * bob * 3.0F, 0, 0, 1);
+		GL11.glRotatef(Math.abs(MathHelper.cos(dist * MathHelper.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
+		GL11.glRotatef(tilt, 1, 0, 0);
 	}
 	
 }

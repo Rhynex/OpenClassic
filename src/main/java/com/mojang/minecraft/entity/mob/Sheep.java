@@ -11,9 +11,9 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
+import com.mojang.minecraft.entity.model.AnimalModel;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.AnimalModel;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Sheep extends QuadrupedMob {

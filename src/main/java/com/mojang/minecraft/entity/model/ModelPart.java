@@ -1,4 +1,4 @@
-package com.mojang.minecraft.model;
+package com.mojang.minecraft.entity.model;
 
 import org.lwjgl.opengl.GL11;
 

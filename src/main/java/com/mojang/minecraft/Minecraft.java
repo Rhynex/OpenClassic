@@ -73,6 +73,8 @@ import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.item.Item;
+import com.mojang.minecraft.entity.model.ModelPart;
+import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.entity.particle.WaterDropParticle;
 import com.mojang.minecraft.entity.player.InputHandler;
@@ -87,15 +89,14 @@ import com.mojang.minecraft.gui.GameOverScreen;
 import com.mojang.minecraft.gui.HUDScreen;
 import com.mojang.minecraft.gui.MenuScreen;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.ModelPart;
-import com.mojang.minecraft.model.Vector;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.Chunk;
 import com.mojang.minecraft.render.ChunkVisibleAndDistanceComparator;
 import com.mojang.minecraft.render.Frustum;
 import com.mojang.minecraft.render.FontRenderer;
+import com.mojang.minecraft.render.HeldBlock;
 import com.mojang.minecraft.render.LevelRenderer;
-import com.mojang.minecraft.render.RenderUtils;
+import com.mojang.minecraft.render.FogRenderer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 import com.mojang.minecraft.render.animation.WaterTexture;
@@ -120,7 +121,7 @@ public final class Minecraft implements Runnable {
 	public FontRenderer fontRenderer;
 	public GuiScreen currentScreen = null;
 	public ClientProgressBar progressBar = new ClientProgressBar();
-	public RenderUtils renderer = new RenderUtils(this);
+	public FogRenderer fogRenderer = new FogRenderer(this);
 	public ClientAudioManager audio;
 	public ResourceDownloadThread resourceThread;
 	private int ticks;
@@ -151,6 +152,9 @@ public final class Minecraft implements Runnable {
 	public boolean ctf;
 	public int mipmapMode = 0;
 	public ClientSession session;
+	public boolean displayActive = false;
+	public int rainTicks = 0;
+	public HeldBlock heldBlock = new HeldBlock();
 	public HashMap<Byte, NetworkPlayer> netPlayers = new HashMap<Byte, NetworkPlayer>();
 
 	public Minecraft(Canvas canvas, int width, int height) {
@@ -582,11 +586,11 @@ public final class Minecraft implements Runnable {
 				checkGLError("Pre render");
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 				this.mode.applyBlockCracks(this.timer.delta);
-				if (this.renderer.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) { // Fixed focus bug for some computers/OS's
+				if (this.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) { // Fixed focus bug for some computers/OS's
 					this.displayMenu();
 				}
 
-				this.renderer.displayActive = Display.isActive();
+				this.displayActive = Display.isActive();
 				if (Mouse.isGrabbed()) {
 					int x = Mouse.getDX();
 					int y = Mouse.getDY();
@@ -604,7 +608,7 @@ public final class Minecraft implements Runnable {
 				if (this.level != null) {
 					float pitch = this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta;
 					float yaw = this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta;
-					Vector pVec = this.renderer.getPlayerVector(this.timer.delta);
+					Vector pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
 					float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
 					float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
 					float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
@@ -614,15 +618,15 @@ public final class Minecraft implements Runnable {
 					float reach = this.mode.getReachDistance();
 					this.selected = this.level.clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach), true);
 					if (this.selected != null) {
-						reach = this.selected.blockPos.distance(this.renderer.getPlayerVector(this.timer.delta));
+						reach = this.selected.blockPos.distance(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta));
 					}
 
-					pVec = this.renderer.getPlayerVector(this.timer.delta);
+					pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
 					if (this.mode instanceof CreativeGameMode) {
 						reach = 32;
 					}
 
-					this.renderer.entity = null;
+					Entity selectedEntity = null;
 					List<Entity> entities = this.level.blockMap.getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
 
 					float distance = 0;
@@ -631,14 +635,14 @@ public final class Minecraft implements Runnable {
 						if (entity.isPickable()) {
 							MovingObjectPosition pos = entity.bb.grow(0.1F, 0.1F, 0.1F).clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach));
 							if (pos != null && (pVec.distance(pos.blockPos) < distance || distance == 0)) {
-								this.renderer.entity = entity;
+								selectedEntity = entity;
 								distance = pVec.distance(pos.blockPos);
 							}
 						}
 					}
 
-					if (this.renderer.entity != null && !(this.mode instanceof CreativeGameMode)) {
-						this.selected = new MovingObjectPosition(this.renderer.entity);
+					if (selectedEntity != null && !(this.mode instanceof CreativeGameMode)) {
+						this.selected = new MovingObjectPosition(selectedEntity);
 					}
 
 					int pass = 0;
@@ -661,38 +665,38 @@ public final class Minecraft implements Runnable {
 						float skyRed = (this.level.skyColor >> 16 & 255) / 255.0F;
 						float skyBlue = (this.level.skyColor >> 8 & 255) / 255.0F;
 						float skyGreen = (this.level.skyColor & 255) / 255.0F;
-						this.renderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
-						this.renderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
-						this.renderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
-						this.renderer.fogRed += (skyRed - this.renderer.fogRed) * fogDensity;
-						this.renderer.fogBlue += (skyBlue - this.renderer.fogBlue) * fogDensity;
-						this.renderer.fogGreen += (skyGreen - this.renderer.fogGreen) * fogDensity;
+						this.fogRenderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
+						this.fogRenderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
+						this.fogRenderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
+						this.fogRenderer.fogRed += (skyRed - this.fogRenderer.fogRed) * fogDensity;
+						this.fogRenderer.fogBlue += (skyBlue - this.fogRenderer.fogBlue) * fogDensity;
+						this.fogRenderer.fogGreen += (skyGreen - this.fogRenderer.fogGreen) * fogDensity;
 						BlockType type = Blocks.fromId(this.level.getTile((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z));
 						if (type != null && type.isLiquid()) {
 							if (type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER) {
-								this.renderer.fogRed = 0.02F;
-								this.renderer.fogBlue = 0.02F;
-								this.renderer.fogGreen = 0.2F;
+								this.fogRenderer.fogRed = 0.02F;
+								this.fogRenderer.fogBlue = 0.02F;
+								this.fogRenderer.fogGreen = 0.2F;
 							} else if (type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
-								this.renderer.fogRed = 0.6F;
-								this.renderer.fogBlue = 0.1F;
-								this.renderer.fogGreen = 0.0F;
+								this.fogRenderer.fogRed = 0.6F;
+								this.fogRenderer.fogBlue = 0.1F;
+								this.fogRenderer.fogGreen = 0.0F;
 							}
 						}
 
 						if (this.settings.anaglyph) {
-							float fred = (this.renderer.fogRed * 30.0F + this.renderer.fogBlue * 59.0F + this.renderer.fogGreen * 11.0F) / 100.0F;
-							float fblue = (this.renderer.fogRed * 30.0F + this.renderer.fogBlue * 70.0F) / 100.0F;
-							float fgreen = (this.renderer.fogRed * 30.0F + this.renderer.fogGreen * 70.0F) / 100.0F;
-							this.renderer.fogRed = fred;
-							this.renderer.fogBlue = fblue;
-							this.renderer.fogGreen = fgreen;
+							float fred = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 59.0F + this.fogRenderer.fogGreen * 11.0F) / 100.0F;
+							float fblue = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 70.0F) / 100.0F;
+							float fgreen = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogGreen * 70.0F) / 100.0F;
+							this.fogRenderer.fogRed = fred;
+							this.fogRenderer.fogBlue = fblue;
+							this.fogRenderer.fogGreen = fgreen;
 						}
 
-						GL11.glClearColor(this.renderer.fogRed, this.renderer.fogBlue, this.renderer.fogGreen, 0.0F);
+						GL11.glClearColor(this.fogRenderer.fogRed, this.fogRenderer.fogBlue, this.fogRenderer.fogGreen, 0.0F);
 						GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
 						GL11.glEnable(GL11.GL_CULL_FACE);
-						this.renderer.fogEnd = (512 >> (this.settings.viewDistance << 1));
+						this.fogRenderer.fogEnd = (512 >> (this.settings.viewDistance << 1));
 						GL11.glMatrixMode(GL11.GL_PROJECTION);
 						GL11.glLoadIdentity();
 						if (this.settings.anaglyph) {
@@ -704,16 +708,16 @@ public final class Minecraft implements Runnable {
 							fov /= (1.0F - 500.0F / (this.player.deathTime + this.timer.delta + 500.0F)) * 2.0F + 1.0F;
 						}
 
-						GLU.gluPerspective(fov, (float) this.width / (float) this.height, 0.05F, this.renderer.fogEnd);
+						GLU.gluPerspective(fov, (float) this.width / (float) this.height, 0.05F, this.fogRenderer.fogEnd);
 						GL11.glMatrixMode(GL11.GL_MODELVIEW);
 						GL11.glLoadIdentity();
 						if (this.settings.anaglyph) {
 							GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
 						}
 
-						this.renderer.hurtEffect(this.timer.delta);
+						ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
 						if (this.settings.viewBobbing) {
-							this.renderer.applyBobbing(this.timer.delta);
+							ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
 						}
 
 						GL11.glTranslatef(0.0F, 0.0F, -0.1F);
@@ -746,7 +750,7 @@ public final class Minecraft implements Runnable {
 							chunk.loaded = false;
 						}
 
-						this.renderer.updateFog();
+						this.fogRenderer.updateFog();
 						GL11.glEnable(GL11.GL_FOG);
 						this.levelRenderer.sortChunks(this.player, 0);
 						if (this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
@@ -776,10 +780,10 @@ public final class Minecraft implements Runnable {
 							}
 						}
 
-						this.renderer.setLighting(true);
-						this.levelRenderer.level.blockMap.render(this.renderer.getPlayerVector(this.timer.delta), clipping, this.levelRenderer.textures, this.timer.delta);
-						this.renderer.setLighting(false);
-						this.renderer.updateFog();
+						ClientRenderHelper.getHelper().setLighting(true);
+						this.levelRenderer.level.blockMap.render(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), clipping, this.levelRenderer.textures, this.timer.delta);
+						ClientRenderHelper.getHelper().setLighting(false);
+						this.fogRenderer.updateFog();
 						float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);
 						float zmod = -MathHelper.sin(this.player.yaw * MathHelper.DEG_TO_RAD);
 						float xdir = -zmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
@@ -811,7 +815,7 @@ public final class Minecraft implements Runnable {
 						RenderHelper.getHelper().bindTexture("/rock.png", true);
 						GL11.glEnable(GL11.GL_TEXTURE_2D);
 						GL11.glCallList(this.levelRenderer.listId);
-						this.renderer.updateFog();
+						this.fogRenderer.updateFog();
 						RenderHelper.getHelper().bindTexture("/clouds.png", true);
 						GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 						float cloudRed = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255.0F;
@@ -868,7 +872,7 @@ public final class Minecraft implements Runnable {
 
 						Renderer.get().end();
 						GL11.glEnable(GL11.GL_TEXTURE_2D);
-						this.renderer.updateFog();
+						this.fogRenderer.updateFog();
 						if (this.selected != null) {
 							GL11.glDisable(GL11.GL_ALPHA_TEST);
 							GL11.glEnable(GL11.GL_BLEND);
@@ -940,7 +944,7 @@ public final class Minecraft implements Runnable {
 						}
 
 						GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-						this.renderer.updateFog();
+						this.fogRenderer.updateFog();
 						GL11.glEnable(GL11.GL_TEXTURE_2D);
 						GL11.glEnable(GL11.GL_BLEND);
 						RenderHelper.getHelper().bindTexture("/water.png", true);
@@ -990,7 +994,7 @@ public final class Minecraft implements Runnable {
 									}
 
 									if (minRY != maxRY) {
-										float downfall = (((this.renderer.levelTicks + cx * 3121 + cz * 418711) % 32) + this.timer.delta) / 32.0F;
+										float downfall = (((this.rainTicks + cx * 3121 + cz * 418711) % 32) + this.timer.delta) / 32.0F;
 										float rax = cx + 0.5F - this.player.x;
 										float raz = cz + 0.5F - this.player.z;
 										float visibility = (float) Math.sqrt(rax * rax + raz * raz) / 5;
@@ -1013,8 +1017,8 @@ public final class Minecraft implements Runnable {
 							GL11.glDisable(GL11.GL_BLEND);
 						}
 
-						if (this.renderer.entity != null) {
-							this.renderer.entity.renderHover(this.textureManager, this.timer.delta);
+						if (selectedEntity != null) {
+							selectedEntity.renderHover(this.textureManager, this.timer.delta);
 						}
 
 						GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
@@ -1023,20 +1027,20 @@ public final class Minecraft implements Runnable {
 							GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
 						}
 
-						this.renderer.hurtEffect(this.timer.delta);
+						ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
 						if (this.settings.viewBobbing) {
-							this.renderer.applyBobbing(this.timer.delta);
+							ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
 						}
 
-						float heldPos = this.renderer.heldBlock.lastPosition + (this.renderer.heldBlock.heldPosition - this.renderer.heldBlock.lastPosition) * this.timer.delta;
+						float heldPos = this.heldBlock.lastPosition + (this.heldBlock.heldPosition - this.heldBlock.lastPosition) * this.timer.delta;
 						GL11.glPushMatrix();
 						GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1.0F, 0.0F, 0.0F);
 						GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0.0F, 1.0F, 0.0F);
-						this.renderer.setLighting(true);
+						ClientRenderHelper.getHelper().setLighting(true);
 						GL11.glPopMatrix();
 						GL11.glPushMatrix();
-						if (this.renderer.heldBlock.moving) {
-							float off = (this.renderer.heldBlock.heldOffset + this.timer.delta) / 7.0F;
+						if (this.heldBlock.moving) {
+							float off = (this.heldBlock.heldOffset + this.timer.delta) / 7.0F;
 							float offsin = MathHelper.sin(off * MathHelper.PI);
 							GL11.glTranslatef(-MathHelper.sin((float) Math.sqrt(off) * MathHelper.PI) * 0.4F, MathHelper.sin((float) Math.sqrt(off) * MathHelper.TWO_PI) * 0.2F, -offsin * 0.2F);
 						}
@@ -1044,8 +1048,8 @@ public final class Minecraft implements Runnable {
 						GL11.glTranslatef(0.7F * 0.8F, -0.65F * 0.8F - (1.0F - heldPos) * 0.6F, -0.9F * 0.8F);
 						GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
 						GL11.glEnable(GL11.GL_NORMALIZE);
-						if (this.renderer.heldBlock.moving) {
-							float off = (this.renderer.heldBlock.heldOffset + this.timer.delta) / 7.0F;
+						if (this.heldBlock.moving) {
+							float off = (this.heldBlock.heldOffset + this.timer.delta) / 7.0F;
 							float offsin = MathHelper.sin((off) * off * MathHelper.PI);
 							GL11.glRotatef(MathHelper.sin((float) Math.sqrt(off) * MathHelper.PI) * 80.0F, 0.0F, 1.0F, 0.0F);
 							GL11.glRotatef(-offsin * 20.0F, 1.0F, 0.0F, 0.0F);
@@ -1055,10 +1059,10 @@ public final class Minecraft implements Runnable {
 						GL11.glColor4f(brightness, brightness, brightness, 1);
 
 						if(!this.hideGui) {
-							if (this.renderer.heldBlock.block != null) {
+							if (this.heldBlock.block != null) {
 								GL11.glScalef(0.4F, 0.4F, 0.4F);
 								GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-								this.renderer.heldBlock.block.getModel().renderAll(0, 0, 0, this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z));
+								this.heldBlock.block.getModel().renderAll(0, 0, 0, this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z));
 							} else {
 								this.player.bindTexture(this.textureManager);
 								GL11.glScalef(1.0F, -1.0F, -1.0F);
@@ -1076,7 +1080,7 @@ public final class Minecraft implements Runnable {
 
 						GL11.glDisable(GL11.GL_NORMALIZE);
 						GL11.glPopMatrix();
-						this.renderer.setLighting(false);
+						ClientRenderHelper.getHelper().setLighting(false);
 						if (!this.settings.anaglyph) {
 							break;
 						}
@@ -1084,6 +1088,7 @@ public final class Minecraft implements Runnable {
 						pass++;
 					}
 
+					ClientRenderHelper.getHelper().ortho();
 					this.hud.render(this.timer.delta, this.currentScreen != null, Mouse.getX() * width / this.width, height - Mouse.getY() * height / this.height - 1);
 				} else {
 					GL11.glViewport(0, 0, this.width, this.height);
@@ -1093,7 +1098,7 @@ public final class Minecraft implements Runnable {
 					GL11.glLoadIdentity();
 					GL11.glMatrixMode(GL11.GL_MODELVIEW);
 					GL11.glLoadIdentity();
-					this.renderer.enableGuiMode();
+					ClientRenderHelper.getHelper().ortho();
 				}
 
 				if (this.currentScreen != null) {
@@ -1148,13 +1153,13 @@ public final class Minecraft implements Runnable {
 	private void onMouseClick(int button) {
 		if (button != 0 || this.blockHitTime <= 0) {
 			if (button == 0) {
-				this.renderer.heldBlock.heldOffset = -1;
-				this.renderer.heldBlock.moving = true;
+				this.heldBlock.heldOffset = -1;
+				this.heldBlock.moving = true;
 			}
 
 			int selected = this.player.inventory.getSelected();
 			if (button == 1 && selected > 0 && this.mode.useItem(this.player, selected)) {
-				this.renderer.heldBlock.heldPosition = 0;
+				this.heldBlock.heldPosition = 0;
 			} else if (this.selected == null) {
 				if (button == 0 && !(this.mode instanceof CreativeGameMode)) {
 					this.blockHitTime = 10;
@@ -1222,12 +1227,12 @@ public final class Minecraft implements Runnable {
 								this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, button == 1, (byte) id));
 							}
 
-							if(!this.isInMultiplayer() && EventManager.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.renderer.heldBlock.block)).isCancelled()) {
+							if(!this.isInMultiplayer() && EventManager.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.heldBlock.block)).isCancelled()) {
 								return;
 							}
 
 							this.level.netSetTile(x, y, z, id);
-							this.renderer.heldBlock.heldPosition = 0;
+							this.heldBlock.heldPosition = 0;
 							if(Blocks.fromId(id) != null && Blocks.fromId(id).getPhysics() != null) {
 								Blocks.fromId(id).getPhysics().onPlace(this.level.openclassic.getBlockAt(x, y, z));
 							}
@@ -1539,13 +1544,13 @@ public final class Minecraft implements Runnable {
 		}
 
 		if (this.level != null) {
-			this.renderer.levelTicks++;
-			this.renderer.heldBlock.lastPosition = this.renderer.heldBlock.heldPosition;
-			if (this.renderer.heldBlock.moving) {
-				this.renderer.heldBlock.heldOffset++;
-				if (this.renderer.heldBlock.heldOffset == 7) {
-					this.renderer.heldBlock.heldOffset = 0;
-					this.renderer.heldBlock.moving = false;
+			this.rainTicks++;
+			this.heldBlock.lastPosition = this.heldBlock.heldPosition;
+			if (this.heldBlock.moving) {
+				this.heldBlock.heldOffset++;
+				if (this.heldBlock.heldOffset == 7) {
+					this.heldBlock.heldOffset = 0;
+					this.heldBlock.moving = false;
 				}
 			}
 
@@ -1557,7 +1562,7 @@ public final class Minecraft implements Runnable {
 
 			block = this.player.openclassic != null && this.player.openclassic.getPlaceMode() != 0 ? Blocks.fromId(this.player.openclassic.getPlaceMode()) : block;
 
-			float position = (block == this.renderer.heldBlock.block ? 1.0F : 0.0F) - this.renderer.heldBlock.heldPosition;
+			float position = (block == this.heldBlock.block ? 1.0F : 0.0F) - this.heldBlock.heldPosition;
 			if (position < -0.4F) {
 				position = -0.4F;
 			}
@@ -1566,19 +1571,19 @@ public final class Minecraft implements Runnable {
 				position = 0.4F;
 			}
 
-			this.renderer.heldBlock.heldPosition += position;
-			if (this.renderer.heldBlock.heldPosition < 0.1F) {
-				this.renderer.heldBlock.block = block;
+			this.heldBlock.heldPosition += position;
+			if (this.heldBlock.heldPosition < 0.1F) {
+				this.heldBlock.block = block;
 			}
 
 			if (this.raining) {
 				for (int count = 0; count < 50; count++) {
-					int x = (int) this.player.x + this.renderer.rand.nextInt(9) - 4;
-					int z = (int) this.player.z + this.renderer.rand.nextInt(9) - 4;
+					int x = (int) this.player.x + rand.nextInt(9) - 4;
+					int z = (int) this.player.z + rand.nextInt(9) - 4;
 					int y = this.level.getHighestTile(x, z);
 					if (y <= (int) this.player.y + 4 && y >= (int) this.player.y - 4) {
-						float xOffset = this.renderer.rand.nextFloat();
-						float zOffset = this.renderer.rand.nextFloat();
+						float xOffset = rand.nextFloat();
+						float zOffset = rand.nextFloat();
 						this.particleManager.spawnParticle(new WaterDropParticle(this.level, x + xOffset, y + 0.1F, z + zOffset));
 					}
 				}

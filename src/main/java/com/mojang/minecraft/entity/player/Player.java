@@ -21,7 +21,7 @@ public abstract class Player extends HumanoidMob {
 		super(level, x, y, z);
 		this.armor = false;
 		this.helmet = false;
-		OpenClassic.getGame().getScheduler().scheduleTask(this, new SkinDownloadTask(this));
+		OpenClassic.getGame().getScheduler().scheduleAsyncTask(this, new SkinDownloadTask(this));
 	}
 	
 	public void bindTexture(TextureManager textures) {

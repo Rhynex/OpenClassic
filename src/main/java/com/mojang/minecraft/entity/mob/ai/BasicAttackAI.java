@@ -4,7 +4,7 @@ import ch.spacebase.openclassic.api.math.MathHelper;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
-import com.mojang.minecraft.model.Vector;
+import com.mojang.minecraft.entity.model.Vector;
 
 public class BasicAttackAI extends BasicAI {
 

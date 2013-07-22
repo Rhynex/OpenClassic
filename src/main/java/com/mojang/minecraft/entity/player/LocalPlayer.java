@@ -12,8 +12,8 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
+import com.mojang.minecraft.entity.model.HumanoidModel;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.model.HumanoidModel;
 import com.mojang.minecraft.render.TextureManager;
 import com.zachsthings.onevent.EventManager;
 
