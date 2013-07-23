@@ -33,9 +33,9 @@ public abstract class ClassicSession implements Session {
 	public Player getPlayer() {
 		return this.player;
 	}
-	
+
 	public void setPlayer(Player player) {
-		if (this.player != null) {
+		if(this.player != null) {
 			throw new IllegalStateException();
 		}
 
@@ -45,9 +45,9 @@ public abstract class ClassicSession implements Session {
 	@SuppressWarnings("unchecked")
 	public boolean tick() {
 		Message message;
-		while ((message = this.messageQueue.poll()) != null) {
+		while((message = this.messageQueue.poll()) != null) {
 			MessageHandler<Message> handler = (MessageHandler<Message>) this.lookup.find(message.getClass());
-			if (handler != null) {
+			if(handler != null) {
 				handler.handle(this, this.player, message);
 			}
 		}
@@ -59,24 +59,24 @@ public abstract class ClassicSession implements Session {
 		if(!this.isConnected()) {
 			return;
 		}
-		
+
 		if(message.getClass().getPackage().getName().contains("custom") && !this.sendCustomMessages()) {
 			return;
 		}
-		
+
 		this.channel.write(message);
 	}
-	
+
 	public abstract boolean sendCustomMessages();
 
 	public boolean isConnected() {
 		return this.channel != null && this.channel.isOpen();
 	}
-	
+
 	public void disconnect(String reason) {
 		this.channel.close();
 	}
-	
+
 	public SocketAddress getAddress() {
 		return this.channel.getRemoteAddress();
 	}
@@ -91,9 +91,9 @@ public abstract class ClassicSession implements Session {
 	}
 
 	public void dispose() {
-		if (this.player != null) {
+		if(this.player != null) {
 			this.player = null;
 		}
 	}
-	
+
 }

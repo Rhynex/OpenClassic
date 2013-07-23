@@ -18,5 +18,5 @@ public abstract class HandlerLookup {
 	public <T extends Message> MessageHandler<T> find(Class<T> clazz) {
 		return (MessageHandler<T>) this.handlers.get(clazz);
 	}
-	
+
 }

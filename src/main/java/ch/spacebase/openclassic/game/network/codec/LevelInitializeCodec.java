@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.LevelInitializeMessage;
 
-
 public class LevelInitializeCodec extends MessageCodec<LevelInitializeMessage> {
 
 	public LevelInitializeCodec() {
@@ -23,5 +22,5 @@ public class LevelInitializeCodec extends MessageCodec<LevelInitializeMessage> {
 	public LevelInitializeMessage decode(ChannelBuffer buffer) throws IOException {
 		return new LevelInitializeMessage();
 	}
-	
+
 }

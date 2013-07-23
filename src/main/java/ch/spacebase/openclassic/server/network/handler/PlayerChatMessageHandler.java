@@ -15,26 +15,26 @@ public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> 
 
 	@SuppressWarnings("unused")
 	private static final String illegalChars = "[^0-9a-zA-Z!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«]";
-	
+
 	@Override
 	public void handle(ClassicSession session, Player player, PlayerChatMessage message) {
 		if(session.getState() != State.GAME) return;
-		
+
 		String chat = message.getMessage().trim();
-		
+
 		for(char ch : chat.toCharArray()) {
-            if (ch < 32 || ch >= 127) {
-                session.disconnect("Illegal character in chat!");
-                return;
-            }
-        }
-		
+			if(ch < 32 || ch >= 127) {
+				session.disconnect("Illegal character in chat!");
+				return;
+			}
+		}
+
 		if(chat.startsWith("/")) {
 			((ClassicServer) OpenClassic.getGame()).processCommand(player, chat.substring(1, chat.length()));
 		} else {
 			PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(player, chat));
 			if(event.isCancelled()) return;
-			
+
 			OpenClassic.getServer().sendToAll(new PlayerChatMessage(player.getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));
 			OpenClassic.getLogger().info(String.format(event.getFormat(), player.getDisplayName(), event.getMessage()));
 		}

@@ -33,5 +33,5 @@ public class AudioRegisterCodec extends MessageCodec<AudioRegisterMessage> {
 		boolean music = buffer.readByte() == 1;
 		return new AudioRegisterMessage(identifier, url, included, music);
 	}
-	
+
 }

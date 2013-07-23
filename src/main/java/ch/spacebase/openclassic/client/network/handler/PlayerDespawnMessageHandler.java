@@ -13,7 +13,7 @@ public class PlayerDespawnMessageHandler extends MessageHandler<PlayerDespawnMes
 	@Override
 	public void handle(ClassicSession session, Player player, PlayerDespawnMessage message) {
 		NetworkPlayer despawning = GeneralUtils.getMinecraft().netPlayers.remove(message.getPlayerId());
-		if (message.getPlayerId() >= 0 && despawning != null) {
+		if(message.getPlayerId() >= 0 && despawning != null) {
 			despawning.clear();
 			GeneralUtils.getMinecraft().level.removeEntity(despawning);
 		}

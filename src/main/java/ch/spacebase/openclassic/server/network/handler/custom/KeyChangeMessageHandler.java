@@ -13,7 +13,7 @@ public class KeyChangeMessageHandler extends MessageHandler<KeyChangeMessage> {
 	@Override
 	public void handle(ClassicSession session, Player player, KeyChangeMessage message) {
 		EventManager.callEvent(new PlayerKeyChangeEvent(player, message.getKey(), message.isPressed()));
-		
+
 		// TODO: Add handling if player has gui open
 	}
 

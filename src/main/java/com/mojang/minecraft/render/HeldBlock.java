@@ -9,5 +9,5 @@ public class HeldBlock {
 	public float lastPosition = 0;
 	public int heldOffset = 0;
 	public boolean moving = false;
-	
+
 }

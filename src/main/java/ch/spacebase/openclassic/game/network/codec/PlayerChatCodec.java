@@ -17,10 +17,10 @@ public class PlayerChatCodec extends MessageCodec<PlayerChatMessage> {
 	@Override
 	public ChannelBuffer encode(PlayerChatMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		
+
 		buffer.writeByte(message.getPlayerId());
 		ChannelBufferUtils.writeString(buffer, message.getMessage());
-		
+
 		return buffer;
 	}
 
@@ -28,7 +28,7 @@ public class PlayerChatCodec extends MessageCodec<PlayerChatMessage> {
 	public PlayerChatMessage decode(ChannelBuffer buffer) throws IOException {
 		byte playerId = buffer.readByte();
 		String message = ChannelBufferUtils.readString(buffer);
-		
+
 		return new PlayerChatMessage(playerId, message);
 	}
 

@@ -10,7 +10,7 @@ import com.mojang.minecraft.level.Level;
 public class TerrainParticle extends Particle {
 
 	private BlockType block;
-	
+
 	public TerrainParticle(Level level, float x, float y, float z, float xd, float yd, float zd, BlockType block) {
 		super(level, x, y, z, xd, yd, zd);
 		Quad quad = block.getModel().getQuads().size() >= 3 ? block.getModel().getQuad(2) : block.getModel().getQuad(block.getModel().getQuads().size() - 1);
@@ -31,7 +31,7 @@ public class TerrainParticle extends Particle {
 		if(this.block == VanillaBlock.BROWN_MUSHROOM || this.block == VanillaBlock.GRAY_CLOTH || this.block == VanillaBlock.BLACK_CLOTH || this.block == VanillaBlock.WHITE_CLOTH) {
 			tminY -= 0.01f;
 		}
-		
+
 		float tmaxY = tminY + 0.015609375F;
 		float size = 0.1F * this.size;
 		float x = this.xo + (this.x - this.xo) * dt;

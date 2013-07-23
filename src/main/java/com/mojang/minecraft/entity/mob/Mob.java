@@ -72,22 +72,22 @@ public class Mob extends Entity {
 	public final void tick() {
 		super.tick();
 		this.oTilt = this.tilt;
-		if (this.attackTime > 0) {
+		if(this.attackTime > 0) {
 			this.attackTime--;
 		}
 
-		if (this.hurtTime > 0) {
+		if(this.hurtTime > 0) {
 			this.hurtTime--;
 		}
 
-		if (this.invulnerableTime > 0) {
+		if(this.invulnerableTime > 0) {
 			this.invulnerableTime--;
 		}
 
-		if (this.health <= 0) {
+		if(this.health <= 0) {
 			this.deathTime++;
-			if (this.deathTime > 20) {
-				if (this.ai != null) {
+			if(this.deathTime > 20) {
+				if(this.ai != null) {
 					this.ai.beforeRemove();
 				}
 
@@ -95,8 +95,8 @@ public class Mob extends Entity {
 			}
 		}
 
-		if (this.isUnderWater()) {
-			if (this.airSupply > 0) {
+		if(this.isUnderWater()) {
+			if(this.airSupply > 0) {
 				this.airSupply--;
 			} else {
 				this.hurt(null, 2);
@@ -105,11 +105,11 @@ public class Mob extends Entity {
 			this.airSupply = 300;
 		}
 
-		if (this.isInWater()) {
+		if(this.isInWater()) {
 			this.fallDistance = 0;
 		}
 
-		if (this.isInLava()) {
+		if(this.isInLava()) {
 			this.hurt(null, 10);
 		}
 
@@ -126,73 +126,73 @@ public class Mob extends Entity {
 		float animStep = 0.0F;
 		this.oRun = this.run;
 		float friction = 0.0F;
-		if (xzDistance > 0.05F) {
+		if(xzDistance > 0.05F) {
 			friction = 1.0F;
 			animStep = xzDistance * 3.0F;
 		}
 
-		if (!this.onGround) {
+		if(!this.onGround) {
 			friction = 0.0F;
 		}
 
 		this.run += (friction - this.run) * 0.3F;
 
 		float change = yaw - this.bodyYaw;
-		while (change < -180.0F) {
+		while(change < -180.0F) {
 			change += 360.0F;
 		}
 
-		while (change >= 180) {
+		while(change >= 180) {
 			change -= 360;
 		}
 
 		this.bodyYaw += change * 0.1;
-		
+
 		change = this.yaw - this.bodyYaw;
-		while (change < -180.0F) {
+		while(change < -180.0F) {
 			change += 360.0F;
 		}
 
-		while (change >= 180) {
+		while(change >= 180) {
 			change -= 360;
 		}
 
 		boolean negative = change < -90 || change >= 90;
-		if (change < -75) {
+		if(change < -75) {
 			change = -75;
 		}
 
-		if (change >= 75) {
+		if(change >= 75) {
 			change = 75;
 		}
 
 		this.bodyYaw = this.yaw - change;
 		this.bodyYaw += change * 0.1F;
-		if (negative) {
+		if(negative) {
 			animStep = -animStep;
 		}
 
-		while (this.yaw - this.oYaw < -180) {
+		while(this.yaw - this.oYaw < -180) {
 			this.oYaw -= 360;
 		}
 
-		while (this.yaw - this.oYaw >= 180) {
+		while(this.yaw - this.oYaw >= 180) {
 			this.oYaw += 360;
 		}
 
-		while (this.bodyYaw - this.oBodyYaw < -180) {
+		while(this.bodyYaw - this.oBodyYaw < -180) {
 			this.oBodyYaw -= 360;
 		}
 
-		while (this.bodyYaw - this.oBodyYaw >= 180) {
+		while(this.bodyYaw - this.oBodyYaw >= 180) {
 			this.oBodyYaw += 360;
 		}
 
-		while (this.pitch - this.oPitch < -180) {
+		while(this.pitch - this.oPitch < -180) {
 			this.oPitch -= 360;
 		}
 
-		while (this.pitch - this.oPitch >= 180) {
+		while(this.pitch - this.oPitch >= 180) {
 			this.oPitch += 360;
 		}
 
@@ -200,7 +200,7 @@ public class Mob extends Entity {
 	}
 
 	public void aiStep() {
-		if (this.ai != null) {
+		if(this.ai != null) {
 			this.ai.tick(this.level, this);
 		}
 	}
@@ -210,33 +210,33 @@ public class Mob extends Entity {
 	}
 
 	public void render(TextureManager textures, float dt) {
-		if (this.modelName != null) {
+		if(this.modelName != null) {
 			float attackTime = this.attackTime - dt;
-			if (attackTime < 0.0F) {
+			if(attackTime < 0.0F) {
 				attackTime = 0.0F;
 			}
 
-			while (this.oBodyYaw - this.bodyYaw < -180.0F) {
+			while(this.oBodyYaw - this.bodyYaw < -180.0F) {
 				this.oBodyYaw += 360.0F;
 			}
 
-			while (this.oBodyYaw - this.bodyYaw >= 180.0F) {
+			while(this.oBodyYaw - this.bodyYaw >= 180.0F) {
 				this.oBodyYaw -= 360.0F;
 			}
 
-			while (this.oPitch - this.pitch < -180.0F) {
+			while(this.oPitch - this.pitch < -180.0F) {
 				this.oPitch += 360.0F;
 			}
 
-			while (this.oPitch - this.pitch >= 180.0F) {
+			while(this.oPitch - this.pitch >= 180.0F) {
 				this.oPitch -= 360.0F;
 			}
 
-			while (this.oYaw - this.yaw < -180.0F) {
+			while(this.oYaw - this.yaw < -180.0F) {
 				this.oYaw += 360.0F;
 			}
 
-			while (this.oYaw - this.yaw >= 180.0F) {
+			while(this.oYaw - this.yaw >= 180.0F) {
 				this.oYaw -= 360.0F;
 			}
 
@@ -251,8 +251,8 @@ public class Mob extends Entity {
 			GL11.glColor3f(brightness, brightness, brightness);
 			GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt - 1.62F + this.renderOffset, this.zo + (this.z - this.zo) * dt);
 			float hurtRot = this.hurtTime - dt;
-			if (hurtRot > 0 || this.health <= 0) {
-				if (hurtRot < 0) {
+			if(hurtRot > 0 || this.health <= 0) {
+				if(hurtRot < 0) {
 					hurtRot = 0;
 				} else {
 					hurtRot /= this.hurtDuration;
@@ -260,10 +260,10 @@ public class Mob extends Entity {
 				}
 
 				float deathRot = 0;
-				if (this.health <= 0) {
+				if(this.health <= 0) {
 					deathRot = (this.deathTime + dt) / 20.0F;
 					hurtRot += deathRot * deathRot * 800.0F;
-					if (hurtRot > 90.0F) {
+					if(hurtRot > 90.0F) {
 						hurtRot = 90.0F;
 					}
 				}
@@ -279,7 +279,7 @@ public class Mob extends Entity {
 			GL11.glTranslatef(0.0F, -bob * 0.0625F, 0.0F);
 			GL11.glScalef(1.0F, -1.0F, 1.0F);
 			GL11.glRotatef(180.0F - bodyYaw + this.rotOffs, 0.0F, 1.0F, 0.0F);
-			if (!this.allowAlpha) {
+			if(!this.allowAlpha) {
 				GL11.glDisable(GL11.GL_ALPHA_TEST);
 			} else {
 				GL11.glDisable(GL11.GL_CULL_FACE);
@@ -289,7 +289,7 @@ public class Mob extends Entity {
 			modelCache.getModel(this.modelName).attackTime = attackTime / 5.0F;
 			this.bindTexture(textures);
 			this.renderModel(textures, animStep, dt, runProgress, yaw, pitch, 0.0625F);
-			if (this.invulnerableTime > this.invulnerableDuration - 10) {
+			if(this.invulnerableTime > this.invulnerableDuration - 10) {
 				GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.75F);
 				GL11.glEnable(GL11.GL_BLEND);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
@@ -300,7 +300,7 @@ public class Mob extends Entity {
 			}
 
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			if (this.allowAlpha) {
+			if(this.allowAlpha) {
 				GL11.glEnable(GL11.GL_CULL_FACE);
 			}
 
@@ -314,9 +314,9 @@ public class Mob extends Entity {
 	}
 
 	public void heal(int amount) {
-		if (this.health > 0) {
+		if(this.health > 0) {
 			this.health += amount;
-			if (this.health > 20) {
+			if(this.health > 20) {
 				this.health = 20;
 			}
 
@@ -325,11 +325,11 @@ public class Mob extends Entity {
 	}
 
 	public void hurt(Entity cause, int damage) {
-		if (!this.level.creativeMode) {
-			if (this.health > 0) {
+		if(!this.level.creativeMode) {
+			if(this.health > 0) {
 				this.ai.hurt(cause, damage);
-				if (this.invulnerableTime > this.invulnerableDuration / 2.0F) {
-					if (this.lastHealth - damage >= this.health) {
+				if(this.invulnerableTime > this.invulnerableDuration / 2.0F) {
+					if(this.lastHealth - damage >= this.health) {
 						return;
 					}
 
@@ -342,7 +342,7 @@ public class Mob extends Entity {
 				}
 
 				this.hurtDir = 0;
-				if (cause != null) {
+				if(cause != null) {
 					float xDistance = cause.x - this.x;
 					float zDistance = cause.z - this.z;
 					this.hurtDir = (float) (Math.atan2(zDistance, xDistance) * 180 / Math.PI) - this.yaw;
@@ -351,7 +351,7 @@ public class Mob extends Entity {
 					this.hurtDir = ((int) (Math.random() * 2.0D) * 180);
 				}
 
-				if (this.health <= 0) {
+				if(this.health <= 0) {
 					this.die(cause);
 				}
 			}
@@ -366,15 +366,15 @@ public class Mob extends Entity {
 		this.xd -= xDistance / len * 0.4F;
 		this.yd += 0.4F;
 		this.zd -= zDistance / len * 0.4F;
-		if (this.yd > 0.4F) {
+		if(this.yd > 0.4F) {
 			this.yd = 0.4F;
 		}
 
 	}
 
 	public void die(Entity cause) {
-		if (!this.level.creativeMode) {
-			if (this.deathScore > 0 && cause != null) {
+		if(!this.level.creativeMode) {
+			if(this.deathScore > 0 && cause != null) {
 				cause.awardKillScore(this, this.deathScore);
 			}
 
@@ -383,9 +383,9 @@ public class Mob extends Entity {
 	}
 
 	protected void causeFallDamage(float distance) {
-		if (!this.level.creativeMode) {
+		if(!this.level.creativeMode) {
 			int damage = (int) Math.ceil((distance - 3));
-			if (damage > 0) {
+			if(damage > 0) {
 				this.hurt(null, damage);
 			}
 
@@ -394,7 +394,7 @@ public class Mob extends Entity {
 
 	public void travel(float x, float z) {
 		boolean flying = this.ai instanceof BasicAI && ((BasicAI) this.ai).flying;
-		if (this.isInWater()) {
+		if(this.isInWater()) {
 			float y = this.y;
 			this.moveRelative(x, z, flying ? 0.125F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
@@ -404,11 +404,11 @@ public class Mob extends Entity {
 			if(!flying) {
 				this.yd = (float) (this.yd - 0.02D);
 			}
-			
-			if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
+
+			if(this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
 				this.yd = 0.3F;
 			}
-		} else if (this.isInLava()) {
+		} else if(this.isInLava()) {
 			float y = this.y;
 			this.moveRelative(x, z, flying ? 0.125F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
@@ -418,8 +418,8 @@ public class Mob extends Entity {
 			if(!flying) {
 				this.yd = (float) (this.yd - 0.02D);
 			}
-			
-			if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
+
+			if(this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
 				this.yd = 0.3F;
 			}
 		} else {
@@ -431,8 +431,8 @@ public class Mob extends Entity {
 			if(!flying) {
 				this.yd = (float) (this.yd - 0.08D);
 			}
-			
-			if (this.onGround) {
+
+			if(this.onGround) {
 				float y = 0.6F;
 				this.xd *= y;
 				this.zd *= y;

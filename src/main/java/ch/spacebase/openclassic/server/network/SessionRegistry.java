@@ -6,33 +6,31 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
-
 public class SessionRegistry {
 
 	private final Queue<ServerSession> pending = new ArrayDeque<ServerSession>();
 	private final List<ServerSession> sessions = new ArrayList<ServerSession>();
 
 	public void tick() {
-		synchronized (this.pending) {
+		synchronized(this.pending) {
 			ServerSession session;
-			while ((session = this.pending.poll()) != null) {
+			while((session = this.pending.poll()) != null) {
 				this.sessions.add(session);
 			}
 		}
 
-		for (Iterator<ServerSession> iter = this.sessions.iterator(); iter.hasNext(); ) {
+		for(Iterator<ServerSession> iter = this.sessions.iterator(); iter.hasNext();) {
 			ServerSession session = iter.next();
-			
-			if (!session.tick()) {
+
+			if(!session.tick()) {
 				iter.remove();
 				session.dispose();
 			}
 		}
 	}
 
-
 	public void add(ServerSession session) {
-		synchronized (this.pending) {
+		synchronized(this.pending) {
 			pending.add(session);
 		}
 	}
@@ -40,9 +38,9 @@ public class SessionRegistry {
 	public void remove(ServerSession session) {
 		session.flagForRemoval();
 	}
-	
+
 	public int size() {
 		return this.sessions.size();
 	}
-	
+
 }

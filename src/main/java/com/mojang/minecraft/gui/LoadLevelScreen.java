@@ -47,7 +47,7 @@ public class LoadLevelScreen extends GuiScreen {
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.isActive()) {
+		if(button.isActive()) {
 			if(button.getId() == 1) {
 				GeneralUtils.getMinecraft().setCurrentScreen(new LevelCreateScreen(this));
 			}
@@ -94,7 +94,7 @@ public class LoadLevelScreen extends GuiScreen {
 	protected void loadLevel(int id) {
 		VanillaBlock.registerAll();
 		Level level = LevelIO.load(this.getWidget(0, ButtonList.class).getButton(id).getText());
-		if (level != null) {
+		if(level != null) {
 			GeneralUtils.getMinecraft().setLevel(level);
 			GeneralUtils.getMinecraft().initGame();
 			GeneralUtils.getMinecraft().setCurrentScreen(null);

@@ -19,7 +19,7 @@ public final class MenuScreen extends GuiScreen {
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 2 - 24, this, OpenClassic.getGame().getTranslator().translate("gui.menu.dump")));
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 2, this, OpenClassic.getGame().getTranslator().translate("gui.menu.main-menu")));
 		this.attachWidget(new Button(3, this.getWidth() / 2 - 100, this.getHeight() / 2 + 60, this, OpenClassic.getGame().getTranslator().translate("gui.menu.back")));
-	
+
 		if(!GeneralUtils.getMinecraft().isInMultiplayer()) {
 			this.getWidget(1, Button.class).setActive(false);
 		}
@@ -27,21 +27,21 @@ public final class MenuScreen extends GuiScreen {
 
 	public final void onButtonClick(Button button) {
 		Minecraft mc = GeneralUtils.getMinecraft();
-		
-		if (button.getId() == 0) {
+
+		if(button.getId() == 0) {
 			mc.setCurrentScreen(new OptionsScreen(this, mc.settings));
 		}
-		
+
 		if(button.getId() == 1) {
 			mc.setCurrentScreen(new LevelDumpScreen(this));
 		}
 
-		if (button.getId() == 2) {
+		if(button.getId() == 2) {
 			if(!mc.isInMultiplayer()) {
 				if(EventManager.callEvent(new LevelUnloadEvent(OpenClassic.getClient().getLevel())).isCancelled()) {
 					return;
 				}
-				
+
 				mc.progressBar.setVisible(true);
 				mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
 				mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.saving"));
@@ -51,11 +51,11 @@ public final class MenuScreen extends GuiScreen {
 				LevelIO.save(mc.level);
 				mc.progressBar.setVisible(false);
 			}
-			
+
 			mc.stopGame(true);
 		}
-		
-		if (button.getId() == 3) {
+
+		if(button.getId() == 3) {
 			mc.setCurrentScreen(null);
 			mc.grabMouse();
 		}

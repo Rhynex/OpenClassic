@@ -24,7 +24,7 @@ public final class ErrorScreen extends GuiScreen {
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.getId() == 0) {
+		if(button.getId() == 0) {
 			GeneralUtils.getMinecraft().stopGame(true);
 		}
 	}

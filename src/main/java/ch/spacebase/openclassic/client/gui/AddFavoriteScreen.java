@@ -17,7 +17,7 @@ public class AddFavoriteScreen extends GuiScreen {
 	private GuiScreen parent;
 	private TextBox name;
 	private TextBox url;
-	
+
 	private boolean error = false;
 
 	public AddFavoriteScreen(GuiScreen parent) {
@@ -28,13 +28,13 @@ public class AddFavoriteScreen extends GuiScreen {
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
-		
+
 		this.name = new TextBox(2, this.getWidth() / 2 - 100, this.getHeight() / 2 - 50, this);
 		this.name.setFocus(true);
 		this.url = new TextBox(3, this.getWidth() / 2 - 100, this.getHeight() / 2 - 10, this);
 		this.attachWidget(this.name);
 		this.attachWidget(this.url);
-		
+
 		this.getWidget(0, Button.class).setActive(false);
 	}
 
@@ -43,13 +43,13 @@ public class AddFavoriteScreen extends GuiScreen {
 			if(this.url.getText().length() <= 0) {
 				this.error = true;
 			}
-			
+
 			SessionData.favorites.put(this.name.getText(), this.url.getText());
 			SessionData.saveFavorites();
-			
+
 			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
-		
+
 		if(button.getId() == 1) {
 			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
@@ -62,7 +62,7 @@ public class AddFavoriteScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		
+
 		if(this.error) RenderHelper.getHelper().renderText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, 40);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-name"), this.getWidth() / 2, this.getHeight() / 2 - 65);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), this.getWidth() / 2, this.getHeight() / 2 - 25);

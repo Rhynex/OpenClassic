@@ -21,20 +21,20 @@ public class CustomCodec extends MessageCodec<CustomMessage> {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		ChannelBufferUtils.writeString(buffer, message.getId());
 		byte data[] = message.getData();
-		if (data.length > 1024) {
+		if(data.length > 1024) {
 			data = Arrays.copyOfRange(data, 0, 64);
 		}
-		
+
 		if(data.length < 1024) {
 			byte[] newData = new byte[64];
 			System.arraycopy(data, 0, newData, 0, data.length);
-			
+
 			data = newData;
 		}
-		
+
 		buffer.writeBytes(data);
 		buffer.writeInt(message.getData().length);
-		
+
 		return buffer;
 	}
 
@@ -45,5 +45,5 @@ public class CustomCodec extends MessageCodec<CustomMessage> {
 		buffer.readBytes(data);
 		return new CustomMessage(id, Arrays.copyOfRange(data, 0, buffer.readShort()));
 	}
-	
+
 }

@@ -21,12 +21,7 @@ public class ClientPipelineFactory implements ChannelPipelineFactory {
 
 	@Override
 	public ChannelPipeline getPipeline() throws Exception {
-		return Channels.pipeline(
-			new ClassicDecoder(),
-			new ClassicEncoder(),
-			new ReadTimeoutHandler(this.timer, 40),
-			new ClientHandler(this.session)
-		);
+		return Channels.pipeline(new ClassicDecoder(), new ClassicEncoder(), new ReadTimeoutHandler(this.timer, 40), new ClientHandler(this.session));
 	}
 
 }

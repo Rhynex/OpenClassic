@@ -28,5 +28,5 @@ public class KeyChangeCodec extends MessageCodec<KeyChangeMessage> {
 		boolean pressed = buffer.readByte() == 1;
 		return new KeyChangeMessage(key, pressed);
 	}
-	
+
 }

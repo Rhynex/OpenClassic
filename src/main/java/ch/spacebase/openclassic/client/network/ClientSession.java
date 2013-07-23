@@ -32,13 +32,13 @@ public class ClientSession extends ClassicSession {
 	private ChannelGroup group = new DefaultChannelGroup("ClientSession");
 	private boolean successful = false;
 	private boolean disconnected = false;
-	
+
 	private ByteArrayOutputStream levelData = null;
-	
+
 	public ClientSession(final ClientPlayer player, final String sessionId, final String host, final int port) {
 		super(new ClientHandlerLookup());
 		this.setPlayer(player);
-		new Thread("Client-ConnectThread") {
+		OpenClassic.getClient().getScheduler().scheduleAsyncTask(this, new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -52,13 +52,13 @@ public class ClientSession extends ClassicSession {
 					if(channel != null) {
 						ClientSession.this.channel = channel;
 						group.add(channel);
-			
+
 						PlayerConnectEvent event = EventManager.callEvent(new PlayerConnectEvent(player.getName(), getAddress()));
 						if(event.getResult() != Result.ALLOWED) {
 							disconnect(String.format(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
 							return;
 						}
-			
+
 						send(new IdentificationMessage(Constants.PROTOCOL_VERSION, player.getName(), sessionId, Constants.OPENCLASSIC_PROTOCOL_VERSION));
 						successful = true;
 					} else {
@@ -71,9 +71,9 @@ public class ClientSession extends ClassicSession {
 					successful = false;
 				}
 			}
-		}.start();
+		});
 	}
-	
+
 	@Override
 	public boolean sendCustomMessages() {
 		return OpenClassic.getClient().isConnectedToOpenClassic();
@@ -91,50 +91,50 @@ public class ClientSession extends ClassicSession {
 			this.channel.close();
 			this.group.remove(this.channel);
 		}
-		
+
 		this.dispose();
 	}
-	
+
 	@Override
 	public void dispose() {
 		if(this.bootstrap != null) {
 			this.bootstrap.releaseExternalResources();
 		}
-		
+
 		this.channel = null;
 		this.group = null;
 		this.bootstrap = null;
 	}
-	
+
 	public boolean connectSuccess() {
 		return this.isConnected() && this.successful;
 	}
-	
+
 	public boolean isDisconnected() {
 		return this.disconnected;
 	}
-	
+
 	public void prepareForLevel() {
 		this.levelData = new ByteArrayOutputStream();
 	}
-	
+
 	public void appendLevelData(byte data[], short length) {
 		if(this.levelData == null) {
 			return;
 		}
-		
+
 		this.levelData.write(data, 0, length);
 	}
-	
+
 	public byte[] finishLevel() {
 		if(this.levelData == null) {
 			return new byte[0];
 		}
-		
+
 		IOUtils.closeQuietly(this.levelData);
 		byte processed[] = LevelIO.processData(new ByteArrayInputStream(this.levelData.toByteArray()));
 		this.levelData = null;
 		return processed;
 	}
-	
+
 }

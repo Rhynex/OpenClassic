@@ -41,5 +41,5 @@ public class AudioPlayCodec extends MessageCodec<AudioPlayMessage> {
 		boolean looping = buffer.readByte() == 1;
 		return new AudioPlayMessage(identifier, x, y, z, volume, pitch, music, looping);
 	}
-	
+
 }

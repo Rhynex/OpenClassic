@@ -1,4 +1,4 @@
-package com.mojang.minecraft;
+package com.mojang.minecraft.gui;
 
 public final class ChatLine {
 

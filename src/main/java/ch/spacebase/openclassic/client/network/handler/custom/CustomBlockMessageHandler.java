@@ -29,7 +29,7 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 					if(!file.getParentFile().exists()) {
 						try {
 							file.getParentFile().mkdirs();
-						} catch (SecurityException e) {
+						} catch(SecurityException e) {
 							e.printStackTrace();
 							continue;
 						}
@@ -37,7 +37,7 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 
 					try {
 						file.createNewFile();
-					} catch (Exception e) {
+					} catch(Exception e) {
 						e.printStackTrace();
 						continue;
 					}
@@ -58,7 +58,7 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 							if(length < 0) break;
 							out.write(data, 0, length);
 						}
-					} catch (IOException e) {
+					} catch(IOException e) {
 						e.printStackTrace();
 					} finally {
 						IOUtils.closeQuietly(in);
@@ -71,7 +71,7 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 				quad.getTexture().getParent().setTexture(file.getPath());
 			}
 		}
-		
+
 		Blocks.register(message.getBlock());
 	}
 

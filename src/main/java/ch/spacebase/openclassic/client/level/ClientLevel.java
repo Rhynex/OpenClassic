@@ -18,14 +18,14 @@ public class ClientLevel implements ClassicLevel {
 	private com.mojang.minecraft.level.Level handle;
 	private boolean physics = true;
 	public NBTData data;
-	
+
 	public ClientLevel(com.mojang.minecraft.level.Level handle) {
 		this.handle = handle;
 	}
-	
+
 	public void tick() {
 	}
-	
+
 	@Override
 	public void addPlayer(Player player) {
 	}
@@ -33,7 +33,7 @@ public class ClientLevel implements ClassicLevel {
 	@Override
 	public void removePlayer(String player) {
 	}
-	
+
 	public void removePlayer(byte id) {
 	}
 
@@ -177,18 +177,18 @@ public class ClientLevel implements ClassicLevel {
 	public boolean setBlockAt(int x, int y, int z, BlockType type, boolean physics) {
 		return this.setBlockIdAt(x, y, z, type.getId(), physics);
 	}
-	
+
 	@Override
 	public int getHighestBlockY(int x, int z) {
 		return this.getHighestBlockY(x, z, this.getHeight());
 	}
-	
+
 	@Override
 	public int getHighestBlockY(int x, int z, int max) {
 		for(int y = max; y >= 0; y--) {
 			if(this.getBlockIdAt(x, y, z) != 0) return y;
 		}
-		
+
 		return -1;
 	}
 
@@ -197,7 +197,7 @@ public class ClientLevel implements ClassicLevel {
 		if(this.getHighestBlockY(x, z) <= y) return true;
 		return false;
 	}
-	
+
 	@Override
 	public boolean isLit(int x, int y, int z) {
 		return this.handle.isLit(x, y, z);
@@ -218,7 +218,7 @@ public class ClientLevel implements ClassicLevel {
 			this.getPlayers().get(0).getSession().send(message);
 		}
 	}
-	
+
 	public com.mojang.minecraft.level.Level getHandle() {
 		return this.handle;
 	}

@@ -12,43 +12,43 @@ public class BasicAttackAI extends BasicAI {
 
 	public void update() {
 		super.update();
-		if (this.mob.health > 0) {
+		if(this.mob.health > 0) {
 			this.doAttack();
 		}
 	}
 
 	protected void doAttack() {
 		Entity player = this.level.getPlayer();
-		if (this.attackTarget != null && this.attackTarget.removed) {
+		if(this.attackTarget != null && this.attackTarget.removed) {
 			this.attackTarget = null;
 		}
 
-		if (player != null && this.attackTarget == null) {
+		if(player != null && this.attackTarget == null) {
 			float xDistance = player.x - mob.x;
 			float yDistance = player.y - mob.y;
 			float zDistance = player.z - mob.z;
 			float sqDistance = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
-			
-			if (sqDistance < 256) {
+
+			if(sqDistance < 256) {
 				this.attackTarget = player;
 			}
 		}
 
-		if (this.attackTarget != null) {
+		if(this.attackTarget != null) {
 			float xDistance = player.x - mob.x;
 			float yDistance = player.y - mob.y;
 			float zDistance = player.z - mob.z;
 			float sqDistance = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
-			
-			if (sqDistance > 1024 && this.random.nextInt(100) == 0) {
+
+			if(sqDistance > 1024 && this.random.nextInt(100) == 0) {
 				this.attackTarget = null;
 			}
 
-			if (this.attackTarget != null) {
+			if(this.attackTarget != null) {
 				float distance = (float) Math.sqrt(sqDistance);
 				this.mob.yaw = (float) (Math.atan2(zDistance, xDistance) * MathHelper.DRAD_TO_DEG) - 90.0F;
 				this.mob.pitch = -((float) (Math.atan2(yDistance, (float) Math.sqrt(distance)) * MathHelper.DRAD_TO_DEG));
-				if ((float) Math.sqrt(sqDistance) < 2 && this.attackDelay == 0) {
+				if((float) Math.sqrt(sqDistance) < 2 && this.attackDelay == 0) {
 					this.attack(this.attackTarget);
 				}
 			}
@@ -57,7 +57,7 @@ public class BasicAttackAI extends BasicAI {
 	}
 
 	public boolean attack(Entity entity) {
-		if (this.level.clip(new Vector(this.mob.x, this.mob.y, this.mob.z), new Vector(entity.x, entity.y, entity.z)) != null) {
+		if(this.level.clip(new Vector(this.mob.x, this.mob.y, this.mob.z), new Vector(entity.x, entity.y, entity.z)) != null) {
 			return false;
 		} else {
 			this.mob.attackTime = 5;
@@ -71,11 +71,11 @@ public class BasicAttackAI extends BasicAI {
 
 	public void hurt(Entity cause, int damage) {
 		super.hurt(cause, damage);
-		if (cause instanceof Arrow) {
+		if(cause instanceof Arrow) {
 			cause = ((Arrow) cause).getOwner();
 		}
 
-		if (cause != null && !cause.getClass().equals(this.mob.getClass())) {
+		if(cause != null && !cause.getClass().equals(this.mob.getClass())) {
 			this.attackTarget = cause;
 		}
 

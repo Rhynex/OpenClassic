@@ -65,7 +65,7 @@ public class ClientHandlerLookup extends HandlerLookup {
 			this.bind(PlayerChatMessage.class, PlayerChatMessageHandler.class);
 			this.bind(PlayerDisconnectMessage.class, PlayerDisconnectMessageHandler.class);
 			this.bind(PlayerOpMessage.class, PlayerOpMessageHandler.class);
-			
+
 			// Custom
 			this.bind(GameInfoMessage.class, GameInfoMessageHandler.class);
 			this.bind(CustomBlockMessage.class, CustomBlockMessageHandler.class);
@@ -80,5 +80,5 @@ public class ClientHandlerLookup extends HandlerLookup {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

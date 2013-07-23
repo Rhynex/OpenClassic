@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.PlayerOpMessage;
 
-
 public class PlayerOpCodec extends MessageCodec<PlayerOpMessage> {
 
 	public PlayerOpCodec() {
@@ -17,16 +16,16 @@ public class PlayerOpCodec extends MessageCodec<PlayerOpMessage> {
 	@Override
 	public ChannelBuffer encode(PlayerOpMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.buffer(1);
-		
+
 		buffer.writeByte(message.getOp());
-		
+
 		return buffer;
 	}
 
 	@Override
 	public PlayerOpMessage decode(ChannelBuffer buffer) throws IOException {
 		byte op = buffer.readByte();
-		
+
 		return new PlayerOpMessage(op);
 	}
 

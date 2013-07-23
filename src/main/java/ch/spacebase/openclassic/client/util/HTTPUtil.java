@@ -26,14 +26,14 @@ public class HTTPUtil {
 
 			StringBuffer buffer = new StringBuffer();
 			String line;
-			while ((line = reader.readLine()) != null) {
+			while((line = reader.readLine()) != null) {
 				buffer.append(line);
 				buffer.append("\n");
 			}
 
 			IOUtils.closeQuietly(reader);
 			return buffer.toString();
-		} catch (IOException e) {
+		} catch(IOException e) {
 		}
 
 		return "";
@@ -44,31 +44,31 @@ public class HTTPUtil {
 			URLConnection conn = makeConnection(url, params, referer, true);
 			InputStream in = getInputStream(conn);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-	
+
 			StringBuffer buffer = new StringBuffer();
 			String str;
-			while ((str = reader.readLine()) != null) {
+			while((str = reader.readLine()) != null) {
 				buffer.append(str);
 				buffer.append("\n");
 			}
-			
+
 			IOUtils.closeQuietly(reader);
 			return buffer.toString();
-		} catch (IOException e) {
+		} catch(IOException e) {
 		}
 
 		return "";
 	}
-	
+
 	private static InputStream getInputStream(URLConnection paramURLConnection) throws IOException {
 		InputStream stream = paramURLConnection.getInputStream();
 		String encoding = paramURLConnection.getContentEncoding();
-		if (encoding != null) {
+		if(encoding != null) {
 			encoding = encoding.toLowerCase();
 
-			if (encoding.contains("gzip")) {
+			if(encoding.contains("gzip")) {
 				stream = new GZIPInputStream(stream);
-			} else if (encoding.contains("deflate")) {
+			} else if(encoding.contains("deflate")) {
 				stream = new InflaterInputStream(stream);
 			}
 		}
@@ -88,7 +88,7 @@ public class HTTPUtil {
 		conn.addRequestProperty("Accept-Language", "en-us,en;q=0.5");
 		conn.addRequestProperty("Connection", "keep-alive");
 
-		if (params.length() > 0) {
+		if(params.length() > 0) {
 			conn.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			conn.addRequestProperty("Content-Length", Integer.toString(params.length()));
 			conn.setDoOutput(true);
@@ -107,11 +107,11 @@ public class HTTPUtil {
 		String str = "param name=\"" + param + "\" value=\"";
 		int index = page.indexOf(str);
 
-		if (index > 0) {
+		if(index > 0) {
 			index += str.length();
 			int index2 = page.indexOf("\"", index);
 
-			if (index2 > 0) {
+			if(index2 > 0) {
 				return page.substring(index, index2);
 			}
 		}

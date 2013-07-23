@@ -14,7 +14,7 @@ public class PlayerSpawnMessageHandler extends MessageHandler<PlayerSpawnMessage
 
 	@Override
 	public void handle(ClassicSession session, Player player, PlayerSpawnMessage message) {
-		if (message.getPlayerId() >= 0) {
+		if(message.getPlayerId() >= 0) {
 			NetworkPlayer p = new NetworkPlayer(GeneralUtils.getMinecraft(), message.getPlayerId(), message.getName(), message.getX(), message.getY() - 0.6875f, message.getZ(), message.getYaw(), message.getPitch());
 			GeneralUtils.getMinecraft().netPlayers.put(message.getPlayerId(), p);
 			GeneralUtils.getMinecraft().level.addEntity(p);

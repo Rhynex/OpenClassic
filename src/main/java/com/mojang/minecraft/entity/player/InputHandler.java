@@ -1,6 +1,6 @@
 package com.mojang.minecraft.entity.player;
 
-import com.mojang.minecraft.GameSettings;
+import com.mojang.minecraft.settings.GameSettings;
 
 public final class InputHandler {
 
@@ -11,7 +11,7 @@ public final class InputHandler {
 	public boolean flyDown = false;
 	private int flyDelay = 0;
 	public boolean toggleFly = false;
-	
+
 	private boolean[] keyStates = new boolean[10];
 	private GameSettings settings;
 
@@ -21,42 +21,42 @@ public final class InputHandler {
 
 	public final void setKeyState(int key, boolean pressed) {
 		byte index = -1;
-		
-		if (key == this.settings.forwardKey.key) {
+
+		if(key == this.settings.forwardKey.key) {
 			index = 0;
 		}
 
-		if (key == this.settings.backKey.key) {
+		if(key == this.settings.backKey.key) {
 			index = 1;
 		}
 
-		if (key == this.settings.leftKey.key) {
+		if(key == this.settings.leftKey.key) {
 			index = 2;
 		}
 
-		if (key == this.settings.rightKey.key) {
+		if(key == this.settings.rightKey.key) {
 			index = 3;
 		}
 
-		if (key == this.settings.jumpKey.key) {
+		if(key == this.settings.jumpKey.key) {
 			index = 4;
 		}
-		
-		if (key == this.settings.speedHackKey.key) {
+
+		if(key == this.settings.speedHackKey.key) {
 			index = 5;
 		}
-		
-		if (key == this.settings.flyDownKey.key) {
+
+		if(key == this.settings.flyDownKey.key) {
 			index = 6;
 		}
 
-		if (index >= 0) {
+		if(index >= 0) {
 			this.keyStates[index] = pressed;
 		}
 	}
 
 	public final void resetKeys() {
-		for (int index = 0; index < 10; index++) {
+		for(int index = 0; index < 10; index++) {
 			this.keyStates[index] = false;
 		}
 	}
@@ -65,31 +65,31 @@ public final class InputHandler {
 		if(this.flyDelay > 0) {
 			this.flyDelay--;
 		}
-		
+
 		this.xxa = 0;
 		this.yya = 0;
-		
-		if (this.keyStates[0]) {
+
+		if(this.keyStates[0]) {
 			this.yya--;
 		}
 
-		if (this.keyStates[1]) {
+		if(this.keyStates[1]) {
 			this.yya++;
 		}
 
-		if (this.keyStates[2]) {
+		if(this.keyStates[2]) {
 			this.xxa--;
 		}
 
-		if (this.keyStates[3]) {
+		if(this.keyStates[3]) {
 			this.xxa++;
 		}
-		
+
 		this.jumping = this.keyStates[4];
 		this.speed = this.keyStates[5];
 		this.flyDown = this.keyStates[6];
 	}
-	
+
 	public final void keyPress(int key) {
 		if(key == this.settings.jumpKey.key) {
 			if(this.flyDelay == 0) {

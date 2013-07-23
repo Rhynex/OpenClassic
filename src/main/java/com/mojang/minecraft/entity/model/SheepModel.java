@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity.model;
 
-
 public final class SheepModel extends AnimalModel {
 
 	public SheepModel() {

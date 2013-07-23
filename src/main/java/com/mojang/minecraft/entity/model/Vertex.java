@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity.model;
 
-
 public class Vertex {
 
 	public Vector vector;
@@ -22,9 +21,9 @@ public class Vertex {
 		this.u = u;
 		this.v = v;
 	}
-	
+
 	public Vertex create(float u, float v) {
 		return new Vertex(this, u, v);
 	}
-	
+
 }

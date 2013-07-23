@@ -3,7 +3,7 @@ package com.mojang.minecraft.entity.model;
 public final class Vector {
 
 	private static final float EPSILON = 0.0000001f;
-	
+
 	public float x;
 	public float y;
 	public float z;

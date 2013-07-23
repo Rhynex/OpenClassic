@@ -16,7 +16,7 @@ public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportM
 			GeneralUtils.getMinecraft().player.moveTo(message.getX(), message.getY(), message.getZ(), message.getYaw(), message.getPitch());
 		} else {
 			NetworkPlayer moving = GeneralUtils.getMinecraft().netPlayers.get(message.getPlayerId());
-			if (moving != null) {
+			if(moving != null) {
 				moving.teleport((short) (message.getX() * 32), (short) ((message.getY() * 32) - 22), (short) (message.getZ() * 32), message.getYaw(), message.getPitch());
 			}
 		}

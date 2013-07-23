@@ -7,7 +7,7 @@ import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.GameSettings;
+import com.mojang.minecraft.settings.GameSettings;
 
 public final class HacksScreen extends GuiScreen {
 
@@ -21,22 +21,22 @@ public final class HacksScreen extends GuiScreen {
 
 	public final void onOpen() {
 		this.clearWidgets();
-		for (int count = 0; count < this.settings.hacks; count++) {
+		for(int count = 0; count < this.settings.hacks; count++) {
 			this.attachWidget(new StateButton(count, this.getWidth() / 2 - 155 + count % 2 * 160, this.getHeight() / 6 + 24 * (count >> 1), 155, 20, this, this.settings.getHackName(count)));
 			this.getWidget(count, StateButton.class).setState(this.settings.getHackValue(count));
 		}
-		
+
 		this.attachWidget(new Button(100, this.getWidth() / 2 - 100, this.getHeight() / 6 + 168, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.isActive()) {
-			if (button.getId() < 100) {
+		if(button.isActive()) {
+			if(button.getId() < 100) {
 				this.settings.toggleHack(button.getId());
 				((StateButton) button).setState(this.settings.getHackValue(button.getId()));
 			}
 
-			if (button.getId() == 100) {
+			if(button.getId() == 100) {
 				OpenClassic.getClient().setCurrentScreen(this.parent);
 			}
 		}
@@ -48,7 +48,7 @@ public final class HacksScreen extends GuiScreen {
 		} else {
 			RenderHelper.getHelper().drawDefaultBG();
 		}
-		
+
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.hacks"), this.getWidth() / 2, 20);
 		super.render();
 	}

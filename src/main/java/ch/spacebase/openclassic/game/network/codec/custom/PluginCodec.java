@@ -20,7 +20,7 @@ public class PluginCodec extends MessageCodec<PluginMessage> {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		ChannelBufferUtils.writeString(buffer, message.getName());
 		ChannelBufferUtils.writeString(buffer, message.getVersion());
-		
+
 		return buffer;
 	}
 
@@ -30,5 +30,5 @@ public class PluginCodec extends MessageCodec<PluginMessage> {
 		String version = ChannelBufferUtils.readString(buffer);
 		return new PluginMessage(name, version);
 	}
-	
+
 }

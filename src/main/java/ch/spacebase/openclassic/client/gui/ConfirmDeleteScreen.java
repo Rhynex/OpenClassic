@@ -30,13 +30,13 @@ public class ConfirmDeleteScreen extends GuiScreen {
 	}
 
 	public void onButtonClick(Button button) {
-		if (button.getId() == 0) {
+		if(button.getId() == 0) {
 			try {
 				this.file.delete();
 			} catch(SecurityException e) {
 				e.printStackTrace();
 			}
-			
+
 			File file = new File(new File(GeneralUtils.getMinecraft().dir, "levels"), this.name + ".nbt");
 			if(file.exists()) {
 				try {
@@ -46,13 +46,13 @@ public class ConfirmDeleteScreen extends GuiScreen {
 				}
 			}
 		}
-		
+
 		OpenClassic.getClient().setCurrentScreen(this.parent);
 	}
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		
+
 		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.level"), this.file.getName().substring(0, this.file.getName().indexOf("."))), this.getWidth() / 2, (this.getHeight() / 2) - 32);
 		super.render();
 	}

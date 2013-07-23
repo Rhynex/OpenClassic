@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.PlayerPositionRotationMessage;
 
-
 public class PlayerPositionRotationCodec extends MessageCodec<PlayerPositionRotationMessage> {
 
 	public PlayerPositionRotationCodec() {
@@ -17,14 +16,14 @@ public class PlayerPositionRotationCodec extends MessageCodec<PlayerPositionRota
 	@Override
 	public ChannelBuffer encode(PlayerPositionRotationMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.buffer(9);
-		
+
 		buffer.writeByte(message.getPlayerId());
 		buffer.writeShort((short) (message.getXChange() * 32));
 		buffer.writeShort((short) (message.getYChange() * 32));
 		buffer.writeShort((short) (message.getZChange() * 32));
 		buffer.writeByte((byte) ((int) (message.getYaw() * 256 / 360) & 255));
 		buffer.writeByte((byte) ((int) (message.getPitch() * 256 / 360) & 255));
-		
+
 		return buffer;
 	}
 
@@ -36,7 +35,7 @@ public class PlayerPositionRotationCodec extends MessageCodec<PlayerPositionRota
 		float zChange = buffer.readShort() / 32;
 		float yaw = (buffer.readByte() * 360) / 256f;
 		float pitch = (buffer.readByte() * 360) / 256f;
-		
+
 		return new PlayerPositionRotationMessage(playerId, xChange, yChange, zChange, yaw, pitch);
 	}
 

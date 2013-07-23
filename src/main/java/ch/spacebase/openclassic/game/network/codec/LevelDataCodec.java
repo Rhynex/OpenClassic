@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.LevelDataMessage;
 
-
 public class LevelDataCodec extends MessageCodec<LevelDataMessage> {
 
 	public LevelDataCodec() {
@@ -17,24 +16,24 @@ public class LevelDataCodec extends MessageCodec<LevelDataMessage> {
 	@Override
 	public ChannelBuffer encode(LevelDataMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		
+
 		buffer.writeShort(message.getLength());
 		buffer.writeBytes(message.getData());
 		buffer.writeByte(message.getPercent());
-		
+
 		return buffer;
 	}
 
 	@Override
 	public LevelDataMessage decode(ChannelBuffer buffer) throws IOException {
 		short length = buffer.readShort();
-		
+
 		byte[] data = new byte[1024];
 		buffer.readBytes(data);
-		
+
 		byte percent = buffer.readByte();
-		
+
 		return new LevelDataMessage(length, data, percent);
 	}
-	
+
 }

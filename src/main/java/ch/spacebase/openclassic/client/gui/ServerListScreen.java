@@ -38,12 +38,12 @@ public class ServerListScreen extends GuiScreen {
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.getId() == 1) {
+		if(button.getId() == 1) {
 			OpenClassic.getClient().setCurrentScreen(new FavoriteServersScreen(this));
 		}
 
-		if (button.getId() == 2) {
-			if (this.select) {
+		if(button.getId() == 2) {
+			if(this.select) {
 				this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 				this.select = false;
 			} else {
@@ -52,11 +52,11 @@ public class ServerListScreen extends GuiScreen {
 			}
 		}
 
-		if (button.getId() == 3) {
+		if(button.getId() == 3) {
 			OpenClassic.getClient().setCurrentScreen(new ServerURLScreen(this));
 		}
-		
-		if (button.getId() == 4) {
+
+		if(button.getId() == 4) {
 			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
@@ -64,8 +64,8 @@ public class ServerListScreen extends GuiScreen {
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
 		Server server = SessionData.servers.get(list.getCurrentPage() * 5 + button.getId());
-		
-		if (this.select) {
+
+		if(this.select) {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.select = false;
 			SessionData.favorites.put(server.name, server.getUrl());
@@ -77,7 +77,7 @@ public class ServerListScreen extends GuiScreen {
 	private void joinServer(Server server) {
 		if(server != null) {
 			Minecraft mc = GeneralUtils.getMinecraft();
-			
+
 			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 			OpenClassic.getClient().getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));

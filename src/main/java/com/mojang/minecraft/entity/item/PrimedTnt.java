@@ -39,9 +39,9 @@ public class PrimedTnt extends Entity {
 	}
 
 	public void hurt(Entity damager, int health) {
-		if (!this.removed) {
+		if(!this.removed) {
 			super.hurt(damager, health);
-			if (damager instanceof LocalPlayer) {
+			if(damager instanceof LocalPlayer) {
 				this.remove();
 				this.level.addEntity(new Item(this.level, this.x, this.y, this.z, VanillaBlock.TNT.getId()));
 			}
@@ -61,20 +61,20 @@ public class PrimedTnt extends Entity {
 		this.xd *= 0.98F;
 		this.yd *= 0.98F;
 		this.zd *= 0.98F;
-		if (this.onGround) {
+		if(this.onGround) {
 			this.xd *= 0.7F;
 			this.zd *= 0.7F;
 			this.yd *= -0.5F;
 		}
 
-		if (!this.defused) {
-			if (this.life-- > 0) {
+		if(!this.defused) {
+			if(this.life-- > 0) {
 				this.level.particleEngine.spawnParticle(new SmokeParticle(this.level, this.x, this.y + 0.6F, this.z));
 			} else {
 				this.remove();
 				Random rand = new Random();
 				this.level.explode(null, this.x, this.y, this.z, 4);
-				for (int count = 0; count < 100; count++) {
+				for(int count = 0; count < 100; count++) {
 					float ox = (float) rand.nextGaussian();
 					float oy = (float) rand.nextGaussian();
 					float oz = (float) rand.nextGaussian();
@@ -90,8 +90,8 @@ public class PrimedTnt extends Entity {
 	}
 
 	public void playerTouch(LocalPlayer player) {
-		if (this.defused) {
-			if (player.addResource(VanillaBlock.TNT.getId())) {
+		if(this.defused) {
+			if(player.addResource(VanillaBlock.TNT.getId())) {
 				this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 				this.remove();
 			}
@@ -105,11 +105,11 @@ public class PrimedTnt extends Entity {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glColor4f(1, 1, 1, ((this.life / 4 + 1) % 2) * 0.4F);
-		if (this.life <= 16) {
+		if(this.life <= 16) {
 			GL11.glColor4f(1, 1, 1, ((this.life + 1) % 2) * 0.6F);
 		}
 
-		if (this.life <= 2) {
+		if(this.life <= 2) {
 			GL11.glColor4f(1, 1, 1, 0.9F);
 		}
 

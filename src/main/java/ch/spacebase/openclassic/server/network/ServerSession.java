@@ -33,10 +33,10 @@ public class ServerSession extends ClassicSession {
 	}
 
 	public boolean tick() {
-		if (this.pendingRemoval) {
+		if(this.pendingRemoval) {
 			return false;
 		}
-		
+
 		return super.tick();
 	}
 
@@ -47,11 +47,11 @@ public class ServerSession extends ClassicSession {
 				message = new BlockChangeMessage(((BlockChangeMessage) message).getX(), ((BlockChangeMessage) message).getY(), ((BlockChangeMessage) message).getZ(), VanillaBlock.STONE.getId());
 			}
 		}
-		
+
 		if(!this.canSendPlayerMessage(message, this.getPlayer())) return;
 		super.send(message);
 	}
-	
+
 	@Override
 	public boolean sendCustomMessages() {
 		return ((ServerPlayer) this.getPlayer()).hasCustomClient();
@@ -65,7 +65,7 @@ public class ServerSession extends ClassicSession {
 		} else if(message instanceof PlayerSpawnMessage && ((PlayerSpawnMessage) message).getPlayerId() != -1 && !player.canSee(OpenClassic.getServer().getPlayer(((PlayerSpawnMessage) message).getPlayerId()))) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -75,13 +75,13 @@ public class ServerSession extends ClassicSession {
 			if(event.isCancelled()) {
 				return;
 			}
-			
+
 			EventManager.callEvent(new PlayerQuitEvent(this.getPlayer(), this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
 			OpenClassic.getServer().broadcastMessage(event.getMessage());
 		} else {
 			OpenClassic.getLogger().info(this.getAddress() + " disconnected by server: \"" + reason + "\"");
 		}
-		
+
 		this.channel.write(new PlayerDisconnectMessage(reason)).addListener(ChannelFutureListener.CLOSE);
 		this.disconnectMsgSent = true;
 	}
@@ -91,11 +91,11 @@ public class ServerSession extends ClassicSession {
 	}
 
 	public void dispose() {
-		if (this.getPlayer() != null) {
+		if(this.getPlayer() != null) {
 			((ServerPlayer) this.getPlayer()).destroy();
 		}
-		
+
 		super.dispose();
 	}
-	
+
 }

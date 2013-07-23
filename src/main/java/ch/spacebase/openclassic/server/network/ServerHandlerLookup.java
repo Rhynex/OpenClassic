@@ -27,7 +27,7 @@ public class ServerHandlerLookup extends HandlerLookup {
 			this.bind(PlayerSetBlockMessage.class, PlayerSetBlockMessageHandler.class);
 			this.bind(PlayerTeleportMessage.class, PlayerTeleportMessageHandler.class);
 			this.bind(PlayerChatMessage.class, PlayerChatMessageHandler.class);
-			
+
 			// Custom
 			this.bind(GameInfoMessage.class, GameInfoMessageHandler.class);
 			this.bind(KeyChangeMessage.class, KeyChangeMessageHandler.class);
@@ -38,5 +38,5 @@ public class ServerHandlerLookup extends HandlerLookup {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

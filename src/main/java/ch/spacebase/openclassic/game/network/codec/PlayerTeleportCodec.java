@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 
-
 public class PlayerTeleportCodec extends MessageCodec<PlayerTeleportMessage> {
 
 	public PlayerTeleportCodec() {
@@ -17,14 +16,14 @@ public class PlayerTeleportCodec extends MessageCodec<PlayerTeleportMessage> {
 	@Override
 	public ChannelBuffer encode(PlayerTeleportMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.buffer(9);
-		
+
 		buffer.writeByte(message.getPlayerId());
 		buffer.writeShort((short) (message.getX() * 32));
 		buffer.writeShort((short) (message.getY() * 32));
 		buffer.writeShort((short) (message.getZ() * 32));
 		buffer.writeByte((byte) ((int) (message.getYaw() * 256 / 360) & 255));
 		buffer.writeByte((byte) ((int) (message.getPitch() * 256 / 360) & 255));
-		
+
 		return buffer;
 	}
 
@@ -36,7 +35,7 @@ public class PlayerTeleportCodec extends MessageCodec<PlayerTeleportMessage> {
 		float z = buffer.readShort() / 32;
 		float yaw = (buffer.readByte() * 360) / 256f;
 		float pitch = (buffer.readByte() * 360) / 256f;
-		
+
 		return new PlayerTeleportMessage(playerId, x, y, z, yaw, pitch);
 	}
 

@@ -33,7 +33,7 @@ public final class ModelPart {
 		x -= offset;
 		y -= offset;
 		z -= offset;
-		if (this.mirror) {
+		if(this.mirror) {
 			offset = x2;
 			x2 = x;
 			x = offset;
@@ -61,11 +61,11 @@ public final class ModelPart {
 		this.quads[3] = new Quad(new Vertex[] { v2, v3, v7, v6 }, this.u + depth + width, this.v, this.u + depth + width + width, this.v + depth);
 		this.quads[4] = new Quad(new Vertex[] { v1, v0, v3, v2 }, this.u + depth, this.v + depth, this.u + depth + width, this.v + depth + height);
 		this.quads[5] = new Quad(new Vertex[] { v4, v5, v6, v7 }, this.u + depth + width + depth, this.v + depth, this.u + depth + width + depth + width, this.v + depth + height);
-		if (this.mirror) {
-			for (int q = 0; q < this.quads.length; q++) {
+		if(this.mirror) {
+			for(int q = 0; q < this.quads.length; q++) {
 				Quad quad = this.quads[q];
 				Vertex[] vecs = new Vertex[quad.vertices.length];
-				for (int vert = 0; vert < quad.vertices.length; vert++) {
+				for(int vert = 0; vert < quad.vertices.length; vert++) {
 					vecs[vert] = quad.vertices[quad.vertices.length - vert - 1];
 				}
 
@@ -82,13 +82,13 @@ public final class ModelPart {
 	}
 
 	public final void render(float scale) {
-		if (this.render) {
-			if (!this.hasList) {
+		if(this.render) {
+			if(!this.hasList) {
 				this.generateList(scale);
 			}
 
-			if (this.pitch == 0 && this.yaw == 0 && this.roll == 0) {
-				if (this.x == 0 && this.y == 0 && this.z == 0) {
+			if(this.pitch == 0 && this.yaw == 0 && this.roll == 0) {
+				if(this.x == 0 && this.y == 0 && this.z == 0) {
 					GL11.glCallList(this.list);
 				} else {
 					GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
@@ -98,15 +98,15 @@ public final class ModelPart {
 			} else {
 				GL11.glPushMatrix();
 				GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
-				if (this.roll != 0) {
+				if(this.roll != 0) {
 					GL11.glRotatef(this.roll * 57.295776F, 0.0F, 0.0F, 1.0F);
 				}
 
-				if (this.yaw != 0) {
+				if(this.yaw != 0) {
 					GL11.glRotatef(this.yaw * 57.295776F, 0.0F, 1.0F, 0.0F);
 				}
 
-				if (this.pitch != 0) {
+				if(this.pitch != 0) {
 					GL11.glRotatef(this.pitch * 57.295776F, 1.0F, 0.0F, 0.0F);
 				}
 
@@ -120,13 +120,13 @@ public final class ModelPart {
 		this.list = GL11.glGenLists(1);
 		GL11.glNewList(this.list, 4864);
 		GL11.glBegin(GL11.GL_QUADS);
-		for (int q = 0; q < this.quads.length; q++) {
+		for(int q = 0; q < this.quads.length; q++) {
 			Quad quad = this.quads[q];
 			Vector min = quad.vertices[1].vector.subtract(quad.vertices[0].vector).normalize();
 			Vector max = quad.vertices[1].vector.subtract(quad.vertices[2].vector).normalize();
 			Vector normal = (new Vector(min.y * max.z - min.z * max.y, min.z * max.x - min.x * max.z, min.x * max.y - min.y * max.x)).normalize();
 			GL11.glNormal3f(normal.x, normal.y, normal.z);
-			for (int vertex = 0; vertex < 4; vertex++) {
+			for(int vertex = 0; vertex < 4; vertex++) {
 				Vertex vert = quad.vertices[vertex];
 				GL11.glTexCoord2f(vert.u, vert.v);
 				GL11.glVertex3f(vert.vector.x * scale, vert.vector.y * scale, vert.vector.z * scale);

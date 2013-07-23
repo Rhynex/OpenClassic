@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity.model;
 
-
 public final class Quad {
 
 	public Vertex[] vertices;

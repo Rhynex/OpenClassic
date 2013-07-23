@@ -13,7 +13,7 @@ public class ClientInfo {
 	private String version;
 	private String language = "";
 	private List<RemotePluginInfo> plugins = new ArrayList<RemotePluginInfo>();
-	
+
 	public ClientInfo(Player player) {
 		this.player = player;
 	}
@@ -41,17 +41,17 @@ public class ClientInfo {
 	public void addPlugin(RemotePluginInfo info) {
 		this.plugins.add(info);
 	}
-	
+
 	public List<RemotePluginInfo> getPlugins() {
 		return this.plugins;
 	}
-	
+
 	public String getLanguage() {
 		return this.language;
 	}
-	
+
 	public void setLanguage(String language) {
 		this.language = language;
 	}
-	
+
 }

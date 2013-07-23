@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.api.util.GuiTextures;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
-
 public final class ClientProgressBar implements ProgressBar {
 
 	private String text = "";
@@ -22,17 +21,17 @@ public final class ClientProgressBar implements ProgressBar {
 	public String getTitle() {
 		return this.title;
 	}
-	
+
 	@Override
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	
+
 	@Override
 	public String getSubtitle() {
 		return this.subtitle;
 	}
-	
+
 	@Override
 	public void setSubtitle(String subtitle) {
 		this.subtitle = subtitle;
@@ -42,7 +41,7 @@ public final class ClientProgressBar implements ProgressBar {
 	public String getText() {
 		return this.text;
 	}
-	
+
 	@Override
 	public void setText(String text) {
 		this.text = text;
@@ -52,7 +51,7 @@ public final class ClientProgressBar implements ProgressBar {
 	public int getProgress() {
 		return this.progress;
 	}
-	
+
 	@Override
 	public void setProgress(int progress) {
 		this.progress = progress;
@@ -73,17 +72,17 @@ public final class ClientProgressBar implements ProgressBar {
 			this.text = "";
 		}
 	}
-	
+
 	@Override
 	public void render() {
 		this.render(true);
 	}
-	
+
 	public void render(boolean fresh) {
 		if(!Thread.currentThread().getName().equalsIgnoreCase("Client-Main")) {
 			return;
 		}
-		
+
 		if(this.isVisible()) {
 			int x = ClientRenderHelper.getHelper().getGuiWidth();
 			int sy = ClientRenderHelper.getHelper().getGuiHeight();
@@ -97,7 +96,7 @@ public final class ClientProgressBar implements ProgressBar {
 				GL11.glLoadIdentity();
 				GL11.glTranslatef(0, 0, -200);
 			}
-			
+
 			ClientRenderHelper.getHelper().drawDefaultBG();
 			int width = RenderHelper.getHelper().getGuiWidth();
 			int height = RenderHelper.getHelper().getGuiHeight();
@@ -114,12 +113,12 @@ public final class ClientProgressBar implements ProgressBar {
 			}
 		}
 	}
-	
+
 	@Override
 	public void renderBar() {
 		this.renderBar(true);
 	}
-	
+
 	public void renderBar(boolean fresh) {
 		int width = RenderHelper.getHelper().getGuiWidth();
 		int height = RenderHelper.getHelper().getGuiHeight();
@@ -145,5 +144,5 @@ public final class ClientProgressBar implements ProgressBar {
 			Display.update();
 		}
 	}
-	
+
 }

@@ -29,5 +29,5 @@ public class LevelColorCodec extends MessageCodec<LevelColorMessage> {
 		int value = buffer.readInt();
 		return new LevelColorMessage(type, value);
 	}
-	
+
 }

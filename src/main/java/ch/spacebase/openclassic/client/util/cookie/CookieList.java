@@ -15,17 +15,17 @@ public class CookieList extends CookieHandler {
 
 	public void put(URI paramURI, Map<String, List<String>> paramMap) throws IOException {
 		List<String> cookies = paramMap.get("Set-Cookie");
-		if (cookies != null) {
-			for (String str : cookies) {
+		if(cookies != null) {
+			for(String str : cookies) {
 				Cookie cookie = new Cookie(paramURI, str);
 
-				for (Cookie c : this.cookieJar) {
-					if (c != null && cookie.uriMatches(c.getURI()) && cookie.getName().equals(c.getName())) {
+				for(Cookie c : this.cookieJar) {
+					if(c != null && cookie.uriMatches(c.getURI()) && cookie.getName().equals(c.getName())) {
 						this.cookieJar.remove(c);
 						break;
 					}
 				}
-				
+
 				this.cookieJar.add(cookie);
 			}
 		}
@@ -33,22 +33,22 @@ public class CookieList extends CookieHandler {
 
 	public Map<String, List<String>> get(URI uri, Map<String, List<String>> responseHeader) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		for (Cookie cookie : this.cookieJar) {
-			if (cookie.hasExpired()) {
+		for(Cookie cookie : this.cookieJar) {
+			if(cookie.hasExpired()) {
 				this.cookieJar.remove(cookie);
-			} else if (cookie.matches(uri)) {
-				if (sb.length() > 0) {
+			} else if(cookie.matches(uri)) {
+				if(sb.length() > 0) {
 					sb.append(", ");
 				}
-				
+
 				sb.append(cookie.toString());
 			}
 		}
-		
+
 		List<String> cookies;
 		Map<String, List<String>> result = new HashMap<String, List<String>>(responseHeader);
 
-		if (sb.length() > 0) {
+		if(sb.length() > 0) {
 			cookies = Collections.singletonList(sb.toString());
 			result.put("Cookie", cookies);
 		}
@@ -59,15 +59,15 @@ public class CookieList extends CookieHandler {
 	public Cookie getCookie(String uri, String name) {
 		try {
 			return getCookie(new URI(uri), name);
-		} catch (URISyntaxException e) {
+		} catch(URISyntaxException e) {
 			System.err.println("URI syntax exception: " + e);
 		}
 		return null;
 	}
 
 	public Cookie getCookie(URI uri, String name) {
-		for (Cookie localCookie : this.cookieJar) {
-			if (localCookie.isEquivalent(uri, name)) {
+		for(Cookie localCookie : this.cookieJar) {
+			if(localCookie.isEquivalent(uri, name)) {
 				return localCookie;
 			}
 		}

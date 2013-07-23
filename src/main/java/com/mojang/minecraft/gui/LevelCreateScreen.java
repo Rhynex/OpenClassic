@@ -23,7 +23,7 @@ public final class LevelCreateScreen extends GuiScreen {
 
 	public final void onOpen() {
 		this.widget = new TextBox(0, this.getWidth() / 2 - 100, this.getHeight() / 2 - 45, this, 30);
-		
+
 		this.clearWidgets();
 		this.attachWidget(new StateButton(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 48, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")));
 		this.getWidget(0, StateButton.class).setState("normal");
@@ -32,26 +32,26 @@ public final class LevelCreateScreen extends GuiScreen {
 		this.attachWidget(new Button(3, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.huge")));
 		this.attachWidget(new Button(4, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
 		this.attachWidget(this.widget);
-		
+
 		this.getWidget(1, Button.class).setActive(false);
 		this.getWidget(2, Button.class).setActive(false);
 		this.getWidget(3, Button.class).setActive(false);
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.isActive()) {
+		if(button.isActive()) {
 			Minecraft mc = GeneralUtils.getMinecraft();
-			
+
 			if(button.getId() == 0) {
 				this.type++;
 				if(this.type >= OpenClassic.getGame().getGenerators().size()) {
 					this.type = 0;
 				}
-				
+
 				((StateButton) button).setState(OpenClassic.getGame().getGenerators().keySet().toArray(new String[OpenClassic.getGame().getGenerators().keySet().size()])[this.type]);
 			}
-			
-			if ((button.getId() == 1 || button.getId() == 2 || button.getId() == 3) && this.widget.getText().trim().length() > 0) {
+
+			if((button.getId() == 1 || button.getId() == 2 || button.getId() == 3) && this.widget.getText().trim().length() > 0) {
 				mc.levelName = this.widget.getText();
 				mc.levelSize = button.getId() - 1;
 				mc.initGame(OpenClassic.getGame().getGenerator(this.getWidget(0, StateButton.class).getState()));
@@ -60,7 +60,7 @@ public final class LevelCreateScreen extends GuiScreen {
 				mc.grabMouse();
 			}
 
-			if (button.getId() == 4) {
+			if(button.getId() == 4) {
 				mc.setCurrentScreen(this.parent);
 			}
 		}

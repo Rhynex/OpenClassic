@@ -18,7 +18,7 @@ public class SmokeParticle extends Particle {
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
+		if(this.age++ >= this.lifetime) {
 			this.remove();
 		}
 
@@ -28,7 +28,7 @@ public class SmokeParticle extends Particle {
 		this.xd *= 0.96F;
 		this.yd *= 0.96F;
 		this.zd *= 0.96F;
-		if (this.onGround) {
+		if(this.onGround) {
 			this.xd *= 0.7F;
 			this.zd *= 0.7F;
 		}

@@ -21,30 +21,30 @@ public final class GameOverScreen extends GuiScreen {
 
 	public final void onButtonClick(Button button) {
 		Minecraft mc = GeneralUtils.getMinecraft();
-		
-		if (button.getId() == 0) {
+
+		if(button.getId() == 0) {
 			for(int slot = 0; slot < 9; slot++) {
 				mc.player.inventory.slots[slot] = -1;
 				mc.player.inventory.count[slot] = 0;
 			}
-			
+
 			mc.player.airSupply = 20;
 			mc.player.arrows = 20;
 			mc.player.deathTime = 0;
 			mc.player.health = LocalPlayer.MAX_HEALTH;
 			mc.player.resetPos();
-			
+
 			OpenClassic.getClient().setCurrentScreen(null);
 		}
 
-		if (button.getId() == 1) {
+		if(button.getId() == 1) {
 			mc.stopGame(true);
 		}
 	}
 
 	public final void render() {
 		RenderHelper.getHelper().color(0, 0, this.getWidth(), this.getHeight(), 1615855616, -1602211792);
-		
+
 		GL11.glPushMatrix();
 		GL11.glScalef(2.0F, 2.0F, 2.0F);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.game-over.game-over"), this.getWidth() / 2 / 2, 30);

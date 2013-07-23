@@ -16,27 +16,27 @@ import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class MCForgeLevelFormat {
-	
+
 	public static Level load(ClassicLevel level, String file) throws IOException {
 		File f = new File(file);
 		FileInputStream in = new FileInputStream(f);
 		DataInputStream data = new DataInputStream(in);
-		
+
 		long magic = data.readLong();
-		if (magic != 7882256401675281664L) {
+		if(magic != 7882256401675281664L) {
 			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("level.format-mismatch"), "MCForge 6"));
 			System.out.println(magic);
 			IOUtils.closeQuietly(data);
 			return null;
 		}
-		
+
 		byte version = data.readByte();
-		if (version != 1) {
+		if(version != 1) {
 			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.unknown-version"));
 			IOUtils.closeQuietly(data);
 			return null;
 		}
-		
+
 		level.setName(file.substring(file.lastIndexOf("/") + 1, file.lastIndexOf(".")));
 		level.setAuthor("Unknown");
 		level.setCreationTime(System.currentTimeMillis());
@@ -50,44 +50,42 @@ public class MCForgeLevelFormat {
 		int z = Integer.parseInt(ldata.split("\\!")[2]);
 		level.setSpawn(new Position(level, x, y, z));
 		ldata = readString(data);
-		
+
 		// ====METADATA==//
 		int metadata = readInt(data);
-		for (int i = 0; i < metadata; i++) {
+		for(int i = 0; i < metadata; i++) {
 			readString(data); // key
 			readString(data); // value
 		}
 		// ====METADATA==//
-		
+
 		readInt(data); // block size
 		int bytesize = readInt(data);
 		byte[] compressed = new byte[bytesize];
 		data.readFully(compressed);
-		
+
 		byte[] decompressed = decompress(compressed);
 		byte[] blocks = new byte[width * depth * height];
-		for (int i = 0; i < decompressed.length; i++) {
+		for(int i = 0; i < decompressed.length; i++) {
 			blocks[i] = translateBlock(decompressed[i]);
 		}
-		
+
 		level.setData(width, depth, height, blocks);
 		IOUtils.closeQuietly(data);
-		
+
 		try {
 			f.delete();
-		} catch (SecurityException e) {
+		} catch(SecurityException e) {
 			e.printStackTrace();
 		}
-		
+
 		return level;
 	}
 
 	public static byte translateBlock(byte id) {
-		if (id <= 49)
-			return id;
+		if(id <= 49) return id;
 
-		if (id == 111)
-			return VanillaBlock.LOG.getId();
+		if(id == 111) return VanillaBlock.LOG.getId();
 
 		return VanillaBlock.AIR.getId();
 	}
@@ -99,7 +97,7 @@ public class MCForgeLevelFormat {
 			data.readFully(array);
 			String ldata = new String(array, "US-ASCII");
 			return ldata;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return "";
 		}
 	}
@@ -109,7 +107,7 @@ public class MCForgeLevelFormat {
 			byte[] temp = new byte[4];
 			data.readFully(temp);
 			return temp[0] | (temp[1] << 8) | (temp[2] << 16) | (temp[3] << 24);
-		} catch (IOException e) {
+		} catch(IOException e) {
 			e.printStackTrace();
 			return -1;
 		}
@@ -118,14 +116,13 @@ public class MCForgeLevelFormat {
 	private static int readEncodedInt(DataInputStream data) throws IOException {
 		int num = 0;
 		int num2 = 0;
-		while (num2 != 35) {
+		while(num2 != 35) {
 			byte b = data.readByte();
 			num |= (b & 127) << num2;
 			num2 += 7;
-			if ((b & 128) == 0)
-				return num;
+			if((b & 128) == 0) return num;
 		}
-		
+
 		throw new IOException("Format Exception");
 	}
 
@@ -139,7 +136,7 @@ public class MCForgeLevelFormat {
 			byte[] data = new byte[size];
 			gz.read(data);
 			return data;
-		} catch (IOException e) {
+		} catch(IOException e) {
 			e.printStackTrace();
 			return new byte[0];
 		} finally {
@@ -150,5 +147,5 @@ public class MCForgeLevelFormat {
 
 	private MCForgeLevelFormat() {
 	}
-	
+
 }

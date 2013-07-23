@@ -27,17 +27,17 @@ public class ConfirmDeleteServerScreen extends GuiScreen {
 	}
 
 	public void onButtonClick(Button button) {
-		if (button.getId() == 0) {
+		if(button.getId() == 0) {
 			SessionData.favorites.remove(name);
 			SessionData.saveFavorites();
 		}
-		
+
 		OpenClassic.getClient().setCurrentScreen(this.parent);
 	}
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		
+
 		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), this.getWidth() / 2, (this.getHeight() / 2) - 32);
 		super.render();
 	}

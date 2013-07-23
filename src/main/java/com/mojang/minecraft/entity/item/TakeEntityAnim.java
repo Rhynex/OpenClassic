@@ -25,7 +25,7 @@ public class TakeEntityAnim extends Entity {
 
 	public void tick() {
 		this.time++;
-		if (this.time >= 3) {
+		if(this.time >= 3) {
 			this.remove();
 		}
 

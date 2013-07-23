@@ -29,7 +29,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 public class ServerFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private JPanel contentPane;
 	public JTextPane log;
 	public JTextField commandBox;
@@ -49,28 +49,28 @@ public class ServerFrame extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
+
 		log = new JTextPane();
 		log.setFont(new Font("Dialog", Font.PLAIN, 12));
 		log.setEditable(false);
 		log.setEditorKit(new HTMLEditorKit());
 		log.setStyledDocument(new HTMLDocument());
-		//log.setLineWrap(true);
+		// log.setLineWrap(true);
 		JScrollPane scroll = new JScrollPane(log);
 		scroll.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		scroll.setBounds(5, 5, 545, 428);
 		contentPane.add(scroll);
-		//log.setColumns(10);
-		
+		// log.setColumns(10);
+
 		commandBox = new JTextField();
 		commandBox.setBounds(5, 437, 545, 27);
 		contentPane.add(commandBox);
 		commandBox.setColumns(10);
-		
+
 		final JList levels = new JList(this.levels);
 		levels.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		levels.setBounds(571, 212, 115, 195);
-		
+
 		final JPopupMenu menu = new JPopupMenu();
 		JMenuItem unload = new JMenuItem("Unload Level");
 		unload.addActionListener(new ActionListener() {
@@ -81,30 +81,31 @@ public class ServerFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		menu.add(unload);
 		levels.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				this.check(e);
 			}
+
 			public void mouseReleased(MouseEvent e) {
 				this.check(e);
 			}
 
 			public void check(MouseEvent e) {
-			    if (e.isPopupTrigger() && levels.locationToIndex(e.getPoint()) != -1 && levels.locationToIndex(e.getPoint()) < levels.getModel().getSize()) {
-			        levels.setSelectedIndex(levels.locationToIndex(e.getPoint()));
-			        menu.show(levels, e.getX(), e.getY());
-			    }
+				if(e.isPopupTrigger() && levels.locationToIndex(e.getPoint()) != -1 && levels.locationToIndex(e.getPoint()) < levels.getModel().getSize()) {
+					levels.setSelectedIndex(levels.locationToIndex(e.getPoint()));
+					menu.show(levels, e.getX(), e.getY());
+				}
 			}
 		});
-		
+
 		contentPane.add(levels);
-		
+
 		final JList players = new JList(this.players);
 		players.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		players.setBounds(571, 5, 115, 195);
-		
+
 		final JPopupMenu pmenu = new JPopupMenu();
 		JMenuItem kick = new JMenuItem("Kick Player");
 		kick.addActionListener(new ActionListener() {
@@ -115,45 +116,46 @@ public class ServerFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		pmenu.add(kick);
 		players.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				this.check(e);
 			}
+
 			public void mouseReleased(MouseEvent e) {
 				this.check(e);
 			}
 
 			public void check(MouseEvent e) {
-			    if (e.isPopupTrigger() && players.locationToIndex(e.getPoint()) != -1 && players.locationToIndex(e.getPoint()) < players.getModel().getSize()) {
-			        players.setSelectedIndex(players.locationToIndex(e.getPoint()));
-			        pmenu.show(players, e.getX(), e.getY());
-			    }
+				if(e.isPopupTrigger() && players.locationToIndex(e.getPoint()) != -1 && players.locationToIndex(e.getPoint()) < players.getModel().getSize()) {
+					players.setSelectedIndex(players.locationToIndex(e.getPoint()));
+					pmenu.show(players, e.getX(), e.getY());
+				}
 			}
 		});
-		
+
 		contentPane.add(players);
-		
+
 		JButton btnSend = new JButton("Send");
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(commandBox.getText() != null && commandBox.getText().length() > 0 && OpenClassic.getServer() != null) {
-					OpenClassic.getServer().processCommand(TextConsoleManager.SENDER, commandBox.getText());
+					OpenClassic.getServer().processCommand(ConsoleManager.SENDER, commandBox.getText());
 					commandBox.setText("");
 				}
 			}
 		});
-		
+
 		btnSend.setBounds(569, 445, 117, 19);
 		contentPane.add(btnSend);
 		getRootPane().setDefaultButton(btnSend);
-		
+
 		JButton btnSettings = new JButton("Settings");
 		btnSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				SettingsFrame frame = new SettingsFrame();
-				
+
 				frame.serverName.setText(OpenClassic.getGame().getConfig().getString("info.name"));
 				frame.motd.setText(OpenClassic.getGame().getConfig().getString("info.motd"));
 				frame.port.setText(String.valueOf(OpenClassic.getGame().getConfig().getInteger("options.port")));
@@ -172,13 +174,13 @@ public class ServerFrame extends JFrame {
 				frame.chckbxLiquid.setSelected(OpenClassic.getGame().getConfig().getBoolean("physics.liquid"));
 				frame.chckbxGrass.setSelected(OpenClassic.getGame().getConfig().getBoolean("physics.grass"));
 				frame.changePhysics();
-				
+
 				GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 				frame.setLocation((gd.getDisplayMode().getWidth() - frame.getWidth()) / 2, (gd.getDisplayMode().getHeight() - frame.getHeight()) / 2);
 				frame.setVisible(true);
 			}
 		});
-		
+
 		btnSettings.setBounds(569, 419, 117, 19);
 		contentPane.add(btnSettings);
 	}

@@ -21,7 +21,7 @@ public final class CreativeGameMode extends GameMode {
 
 	public final void apply(Level level) {
 		super.apply(level);
-		
+
 		level.removeAllNonCreativeModeEntities();
 		level.creativeMode = true;
 		level.growTrees = false;
@@ -29,12 +29,12 @@ public final class CreativeGameMode extends GameMode {
 
 	public final void apply(LocalPlayer player) {
 		int slot = 0;
-		for (BlockType block : Blocks.getBlocks()) {
+		for(BlockType block : Blocks.getBlocks()) {
 			if(slot >= 9) break;
 			if(block != null && block.isSelectable()) {
 				player.inventory.count[slot] = 1;
 				player.inventory.slots[slot] = block.getId();
-				
+
 				slot++;
 			}
 		}

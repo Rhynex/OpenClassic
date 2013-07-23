@@ -40,12 +40,12 @@ public class FavoriteServersScreen extends GuiScreen {
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.getId() == 1) {
+		if(button.getId() == 1) {
 			OpenClassic.getClient().setCurrentScreen(new AddFavoriteScreen(this));
 		}
-		
-		if (button.getId() == 2) {
-			if (this.delete) {
+
+		if(button.getId() == 2) {
+			if(this.delete) {
 				this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 				this.delete = false;
 			} else {
@@ -53,15 +53,15 @@ public class FavoriteServersScreen extends GuiScreen {
 				this.delete = true;
 			}
 		}
-		
-		if (button.getId() == 3) {
+
+		if(button.getId() == 3) {
 			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
 
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
-		if (this.delete) {
+		if(this.delete) {
 			OpenClassic.getClient().setCurrentScreen(new ConfirmDeleteServerScreen(this, button.getText()));
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.delete = false;
@@ -69,10 +69,10 @@ public class FavoriteServersScreen extends GuiScreen {
 			this.joinServer(SessionData.favorites.get(button.getText()));
 		}
 	}
-	
+
 	private void joinServer(String url) {
 		Minecraft mc = GeneralUtils.getMinecraft();
-		
+
 		mc.progressBar.setVisible(true);
 		mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 		mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
@@ -81,17 +81,17 @@ public class FavoriteServersScreen extends GuiScreen {
 		mc.progressBar.render();
 		String play = HTTPUtil.fetchUrl(url, "", Constants.MINECRAFT_URL_HTTPS + "classic/list");
 		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
-		
-		if (mppass.length() > 0) {
+
+		if(mppass.length() > 0) {
 			String user = HTTPUtil.getParameterOffPage(play, "username");
 			mc.data = new SessionData(user);
 			mc.data.key = mppass;
-			
+
 			try {
 				mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
 			} catch(UnsupportedEncodingException e) {
 			}
-			
+
 			mc.server = HTTPUtil.getParameterOffPage(play, "server");
 			try {
 				mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));
@@ -106,7 +106,7 @@ public class FavoriteServersScreen extends GuiScreen {
 			mc.progressBar.setVisible(false);
 			return;
 		}
-		
+
 		mc.progressBar.setVisible(false);
 		mc.initGame();
 		OpenClassic.getClient().setCurrentScreen(null);

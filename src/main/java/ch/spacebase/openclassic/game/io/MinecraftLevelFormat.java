@@ -84,19 +84,19 @@ public class MinecraftLevelFormat {
 		for(int index = 0; index < dat.length; index++) {
 			blocks[index] = dat[index];
 		}
-		
+
 		level.setSpawn(spawn);
 		level.setData(width, height, depth, blocks);
-		
+
 		try {
 			fi.delete();
 		} catch(SecurityException e) {
 			e.printStackTrace();
 		}
-		
+
 		return level;
 	}
-	
+
 	private MinecraftLevelFormat() {
 	}
 

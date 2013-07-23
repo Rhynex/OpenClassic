@@ -37,5 +37,5 @@ public class ClientInputHelper extends InputHelper {
 	public void enableRepeatEvents(boolean enabled) {
 		Keyboard.enableRepeatEvents(enabled);
 	}
-	
+
 }

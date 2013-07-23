@@ -22,23 +22,23 @@ public class LanguageScreen extends GuiScreen {
 		this.clearWidgets();
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this));
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
-	
+
 		List<String> languages = new ArrayList<String>();
 		for(String language : OpenClassic.getGame().getTranslator().getLanguageNames()) {
 			languages.add(language);
 		}
-		
+
 		this.getWidget(0, ButtonList.class).setContents(languages);
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.isActive()) {
-			if (button.getId() == 1) {
+		if(button.isActive()) {
+			if(button.getId() == 1) {
 				GeneralUtils.getMinecraft().setCurrentScreen(this.parent);
 			}
 		}
 	}
-	
+
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
 		if(button.isActive()) {

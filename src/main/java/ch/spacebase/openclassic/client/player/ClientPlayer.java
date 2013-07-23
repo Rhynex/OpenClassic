@@ -20,17 +20,17 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import com.zachsthings.onevent.EventManager;
 
 public class ClientPlayer implements Player {
-	
+
 	private com.mojang.minecraft.entity.player.LocalPlayer handle;
 	private byte placeMode = 0;
 	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
-	
+
 	public ClientPlayer(com.mojang.minecraft.entity.player.LocalPlayer handle) {
 		this.handle = handle;
 		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 	}
-	
+
 	@Override
 	public void sendMessage(String message) {
 		OpenClassic.getClient().getMainScreen().addChat(message);
@@ -111,12 +111,12 @@ public class ClientPlayer implements Player {
 		if(event.isCancelled()) {
 			return;
 		}
-		
+
 		if(event.getTo().getLevel() != null && this.handle.level != null && !this.handle.level.name.equals(event.getTo().getLevel().getName())) {
 			this.handle.setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
 			GeneralUtils.getMinecraft().setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
 		}
-		
+
 		this.handle.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
 	}
 
@@ -143,7 +143,7 @@ public class ClientPlayer implements Player {
 	public void disconnect(String reason) {
 		this.getSession().disconnect(reason);
 	}
-	
+
 	public com.mojang.minecraft.entity.player.LocalPlayer getHandle() {
 		return this.handle;
 	}

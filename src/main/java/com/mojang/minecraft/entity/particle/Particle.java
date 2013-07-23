@@ -57,7 +57,7 @@ public class Particle extends Entity {
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
+		if(this.age++ >= this.lifetime) {
 			this.remove();
 		}
 
@@ -66,7 +66,7 @@ public class Particle extends Entity {
 		this.xd *= 0.98F;
 		this.yd *= 0.98F;
 		this.zd *= 0.98F;
-		if (this.onGround) {
+		if(this.onGround) {
 			this.xd *= 0.7F;
 			this.zd *= 0.7F;
 		}

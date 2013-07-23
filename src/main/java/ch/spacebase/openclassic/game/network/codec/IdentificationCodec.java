@@ -8,7 +8,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
-
 public class IdentificationCodec extends MessageCodec<IdentificationMessage> {
 
 	public IdentificationCodec() {
@@ -18,12 +17,12 @@ public class IdentificationCodec extends MessageCodec<IdentificationMessage> {
 	@Override
 	public ChannelBuffer encode(IdentificationMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		
+
 		buffer.writeByte(message.getProtocolVersion());
 		ChannelBufferUtils.writeString(buffer, message.getUsernameOrServerName());
 		ChannelBufferUtils.writeString(buffer, message.getVerificationKeyOrMotd());
 		buffer.writeByte(message.getOpOrCustomClient());
-		
+
 		return buffer;
 	}
 
@@ -33,8 +32,8 @@ public class IdentificationCodec extends MessageCodec<IdentificationMessage> {
 		String username = ChannelBufferUtils.readString(buffer);
 		String verificationKey = ChannelBufferUtils.readString(buffer);
 		byte unused = buffer.readByte();
-		
+
 		return new IdentificationMessage(protocol, username, verificationKey, unused);
 	}
-	
+
 }

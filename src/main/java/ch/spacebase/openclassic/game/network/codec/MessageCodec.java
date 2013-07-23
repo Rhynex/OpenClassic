@@ -6,7 +6,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import ch.spacebase.openclassic.api.network.msg.Message;
 
-
 public abstract class MessageCodec<T extends Message> {
 
 	private final Class<T> clazz;
@@ -20,7 +19,7 @@ public abstract class MessageCodec<T extends Message> {
 	public final Class<T> getType() {
 		return clazz;
 	}
-	
+
 	public byte getOpcode() {
 		return this.opcode;
 	}
@@ -28,5 +27,5 @@ public abstract class MessageCodec<T extends Message> {
 	public abstract ChannelBuffer encode(T message) throws IOException;
 
 	public abstract T decode(ChannelBuffer buffer) throws IOException;
-	
+
 }

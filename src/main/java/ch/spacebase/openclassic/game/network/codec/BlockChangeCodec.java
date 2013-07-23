@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
 
-
 public class BlockChangeCodec extends MessageCodec<BlockChangeMessage> {
 
 	public BlockChangeCodec() {
@@ -17,12 +16,12 @@ public class BlockChangeCodec extends MessageCodec<BlockChangeMessage> {
 	@Override
 	public ChannelBuffer encode(BlockChangeMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.buffer(7);
-		
+
 		buffer.writeShort(message.getX());
 		buffer.writeShort(message.getY());
 		buffer.writeShort(message.getZ());
 		buffer.writeByte(message.getBlock());
-		
+
 		return buffer;
 	}
 
@@ -32,8 +31,8 @@ public class BlockChangeCodec extends MessageCodec<BlockChangeMessage> {
 		short y = buffer.readShort();
 		short z = buffer.readShort();
 		byte type = buffer.readByte();
-		
+
 		return new BlockChangeMessage(x, y, z, type);
 	}
-	
+
 }

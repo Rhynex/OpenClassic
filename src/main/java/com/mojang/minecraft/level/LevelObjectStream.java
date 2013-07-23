@@ -25,7 +25,7 @@ public final class LevelObjectStream extends ObjectInputStream {
 		try {
 			ObjectStreamClass streamClass = super.readClassDescriptor();
 			return this.classes.contains(streamClass.getName()) ? ObjectStreamClass.lookup(Class.forName(streamClass.getName())) : streamClass;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 

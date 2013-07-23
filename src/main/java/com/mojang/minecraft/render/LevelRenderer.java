@@ -41,8 +41,8 @@ public final class LevelRenderer {
 	}
 
 	public final void refresh() {
-		if (this.chunkCache != null) {
-			for (int index = 0; index < this.chunkCache.length; index++) {
+		if(this.chunkCache != null) {
+			for(int index = 0; index < this.chunkCache.length; index++) {
 				this.chunkCache[index].dispose();
 			}
 		}
@@ -54,9 +54,9 @@ public final class LevelRenderer {
 		this.loadQueue = new Chunk[this.xChunks * this.zChunks * this.yChunks];
 		int listCount = 0;
 
-		for (int x = 0; x < this.xChunks; x++) {
-			for (int y = 0; y < this.zChunks; y++) {
-				for (int z = 0; z < this.yChunks; z++) {
+		for(int x = 0; x < this.xChunks; x++) {
+			for(int y = 0; y < this.zChunks; y++) {
+				for(int z = 0; z < this.yChunks; z++) {
 					this.chunkCache[(z * this.zChunks + y) * this.xChunks + x] = new Chunk(this.level, x << 4, y << 4, z << 4, 16, this.baseListId + listCount);
 					this.loadQueue[(z * this.zChunks + y) * this.xChunks + x] = this.chunkCache[(z * this.zChunks + y) * this.xChunks + x];
 					listCount += 2;
@@ -64,7 +64,7 @@ public final class LevelRenderer {
 			}
 		}
 
-		for (int x = 0; x < this.chunks.size(); x++) {
+		for(int x = 0; x < this.chunks.size(); x++) {
 			this.chunks.get(x).loaded = false;
 		}
 
@@ -73,20 +73,20 @@ public final class LevelRenderer {
 		GL11.glColor4f(0.5F, 0.5F, 0.5F, 1.0F);
 		float groundLevel = this.level.getGroundLevel();
 		int length = 128;
-		if (128 > this.level.width) {
+		if(128 > this.level.width) {
 			length = this.level.width;
 		}
 
-		if (length > this.level.depth) {
+		if(length > this.level.depth) {
 			length = this.level.depth;
 		}
 
 		int mult = 2048 / length;
 		Renderer.get().begin();
-		for (int x = -length * mult; x < this.level.width + length * mult; x += length) {
-			for (int z = -length * mult; z < this.level.depth + length * mult; z += length) {
+		for(int x = -length * mult; x < this.level.width + length * mult; x += length) {
+			for(int z = -length * mult; z < this.level.depth + length * mult; z += length) {
 				float y = groundLevel;
-				if (x >= 0 && z >= 0 && x < this.level.width && z < this.level.depth) {
+				if(x >= 0 && z >= 0 && x < this.level.width && z < this.level.depth) {
 					y = 0;
 				}
 
@@ -101,7 +101,7 @@ public final class LevelRenderer {
 		GL11.glColor3f(0.8F, 0.8F, 0.8F);
 		Renderer.get().begin();
 
-		for (int x = 0; x < this.level.width; x += length) {
+		for(int x = 0; x < this.level.width; x += length) {
 			Renderer.get().vertexuv(x, 0.0F, 0.0F, 0.0F, 0.0F);
 			Renderer.get().vertexuv((x + length), 0.0F, 0.0F, length, 0.0F);
 			Renderer.get().vertexuv((x + length), groundLevel, 0.0F, length, groundLevel);
@@ -113,7 +113,7 @@ public final class LevelRenderer {
 		}
 
 		GL11.glColor3f(0.6F, 0.6F, 0.6F);
-		for (int z = 0; z < this.level.depth; z += length) {
+		for(int z = 0; z < this.level.depth; z += length) {
 			Renderer.get().vertexuv(0.0F, groundLevel, z, 0.0F, 0.0F);
 			Renderer.get().vertexuv(0.0F, groundLevel, (z + length), length, 0.0F);
 			Renderer.get().vertexuv(0.0F, 0.0F, (z + length), length, groundLevel);
@@ -131,20 +131,20 @@ public final class LevelRenderer {
 		float waterLevel = this.level.getWaterLevel();
 		GL11.glBlendFunc(770, 771);
 		int len = 128;
-		if (len > this.level.width) {
+		if(len > this.level.width) {
 			len = this.level.width;
 		}
 
-		if (len > this.level.depth) {
+		if(len > this.level.depth) {
 			len = this.level.depth;
 		}
 
 		int mul = 2048 / len;
 		Renderer.get().begin();
-		for (int x = -len * mul; x < this.level.width + len * mul; x += len) {
-			for (int z = -len * mul; z < this.level.depth + len * mul; z += len) {
+		for(int x = -len * mul; x < this.level.width + len * mul; x += len) {
+			for(int z = -len * mul; z < this.level.depth + len * mul; z += len) {
 				float y = waterLevel - 0.05F;
-				if (x < 0 || z < 0 || x >= this.level.width || z >= this.level.depth) {
+				if(x < 0 || z < 0 || x >= this.level.width || z >= this.level.depth) {
 					Renderer.get().vertexuv(x, y, (z + len), 0.0F, len);
 					Renderer.get().vertexuv((x + len), y, (z + len), len, len);
 					Renderer.get().vertexuv((x + len), y, z, len, 0.0F);
@@ -168,11 +168,11 @@ public final class LevelRenderer {
 		float yDiff = player.y - this.lastLoadY;
 		float zDiff = player.z - this.lastLoadZ;
 		float sqDistance = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
-		if (sqDistance > 64) {
+		if(sqDistance > 64) {
 			this.lastLoadX = player.x;
 			this.lastLoadY = player.y;
 			this.lastLoadZ = player.z;
-			
+
 			try {
 				Arrays.sort(this.loadQueue, new ChunkDistanceComparator(player));
 			} catch(Exception e) {
@@ -181,14 +181,14 @@ public final class LevelRenderer {
 
 		int length = 0;
 
-		for (int index = 0; index < this.loadQueue.length; index++) {
+		for(int index = 0; index < this.loadQueue.length; index++) {
 			length = this.loadQueue[index].appendData(this.chunkDataCache, length, pass);
 		}
 
 		this.buffer.clear();
 		this.buffer.put(this.chunkDataCache, 0, length);
 		this.buffer.flip();
-		if (this.buffer.remaining() > 0) {
+		if(this.buffer.remaining() > 0) {
 			RenderHelper.getHelper().bindTexture("/terrain.png", true);
 			GL11.glCallLists(this.buffer);
 		}
@@ -203,35 +203,35 @@ public final class LevelRenderer {
 		x2 /= 16;
 		z2 /= 16;
 		y2 /= 16;
-		if (x1 < 0) {
+		if(x1 < 0) {
 			x1 = 0;
 		}
 
-		if (z1 < 0) {
+		if(z1 < 0) {
 			z1 = 0;
 		}
 
-		if (y1 < 0) {
+		if(y1 < 0) {
 			y1 = 0;
 		}
 
-		if (x2 > this.xChunks - 1) {
+		if(x2 > this.xChunks - 1) {
 			x2 = this.xChunks - 1;
 		}
 
-		if (z2 > this.zChunks - 1) {
+		if(z2 > this.zChunks - 1) {
 			z2 = this.zChunks - 1;
 		}
 
-		if (y2 > this.yChunks - 1) {
+		if(y2 > this.yChunks - 1) {
 			y2 = this.yChunks - 1;
 		}
 
-		for (int x = x1; x <= x2; x++) {
-			for (int z = z1; z <= z2; z++) {
-				for (int y = y1; y <= y2; y++) {
+		for(int x = x1; x <= x2; x++) {
+			for(int z = z1; z <= z2; z++) {
+				for(int y = y1; y <= y2; y++) {
 					Chunk chunk = this.chunkCache[(y * this.zChunks + z) * this.xChunks + x];
-					if (!chunk.loaded) {
+					if(!chunk.loaded) {
 						chunk.loaded = true;
 						this.chunks.add(this.chunkCache[(y * this.zChunks + z) * this.xChunks + x]);
 					}

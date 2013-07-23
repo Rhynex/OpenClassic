@@ -1,9 +1,9 @@
-package com.mojang.minecraft;
+package com.mojang.minecraft.phys;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.model.Vector;
 
-public final class MovingObjectPosition {
+public final class Intersection {
 
 	public boolean entityPos;
 	public int x;
@@ -13,7 +13,7 @@ public final class MovingObjectPosition {
 	public Vector blockPos;
 	public Entity entity;
 
-	public MovingObjectPosition(int x, int y, int z, int side, Vector blockPos) {
+	public Intersection(int x, int y, int z, int side, Vector blockPos) {
 		this.entityPos = false;
 		this.x = x;
 		this.y = y;
@@ -22,7 +22,7 @@ public final class MovingObjectPosition {
 		this.blockPos = new Vector(blockPos.x, blockPos.y, blockPos.z);
 	}
 
-	public MovingObjectPosition(Entity entity) {
+	public Intersection(Entity entity) {
 		this.entityPos = true;
 		this.entity = entity;
 	}

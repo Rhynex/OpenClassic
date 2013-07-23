@@ -44,24 +44,24 @@ public class GameMode {
 		if(!this.mc.isInMultiplayer() && EventManager.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.heldBlock.block)).isCancelled()) {
 			return;
 		}
-		
+
 		BlockType old = block.getType();
 		boolean success = this.mc.level.netSetTile(x, y, z, 0);
-		if (old != null && success) {
-			if (this.mc.isInMultiplayer()) {
+		if(old != null && success) {
+			if(this.mc.isInMultiplayer()) {
 				this.mc.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, false, (byte) this.mc.player.inventory.getSelected()));
 			} else if(old.getPhysics() != null) {
 				old.getPhysics().onBreak(block);
 			}
 
-			if (old.getStepSound() != StepSound.NONE) {
+			if(old.getStepSound() != StepSound.NONE) {
 				if(old.getStepSound() == StepSound.SAND) {
 					this.mc.level.playSound(StepSound.GRAVEL.getSound(), x, y, z, (StepSound.GRAVEL.getVolume() + 1.0F) / 2.0F, StepSound.GRAVEL.getPitch() * 0.8F);
 				} else {
 					this.mc.level.playSound(old.getStepSound().getSound(), x, y, z, (old.getStepSound().getVolume() + 1.0F) / 2.0F, old.getStepSound().getPitch() * 0.8F);
 				}
 			}
-			
+
 			ClientRenderHelper.getHelper().spawnDestructionParticles(old, this.mc.level, x, y, z, this.mc.particleManager);
 		}
 	}

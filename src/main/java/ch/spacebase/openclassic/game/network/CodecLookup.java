@@ -36,7 +36,7 @@ public final class CodecLookup {
 	private static MessageCodec<?>[] opcodeTable = new MessageCodec<?>[256];
 
 	private static Map<Class<? extends Message>, MessageCodec<?>> classTable = new HashMap<Class<? extends Message>, MessageCodec<?>>();
-	
+
 	static {
 		try {
 			bind(IdentificationCodec.class);
@@ -55,7 +55,7 @@ public final class CodecLookup {
 			bind(PlayerChatCodec.class);
 			bind(PlayerDisconnectCodec.class);
 			bind(PlayerOpCodec.class);
-			
+
 			// Custom
 			bind(GameInfoCodec.class);
 			bind(CustomBlockCodec.class);
@@ -70,7 +70,7 @@ public final class CodecLookup {
 			throw new ExceptionInInitializerError(e);
 		}
 	}
-	
+
 	private static <T extends Message, C extends MessageCodec<T>> void bind(Class<C> clazz) throws InstantiationException, IllegalAccessException {
 		MessageCodec<T> codec = clazz.newInstance();
 		opcodeTable[codec.getOpcode()] = codec;
@@ -88,5 +88,5 @@ public final class CodecLookup {
 
 	private CodecLookup() {
 	}
-	
+
 }

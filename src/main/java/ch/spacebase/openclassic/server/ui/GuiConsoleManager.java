@@ -45,7 +45,7 @@ public class GuiConsoleManager implements ConsoleManager {
 
 		Logger logger = Logger.getLogger("");
 
-		for (Handler handler : logger.getHandlers()) {
+		for(Handler handler : logger.getHandlers()) {
 			logger.removeHandler(handler);
 		}
 
@@ -62,7 +62,7 @@ public class GuiConsoleManager implements ConsoleManager {
 	public void setup() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 
@@ -81,7 +81,7 @@ public class GuiConsoleManager implements ConsoleManager {
 		message = message.replaceAll("&", "&amp;");
 		message = message.replaceAll("<", "&lt;");
 		message = message.replaceAll(">", "&gt;");
-		
+
 		message = message.replaceAll("&amp;0", "<font color='#000000'>");
 		message = message.replaceAll("&amp;1", "<font color='#0000AA'>");
 		message = message.replaceAll("&amp;2", "<font color='#00AA00'>");
@@ -98,80 +98,36 @@ public class GuiConsoleManager implements ConsoleManager {
 		message = message.replaceAll("&amp;d", "<font color='#FF55FF'>");
 		message = message.replaceAll("&amp;e", "<font color='#FFFF55'>");
 		message = message.replaceAll("&amp;f", "<font color='#000000'>");
-		
-		int colorCount = message.split("&amp;[0-9a-f]").length - 1;
-		for (int i = 0; i < colorCount; i++)
-			message += "</font>";
-		/* int index = 0;
-		while ((index = message.indexOf('&', index + 1)) != -1) {
-			String code = message.substring(index+1, index+2);
-			if(!code.matches("[0-9a-f]")) continue;
-			
-			int color = -1;
-			try {
-				color = Integer.parseInt(code, 16);
-			} catch (NumberFormatException nfe) {
-			}
 
-			if (color != -1) {
-				String replace = "";
-				switch (color) {
-				case 0:
-					replace = "<font color=000000>";
-					break;
-				case 1:
-					replace = "<font color=0000bf>";
-					break;
-				case 2:
-					replace = "<font color=00bf00>";
-					break;
-				case 3:
-					replace = "<font color=00bfbf>";
-					break;
-				case 4:
-					replace = "<font color=bf0000>";
-					break;
-				case 5:
-					replace = "<font color=bf00bf>";
-					break;
-				case 6:
-					replace = "<font color=bfbf00>";
-					break;
-				case 7:
-					replace = "<font color=bfbfbf>";
-					break;
-				case 8:
-					replace = "<font color=404040>";
-					break;
-				case 9:
-					replace = "<font color=4040ff>";
-					break;
-				case 10:
-					replace = "<font color=40ff40>";
-					break;
-				case 11:
-					replace = "<font color=40ffff>";
-					break;
-				case 12:
-					replace = "<font color=ff4040>";
-					break;
-				case 13:
-					replace = "<font color=ff40ff>";
-					break;
-				case 14:
-					replace = "<font color=ffff40>";
-					break;
-				case 15:
-					replace = "<font color=ffffff>";
-					break;
-				case -1:
-					break;
-				}
-				message = message.replaceFirst(message.substring(index, index+2), replace);
-			} else {
-				message = message.replaceFirst(message.substring(index, index), "");
-			}
-		} */
+		int colorCount = message.split("&amp;[0-9a-f]").length - 1;
+		for(int i = 0; i < colorCount; i++)
+			message += "</font>";
+		/*
+		 * int index = 0; while ((index = message.indexOf('&', index + 1)) !=
+		 * -1) { String code = message.substring(index+1, index+2);
+		 * if(!code.matches("[0-9a-f]")) continue; int color = -1; try { color =
+		 * Integer.parseInt(code, 16); } catch (NumberFormatException nfe) { }
+		 * if (color != -1) { String replace = ""; switch (color) { case 0:
+		 * replace = "<font color=000000>"; break; case 1: replace =
+		 * "<font color=0000bf>"; break; case 2: replace =
+		 * "<font color=00bf00>"; break; case 3: replace =
+		 * "<font color=00bfbf>"; break; case 4: replace =
+		 * "<font color=bf0000>"; break; case 5: replace =
+		 * "<font color=bf00bf>"; break; case 6: replace =
+		 * "<font color=bfbf00>"; break; case 7: replace =
+		 * "<font color=bfbfbf>"; break; case 8: replace =
+		 * "<font color=404040>"; break; case 9: replace =
+		 * "<font color=4040ff>"; break; case 10: replace =
+		 * "<font color=40ff40>"; break; case 11: replace =
+		 * "<font color=40ffff>"; break; case 12: replace =
+		 * "<font color=ff4040>"; break; case 13: replace =
+		 * "<font color=ff40ff>"; break; case 14: replace =
+		 * "<font color=ffff40>"; break; case 15: replace =
+		 * "<font color=ffffff>"; break; case -1: break; } message =
+		 * message.replaceFirst(message.substring(index, index+2), replace); }
+		 * else { message = message.replaceFirst(message.substring(index,
+		 * index), ""); } }
+		 */
 
 		return message;
 	}
@@ -194,35 +150,34 @@ public class GuiConsoleManager implements ConsoleManager {
 		public synchronized void publish(LogRecord record) {
 			String message = null;
 
-			if (!this.isLoggable(record))
-				return;
+			if(!this.isLoggable(record)) return;
 			try {
 				message = this.getFormatter().format(record);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				reportError(null, e, ErrorManager.FORMAT_FAILURE);
 			}
 
 			final String msg = message;
 			try {
-		        SwingUtilities.invokeLater(new Runnable() {
-		        	@Override
-		        	public void run() {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
 						try {
-							((HTMLEditorKit) frame.log.getEditorKit()).insertHTML((HTMLDocument) frame.log.getDocument(), frame.log.getDocument().getEndPosition().getOffset()-1, msg, 1, 0, null);
-						} catch (Exception e) {
+							((HTMLEditorKit) frame.log.getEditorKit()).insertHTML((HTMLDocument) frame.log.getDocument(), frame.log.getDocument().getEndPosition().getOffset() - 1, msg, 1, 0, null);
+						} catch(Exception e) {
 							e.printStackTrace();
 							System.err.println("Error appending text to console output: " + msg);
 						}
-		        	}
-			    });
-				
-		        SwingUtilities.invokeLater(new Runnable() {
-		        	@Override
-		        	public void run() {
-		        			frame.log.setCaretPosition(frame.log.getDocument().getLength());
-		        	}
-		        });
-			} catch (Exception ex) {
+					}
+				});
+
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						frame.log.setCaretPosition(frame.log.getDocument().getLength());
+					}
+				});
+			} catch(Exception ex) {
 				this.reportError(null, ex, ErrorManager.WRITE_FAILURE);
 			}
 
@@ -253,7 +208,7 @@ public class GuiConsoleManager implements ConsoleManager {
 			builder.append(formatOutput(formatMessage(record)));
 			builder.append('\n');
 
-			if (record.getThrown() != null) {
+			if(record.getThrown() != null) {
 				StringWriter writer = new StringWriter();
 				record.getThrown().printStackTrace(new PrintWriter(writer));
 				builder.append(writer.toString());

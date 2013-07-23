@@ -11,7 +11,7 @@ import org.apache.commons.lang3.Validate;
 public class Cookie {
 	private static DateFormat expiresFormat1 = new SimpleDateFormat("E, dd MMM yyyy k:m:s 'GMT'", Locale.US);
 	private static DateFormat expiresFormat2 = new SimpleDateFormat("E, dd-MMM-yyyy k:m:s 'GMT'", Locale.US);
-	
+
 	private String name;
 	private String value;
 	private URI uri;
@@ -28,40 +28,39 @@ public class Cookie {
 		this.path = "/";
 		this.domain = uri.getHost().toLowerCase();
 
-		for (int index = 1; index < elements.length; index++) {
+		for(int index = 1; index < elements.length; index++) {
 			data = elements[index].trim();
 			int equals = data.indexOf('=');
-			if (equals == -1) {
+			if(equals == -1) {
 				continue;
 			}
-			
+
 			String name = data.substring(0, equals);
 			String value = data.substring(equals + 1);
-			if (name.equalsIgnoreCase("domain")) {
+			if(name.equalsIgnoreCase("domain")) {
 				String host = uri.getHost();
-				if (host.equals(value)) {
+				if(host.equals(value)) {
 					this.domain = value.toLowerCase();
 				} else {
-					if (!value.startsWith(".")) {
+					if(!value.startsWith(".")) {
 						value = "." + value;
 					}
-					
+
 					host = host.substring(host.indexOf('.'));
 					Validate.isTrue(host.equalsIgnoreCase(value), "Trying to set foreign cookie");
 					this.domain = value.toLowerCase();
 				}
-			} else if (name.equalsIgnoreCase("path")) {
+			} else if(name.equalsIgnoreCase("path")) {
 				this.path = value;
 			} else {
-				if (!name.equalsIgnoreCase("expires"))
-					continue;
-				
+				if(!name.equalsIgnoreCase("expires")) continue;
+
 				try {
 					this.expires = expiresFormat1.parse(value);
-				} catch (Exception e) {
+				} catch(Exception e) {
 					try {
 						this.expires = expiresFormat2.parse(value);
-					} catch (Exception e1) {
+					} catch(Exception e1) {
 						System.err.println("Bad date format in header: " + value);
 					}
 				}
@@ -70,7 +69,7 @@ public class Cookie {
 	}
 
 	public boolean hasExpired() {
-		if (this.expires == null) {
+		if(this.expires == null) {
 			return false;
 		}
 		Date localDate = new Date();
@@ -90,35 +89,32 @@ public class Cookie {
 	}
 
 	public boolean domainMatches(String domain) {
-		if (domain.equalsIgnoreCase(this.domain))
-			return true;
+		if(domain.equalsIgnoreCase(this.domain)) return true;
 		return domain.endsWith("." + this.domain);
 	}
 
 	public boolean pathMatches(String path) {
-		if (path.equals(this.path))
-			return true;
+		if(path.equals(this.path)) return true;
 		return path.startsWith(this.path);
 	}
 
 	public boolean uriMatches(URI uri) {
-		if (!domainMatches(uri.getHost())) {
+		if(!domainMatches(uri.getHost())) {
 			return false;
 		}
 
 		String path = uri.getPath();
-		if ((path == null) || (path.length() == 0))
-			path = "/";
+		if((path == null) || (path.length() == 0)) path = "/";
 
 		return pathMatches(path);
 	}
 
 	public boolean isEquivalent(URI uri, String name) {
-		if (hasExpired()) {
+		if(hasExpired()) {
 			return false;
 		}
 
-		if (!uriMatches(uri)) {
+		if(!uriMatches(uri)) {
 			return false;
 		}
 
@@ -126,11 +122,11 @@ public class Cookie {
 	}
 
 	public boolean matches(URI uri) {
-		if (hasExpired()) {
+		if(hasExpired()) {
 			return false;
 		}
 		String path = uri.getPath();
-		if (path == null) {
+		if(path == null) {
 			path = "/";
 		}
 
@@ -141,7 +137,7 @@ public class Cookie {
 		StringBuilder sb = new StringBuilder(this.name);
 		sb.append("=");
 		sb.append(this.value);
-		
+
 		return sb.toString();
 	}
 }

@@ -22,5 +22,5 @@ public class Main {
 			MinecraftStandalone.start(args);
 		}
 	}
-	
+
 }

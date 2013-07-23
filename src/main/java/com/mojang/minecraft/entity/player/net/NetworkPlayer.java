@@ -43,8 +43,8 @@ public class NetworkPlayer extends Player {
 	public void aiStep() {
 		int steps = 5;
 
-		while (steps-- > 0 && this.moveQueue.size() > 10) {
-			if (this.moveQueue.size() > 0) {
+		while(steps-- > 0 && this.moveQueue.size() > 10) {
+			if(this.moveQueue.size() > 0) {
 				this.setPos(this.moveQueue.remove(0));
 			}
 		}
@@ -62,7 +62,7 @@ public class NetworkPlayer extends Player {
 		GL11.glNormal3f(1.0F, -1.0F, 1.0F);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glDisable(GL11.GL_COLOR_BUFFER_BIT);
-		if (this.name.equalsIgnoreCase("Notch")) {
+		if(this.name.equalsIgnoreCase("Notch")) {
 			fontRenderer.renderNoShadow(this.displayName, 0, 0, 16776960);
 		} else {
 			fontRenderer.renderNoShadow(this.displayName, 0, 0, 16777215);
@@ -87,20 +87,20 @@ public class NetworkPlayer extends Player {
 	public void queue(byte xChange, byte yChange, byte zChange, float yawChange, float pitchChange) {
 		float yaw = yawChange - this.yaw;
 		float pitch = pitchChange - this.pitch;
-		
-		while (yaw >= 180.0F) {
+
+		while(yaw >= 180.0F) {
 			yaw -= 360.0F;
 		}
 
-		while (yaw < -180.0F) {
+		while(yaw < -180.0F) {
 			yaw += 360.0F;
 		}
 
-		while (pitch >= 180.0F) {
+		while(pitch >= 180.0F) {
 			pitch -= 360.0F;
 		}
 
-		while (pitch < -180.0F) {
+		while(pitch < -180.0F) {
 			pitch += 360.0F;
 		}
 
@@ -116,19 +116,19 @@ public class NetworkPlayer extends Player {
 	public void teleport(short x, short y, short z, float yaw, float pitch) {
 		float newYaw = yaw - this.yaw;
 		float newPitch = pitch - this.pitch;
-		while (newYaw >= 180.0F) {
+		while(newYaw >= 180.0F) {
 			newYaw -= 360.0F;
 		}
 
-		while (newYaw < -180.0F) {
+		while(newYaw < -180.0F) {
 			newYaw += 360.0F;
 		}
 
-		while (newPitch >= 180.0F) {
+		while(newPitch >= 180.0F) {
 			newPitch -= 360.0F;
 		}
 
-		while (newPitch < -180.0F) {
+		while(newPitch < -180.0F) {
 			newPitch += 360.0F;
 		}
 
@@ -153,19 +153,19 @@ public class NetworkPlayer extends Player {
 		float newYaw = yaw - this.yaw;
 
 		float newPitch = pitch - this.pitch;
-		while (newYaw >= 180.0F) {
+		while(newYaw >= 180.0F) {
 			newYaw -= 360.0F;
 		}
 
-		while (newYaw < -180.0F) {
+		while(newYaw < -180.0F) {
 			newYaw += 360.0F;
 		}
 
-		while (newPitch >= 180.0F) {
+		while(newPitch >= 180.0F) {
 			newPitch -= 360.0F;
 		}
 
-		while (newPitch < -180.0F) {
+		while(newPitch < -180.0F) {
 			newPitch += 360.0F;
 		}
 
@@ -174,9 +174,9 @@ public class NetworkPlayer extends Player {
 		this.moveQueue.add(new PositionUpdate(newYaw, newPitch));
 		this.moveQueue.add(new PositionUpdate(yaw, pitch));
 	}
-	
+
 	public void clear() {
-		if (this.newTextureId >= 0 && this.textures != null) {
+		if(this.newTextureId >= 0 && this.textures != null) {
 			this.textures.textureImgs.remove(this.newTextureId);
 			this.textures.textureBuffer.clear();
 			this.textures.textureBuffer.put(this.newTextureId);

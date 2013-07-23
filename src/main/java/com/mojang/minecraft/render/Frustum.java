@@ -11,7 +11,7 @@ public final class Frustum {
 	public static float[] projectionMatrix = new float[16];
 	public static float[] modelviewMatrix = new float[16];
 	public static float[] clippingMatrix = new float[16];
-	
+
 	private static FloatBuffer projectionMatrixBuffer = BufferUtils.createFloatBuffer(16);
 	private static FloatBuffer modelviewMatrixBuffer = BufferUtils.createFloatBuffer(16);
 
@@ -79,10 +79,10 @@ public final class Frustum {
 		frustum[plane][2] /= len;
 		frustum[plane][3] /= len;
 	}
-	
+
 	public static boolean isBoxInFrustum(float x1, float y1, float z1, float x2, float y2, float z2) {
-		for (int plane = 0; plane < 6; plane++) {
-			if (frustum[plane][0] * x1 + frustum[plane][1] * y1 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y1 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x1 + frustum[plane][1] * y2 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y2 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x1 + frustum[plane][1] * y1 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y1 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x1 + frustum[plane][1] * y2 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y2 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F) {
+		for(int plane = 0; plane < 6; plane++) {
+			if(frustum[plane][0] * x1 + frustum[plane][1] * y1 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y1 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x1 + frustum[plane][1] * y2 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y2 + frustum[plane][2] * z1 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x1 + frustum[plane][1] * y1 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y1 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x1 + frustum[plane][1] * y2 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F && frustum[plane][0] * x2 + frustum[plane][1] * y2 + frustum[plane][2] * z2 + frustum[plane][3] <= 0.0F) {
 				return false;
 			}
 		}

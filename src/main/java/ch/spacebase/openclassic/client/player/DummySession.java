@@ -10,11 +10,11 @@ import ch.spacebase.openclassic.api.player.Session;
 public class DummySession implements Session {
 
 	private ClientPlayer player;
-	
+
 	public DummySession(ClientPlayer player) {
 		this.player = player;
 	}
-	
+
 	@Override
 	public State getState() {
 		return State.GAME;

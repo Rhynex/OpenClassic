@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity.mob.ai;
 
-
 public class JumpAttackAI extends BasicAttackAI {
 
 	public JumpAttackAI() {
@@ -8,7 +7,7 @@ public class JumpAttackAI extends BasicAttackAI {
 	}
 
 	protected void jumpFromGround() {
-		if (this.attackTarget == null) {
+		if(this.attackTarget == null) {
 			super.jumpFromGround();
 		} else {
 			this.mob.xd = 0.0F;

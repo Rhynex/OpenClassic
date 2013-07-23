@@ -19,14 +19,14 @@ public class ServerAudioManager implements AudioManager {
 
 	private final Map<String, List<URL>> sounds = new HashMap<String, List<URL>>();
 	private final Map<String, List<URL>> music = new HashMap<String, List<URL>>();
-	
+
 	@Override
 	public void registerSound(String sound, URL file, boolean included) {
 		Validate.notNull(sound, "Sound cannot be null.");
 		Validate.notNull(file, "URL cannot be null.");
 		if(!this.sounds.containsKey(sound)) this.sounds.put(sound, new ArrayList<URL>());
 		this.sounds.get(sound).add(file);
-		
+
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			player.getSession().send(new AudioRegisterMessage(sound, file.getPath(), included, false));
 		}
@@ -38,7 +38,7 @@ public class ServerAudioManager implements AudioManager {
 		Validate.notNull(file, "URL cannot be null.");
 		if(!this.music.containsKey(music)) this.music.put(music, new ArrayList<URL>());
 		this.music.get(music).add(file);
-		
+
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			player.getSession().send(new AudioRegisterMessage(music, file.getPath(), included, true));
 		}
@@ -49,7 +49,7 @@ public class ServerAudioManager implements AudioManager {
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			player.getSession().send(new AudioPlayMessage(sound, 0, 0, 0, volume, pitch, false, false));
 		}
-		
+
 		return true;
 	}
 
@@ -64,10 +64,10 @@ public class ServerAudioManager implements AudioManager {
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			player.getSession().send(new AudioPlayMessage(sound, x, y, z, volume, pitch, false, false));
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean playSound(Player player, String sound, float x, float y, float z, float volume, float pitch) {
 		player.getSession().send(new AudioPlayMessage(sound, x, y, z, volume, pitch, false, false));
@@ -79,26 +79,25 @@ public class ServerAudioManager implements AudioManager {
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			player.getSession().send(new AudioPlayMessage(music, 0, 0, 0, 1, 1, true, false));
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean playMusic(Player player, String music) {
 		player.getSession().send(new AudioPlayMessage(music, 0, 0, 0, 1, 1, true, false));
 		return true;
 	}
 
-
 	@Override
 	public boolean playMusic(String music, boolean loop) {
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			player.getSession().send(new AudioPlayMessage(music, 0, 0, 0, 1, 1, true, true));
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean playMusic(Player player, String music, boolean loop) {
 		player.getSession().send(new AudioPlayMessage(music, 0, 0, 0, 1, 1, true, true));
@@ -116,7 +115,7 @@ public class ServerAudioManager implements AudioManager {
 			player.getSession().send(new MusicStopMessage("all_music"));
 		}
 	}
-	
+
 	@Override
 	public void stopMusic(Player player) {
 		player.getSession().send(new MusicStopMessage("all_music"));
@@ -133,7 +132,7 @@ public class ServerAudioManager implements AudioManager {
 			player.getSession().send(new MusicStopMessage(music));
 		}
 	}
-	
+
 	@Override
 	public void stop(Player player, String music) {
 		player.getSession().send(new MusicStopMessage(music));

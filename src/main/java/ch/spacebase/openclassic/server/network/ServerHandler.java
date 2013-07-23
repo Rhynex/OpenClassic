@@ -71,7 +71,7 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 	public void exceptionCaught(ChannelHandlerContext context, ExceptionEvent event) {
 		Channel channel = event.getChannel();
 
-		if (channel.isOpen()) {
+		if(channel.isOpen()) {
 			if(!(event.getCause().getMessage() != null && (event.getCause().getMessage().equals("Connection reset by peer") || event.getCause().getMessage().equals("Connection timed out")))) OpenClassic.getLogger().log(Level.WARNING, "Exception caught, closing channel: " + channel + "...", event.getCause());
 			channel.close();
 		}

@@ -42,26 +42,26 @@ import com.mojang.minecraft.level.LevelIO;
 import com.zachsthings.onevent.EventManager;
 
 public class ClassicClient extends ClassicGame implements Client {
-	
+
 	private final Minecraft mc;
-	
+
 	public ClassicClient(Minecraft mc) {
 		super(GeneralUtils.getMinecraftDirectory());
 		RenderHelper.setHelper(new ClientRenderHelper());
 		InputHelper.setHelper(new ClientInputHelper());
 		this.mc = mc;
-		
+
 		// Init logger
 		ConsoleHandler console = new ConsoleHandler();
 		console.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss"), new EmptyMessageFormatter()));
 
 		Logger logger = Logger.getLogger("");
-		for (Handler handler : logger.getHandlers()) {
+		for(Handler handler : logger.getHandlers()) {
 			logger.removeHandler(handler);
 		}
 
 		logger.addHandler(console);
-		
+
 		try {
 			FileHandler handler = new FileHandler(this.getDirectory().getPath() + "/client.log");
 			handler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"), new EmptyMessageFormatter()));
@@ -70,20 +70,20 @@ public class ClassicClient extends ClassicGame implements Client {
 			OpenClassic.getLogger().severe(this.getTranslator().translate("log.create-fail"));
 			e.printStackTrace();
 		}
-		
+
 		System.setOut(new PrintStream(new LoggerOutputStream(java.util.logging.Level.INFO), true));
 		System.setErr(new PrintStream(new LoggerOutputStream(java.util.logging.Level.SEVERE), true));
 	}
-	
+
 	public void init() {
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
-		
+
 		this.registerExecutor(this, new ClientCommands());
 		this.registerGenerator("normal", new NormalGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
 
 		VanillaBlock.TNT.setPhysics(new TNTPhysics());
-		
+
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
 	}
@@ -114,7 +114,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(info.getSpawn() != null) {
 			level.openclassic.setSpawn(info.getSpawn());
 		}
-		
+
 		level.openclassic.data = new NBTData(level.name);
 		level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
 		this.mc.mode.prepareLevel(level);
@@ -144,7 +144,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(this.mc.level != null && this.mc.level.name.equals(name)) {
 			return this.mc.level.openclassic;
 		}
-		
+
 		VanillaBlock.registerAll();
 		com.mojang.minecraft.level.Level level = LevelIO.load(name);
 		if(level != null) {
@@ -155,7 +155,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		} else {
 			VanillaBlock.unregisterAll();
 		}
-		
+
 		return null;
 	}
 
@@ -164,16 +164,16 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(this.mc.level == null) return;
 		LevelIO.save(this.mc.level);
 	}
-	
+
 	@Override
 	public void exitLevel() {
 		this.exitLevel(true);
 	}
-	
+
 	@Override
 	public void exitLevel(boolean save) {
 		if(this.mc.level == null) return;
-		
+
 		if(save) this.saveLevel();
 		this.mc.stopGame(true);
 	}
@@ -182,7 +182,7 @@ public class ClassicClient extends ClassicGame implements Client {
 	public AudioManager getAudioManager() {
 		return this.mc.audio;
 	}
-	
+
 	public Minecraft getMinecraft() {
 		return this.mc;
 	}

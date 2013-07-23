@@ -8,19 +8,19 @@ import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.Model;
 
-import com.mojang.minecraft.MovingObjectPosition;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.phys.AABB;
+import com.mojang.minecraft.phys.Intersection;
 
 public class BlockUtils {
 
 	private static Random rand = new Random();
-	
-	public static final MovingObjectPosition clipSelection(int id, int x, int y, int z, Vector point, Vector other) {
+
+	public static final Intersection clipSelection(int id, int x, int y, int z, Vector point, Vector other) {
 		Model model = Blocks.fromId(id).getModel();
-		
+
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
 		BoundingBox box = model.getSelectionBox(0, 0, 0);
@@ -31,93 +31,93 @@ public class BlockUtils {
 		Vector y2 = point.getYIntersection(other, box.getY2());
 		Vector z1 = point.getZIntersection(other, box.getZ1());
 		Vector z2 = point.getZIntersection(other, box.getZ2());
-		if (!xIntersectsSelection(id, x1)) {
+		if(!xIntersectsSelection(id, x1)) {
 			x1 = null;
 		}
 
-		if (!xIntersectsSelection(id, x2)) {
+		if(!xIntersectsSelection(id, x2)) {
 			x2 = null;
 		}
 
-		if (!yIntersectsSelection(id, y1)) {
+		if(!yIntersectsSelection(id, y1)) {
 			y1 = null;
 		}
 
-		if (!yIntersectsSelection(id, y2)) {
+		if(!yIntersectsSelection(id, y2)) {
 			y2 = null;
 		}
 
-		if (!zIntersectsSelection(id, z1)) {
+		if(!zIntersectsSelection(id, z1)) {
 			z1 = null;
 		}
 
-		if (!zIntersectsSelection(id, z2)) {
+		if(!zIntersectsSelection(id, z2)) {
 			z2 = null;
 		}
 
 		Vector result = null;
-		if (x1 != null) {
+		if(x1 != null) {
 			result = x1;
 		}
 
-		if (x2 != null && (result == null || point.distance(x2) < point.distance(result))) {
+		if(x2 != null && (result == null || point.distance(x2) < point.distance(result))) {
 			result = x2;
 		}
 
-		if (y1 != null && (result == null || point.distance(y1) < point.distance(result))) {
+		if(y1 != null && (result == null || point.distance(y1) < point.distance(result))) {
 			result = y1;
 		}
 
-		if (y2 != null && (result == null || point.distance(y2) < point.distance(result))) {
+		if(y2 != null && (result == null || point.distance(y2) < point.distance(result))) {
 			result = y2;
 		}
 
-		if (z1 != null && (result == null || point.distance(z1) < point.distance(result))) {
+		if(z1 != null && (result == null || point.distance(z1) < point.distance(result))) {
 			result = z1;
 		}
 
-		if (z2 != null && (result == null || point.distance(z2) < point.distance(result))) {
+		if(z2 != null && (result == null || point.distance(z2) < point.distance(result))) {
 			result = z2;
 		}
 
-		if (result == null) {
+		if(result == null) {
 			return null;
 		} else {
 			byte side = -1;
-			if (result == x1) {
+			if(result == x1) {
 				side = 4;
 			}
 
-			if (result == x2) {
+			if(result == x2) {
 				side = 5;
 			}
 
-			if (result == y1) {
+			if(result == y1) {
 				side = 0;
 			}
 
-			if (result == y2) {
+			if(result == y2) {
 				side = 1;
 			}
 
-			if (result == z1) {
+			if(result == z1) {
 				side = 2;
 			}
 
-			if (result == z2) {
+			if(result == z2) {
 				side = 3;
 			}
 
-			return new MovingObjectPosition(x, y, z, side, result.add(x, y, z));
+			return new Intersection(x, y, z, side, result.add(x, y, z));
 		}
 	}
-	
-	public static final MovingObjectPosition clip(int id, int x, int y, int z, Vector point, Vector other) {
+
+	public static final Intersection clip(int id, int x, int y, int z, Vector point, Vector other) {
 		Model model = Blocks.fromId(id).getModel();
-		
+
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
-		
+
 		BoundingBox box = model.getCollisionBox(0, 0, 0);
 		if(box == null) return null;
 		Vector x1 = point.getXIntersection(other, box.getX1());
@@ -126,84 +126,84 @@ public class BlockUtils {
 		Vector y2 = point.getYIntersection(other, box.getY2());
 		Vector z1 = point.getZIntersection(other, box.getZ1());
 		Vector z2 = point.getZIntersection(other, box.getZ2());
-		if (!xIntersects(id, x1)) {
+		if(!xIntersects(id, x1)) {
 			x1 = null;
 		}
 
-		if (!xIntersects(id, x2)) {
+		if(!xIntersects(id, x2)) {
 			x2 = null;
 		}
 
-		if (!yIntersects(id, y1)) {
+		if(!yIntersects(id, y1)) {
 			y1 = null;
 		}
 
-		if (!yIntersects(id, y2)) {
+		if(!yIntersects(id, y2)) {
 			y2 = null;
 		}
 
-		if (!zIntersects(id, z1)) {
+		if(!zIntersects(id, z1)) {
 			z1 = null;
 		}
 
-		if (!zIntersects(id, z2)) {
+		if(!zIntersects(id, z2)) {
 			z2 = null;
 		}
 
 		Vector result = null;
-		if (x1 != null) {
+		if(x1 != null) {
 			result = x1;
 		}
 
-		if (x2 != null && (result == null || point.distance(x2) < point.distance(result))) {
+		if(x2 != null && (result == null || point.distance(x2) < point.distance(result))) {
 			result = x2;
 		}
 
-		if (y1 != null && (result == null || point.distance(y1) < point.distance(result))) {
+		if(y1 != null && (result == null || point.distance(y1) < point.distance(result))) {
 			result = y1;
 		}
 
-		if (y2 != null && (result == null || point.distance(y2) < point.distance(result))) {
+		if(y2 != null && (result == null || point.distance(y2) < point.distance(result))) {
 			result = y2;
 		}
 
-		if (z1 != null && (result == null || point.distance(z1) < point.distance(result))) {
+		if(z1 != null && (result == null || point.distance(z1) < point.distance(result))) {
 			result = z1;
 		}
 
-		if (z2 != null && (result == null || point.distance(z2) < point.distance(result))) {
+		if(z2 != null && (result == null || point.distance(z2) < point.distance(result))) {
 			result = z2;
 		}
 
-		if (result == null) {
+		if(result == null) {
 			return null;
 		} else {
 			byte side = -1;
-			if (result == x1) {
+			if(result == x1) {
 				side = 4;
 			}
 
-			if (result == x2) {
+			if(result == x2) {
 				side = 5;
 			}
 
-			if (result == y1) {
+			if(result == y1) {
 				side = 0;
 			}
 
-			if (result == y2) {
+			if(result == y2) {
 				side = 1;
 			}
 
-			if (result == z1) {
+			if(result == z1) {
 				side = 2;
 			}
 
-			if (result == z2) {
+			if(result == z2) {
 				side = 3;
 			}
 
-			return new MovingObjectPosition(x, y, z, side, result.add(x, y, z));
+			return new Intersection(x, y, z, side, result.add(x, y, z));
 		}
 	}
 
@@ -221,7 +221,7 @@ public class BlockUtils {
 		Model model = Blocks.fromId(id).getModel();
 		return point != null && point.x >= model.getSelectionBox((int) point.x, (int) point.y, (int) point.z).getX1() && point.x <= model.getSelectionBox((int) point.x, (int) point.y, (int) point.z).getX2() && point.y >= model.getSelectionBox((int) point.x, (int) point.y, (int) point.z).getY1() && point.y <= model.getSelectionBox((int) point.x, (int) point.y, (int) point.z).getY2();
 	}
-	
+
 	private static boolean xIntersects(int id, Vector point) {
 		Model model = Blocks.fromId(id).getModel();
 		return point != null && point.y >= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getY1() && point.y <= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getY2() && point.z >= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getZ1() && point.z <= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getZ2();
@@ -236,7 +236,7 @@ public class BlockUtils {
 		Model model = Blocks.fromId(id).getModel();
 		return point != null && point.x >= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getX1() && point.x <= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getX2() && point.y >= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getY1() && point.y <= model.getCollisionBox((int) point.x, (int) point.y, (int) point.z).getY2();
 	}
-	
+
 	public static AABB getSelectionBox(int id, int x, int y, int z) {
 		BlockType type = Blocks.fromId(id);
 		if(type == null) return null;
@@ -252,11 +252,11 @@ public class BlockUtils {
 		if(bb == null) return null;
 		return new AABB(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2());
 	}
-	
+
 	public static boolean canExplode(BlockType type) {
 		return type != VanillaBlock.STONE && type != VanillaBlock.COBBLESTONE && type != VanillaBlock.BEDROCK && type != VanillaBlock.COAL_ORE && type != VanillaBlock.IRON_ORE && type != VanillaBlock.GOLD_ORE && type != VanillaBlock.GOLD_BLOCK && type != VanillaBlock.IRON_BLOCK && type != VanillaBlock.SLAB && type != VanillaBlock.DOUBLE_SLAB && type != VanillaBlock.BRICK_BLOCK && type != VanillaBlock.MOSSY_COBBLESTONE && type != VanillaBlock.OBSIDIAN;
 	}
-	
+
 	public static int getHardness(BlockType type) {
 		if(type == VanillaBlock.SAPLING || type == VanillaBlock.DANDELION || type == VanillaBlock.ROSE || type == VanillaBlock.BROWN_MUSHROOM || type == VanillaBlock.RED_MUSHROOM || type == VanillaBlock.TNT) {
 			return 0;
@@ -288,7 +288,7 @@ public class BlockUtils {
 
 		return 0;
 	}
-	
+
 	public static int getDrop(BlockType type) {
 		if(type == VanillaBlock.STONE) {
 			return VanillaBlock.COBBLESTONE.getId();
@@ -305,10 +305,10 @@ public class BlockUtils {
 		} else if(type == VanillaBlock.LEAVES) {
 			return VanillaBlock.SAPLING.getId();
 		}
-		
+
 		return type.getId();
 	}
-	
+
 	public static int getDropCount(BlockType type) {
 		if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER || type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA || type == VanillaBlock.TNT || type == VanillaBlock.BOOKSHELF) {
 			return 0;
@@ -321,20 +321,20 @@ public class BlockUtils {
 		} else if(type == VanillaBlock.LEAVES) {
 			return rand.nextInt(10) == 0 ? 1 : 0;
 		}
-		
+
 		return 1;
 	}
-	
+
 	public static void dropItems(int block, Level level, int x, int y, int z) {
 		dropItems(block, level, x, y, z, 1);
 	}
 
 	public static void dropItems(int block, Level level, int x, int y, int z, float chance) {
-		if (!level.creativeMode) {
+		if(!level.creativeMode) {
 			int dropCount = getDropCount(Blocks.fromId(block));
 
-			for (int count = 0; count < dropCount; count++) {
-				if (rand.nextFloat() <= chance) {
+			for(int count = 0; count < dropCount; count++) {
+				if(rand.nextFloat() <= chance) {
 					float xOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
 					float yOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
 					float zOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
@@ -344,5 +344,5 @@ public class BlockUtils {
 
 		}
 	}
-	
+
 }

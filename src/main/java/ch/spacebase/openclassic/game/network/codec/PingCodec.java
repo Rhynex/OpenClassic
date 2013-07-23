@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.PingMessage;
 
-
 public class PingCodec extends MessageCodec<PingMessage> {
 
 	public PingCodec() {
@@ -23,5 +22,5 @@ public class PingCodec extends MessageCodec<PingMessage> {
 	public PingMessage decode(ChannelBuffer buffer) throws IOException {
 		return new PingMessage();
 	}
-	
+
 }

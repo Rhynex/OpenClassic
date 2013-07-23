@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 
-
 public class PlayerSetBlockCodec extends MessageCodec<PlayerSetBlockMessage> {
 
 	public PlayerSetBlockCodec() {
@@ -17,13 +16,13 @@ public class PlayerSetBlockCodec extends MessageCodec<PlayerSetBlockMessage> {
 	@Override
 	public ChannelBuffer encode(PlayerSetBlockMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.buffer(8);
-		
+
 		buffer.writeShort(message.getX());
 		buffer.writeShort(message.getY());
 		buffer.writeShort(message.getZ());
 		buffer.writeByte(message.isPlacing() ? 0x01 : 0x00);
 		buffer.writeByte(message.getBlock());
-		
+
 		return buffer;
 	}
 
@@ -34,8 +33,8 @@ public class PlayerSetBlockCodec extends MessageCodec<PlayerSetBlockMessage> {
 		short z = buffer.readShort();
 		boolean placing = buffer.readByte() == 0x01;
 		byte type = buffer.readByte();
-		
+
 		return new PlayerSetBlockMessage(x, y, z, placing, type);
 	}
-	
+
 }

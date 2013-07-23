@@ -16,11 +16,11 @@ public class ClassicEncoder extends OneToOneEncoder {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Object encode(ChannelHandlerContext context, Channel channel, Object msg) throws Exception {
-		if (msg instanceof Message) {
+		if(msg instanceof Message) {
 			Message message = (Message) msg;
 			Class<? extends Message> clazz = message.getClass();
 			MessageCodec<Message> codec = (MessageCodec<Message>) CodecLookup.find(clazz);
-			if (codec == null) {
+			if(codec == null) {
 				throw new IOException("Unknown message type: " + clazz + ".");
 			}
 
@@ -28,8 +28,8 @@ public class ClassicEncoder extends OneToOneEncoder {
 			opcodeBuf.writeByte(message.getOpcode());
 			return ChannelBuffers.wrappedBuffer(opcodeBuf, codec.encode(message));
 		}
-		
+
 		return msg;
 	}
-	
+
 }

@@ -1,6 +1,5 @@
 package com.mojang.minecraft.entity.model;
 
-
 public final class SkeletonModel extends ZombieModel {
 
 	public SkeletonModel() {

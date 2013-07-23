@@ -42,7 +42,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().getPreventsOwnRenderingRaw() ? 1 : 0);
 		buffer.writeFloat(message.getBlock().getBrightness());
 		ChannelBufferUtils.writeString(buffer, message.getBlock().getModel().getNetworkClass().getSimpleName());
-		
+
 		buffer.writeByte(message.getBlock().getModel().getDefaultCollisionBox() != null ? (byte) 1 : (byte) 0);
 		if(message.getBlock().getModel().getDefaultCollisionBox() != null) {
 			buffer.writeFloat(message.getBlock().getModel().getDefaultCollisionBox().getX1());
@@ -52,7 +52,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			buffer.writeFloat(message.getBlock().getModel().getDefaultCollisionBox().getZ1());
 			buffer.writeFloat(message.getBlock().getModel().getDefaultCollisionBox().getZ2());
 		}
-		
+
 		buffer.writeByte(message.getBlock().getModel().getDefaultSelectionBox() != null ? (byte) 1 : (byte) 0);
 		if(message.getBlock().getModel().getDefaultSelectionBox() != null) {
 			buffer.writeFloat(message.getBlock().getModel().getDefaultSelectionBox().getX1());
@@ -62,7 +62,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			buffer.writeFloat(message.getBlock().getModel().getDefaultSelectionBox().getZ1());
 			buffer.writeFloat(message.getBlock().getModel().getDefaultSelectionBox().getZ2());
 		}
-		
+
 		buffer.writeInt(message.getBlock().getModel().getQuads().size());
 		for(Quad quad : message.getBlock().getModel().getQuads()) {
 			buffer.writeInt(quad.getId());
@@ -72,7 +72,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 				buffer.writeFloat(vertex.getY());
 				buffer.writeFloat(vertex.getZ());
 			}
-				
+
 			ChannelBufferUtils.writeString(buffer, quad.getTexture().getParent().getTexture());
 			buffer.writeByte(quad.getTexture().getParent().isInJar() ? 1 : 0);
 			buffer.writeInt(quad.getTexture().getParent().getWidth());
@@ -81,7 +81,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			buffer.writeInt(quad.getTexture().getParent().getSubTextureHeight());
 			buffer.writeInt(quad.getTexture().getId());
 		}
-		
+
 		return buffer;
 	}
 
@@ -98,11 +98,11 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		boolean gas = buffer.readByte() == 1;
 		boolean preventsOwnRendering = buffer.readByte() == 1;
 		float brightness = buffer.readFloat();
-		
+
 		String type = ChannelBufferUtils.readString(buffer);
 		Model model = type.equals(EmptyModel.class.getName()) ? new EmptyModel() : type.equals(LiquidModel.class.getName()) ? new LiquidModel("/terrain.png", 16) : (type.equals(CuboidModel.class.getName()) ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (type.equals(CubeModel.class.getName()) ? new CubeModel("/terrain.png", 16) : type.equals(PlantModel.class.getName()) ? new PlantModel("/terrain.png", 16) : new Model()));
 		model.clearQuads();
-		
+
 		if(buffer.readByte() == 1) {
 			float x1 = buffer.readFloat();
 			float x2 = buffer.readFloat();
@@ -112,7 +112,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			float z2 = buffer.readFloat();
 			model.setCollisionBox(new BoundingBox(x1, y1, z1, x2, y2, z2));
 		}
-		
+
 		if(buffer.readByte() == 1) {
 			float sx1 = buffer.readFloat();
 			float sx2 = buffer.readFloat();
@@ -122,7 +122,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			float sz2 = buffer.readFloat();
 			model.setSelectionBox(new BoundingBox(sx1, sy1, sz1, sx2, sy2, sz2));
 		}
-		
+
 		int quads = buffer.readInt();
 		for(int i = 0; i < quads; i++) {
 			int qid = buffer.readInt();
@@ -131,21 +131,21 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 				float x = buffer.readFloat();
 				float y = buffer.readFloat();
 				float z = buffer.readFloat();
-					
+
 				vertices[ind] = new Vertex(x, y, z);
 			}
-				
+
 			String texture = ChannelBufferUtils.readString(buffer);
 			boolean jar = buffer.readByte() == 1;
 			int width = buffer.readInt();
 			int height = buffer.readInt();
 			int swidth = buffer.readInt();
 			int sheight = buffer.readInt();
-				
+
 			Texture t = new Texture(texture, jar, width, height, swidth, sheight);
 			model.addQuad(new Quad(qid, t.getSubTexture(buffer.readInt()), vertices[0], vertices[1], vertices[2], vertices[3]));
 		}
-		
+
 		BlockType block = new BlockType(id, sound, model);
 		block.setOpaque(opaque);
 		block.setLiquid(liquid);
@@ -156,8 +156,8 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		block.setGas(gas);
 		block.setPreventsOwnRendering(preventsOwnRendering);
 		block.setBrightness(brightness);
-		
+
 		return new CustomBlockMessage(block);
 	}
-	
+
 }

@@ -65,25 +65,25 @@ import com.zachsthings.onevent.EventManager;
 
 // TODO: Server-side GUIs
 public class ClassicServer extends ClassicGame implements Server {
-	
+
 	/**
 	 * The server's executor service.
 	 */
-    private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-    	private int nextId = 0;
-    	
-    	@Override
+	private final ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+		private int nextId = 0;
+
+		@Override
 		public Thread newThread(Runnable r) {
-    		this.nextId++;
+			this.nextId++;
 			return new Thread(r, "Server-" + this.nextId);
 		}
-    });
-	
+	});
+
 	/**
 	 * Console manager
 	 */
 	private ConsoleManager console;
-	
+
 	/**
 	 * The {@link ServerBootstrap} used to initialize Netty.
 	 */
@@ -95,7 +95,8 @@ public class ClassicServer extends ClassicGame implements Server {
 	private final ChannelGroup group = new DefaultChannelGroup();
 
 	/**
-	 * The network executor service - Netty dispatches events to this thread pool.
+	 * The network executor service - Netty dispatches events to this thread
+	 * pool.
 	 */
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -103,12 +104,12 @@ public class ClassicServer extends ClassicGame implements Server {
 	 * A list of all the active {@link ClassicSession}s.
 	 */
 	private final SessionRegistry sessions = new SessionRegistry();
-	
+
 	/**
 	 * The server's persistence manager.
 	 */
 	private final PersistanceManager persistenceManager = new PersistanceManager();
-	
+
 	/**
 	 * The server's audio manager.
 	 */
@@ -118,7 +119,7 @@ public class ClassicServer extends ClassicGame implements Server {
 	 * The server's permissions manager.
 	 */
 	private PermissionManager permManager = new PermissionManager();
-	
+
 	/**
 	 * Whether the server is running or not.
 	 */
@@ -129,69 +130,78 @@ public class ClassicServer extends ClassicGame implements Server {
 	 */
 	private List<Level> levels = new ArrayList<Level>();
 
+	/**
+	 * The server's tick count.
+	 */
+	private int ticks = 0;
+
 	public ClassicServer() {
 		this(new File("."));
 	}
-	
+
 	public ClassicServer(File directory) {
 		super(directory);
 	}
-	
+
 	public void start(String[] args) {
 		if(this.isRunning()) return;
 		this.running = true;
-		
+
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.server"), Constants.VERSION));
-		
+
 		ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
 		this.bootstrap.setFactory(factory);
-		
+
 		ChannelPipelineFactory pipelineFactory = new ServerPipelineFactory();
 		this.bootstrap.setPipelineFactory(pipelineFactory);
 		this.setupConfig();
-		
+
 		if(Arrays.asList(args).contains("gui")) {
 			this.console = new GuiConsoleManager();
 		} else {
 			this.console = new TextConsoleManager();
 		}
-		
+
 		this.console.setup();
-		
+
 		if(!this.bind(new InetSocketAddress(this.getPort()))) {
 			return;
 		}
-		
+
 		this.persistenceManager.load();
 		this.permManager.load();
-		
-		this.registerExecutor(null, new ServerCommands());
-		
+
+		this.registerExecutor(this, new ServerCommands());
+
 		this.registerGenerator("normal", new NormalGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
-		
+
 		VanillaBlock.registerAll();
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
-		
+
 		File file = new File(this.getDirectory(), "levels");
 		if(!file.exists()) {
 			file.mkdirs();
 		}
-		
+
 		this.loadLevel(this.getConfig().getString("options.default-level", "main"));
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
-		
-        this.exec.scheduleAtFixedRate(new Runnable() {	
-            public void run() {
-                try {
-                    tick();
-                } catch (Exception e) {
-                    OpenClassic.getLogger().severe(String.format(getTranslator().translate("core.tick-error"), e));
-                    e.printStackTrace();
-                }
-            }
-        }, 0, 1000 / Constants.TICKS_PER_SECOND, TimeUnit.MILLISECONDS);
-		
+
+		this.exec.scheduleAtFixedRate(new Runnable() {
+			public void run() {
+				if(!running) {
+					return;
+				}
+				
+				try {
+					tick();
+				} catch(Exception e) {
+					OpenClassic.getLogger().severe(String.format(getTranslator().translate("core.tick-error"), e));
+					e.printStackTrace();
+				}
+			}
+		}, 0, 1000 / Constants.TICKS_PER_SECOND, TimeUnit.MILLISECONDS);
+
 		this.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
@@ -199,7 +209,7 @@ public class ClassicServer extends ClassicGame implements Server {
 			}
 		}, 450, 450);
 		HeartbeatManager.beat();
-		
+
 		this.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
@@ -208,7 +218,7 @@ public class ClassicServer extends ClassicGame implements Server {
 			}
 		}, 3000, 3000);
 	}
-	
+
 	private void tick() {
 		this.getSessionRegistry().tick();
 		for(Level level : this.getLevels()) {
@@ -218,50 +228,53 @@ public class ClassicServer extends ClassicGame implements Server {
 				((ServerLevel) level).tick();
 			}
 		}
-		
+
 		for(Plugin plugin : this.getPluginManager().getPlugins()) {
 			plugin.tick();
 		}
-		
-		((ClassicScheduler) this.getScheduler()).tick();
+
+		((ClassicScheduler) this.getScheduler()).tick(this.ticks);
+		this.ticks++;
 	}
-	
+
 	public void shutdown() {
 		if(!this.isRunning()) return;
 		this.running = false;
 		OpenClassic.getLogger().info("Stopping the server...");
-		
-		((ClassicScheduler) this.getScheduler()).stop();
+
+		((ClassicScheduler) this.getScheduler()).shutdown();
 		this.getPluginManager().disablePlugins();
 		this.getPluginManager().clearPlugins();
 		this.unregisterExecutors(this);
 		HeartbeatManager.clearBeats();
 		HeartbeatManager.setURL("");
-		
+
 		this.sendToAll(new PlayerDisconnectMessage("Server shutting down."));
-		
+
 		OpenClassic.getLogger().info("Saving levels...");
 		this.saveLevels();
-		
+
 		OpenClassic.getLogger().info("Saving data...");
 		this.getConfig().save();
 		this.persistenceManager.save();
-		
+
 		OpenClassic.getLogger().info("Closing connections...");
-        this.group.close();
-        this.bootstrap.getFactory().releaseExternalResources();
-		
+		this.group.close();
+		this.bootstrap.getFactory().releaseExternalResources();
+
 		for(BlockType block : Blocks.getBlocks()) {
 			if(block != null) {
 				Blocks.unregister(block.getId());
 			}
 		}
-		
+
 		OpenClassic.getLogger().info("Stopping console...");
 		this.console.stop();
+		this.exec.shutdown();
 		OpenClassic.setGame(null);
+		System.exit(0);
 	}
-	
+
 	public ChannelGroup getChannelGroup() {
 		return this.group;
 	}
@@ -269,10 +282,10 @@ public class ClassicServer extends ClassicGame implements Server {
 	public SessionRegistry getSessionRegistry() {
 		return this.sessions;
 	}
-	
+
 	public boolean bind(SocketAddress address) {
 		OpenClassic.getLogger().info("Binding to address: " + address + "...");
-		
+
 		try {
 			this.group.add(this.bootstrap.bind(address));
 			return true;
@@ -282,163 +295,163 @@ public class ClassicServer extends ClassicGame implements Server {
 			return false;
 		}
 	}
-	
+
 	public void broadcastMessage(String message) {
 		OpenClassic.getLogger().info(message);
-		
+
 		for(Player player : this.getPlayers()) {
 			player.sendMessage(message);
 		}
 	}
-	
+
 	public List<Player> getPlayers() {
 		List<Player> players = new ArrayList<Player>();
-		
+
 		for(Level level : this.levels) {
 			players.addAll(level.getPlayers());
 		}
-		
+
 		return players;
 	}
-	
+
 	public Player getPlayer(String name) {
 		for(Player player : this.getPlayers()) {
 			if(player.getName().equalsIgnoreCase(name)) return player;
 		}
-		
+
 		return null;
 	}
-	
+
 	public List<Player> matchPlayer(String name) {
 		List<Player> result = new ArrayList<Player>();
-		
+
 		for(Player player : this.getPlayers()) {
 			if(player.getName().toLowerCase().contains(name.toLowerCase()) && !result.contains(player)) result.add(player);
 		}
-		
+
 		return result;
 	}
-	
+
 	public long getURLSalt() {
 		return HeartbeatManager.getSalt();
 	}
-	
+
 	public String getMotd() {
 		return getConfig().getString("info.motd", "Welcome to my OpenClassic Server!");
 	}
-	
+
 	public void setMotd(String motd) {
 		getConfig().setValue("info.motd", motd);
 	}
-	
+
 	public String getServerName() {
 		return getConfig().getString("info.name", "OpenClassic Server");
 	}
-	
+
 	public void setServerName(String name) {
 		getConfig().setValue("info.name", name);
 	}
-	
+
 	public int getMaxPlayers() {
 		return getConfig().getInteger("options.max-players", 20);
 	}
-	
+
 	public void setMaxPlayers(int max) {
 		getConfig().setValue("options.max-players", max);
 	}
-	
+
 	public int getPort() {
 		return getConfig().getInteger("options.port", 25565);
 	}
-	
+
 	public void setPort(int port) {
 		getConfig().setValue("options.port", port);
 	}
-	
+
 	public boolean isPublic() {
 		return getConfig().getBoolean("options.public", true);
 	}
-	
+
 	public void setPublic(boolean serverPublic) {
 		getConfig().setValue("options.public", serverPublic);
 	}
-	
+
 	public boolean isOnlineMode() {
 		return getConfig().getBoolean("options.online-mode", true);
 	}
-	
+
 	public void setOnlineMode(boolean online) {
 		getConfig().setValue("options.online-mode", online);
 	}
-	
+
 	public boolean doesUseWhitelist() {
 		return getConfig().getBoolean("options.whitelist", false);
 	}
-	
+
 	public void setUseWhitelist(boolean whitelist) {
 		getConfig().setValue("options.whitelist", whitelist);
 	}
-	
+
 	public boolean isWhitelisted(String player) {
 		return this.persistenceManager.isWhitelisted(player);
 	}
-	
+
 	public boolean isBanned(String player) {
 		return this.persistenceManager.isBanned(player);
 	}
-	
+
 	public boolean isIpBanned(String address) {
 		return this.persistenceManager.isIpBanned(address);
 	}
-	
+
 	public void banPlayer(String player) {
 		this.persistenceManager.banPlayer(player);
 	}
-	
+
 	public void banPlayer(String player, String reason) {
 		this.persistenceManager.banPlayer(player, reason);
 	}
-	
+
 	public void unbanPlayer(String player) {
 		this.persistenceManager.unbanPlayer(player);
 	}
-	
+
 	public void banIp(String address) {
 		this.persistenceManager.banIp(address);
 	}
-	
+
 	public void banIp(String address, String reason) {
 		this.persistenceManager.banIp(address, reason);
 	}
-	
+
 	public void unbanIp(String address) {
 		this.persistenceManager.unbanIp(address);
 	}
-	
+
 	public void whitelist(String player) {
 		this.persistenceManager.whitelist(player);
 	}
-	
+
 	public void unwhitelist(String player) {
 		this.persistenceManager.unwhitelist(player);
 	}
-	
+
 	public String getBanReason(String player) {
 		return this.persistenceManager.getBanReason(player);
 	}
-	
+
 	public String getIpBanReason(String address) {
 		return this.persistenceManager.getIpBanReason(address);
 	}
-	
+
 	public List<String> getBannedPlayers() {
 		return this.persistenceManager.getBannedPlayers();
 	}
-	
+
 	public List<String> getBannedIps() {
 		return this.persistenceManager.getBannedIps();
 	}
-	
+
 	public PermissionManager getPermissionManager() {
 		return this.permManager;
 	}
@@ -471,18 +484,18 @@ public class ClassicServer extends ClassicGame implements Server {
 		generator.generate(level, data);
 		level.setGenerating(false);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-		
+
 		if(level.getSpawn() == null) {
 			level.setSpawn(generator.findSpawn(level));
 		}
 
 		try {
 			OpenClassicLevelFormat.save(level);
-		} catch (IOException e) {
+		} catch(IOException e) {
 			OpenClassic.getLogger().severe("Failed to save newly created world!");
 			e.printStackTrace();
 		}
-		
+
 		this.levels.add(level);
 		EventManager.callEvent(new LevelCreateEvent(level));
 		OpenClassic.getLogger().info("Level \"" + level.getName() + "\" was successfully created!");
@@ -493,40 +506,40 @@ public class ClassicServer extends ClassicGame implements Server {
 	public Level loadLevel(String name) {
 		return this.loadLevel(name, true);
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Level loadLevel(String name, boolean create) {
 		if(this.getLevel(name) != null) return this.getLevel(name);
-		
+
 		try {
 			ServerLevel level = new ServerLevel();
 			level = (ServerLevel) OpenClassicLevelFormat.load(level, name, create);
 			if(level == null) {
 				return null;
 			}
-			
+
 			this.levels.add(level);
 			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
 				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().levels;
 				model.add(model.size(), level.getName());
 				if(model.capacity() == model.size()) model.setSize(model.getSize() + 1);
 			}
-			
+
 			EventManager.callEvent(new LevelLoadEvent(level));
 			this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.load-success"), name));
 			return level;
-		} catch (IOException e) {
+		} catch(IOException e) {
 			OpenClassic.getLogger().severe(String.format(this.getTranslator().translate("level.load-fail"), name));
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	public void unloadLevel(String name) {
 		this.unloadLevel(name, true);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public void unloadLevel(String name, boolean announce) {
 		if(this.getLevel(name) != null) {
@@ -534,69 +547,69 @@ public class ClassicServer extends ClassicGame implements Server {
 				if(announce) this.broadcastMessage(Color.RED + this.getTranslator().translate("level.unload-main"));
 				return;
 			}
-			
+
 			if(EventManager.callEvent(new LevelUnloadEvent(this.getLevel(name))).isCancelled()) {
 				return;
 			}
-			
+
 			Level level = this.getLevel(name);
 			for(Player player : level.getPlayers()) {
 				player.moveTo(this.getDefaultLevel().getSpawn());
 			}
-			
+
 			this.saveLevel(level);
 			((ServerLevel) level).clearPhysics();
 			((ServerLevel) level).dispose();
 			this.levels.remove(level);
-			
+
 			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
 				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().levels;
 				if(model.indexOf(level.getName()) != -1) {
 					model.remove(model.indexOf(level.getName()));
 				}
 			}
-			
+
 			if(announce) this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.unload-success"), name));
 		}
 	}
-	
+
 	public Level getDefaultLevel() {
 		for(Level level : this.levels) {
 			if(level.getName().equalsIgnoreCase(this.getConfig().getString("options.default-level", "main"))) return level;
 		}
-		
+
 		return (this.levels.size() > 0) ? this.levels.get(0) : null;
 	}
-	
+
 	public Level getLevel(String name) {
 		for(Level level : this.levels) {
 			if(level.getName().equalsIgnoreCase(name)) return level;
 		}
-		
+
 		return null;
 	}
-	
+
 	public void saveLevels() {
 		for(Level level : this.levels) {
 			this.saveLevel(level);
 		}
 	}
-	
+
 	public void saveLevel(Level level) {
 		level.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.getName() + ".nbt");
-		
+
 		try {
 			if(EventManager.callEvent(new LevelSaveEvent(level)).isCancelled()) {
 				return;
 			}
-			
+
 			OpenClassicLevelFormat.save(level);
 		} catch(IOException e) {
 			OpenClassic.getLogger().severe("Failed to save level " + level.getName() + "!");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void saveLevel(String name) {
 		if(this.getLevel(name) != null) {
 			this.saveLevel(this.getLevel(name));
@@ -606,28 +619,28 @@ public class ClassicServer extends ClassicGame implements Server {
 	public List<Level> getLevels() {
 		return new ArrayList<Level>(this.levels);
 	}
-	
+
 	public void sendToAll(Message msg) {
 		for(Level level : this.levels) {
 			level.sendToAll(msg);
 		}
 	}
-	
+
 	public void sendToAllExcept(Player player, Message msg) {
 		for(Level level : this.levels) {
 			level.sendToAllExcept(player, msg);
 		}
 	}
-	
+
 	public boolean isRunning() {
 		return this.running;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "OpenClassic{running=" + this.isRunning() + "}";
 	}
-	
+
 	public ConsoleManager getConsoleManager() {
 		return this.console;
 	}
@@ -651,7 +664,7 @@ public class ClassicServer extends ClassicGame implements Server {
 	public void setAllowFlight(boolean flight) {
 		this.getConfig().setValue("options.allow-flight", flight);
 	}
-	
+
 	@Override
 	public Console getConsoleSender() {
 		return TextConsoleManager.SENDER;
@@ -662,7 +675,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		for(Player player : this.getPlayers()) {
 			if(player.getPlayerId() == id) return player;
 		}
-		
+
 		return null;
 	}
 

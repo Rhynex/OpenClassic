@@ -7,7 +7,7 @@ import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.GameSettings;
+import com.mojang.minecraft.settings.GameSettings;
 
 public final class ControlsScreen extends GuiScreen {
 
@@ -23,7 +23,7 @@ public final class ControlsScreen extends GuiScreen {
 
 	public final void onOpen() {
 		this.clearWidgets();
-		for (int binding = 0; binding < this.settings.bindings.length; binding++) {
+		for(int binding = 0; binding < this.settings.bindings.length; binding++) {
 			this.attachWidget(new StateButton(binding, this.getWidth() / 2 - 155 + binding % 2 * 160, this.getHeight() / 6 + 24 * (binding >> 1), 155, 20, this, this.settings.getBindingName(binding)));
 			this.getWidget(binding, StateButton.class).setState(this.settings.getBindingValue(binding));
 		}
@@ -32,11 +32,11 @@ public final class ControlsScreen extends GuiScreen {
 	}
 
 	public final void onButtonClick(Button button) {
-		for (int binding = 0; binding < this.settings.bindings.length; binding++) {
+		for(int binding = 0; binding < this.settings.bindings.length; binding++) {
 			this.getWidget(binding, StateButton.class).setState(this.settings.getBindingValue(binding));
 		}
 
-		if (button.getId() == 200) {
+		if(button.getId() == 200) {
 			GeneralUtils.getMinecraft().setCurrentScreen(this.parent);
 		} else {
 			this.binding = button.getId();
@@ -46,7 +46,7 @@ public final class ControlsScreen extends GuiScreen {
 	}
 
 	public final void onKeyPress(char c, int key) {
-		if (this.binding >= 0) {
+		if(this.binding >= 0) {
 			this.settings.setBinding(this.binding, key);
 			this.getWidget(this.binding, Button.class).setText(this.settings.getBindingName(this.binding));
 			this.getWidget(this.binding, StateButton.class).setState(this.settings.getBindingValue(this.binding));
@@ -62,7 +62,7 @@ public final class ControlsScreen extends GuiScreen {
 		} else {
 			RenderHelper.getHelper().drawDefaultBG();
 		}
-		
+
 		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 20);
 		super.render();
 	}

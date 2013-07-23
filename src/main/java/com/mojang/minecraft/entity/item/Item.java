@@ -25,8 +25,8 @@ public class Item extends Entity {
 	private transient int count = 0;
 
 	public static void initModels() {
-		for (int id = 1; id < 256; id++) {
-			if (Blocks.fromId(id) != null) {
+		for(int id = 1; id < 256; id++) {
+			if(Blocks.fromId(id) != null) {
 				Quad quad = Blocks.fromId(id).getModel().getQuads().size() >= 3 ? Blocks.fromId(id).getModel().getQuad(2) : Blocks.fromId(id).getModel().getQuad(Blocks.fromId(id).getModel().getQuads().size() - 1);
 				models[id] = new ItemModel(id, quad.getTexture().getId());
 			}
@@ -37,7 +37,7 @@ public class Item extends Entity {
 	public Item(Level level, float x, float y, float z, int block) {
 		this(level, x, y, z, block, 1);
 	}
-	
+
 	public Item(Level level, float x, float y, float z, int block, int count) {
 		super(level);
 		this.setSize(0.25F, 0.25F);
@@ -61,7 +61,7 @@ public class Item extends Entity {
 		this.xd *= 0.98F;
 		this.yd *= 0.98F;
 		this.zd *= 0.98F;
-		if (this.onGround) {
+		if(this.onGround) {
 			this.xd *= 0.7F;
 			this.zd *= 0.7F;
 			this.yd *= -0.5F;
@@ -69,7 +69,7 @@ public class Item extends Entity {
 
 		this.tickCount++;
 		this.age++;
-		if (this.age >= 6000) {
+		if(this.age >= 6000) {
 			this.remove();
 		}
 
@@ -83,19 +83,19 @@ public class Item extends Entity {
 		float bob = rsin * 0.1F + 0.1F;
 		GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt + bob, this.zo + (this.z - this.zo) * dt);
 		GL11.glRotatef(rot, 0.0F, 1.0F, 0.0F);
-		
+
 		if(models[this.resource] == null && Blocks.fromId(this.resource) != null) {
 			Quad quad = Blocks.fromId(this.resource).getModel().getQuads().size() >= 3 ? Blocks.fromId(this.resource).getModel().getQuad(2) : Blocks.fromId(this.resource).getModel().getQuad(Blocks.fromId(this.resource).getModel().getQuads().size() - 1);
 			models[this.resource] = new ItemModel(this.resource, quad.getTexture().getId());
 		}
-		
+
 		models[this.resource].render();
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glPopMatrix();
 	}
 
 	public void playerTouch(LocalPlayer player) {
-		if (player.addResource(this.resource, this.count)) {
+		if(player.addResource(this.resource, this.count)) {
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			this.remove();
 		}

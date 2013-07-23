@@ -23,11 +23,11 @@ public class HumanoidMob extends Mob {
 		super.renderModel(textures, animStep, dt, runProgress, yaw, pitch, scale);
 		HumanoidModel model = (HumanoidModel) modelCache.getModel(this.modelName);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		if (this.allowAlpha) {
+		if(this.allowAlpha) {
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 
-		if (this.hasHair) {
+		if(this.hasHair) {
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			model.hair.yaw = model.head.yaw;
 			model.hair.pitch = model.head.pitch;
@@ -35,7 +35,7 @@ public class HumanoidMob extends Mob {
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 
-		if (this.armor || this.helmet) {
+		if(this.armor || this.helmet) {
 			RenderHelper.getHelper().bindTexture("/armor/plate.png", true);
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			HumanoidModel armored = (HumanoidModel) modelCache.getModel("humanoid.armor");

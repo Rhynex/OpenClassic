@@ -57,11 +57,11 @@ public class ClientHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext context, ExceptionEvent event) {
 		Channel channel = event.getChannel();
-	    if(event.getCause() instanceof ReadTimeoutException) {
-	    	if(!this.session.isDisconnected()) {
-	    		OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", "Connection timed out."));
-	    	}
-	    } else if(channel.isOpen()) {
+		if(event.getCause() instanceof ReadTimeoutException) {
+			if(!this.session.isDisconnected()) {
+				OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", "Connection timed out."));
+			}
+		} else if(channel.isOpen()) {
 			if(!(event.getCause().getMessage() != null && (event.getCause().getMessage().equals("Connection reset by peer") || event.getCause().getMessage().equals("Connection timed out")))) {
 				OpenClassic.getLogger().log(Level.WARNING, "Exception caught, closing channel: " + channel + "...", event.getCause());
 				OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", event.getCause().getMessage()));

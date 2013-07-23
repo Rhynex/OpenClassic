@@ -37,7 +37,7 @@ public class Arrow extends Entity {
 		this.setSize(0.3F, 0.5F);
 		this.heightOffset = this.bbHeight / 2.0F;
 		this.damage = 3;
-		if (!(owner instanceof LocalPlayer)) {
+		if(!(owner instanceof LocalPlayer)) {
 			this.type = 1;
 		} else {
 			this.damage = 7;
@@ -73,14 +73,14 @@ public class Arrow extends Entity {
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		if (this.hasHit) {
+		if(this.hasHit) {
 			this.stickTime++;
-			if (this.type == 0) {
-				if (this.stickTime >= 300 && Math.random() < 0.009999999776482582D) {
+			if(this.type == 0) {
+				if(this.stickTime >= 300 && Math.random() < 0.009999999776482582D) {
 					this.remove();
 					return;
 				}
-			} else if (this.type == 1 && this.stickTime >= 20) {
+			} else if(this.type == 1 && this.stickTime >= 20) {
 				this.remove();
 			}
 
@@ -94,16 +94,16 @@ public class Arrow extends Entity {
 			float movY = this.yd / len;
 			float movZ = this.zd / len;
 
-			for (int mov = 0; mov < len && !this.collision; mov++) {
+			for(int mov = 0; mov < len && !this.collision; mov++) {
 				AABB collision = this.bb.expand(movX, movY, movZ);
-				if (this.level.getCubes(collision).size() > 0) {
+				if(this.level.getCubes(collision).size() > 0) {
 					this.collision = true;
 				}
 
 				List<Entity> entities = this.level.blockMap.getEntities(this, collision);
-				for (int count = 0; count < entities.size(); count++) {
+				for(int count = 0; count < entities.size(); count++) {
 					Entity entity = entities.get(count);
-					if (entity.isShootable() && (entity != this.owner || this.time > 5)) {
+					if(entity.isShootable() && (entity != this.owner || this.time > 5)) {
 						entity.hurt(this, this.damage);
 						this.collision = true;
 						this.remove();
@@ -111,7 +111,7 @@ public class Arrow extends Entity {
 					}
 				}
 
-				if (!this.collision) {
+				if(!this.collision) {
 					this.bb.move(movX, movY, movZ);
 					this.x += movX;
 					this.y += movY;
@@ -120,12 +120,12 @@ public class Arrow extends Entity {
 				}
 			}
 
-			if (this.collision) {
+			if(this.collision) {
 				this.hasHit = true;
 				this.xd = this.yd = this.zd = 0.0F;
 			}
 
-			if (!this.hasHit) {
+			if(!this.hasHit) {
 				float xzlen = (float) Math.sqrt(this.xd * this.xd + this.zd * this.zd);
 				this.yaw = (float) (Math.atan2(this.xd, this.zd) * 180.0D / Math.PI);
 				this.pitch = (float) (Math.atan2(this.yd, xzlen) * 180.0D / Math.PI);
@@ -133,15 +133,15 @@ public class Arrow extends Entity {
 					this.oPitch -= 360.0F;
 				}
 
-				while (this.pitch - this.oPitch >= 180.0F) {
+				while(this.pitch - this.oPitch >= 180.0F) {
 					this.oPitch += 360.0F;
 				}
 
-				while (this.yaw - this.oYaw < -180.0F) {
+				while(this.yaw - this.oYaw < -180.0F) {
 					this.oYaw -= 360.0F;
 				}
 
-				while (this.yaw - this.oYaw >= 180.0F) {
+				while(this.yaw - this.oYaw >= 180.0F) {
 					this.oYaw += 360.0F;
 				}
 			}
@@ -178,7 +178,7 @@ public class Arrow extends Entity {
 		Renderer.get().vertexuv(-7.0F, -2.0F, -2.0F, 0.0F, ty1);
 		Renderer.get().end();
 
-		for (int end = 0; end < 4; end++) {
+		for(int end = 0; end < 4; end++) {
 			GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
 			Renderer.get().begin();
 			Renderer.get().normal(0.0F, -0.05625F, 0.0F);
@@ -202,7 +202,7 @@ public class Arrow extends Entity {
 	}
 
 	public void playerTouch(LocalPlayer player) {
-		if (this.hasHit && this.owner == player && player.arrows < 99) {
+		if(this.hasHit && this.owner == player && player.arrows < 99) {
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			player.arrows++;
 			this.remove();

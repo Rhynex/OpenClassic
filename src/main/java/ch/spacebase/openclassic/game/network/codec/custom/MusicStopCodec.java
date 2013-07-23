@@ -27,5 +27,5 @@ public class MusicStopCodec extends MessageCodec<MusicStopMessage> {
 		String identifier = ChannelBufferUtils.readString(buffer);
 		return new MusicStopMessage(identifier);
 	}
-	
+
 }

@@ -16,11 +16,11 @@ public class LevelFinalizeCodec extends MessageCodec<LevelFinalizeMessage> {
 	@Override
 	public ChannelBuffer encode(LevelFinalizeMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.buffer(6);
-		
+
 		buffer.writeShort(message.getWidth());
 		buffer.writeShort(message.getHeight());
 		buffer.writeShort(message.getDepth());
-		
+
 		return buffer;
 	}
 
@@ -29,8 +29,8 @@ public class LevelFinalizeCodec extends MessageCodec<LevelFinalizeMessage> {
 		short width = buffer.readShort();
 		short height = buffer.readShort();
 		short depth = buffer.readShort();
-		
+
 		return new LevelFinalizeMessage(width, height, depth);
 	}
-	
+
 }

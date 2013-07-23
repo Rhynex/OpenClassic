@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import ch.spacebase.openclassic.api.OpenClassic;
 
 public class LoggerOutputStream extends ByteArrayOutputStream {
-	
+
 	private final Level level;
 
 	public LoggerOutputStream(Level level) {
@@ -24,5 +24,5 @@ public class LoggerOutputStream extends ByteArrayOutputStream {
 			OpenClassic.getLogger().logp(level, "LoggerOutputStream", "log" + level, record);
 		}
 	}
-	
+
 }

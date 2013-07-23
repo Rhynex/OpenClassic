@@ -21,24 +21,24 @@ public final class LevelDumpScreen extends GuiScreen {
 
 	public final void onOpen() {
 		this.widget = new TextBox(0, this.getWidth() / 2 - 100, this.getHeight() / 2 - 30, this, 30);
-		
+
 		this.clearWidgets();
 		this.attachWidget(this.widget);
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")));
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
-		
+
 		this.getWidget(1, Button.class).setActive(false);
 	}
 
 	public final void onButtonClick(Button button) {
 		Minecraft mc = GeneralUtils.getMinecraft();
-		if (button.getId() == 1 && this.widget.getText().trim().length() > 0) {
+		if(button.getId() == 1 && this.widget.getText().trim().length() > 0) {
 			mc.level.name = this.widget.getText();
 			LevelIO.save(mc.level);
 			mc.setCurrentScreen(this.parent);
 		}
 
-		if (button.getId() == 2) {
+		if(button.getId() == 2) {
 			mc.setCurrentScreen(this.parent);
 		}
 	}

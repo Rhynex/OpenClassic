@@ -20,13 +20,13 @@ public final class ChatInputScreen extends GuiScreen {
 	}
 
 	public final void onKeyPress(char c, int key) {
-		if (key == Keyboard.KEY_RETURN) {
+		if(key == Keyboard.KEY_RETURN) {
 			String message = this.getWidget(0, TextBox.class).getText().trim();
-			if (message.length() > 0) {
+			if(message.length() > 0) {
 				if(GeneralUtils.getMinecraft().isInMultiplayer()) {
 					PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
 					if(event.isCancelled()) return;
-					
+
 					GeneralUtils.getMinecraft().session.send(new PlayerChatMessage((byte) -1, event.getMessage()));
 				} else if(message.startsWith("/")) {
 					OpenClassic.getClient().processCommand(OpenClassic.getClient().getPlayer(), message.substring(1));
@@ -35,19 +35,19 @@ public final class ChatInputScreen extends GuiScreen {
 
 			GeneralUtils.getMinecraft().setCurrentScreen(null);
 		}
-		
+
 		super.onKeyPress(c, key);
 	}
 
 	public final void onMouseClick(int x, int y, int button) {
 		TextBox text = this.getWidget(0, TextBox.class);
-		if (button == 0 && GeneralUtils.getMinecraft().hud.clickedPlayer != null) {
-			if (text.getText().length() > 0 && !text.getText().endsWith(" ")) {
+		if(button == 0 && GeneralUtils.getMinecraft().hud.clickedPlayer != null) {
+			if(text.getText().length() > 0 && !text.getText().endsWith(" ")) {
 				text.setText(text.getText() + " ");
 			}
 
 			text.setText(text.getText() + GeneralUtils.getMinecraft().hud.clickedPlayer);
-			if (text.getText().length() > 62 - GeneralUtils.getMinecraft().data.username.length()) {
+			if(text.getText().length() > 62 - GeneralUtils.getMinecraft().data.username.length()) {
 				text.setText(text.getText().substring(0, 62 - GeneralUtils.getMinecraft().data.username.length()));
 			}
 		}

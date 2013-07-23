@@ -13,13 +13,13 @@ public final class ParticleManager {
 	public TextureManager textureManager;
 
 	public ParticleManager(Level level, TextureManager textureManager) {
-		if (level != null) {
+		if(level != null) {
 			level.particleEngine = this;
 		}
 
 		this.textureManager = textureManager;
 
-		for (int index = 0; index < particles.length; index++) {
+		for(int index = 0; index < particles.length; index++) {
 			this.particles[index] = new ArrayList<Particle>();
 		}
 	}
@@ -30,12 +30,12 @@ public final class ParticleManager {
 	}
 
 	public final void tickParticles() {
-		for (int pIndex = 0; pIndex < 2; pIndex++) {
-			for (int index = 0; index < this.particles[pIndex].size(); index++) {
+		for(int pIndex = 0; pIndex < 2; pIndex++) {
+			for(int index = 0; index < this.particles[pIndex].size(); index++) {
 				Particle particle = this.particles[pIndex].get(index);
 				particle.tick();
-				
-				if (particle.removed) {
+
+				if(particle.removed) {
 					this.particles[pIndex].remove(index--);
 				}
 			}

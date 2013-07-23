@@ -11,11 +11,7 @@ public class ServerPipelineFactory implements ChannelPipelineFactory {
 
 	@Override
 	public ChannelPipeline getPipeline() throws Exception {
-		return Channels.pipeline(
-			new ClassicDecoder(),
-			new ClassicEncoder(),
-			new ServerHandler()
-		);
+		return Channels.pipeline(new ClassicDecoder(), new ClassicEncoder(), new ServerHandler());
 	}
 
 }

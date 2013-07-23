@@ -14,7 +14,7 @@ import com.mojang.minecraft.Minecraft;
 public class LWJGLNatives {
 
 	public static void load(File dir) {
-	    String os = System.getProperty("os.name").toLowerCase();
+		String os = System.getProperty("os.name").toLowerCase();
 		if(os.contains("linux")) {
 			load(dir.getPath(), "libjinput-linux.so", "86");
 			load(dir.getPath(), "libjinput-linux64.so", "64");
@@ -43,7 +43,7 @@ public class LWJGLNatives {
 		} else {
 			throw new RuntimeException(OpenClassic.getGame().getTranslator().translate("core.no-lwjgl"));
 		}
-		
+
 		System.setProperty("java.library.path", dir.getPath());
 		System.setProperty("org.lwjgl.librarypath", dir.getPath());
 		System.setProperty("net.java.games.input.librarypath", dir.getPath());
@@ -51,7 +51,7 @@ public class LWJGLNatives {
 
 	private static void load(String dir, String lib, String arch) {
 		File file = new File(dir + "/" + lib);
-		
+
 		try {
 			if(file.exists()) {
 				InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
@@ -61,7 +61,7 @@ public class LWJGLNatives {
 						if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
 							System.load(file.getPath());
 						}
-						
+
 						return;
 					}
 				} finally {
@@ -69,7 +69,7 @@ public class LWJGLNatives {
 					IOUtils.closeQuietly(fin);
 				}
 			}
-			
+
 			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
 			System.out.println("Writing " + lib + " to " + file.getPath());
 			IOUtils.copy(in, new FileOutputStream(file));
@@ -77,7 +77,7 @@ public class LWJGLNatives {
 			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
 				System.load(file.getPath());
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 			System.err.println(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
 			e.printStackTrace();
 		}

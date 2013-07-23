@@ -65,30 +65,30 @@ public abstract class Entity {
 	public void resetPos() {
 		this.resetPos(null);
 	}
-	
+
 	public void resetPos(Position pos) {
-		if (pos != null) {
+		if(pos != null) {
 			pos = pos.clone();
 			while(pos.getY() < this.level.height && this.level.getCubes(this.bb).size() != 0) {
 				pos.setY(pos.getY() + 1);
 			}
-			
+
 			this.setPos(pos.getX(), pos.getY(), pos.getZ());
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
 			this.yaw = pos.getYaw();
 			this.pitch = pos.getPitch();
-		} else if (this.level != null) {
+		} else if(this.level != null) {
 			float x = this.level.xSpawn + 0.5F;
 			float y = this.level.ySpawn;
 			float z = this.level.zSpawn + 0.5F;
-			while (y < this.level.height) {
+			while(y < this.level.height) {
 				this.setPos(x, y, z);
-				if (this.level.getCubes(this.bb).size() == 0) {
+				if(this.level.getCubes(this.bb).size() == 0) {
 					break;
 				}
-				
+
 				y++;
 			}
 
@@ -110,13 +110,13 @@ public abstract class Entity {
 	}
 
 	public void setPos(PositionUpdate pos) {
-		if (pos.position) {
+		if(pos.position) {
 			this.setPos(pos.x, pos.y, pos.z);
 		} else {
 			this.setPos(this.x, this.y, this.z);
 		}
 
-		if (pos.rotation) {
+		if(pos.rotation) {
 			this.setRot(pos.yaw, pos.pitch);
 		} else {
 			this.setRot(this.yaw, this.pitch);
@@ -142,11 +142,11 @@ public abstract class Entity {
 		float oldYaw = this.yaw;
 		this.yaw = (float) (this.yaw + yaw * 0.15D);
 		this.pitch = (float) (this.pitch - pitch * 0.15D);
-		if (this.pitch < -90.0F) {
+		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}
 
-		if (this.pitch > 90.0F) {
+		if(this.pitch > 90.0F) {
 			this.pitch = 90.0F;
 		}
 
@@ -157,11 +157,11 @@ public abstract class Entity {
 	public void interpolateTurn(float yaw, float pitch) {
 		this.yaw = (float) (this.yaw + yaw * 0.15D);
 		this.pitch = (float) (this.pitch - pitch * 0.15D);
-		if (this.pitch < -90.0F) {
+		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}
 
-		if (this.pitch > 90.0F) {
+		if(this.pitch > 90.0F) {
 			this.pitch = 90.0F;
 		}
 	}
@@ -186,7 +186,7 @@ public abstract class Entity {
 	}
 
 	public void move(float x, float y, float z) {
-		if (this.noPhysics) {
+		if(this.noPhysics) {
 			this.bb.move(x, y, z);
 			this.x = (this.bb.x0 + this.bb.x1) / 2.0F;
 			this.y = this.bb.y0 + this.heightOffset - this.ySlideOffset;
@@ -200,12 +200,12 @@ public abstract class Entity {
 			AABB copy = this.bb.copy();
 			ArrayList<AABB> cubes = this.level.getCubes(this.bb.expand(x, y, z));
 
-			for (AABB cube : cubes) {
+			for(AABB cube : cubes) {
 				y = cube.clipYCollide(this.bb, y);
 			}
 
 			this.bb.move(0.0F, y, 0.0F);
-			if (!this.slide && oldY != y) {
+			if(!this.slide && oldY != y) {
 				x = 0;
 				y = 0;
 				z = 0;
@@ -213,29 +213,29 @@ public abstract class Entity {
 
 			boolean stepFurther = this.onGround || oldY != y && oldY < 0.0F;
 
-			for (AABB cube : cubes) {
+			for(AABB cube : cubes) {
 				x = cube.clipXCollide(this.bb, x);
 			}
 
 			this.bb.move(x, 0.0F, 0.0F);
-			if (!this.slide && oldX != x) {
+			if(!this.slide && oldX != x) {
 				z = 0.0F;
 				y = 0.0F;
 				x = 0.0F;
 			}
 
-			for (AABB cube : cubes) {
+			for(AABB cube : cubes) {
 				z = cube.clipZCollide(this.bb, z);
 			}
 
 			this.bb.move(0.0F, 0.0F, z);
-			if (!this.slide && oldZ != z) {
+			if(!this.slide && oldZ != z) {
 				x = 0;
 				y = 0;
 				z = 0;
 			}
 
-			if (this.footSize > 0 && stepFurther && this.ySlideOffset < 0.05F && (oldX != x || oldZ != z)) {
+			if(this.footSize > 0 && stepFurther && this.ySlideOffset < 0.05F && (oldX != x || oldZ != z)) {
 				float newX = x;
 				float newY = y;
 				float newZ = z;
@@ -246,40 +246,40 @@ public abstract class Entity {
 				this.bb = copy.copy();
 				cubes = this.level.getCubes(this.bb.expand(oldX, y, oldZ));
 
-				for (AABB cube : cubes) {
+				for(AABB cube : cubes) {
 					y = cube.clipYCollide(this.bb, y);
 				}
 
 				this.bb.move(0.0F, y, 0.0F);
-				if (!this.slide && oldY != y) {
+				if(!this.slide && oldY != y) {
 					z = 0.0F;
 					y = 0.0F;
 					x = 0.0F;
 				}
 
-				for (AABB cube : cubes) {
+				for(AABB cube : cubes) {
 					x = cube.clipXCollide(this.bb, x);
 				}
 
 				this.bb.move(x, 0.0F, 0.0F);
-				if (!this.slide && oldX != x) {
+				if(!this.slide && oldX != x) {
 					z = 0.0F;
 					y = 0.0F;
 					x = 0.0F;
 				}
 
-				for (AABB cube : cubes) {
+				for(AABB cube : cubes) {
 					z = cube.clipZCollide(this.bb, z);
 				}
 
 				this.bb.move(0.0F, 0.0F, z);
-				if (!this.slide && oldZ != z) {
+				if(!this.slide && oldZ != z) {
 					z = 0.0F;
 					y = 0.0F;
 					x = 0.0F;
 				}
 
-				if (newX * newX + newZ * newZ >= x * x + z * z) {
+				if(newX * newX + newZ * newZ >= x * x + z * z) {
 					x = newX;
 					y = newY;
 					z = newZ;
@@ -292,24 +292,24 @@ public abstract class Entity {
 			this.horizontalCollision = oldX != x || oldZ != z;
 			this.onGround = oldY != y && oldY < 0;
 			this.collision = this.horizontalCollision || oldY != y;
-			if (this.onGround) {
-				if (this.fallDistance > 0) {
+			if(this.onGround) {
+				if(this.fallDistance > 0) {
 					this.causeFallDamage(this.fallDistance);
 					this.fallDistance = 0;
 				}
-			} else if (y < 0.0F) {
+			} else if(y < 0.0F) {
 				this.fallDistance -= y;
 			}
 
-			if (oldX != x) {
+			if(oldX != x) {
 				this.xd = 0.0F;
 			}
 
-			if (oldY != y) {
+			if(oldY != y) {
 				this.yd = 0.0F;
 			}
 
-			if (oldZ != z) {
+			if(oldZ != z) {
 				this.zd = 0.0F;
 			}
 
@@ -320,13 +320,13 @@ public abstract class Entity {
 			float zDiff = this.z - oldEntityZ;
 			if(this.onGround) {
 				this.walkDist = (float) (this.walkDist + (float) Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
-				if (this.makeStepSound) {
+				if(this.makeStepSound) {
 					int id = this.level.getTile((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
-					if (this.walkDist > this.nextStep && id > 0) {
+					if(this.walkDist > this.nextStep && id > 0) {
 						this.nextStep++;
 						if(Blocks.fromId(id) != null) {
 							StepSound step = Blocks.fromId(id).getStepSound();
-							if (step != StepSound.NONE) {
+							if(step != StepSound.NONE) {
 								this.playSound(step.getSound(), step.getVolume() * 0.75F, step.getPitch());
 							}
 						}
@@ -356,8 +356,8 @@ public abstract class Entity {
 
 	public void moveRelative(float forward, float strafe, float speed) {
 		float len = (float) Math.sqrt(forward * forward + strafe * strafe);
-		if (len >= 0.01F) {
-			if (len < 1.0F) {
+		if(len >= 0.01F) {
+			if(len < 1.0F) {
 				len = 1.0F;
 			}
 
@@ -365,7 +365,7 @@ public abstract class Entity {
 			float mstrafe = strafe * (speed / len);
 			float xangle = MathHelper.cos(this.yaw * MathHelper.DEG_TO_RAD);
 			float zangle = MathHelper.sin(this.yaw * MathHelper.DEG_TO_RAD);
-			
+
 			this.xd += mforward * xangle - mstrafe * zangle;
 			this.zd += mstrafe * xangle + mforward * zangle;
 		}
@@ -431,7 +431,7 @@ public abstract class Entity {
 		float xDiff = entity.x - this.x;
 		float zDiff = entity.z - this.z;
 		float sqXZDiff = xDiff * xDiff + zDiff * zDiff;
-		if (sqXZDiff >= 0.01F) {
+		if(sqXZDiff >= 0.01F) {
 			float xzDiff = (float) Math.sqrt(sqXZDiff);
 			xDiff /= xzDiff;
 			zDiff /= xzDiff;

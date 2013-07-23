@@ -43,7 +43,7 @@ public final class SurvivalGameMode extends GameMode {
 
 	public final void hitBlock(int x, int y, int z) {
 		int block = this.mc.level.getTile(x, y, z);
-		if (block > 0 && BlockUtils.getHardness(Blocks.fromId(block)) == 0) {
+		if(block > 0 && BlockUtils.getHardness(Blocks.fromId(block)) == 0) {
 			this.breakBlock(x, y, z);
 		}
 
@@ -55,15 +55,15 @@ public final class SurvivalGameMode extends GameMode {
 	}
 
 	public final void hitBlock(int x, int y, int z, int side) {
-		if (this.hitDelay > 0) {
+		if(this.hitDelay > 0) {
 			this.hitDelay--;
-		} else if (x == this.hitX && y == this.hitY && z == this.hitZ) {
+		} else if(x == this.hitX && y == this.hitY && z == this.hitZ) {
 			int type = this.mc.level.getTile(x, y, z);
-			if (type != 0) {
+			if(type != 0) {
 				this.blockHardness = BlockUtils.getHardness(Blocks.fromId(type));
 				ClientRenderHelper.getHelper().spawnBlockParticles(this.mc.level, x, y, z, side, this.mc.particleManager);
 				this.hits++;
-				if (this.hits == this.blockHardness + 1) {
+				if(this.hits == this.blockHardness + 1) {
 					this.breakBlock(x, y, z);
 					this.hits = 0;
 					this.hitDelay = 5;
@@ -79,7 +79,7 @@ public final class SurvivalGameMode extends GameMode {
 	}
 
 	public final void applyBlockCracks(float time) {
-		if (this.hits <= 0) {
+		if(this.hits <= 0) {
 			this.mc.levelRenderer.cracks = 0;
 		} else {
 			this.mc.levelRenderer.cracks = (this.hits + time - 1) / this.blockHardness;
@@ -92,14 +92,14 @@ public final class SurvivalGameMode extends GameMode {
 
 	public final boolean useItem(LocalPlayer player, int type) {
 		BlockType block = Blocks.fromId(type);
-		if (block == VanillaBlock.RED_MUSHROOM && this.mc.player.inventory.removeSelected(type)) {
+		if(block == VanillaBlock.RED_MUSHROOM && this.mc.player.inventory.removeSelected(type)) {
 			player.hurt(null, 3);
 			return true;
-		} else if (block == VanillaBlock.BROWN_MUSHROOM && this.mc.player.inventory.removeSelected(type)) {
+		} else if(block == VanillaBlock.BROWN_MUSHROOM && this.mc.player.inventory.removeSelected(type)) {
 			player.heal(5);
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -107,20 +107,20 @@ public final class SurvivalGameMode extends GameMode {
 		super.apply(level);
 		this.spawner = new MobSpawner(level);
 	}
-	
+
 	public final void apply(LocalPlayer player) {
 		for(int slot = 0; slot < 9; slot++) {
 			player.inventory.slots[slot] = -1;
 			player.inventory.count[slot] = 0;
 		}
-		
+
 		player.inventory.slots[8] = VanillaBlock.TNT.getId();
 		player.inventory.count[8] = 10;
 	}
 
 	public final void spawnMobs() {
 		int area = this.spawner.level.width * this.spawner.level.height * this.spawner.level.depth / 64 / 64 / 64;
-		if (this.spawner.level.random.nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
+		if(this.spawner.level.random.nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
 			this.spawner.spawn(area, this.spawner.level.player, null);
 		}
 

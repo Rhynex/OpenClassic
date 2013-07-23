@@ -19,10 +19,10 @@ public final class FontRenderer {
 
 	public FontRenderer(String fontImage, TextureManager textures) {
 		BufferedImage font;
-		
+
 		try {
 			font = ImageIO.read(TextureManager.class.getResourceAsStream(fontImage));
-		} catch (IOException e) {
+		} catch(IOException e) {
 			throw new RuntimeException(OpenClassic.getGame().getTranslator().translate("core.fail-font"), e);
 		}
 
@@ -31,22 +31,22 @@ public final class FontRenderer {
 		int[] fontData = new int[width * height];
 		font.getRGB(0, 0, width, height, fontData, 0, width);
 
-		for (int character = 0; character < 256; character++) {
+		for(int character = 0; character < 256; character++) {
 			int tx = character % 16;
 			int ty = character / 16;
 			int chWidth = 0;
-			for (boolean empty = false; chWidth < 8 && !empty; chWidth++) {
+			for(boolean empty = false; chWidth < 8 && !empty; chWidth++) {
 				int xk = (tx << 3) + chWidth;
 				empty = true;
-				for (int y = 0; y < 8 && empty; y++) {
+				for(int y = 0; y < 8 && empty; y++) {
 					int yk = ((ty << 3) + y) * width;
-					if ((fontData[xk + yk] & 255) > 128) {
+					if((fontData[xk + yk] & 255) > 128) {
 						empty = false;
 					}
 				}
 			}
 
-			if (character == 32) {
+			if(character == 32) {
 				chWidth = 4;
 			}
 
@@ -59,7 +59,7 @@ public final class FontRenderer {
 	public final void renderWithShadow(String text, int x, int y, int color) {
 		this.renderWithShadow(text, x, y, color, false);
 	}
-	
+
 	public final void renderWithShadow(String text, int x, int y, int color, boolean scaled) {
 		this.render(text, x + 1, y + 1, color, true, scaled);
 		this.renderNoShadow(text, x, y, color, scaled);
@@ -68,20 +68,20 @@ public final class FontRenderer {
 	public final void renderNoShadow(String text, int x, int y, int color) {
 		this.renderNoShadow(text, x, y, color, false);
 	}
-	
+
 	public final void renderNoShadow(String text, int x, int y, int color, boolean scaled) {
 		this.render(text, x, y, color, false, scaled);
 	}
-	
+
 	private void render(String text, int x, int y, int color, boolean shadow, boolean scaled) {
 		if(scaled) {
 			GL11.glScalef(2, 2, 2);
 			GL11.glTranslatef(-(x / 2), -(y / 2), 0);
 		}
-		
-		if (text != null) {
+
+		if(text != null) {
 			char[] chars = text.toCharArray();
-			if (shadow) {
+			if(shadow) {
 				color = (color & 16579836) >> 2;
 			}
 
@@ -89,10 +89,10 @@ public final class FontRenderer {
 			Renderer.get().begin();
 			Renderer.get().color(color);
 			int width = 0;
-			for (int count = 0; count < chars.length; count++) {
-				if (chars[count] == '&' && chars.length > count + 1) {
+			for(int count = 0; count < chars.length; count++) {
+				if(chars[count] == '&' && chars.length > count + 1) {
 					Color code = Color.getByChar(chars[count + 1]);
-					if (code == null) {
+					if(code == null) {
 						code = Color.WHITE;
 					}
 
@@ -100,7 +100,7 @@ public final class FontRenderer {
 					int green = code.getGreen();
 					int blue = code.getBlue();
 					int c = red << 16 | green << 8 | blue;
-					if (shadow) {
+					if(shadow) {
 						c = (c & 16579836) >> 2;
 					}
 
@@ -114,14 +114,14 @@ public final class FontRenderer {
 				Renderer.get().vertexuv((x + width) + 7.99F, y + 7.99F, 0.0F, (tx + 7.99F) / 128.0F, (ty + 7.99F) / 128.0F);
 				Renderer.get().vertexuv((x + width) + 7.99F, y, 0.0F, (tx + 7.99F) / 128.0F, ty / 128.0F);
 				Renderer.get().vertexuv((x + width), y, 0.0F, tx / 128.0F, ty / 128.0F);
-				if (chars[count] < this.font.length) {
+				if(chars[count] < this.font.length) {
 					width += this.font[chars[count]];
 				}
 			}
 
 			Renderer.get().end();
 		}
-		
+
 		if(scaled) {
 			GL11.glTranslatef(x / 2, y / 2, 0);
 			GL11.glScalef(0.5f, 0.5f, 0.5f);
@@ -129,16 +129,16 @@ public final class FontRenderer {
 	}
 
 	public final int getWidth(String string) {
-		if (string == null) {
+		if(string == null) {
 			return 0;
 		} else {
 			char[] chars = string.toCharArray();
 			int width = 0;
 
-			for (int index = 0; index < chars.length; index++) {
-				if (chars[index] == '&') {
+			for(int index = 0; index < chars.length; index++) {
+				if(chars[index] == '&') {
 					index++;
-				} else if (chars[index] < this.font.length) {
+				} else if(chars[index] < this.font.length) {
 					width += this.font[chars[index]];
 				}
 			}

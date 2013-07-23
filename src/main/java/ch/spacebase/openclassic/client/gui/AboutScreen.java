@@ -24,7 +24,7 @@ public class AboutScreen extends GuiScreen {
 	}
 
 	public void onButtonClick(Button button) {
-		if (button.getId() == 0) {
+		if(button.getId() == 0) {
 			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
@@ -32,7 +32,7 @@ public class AboutScreen extends GuiScreen {
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().drawRotatedBlock(this.getWidth() / 2 - 10, (this.getHeight() / 2) - 56, VanillaBlock.STONE, 2);
-		
+
 		RenderHelper.getHelper().renderText("Minecraft Classic", this.getWidth() / 2, (this.getHeight() / 2) - 32);
 		RenderHelper.getHelper().renderText("Version " + Constants.VERSION, this.getWidth() / 2, (this.getHeight() / 2) - 21);
 		RenderHelper.getHelper().renderText("Modded By Steveice10 (Steveice10@gmail.com)", this.getWidth() / 2, (this.getHeight() / 2) - 10);

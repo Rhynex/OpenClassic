@@ -25,22 +25,22 @@ public class Creeper extends Mob {
 		float brightness = (20 - this.health) / 20.0F;
 		return ((MathHelper.sin(this.tickCount + dt) * 0.5F + 0.5F) * brightness * 0.5F + 0.25F + brightness * 0.25F) * super.getBrightness(dt);
 	}
-	
+
 	public static class CreeperAI extends BasicAttackAI {
 
 		public final boolean attack(Entity entity) {
-			if (super.attack(entity)) {
+			if(super.attack(entity)) {
 				this.mob.hurt(entity, 6);
 				return true;
 			}
-			
+
 			return false;
 		}
 
 		public final void beforeRemove() {
 			this.level.explode(this.mob, this.mob.x, this.mob.y, this.mob.z, 4);
 
-			for (int count = 0; count < 500; count++) {
+			for(int count = 0; count < 500; count++) {
 				float particleX = (float) this.random.nextGaussian();
 				float particleY = (float) this.random.nextGaussian();
 				float particleZ = (float) this.random.nextGaussian();

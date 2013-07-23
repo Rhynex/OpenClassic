@@ -26,12 +26,12 @@ public class WaterDropParticle extends Particle {
 		this.xd *= 0.98F;
 		this.yd *= 0.98F;
 		this.zd *= 0.98F;
-		if (this.lifetime-- <= 0) {
+		if(this.lifetime-- <= 0) {
 			this.remove();
 		}
 
-		if (this.onGround) {
-			if (Math.random() < 0.5D) {
+		if(this.onGround) {
+			if(Math.random() < 0.5D) {
 				this.remove();
 			}
 

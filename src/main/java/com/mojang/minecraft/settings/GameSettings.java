@@ -1,4 +1,4 @@
-package com.mojang.minecraft;
+package com.mojang.minecraft.settings;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,6 +12,7 @@ import org.lwjgl.input.Keyboard;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 
+import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.LocalPlayer.PlayerAI;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
@@ -63,11 +64,11 @@ public final class GameSettings {
 	public final String getBinding(int key) {
 		return this.getBindingName(key) + ": " + this.getBindingValue(key);
 	}
-	
+
 	public final String getBindingName(int key) {
 		return OpenClassic.getGame().getTranslator().translate(this.bindings[key].name);
 	}
-	
+
 	public final String getBindingValue(int key) {
 		return Keyboard.getKeyName(this.bindings[key].key);
 	}
@@ -78,32 +79,32 @@ public final class GameSettings {
 	}
 
 	public final void toggleSetting(int setting, int intVal) {
-		if (setting == 0) {
+		if(setting == 0) {
 			this.music = !this.music;
 			if(!this.music) this.mc.audio.stopMusic();
 		}
 
-		if (setting == 1) {
+		if(setting == 1) {
 			this.sound = !this.sound;
 		}
 
-		if (setting == 2) {
+		if(setting == 2) {
 			this.invertMouse = !this.invertMouse;
 		}
 
-		if (setting == 3) {
+		if(setting == 3) {
 			this.showInfo = !this.showInfo;
 		}
 
-		if (setting == 4) {
+		if(setting == 4) {
 			this.viewDistance = this.viewDistance + intVal & 3;
 		}
 
-		if (setting == 5) {
+		if(setting == 5) {
 			this.viewBobbing = !this.viewBobbing;
 		}
 
-		if (setting == 6) {
+		if(setting == 6) {
 			this.anaglyph = !this.anaglyph;
 			this.mc.textureManager.clear();
 			if(this.mc.ingame) {
@@ -111,24 +112,24 @@ public final class GameSettings {
 			}
 		}
 
-		if (setting == 7) {
+		if(setting == 7) {
 			this.limitFPS = !this.limitFPS;
 		}
-		
-		if (setting == 8) {
+
+		if(setting == 8) {
 			this.survival = (this.survival + intVal) % 3;
 			this.mc.mode = this.survival > 0 ? new SurvivalGameMode(this.mc) : new CreativeGameMode(this.mc);
-			
+
 			if(this.mc.level != null) {
 				this.mc.mode.apply(this.mc.level);
 			}
-			
+
 			if(this.mc.player != null) {
 				this.mc.mode.apply(this.mc.player);
 			}
 		}
-		
-		if (setting == 9) {
+
+		if(setting == 9) {
 			this.smoothing = !this.smoothing;
 			this.mc.textureManager.clear();
 			if(this.mc.ingame) {
@@ -142,31 +143,37 @@ public final class GameSettings {
 	public final String getSetting(int id) {
 		return this.getSettingName(id) + ": " + this.getSettingValue(id);
 	}
-	
+
 	public final String getSettingName(int id) {
 		return id == 0 ? OpenClassic.getGame().getTranslator().translate("options.music") : (id == 1 ? OpenClassic.getGame().getTranslator().translate("options.sound") : (id == 2 ? OpenClassic.getGame().getTranslator().translate("options.invert-mouse") : (id == 3 ? OpenClassic.getGame().getTranslator().translate("options.show-info") : (id == 4 ? OpenClassic.getGame().getTranslator().translate("options.render-distance") : (id == 5 ? OpenClassic.getGame().getTranslator().translate("options.view-bobbing") : (id == 6 ? OpenClassic.getGame().getTranslator().translate("options.3d-anaglyph") : (id == 7 ? OpenClassic.getGame().getTranslator().translate("options.limit-frames") : (id == 8 ? OpenClassic.getGame().getTranslator().translate("options.survival") : id == 9 ? OpenClassic.getGame().getTranslator().translate("options.smoothing") : ""))))))));
 	}
-	
+
 	public final String getSettingValue(int id) {
 		return id == 0 ? (this.music ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 1 ? (this.sound ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 2 ? (this.invertMouse ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 3 ? (this.showInfo ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 4 ? FOG[this.viewDistance] : (id == 5 ? (this.viewBobbing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 6 ? (this.anaglyph ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 7 ? (this.limitFPS ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 8 ? SURVIVAL[this.survival] : id == 9 ? (this.smoothing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : ""))))))));
 	}
-	
+
 	public final String getHackName(int id) {
 		switch(id) {
-			case 0: return OpenClassic.getGame().getTranslator().translate("options.hacks.speed");
-			case 1: return OpenClassic.getGame().getTranslator().translate("options.hacks.fly");
-			default: return "";
+			case 0:
+				return OpenClassic.getGame().getTranslator().translate("options.hacks.speed");
+			case 1:
+				return OpenClassic.getGame().getTranslator().translate("options.hacks.fly");
+			default:
+				return "";
 		}
 	}
-	
+
 	public final String getHackValue(int id) {
 		switch(id) {
-			case 0: return this.speed ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off");
-			case 1: return this.flying ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off");
-			default: return "";
+			case 0:
+				return this.speed ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off");
+			case 1:
+				return this.flying ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off");
+			default:
+				return "";
 		}
 	}
-	
+
 	public void toggleHack(int id) {
 		switch(id) {
 			case 0: {
@@ -184,66 +191,66 @@ public final class GameSettings {
 	private void load() {
 		BufferedReader reader = null;
 		try {
-			if (this.file.exists()) {
+			if(this.file.exists()) {
 				reader = new BufferedReader(new FileReader(this.file));
 				String line = null;
-				while ((line = reader.readLine()) != null) {
+				while((line = reader.readLine()) != null) {
 					String[] setting = line.split(":");
-					if (setting[0].equals("music")) {
+					if(setting[0].equals("music")) {
 						this.music = setting[1].equals("true");
 					}
 
-					if (setting[0].equals("sound")) {
+					if(setting[0].equals("sound")) {
 						this.sound = setting[1].equals("true");
 					}
 
-					if (setting[0].equals("invertYMouse")) {
+					if(setting[0].equals("invertYMouse")) {
 						this.invertMouse = setting[1].equals("true");
 					}
 
-					if (setting[0].equals("showFrameRate")) {
+					if(setting[0].equals("showFrameRate")) {
 						this.showInfo = setting[1].equals("true");
 					}
 
-					if (setting[0].equals("viewDistance")) {
+					if(setting[0].equals("viewDistance")) {
 						this.viewDistance = Integer.parseInt(setting[1]);
 					}
 
-					if (setting[0].equals("bobView")) {
+					if(setting[0].equals("bobView")) {
 						this.viewBobbing = setting[1].equals("true");
 					}
 
-					if (setting[0].equals("anaglyph3d")) {
+					if(setting[0].equals("anaglyph3d")) {
 						this.anaglyph = setting[1].equals("true");
 					}
 
-					if (setting[0].equals("limitFramerate")) {
+					if(setting[0].equals("limitFramerate")) {
 						this.limitFPS = setting[1].equals("true");
 					}
-					
-					if (setting[0].equals("survival")) {
+
+					if(setting[0].equals("survival")) {
 						this.survival = setting[1].equals("true") ? 2 : setting[1].equals("false") ? 0 : Integer.parseInt(setting[1]);
 						if(this.survival >= SURVIVAL.length) {
 							this.survival = SURVIVAL.length - 1;
 						}
 					}
-					
-					if (setting[0].equals("smoothing")) {
+
+					if(setting[0].equals("smoothing")) {
 						this.smoothing = setting[1].equals("true");
 					}
-					
-					if (setting[0].equals("texturepack")) {
+
+					if(setting[0].equals("texturepack")) {
 						this.texturePack = setting[1];
 					}
 
-					for (int index = 0; index < this.bindings.length; index++) {
-						if (setting[0].equals("key_" + this.bindings[index].key)) {
+					for(int index = 0; index < this.bindings.length; index++) {
+						if(setting[0].equals("key_" + this.bindings[index].key)) {
 							this.bindings[index].key = Integer.parseInt(setting[1]);
 						}
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch(IOException e) {
 			System.out.println(OpenClassic.getGame().getTranslator().translate("core.fail-options-load"));
 			e.printStackTrace();
 		} finally {
@@ -267,10 +274,10 @@ public final class GameSettings {
 			writer.println("smoothing:" + this.smoothing);
 			writer.println("texturepack:" + this.texturePack);
 
-			for (int binding = 0; binding < this.bindings.length; binding++) {
+			for(int binding = 0; binding < this.bindings.length; binding++) {
 				writer.println("key_" + this.bindings[binding].key + ":" + this.bindings[binding].key);
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 			System.out.println(OpenClassic.getGame().getTranslator().translate("core.fail-options-save"));
 			e.printStackTrace();
 		} finally {

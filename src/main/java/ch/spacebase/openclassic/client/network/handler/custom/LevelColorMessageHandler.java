@@ -10,11 +10,11 @@ public class LevelColorMessageHandler extends MessageHandler<LevelColorMessage> 
 
 	@Override
 	public void handle(ClassicSession session, Player player, LevelColorMessage message) {
-		if (message.getType().equals("sky")) {
+		if(message.getType().equals("sky")) {
 			OpenClassic.getClient().getLevel().setSkyColor(message.getValue());
-		} else if (message.getType().equals("fog")) {
+		} else if(message.getType().equals("fog")) {
 			OpenClassic.getClient().getLevel().setFogColor(message.getValue());
-		} else if (message.getType().equals("cloud")) {
+		} else if(message.getType().equals("cloud")) {
 			OpenClassic.getClient().getLevel().setCloudColor(message.getValue());
 		}
 	}

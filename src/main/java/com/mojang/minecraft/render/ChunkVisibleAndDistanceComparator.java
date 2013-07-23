@@ -5,7 +5,7 @@ import java.util.Comparator;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 
 public final class ChunkVisibleAndDistanceComparator implements Comparator<Chunk> {
-	
+
 	private LocalPlayer player;
 
 	public ChunkVisibleAndDistanceComparator(LocalPlayer player) {
@@ -14,14 +14,14 @@ public final class ChunkVisibleAndDistanceComparator implements Comparator<Chunk
 
 	@Override
 	public int compare(Chunk chunk, Chunk other) {
-		if (chunk.visible || !other.visible) {
-			if (other.visible) {
+		if(chunk.visible || !other.visible) {
+			if(other.visible) {
 				float sqDist = chunk.distanceSquared(this.player);
 				float otherSqDist = other.distanceSquared(this.player);
 
 				if(sqDist == otherSqDist) {
 					return 0;
-				} else if (sqDist > otherSqDist) {
+				} else if(sqDist > otherSqDist) {
 					return -1;
 				} else {
 					return 1;
@@ -33,5 +33,5 @@ public final class ChunkVisibleAndDistanceComparator implements Comparator<Chunk
 			return -1;
 		}
 	}
-	
+
 }

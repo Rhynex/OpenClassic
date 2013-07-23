@@ -41,21 +41,21 @@ public final class Chunk {
 		chunkUpdates++;
 		this.setAllDirty();
 
-		for (int pass = 0; pass < 2; pass++) {
+		for(int pass = 0; pass < 2; pass++) {
 			boolean continuing = false;
 			boolean cleaned = false;
 			GL11.glNewList(this.baseListId + pass, GL11.GL_COMPILE);
 			Renderer.get().begin();
-			for (int x = this.x; x < this.x + this.width; x++) {
-				for (int y = this.y; y < this.y + this.height; y++) {
-					for (int z = this.z; z < this.z + this.depth; z++) {
+			for(int x = this.x; x < this.x + this.width; x++) {
+				for(int y = this.y; y < this.y + this.height; y++) {
+					for(int z = this.z; z < this.z + this.depth; z++) {
 						int type = this.level.getTile(x, y, z);
-						if (type > 0) {
+						if(type > 0) {
 							BlockType block = Blocks.fromId(type);
 							if(block == null) block = VanillaBlock.STONE;
-							
+
 							int requiredPass = block.getId() == VanillaBlock.WATER.getId() || block.getId() == VanillaBlock.STATIONARY_WATER.getId() ? 1 : 0;
-							if (requiredPass != pass) {
+							if(requiredPass != pass) {
 								continuing = true;
 							} else {
 								cleaned |= block.getModel().render(x, y, z, this.level.getBrightness(x, y, z), true);
@@ -67,11 +67,11 @@ public final class Chunk {
 
 			Renderer.get().end();
 			GL11.glEndList();
-			if (cleaned) {
+			if(cleaned) {
 				this.dirty[pass] = false;
 			}
 
-			if (!continuing) {
+			if(!continuing) {
 				break;
 			}
 		}
@@ -86,7 +86,7 @@ public final class Chunk {
 	}
 
 	private void setAllDirty() {
-		for (int index = 0; index < 2; index++) {
+		for(int index = 0; index < 2; index++) {
 			this.dirty[index] = true;
 		}
 	}
@@ -97,10 +97,10 @@ public final class Chunk {
 	}
 
 	public final int appendData(int[] data, int start, int pass) {
-		if (!this.visible) {
+		if(!this.visible) {
 			return start;
 		} else {
-			if (!this.dirty[pass]) {
+			if(!this.dirty[pass]) {
 				data[start++] = this.baseListId + pass;
 			}
 
