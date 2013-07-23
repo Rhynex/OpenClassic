@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.network.msg.custom.audio.AudioPlayMessage;
 import ch.spacebase.openclassic.api.network.msg.custom.audio.AudioRegisterMessage;
@@ -20,6 +22,8 @@ public class ServerAudioManager implements AudioManager {
 	
 	@Override
 	public void registerSound(String sound, URL file, boolean included) {
+		Validate.notNull(sound, "Sound cannot be null.");
+		Validate.notNull(file, "URL cannot be null.");
 		if(!this.sounds.containsKey(sound)) this.sounds.put(sound, new ArrayList<URL>());
 		this.sounds.get(sound).add(file);
 		
@@ -30,6 +34,8 @@ public class ServerAudioManager implements AudioManager {
 
 	@Override
 	public void registerMusic(String music, URL file, boolean included) {
+		Validate.notNull(music, "Music cannot be null.");
+		Validate.notNull(file, "URL cannot be null.");
 		if(!this.music.containsKey(music)) this.music.put(music, new ArrayList<URL>());
 		this.music.get(music).add(file);
 		

@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
@@ -24,14 +26,14 @@ public class MCForgeLevelFormat {
 		if (magic != 7882256401675281664L) {
 			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("level.format-mismatch"), "MCForge 6"));
 			System.out.println(magic);
-			data.close();
+			IOUtils.closeQuietly(data);
 			return null;
 		}
 		
 		byte version = data.readByte();
 		if (version != 1) {
 			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.unknown-version"));
-			data.close();
+			IOUtils.closeQuietly(data);
 			return null;
 		}
 		
@@ -69,7 +71,7 @@ public class MCForgeLevelFormat {
 		}
 		
 		level.setData(width, depth, height, blocks);
-		data.close();
+		IOUtils.closeQuietly(data);
 		
 		try {
 			f.delete();
@@ -128,18 +130,21 @@ public class MCForgeLevelFormat {
 	}
 
 	private static byte[] decompress(byte[] gzip) {
+		ByteArrayInputStream ba = null;
+		GZIPInputStream gz = null;
 		try {
 			final int size = 4096;
-			ByteArrayInputStream ba = new ByteArrayInputStream(gzip);
-			GZIPInputStream gz = new GZIPInputStream(ba);
+			ba = new ByteArrayInputStream(gzip);
+			gz = new GZIPInputStream(ba);
 			byte[] data = new byte[size];
 			gz.read(data);
-			gz.close();
-			ba.close();
 			return data;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return new byte[0];
+		} finally {
+			IOUtils.closeQuietly(gz);
+			IOUtils.closeQuietly(ba);
 		}
 	}
 

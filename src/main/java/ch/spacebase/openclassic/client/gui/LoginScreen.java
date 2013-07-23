@@ -10,6 +10,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.URLEncoder;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
@@ -19,11 +21,11 @@ import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.cookie.Cookie;
-import ch.spacebase.openclassic.client.cookie.CookieList;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
+import ch.spacebase.openclassic.client.util.cookie.Cookie;
+import ch.spacebase.openclassic.client.util.cookie.CookieList;
 
 import com.mojang.minecraft.SessionData;
 
@@ -63,13 +65,7 @@ public class LoginScreen extends GuiScreen {
 				System.out.println(OpenClassic.getGame().getTranslator().translate("gui.login.fail-check"));
 				e.printStackTrace();
 			} finally {
-				if(reader != null) {
-					try {
-						reader.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+				IOUtils.closeQuietly(reader);
 			}
 		} else {
 			this.getWidget(0, Button.class).setActive(false);
@@ -89,17 +85,11 @@ public class LoginScreen extends GuiScreen {
 					writer.write(user);
 					writer.newLine();
 					writer.write(pass);
-				} catch (IOException e1) {
+				} catch (IOException e) {
 					System.out.println(OpenClassic.getGame().getTranslator().translate("gui.login.fail-create"));
-					e1.printStackTrace();
+					e.printStackTrace();
 				} finally {
-					if(writer != null) {
-						try {
-							writer.close();
-						} catch(IOException e1) {
-							e1.printStackTrace();
-						}
-					}
+					IOUtils.closeQuietly(writer);
 				}
 			} else if(this.getLoginFile(false).exists()) {
 				this.getLoginFile(false).delete();

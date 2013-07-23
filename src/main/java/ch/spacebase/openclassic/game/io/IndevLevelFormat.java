@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
@@ -50,7 +52,7 @@ public class IndevLevelFormat {
 		level.setData(width, height, depth, blocks);
 		
 		level.setSpawn(new Position(level, (float) x, (float) y, (float) z));
-		in.close();
+		IOUtils.closeQuietly(in);
 		
 		try {
 			f.delete();

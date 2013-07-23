@@ -3,7 +3,6 @@ package com.mojang.minecraft.gui;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
@@ -25,42 +24,28 @@ public final class LevelDumpScreen extends GuiScreen {
 		
 		this.clearWidgets();
 		this.attachWidget(this.widget);
-		this.attachWidget(new StateButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 96, this, OpenClassic.getGame().getTranslator().translate("gui.level-dump.format")));
-		this.getWidget(1, StateButton.class).setState("OpenClassic");
-		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")));
-		this.attachWidget(new Button(3, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
+		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")));
+		this.attachWidget(new Button(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")));
 		
-		this.getWidget(2, Button.class).setActive(false);
+		this.getWidget(1, Button.class).setActive(false);
 	}
 
 	public final void onButtonClick(Button button) {
-		if (button.isActive()) {
-			Minecraft mc = GeneralUtils.getMinecraft();
-			
-			if(button.getId() == 1) {
-				((StateButton) button).setState(((StateButton) button).getState().equals("Minecraft") ? "OpenClassic" : "Minecraft");
-			}
-			
-			if (button.getId() == 2 && this.widget.getText().trim().length() > 0) {
-				mc.level.name = this.widget.getText();
-				if(this.getWidget(1, StateButton.class).getState().equals("Minecraft")) {
-					LevelIO.saveOld(mc.level);
-				} else {
-					LevelIO.save(mc.level);
-				}
-				
-				mc.setCurrentScreen(this.parent);
-			}
+		Minecraft mc = GeneralUtils.getMinecraft();
+		if (button.getId() == 1 && this.widget.getText().trim().length() > 0) {
+			mc.level.name = this.widget.getText();
+			LevelIO.save(mc.level);
+			mc.setCurrentScreen(this.parent);
+		}
 
-			if (button.getId() == 3) {
-				mc.setCurrentScreen(this.parent);
-			}
+		if (button.getId() == 2) {
+			mc.setCurrentScreen(this.parent);
 		}
 	}
 
 	public final void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
-		this.getWidget(2, Button.class).setActive(this.widget.getText().trim().length() > 0);
+		this.getWidget(1, Button.class).setActive(this.widget.getText().trim().length() > 0);
 	}
 
 	public final void render() {

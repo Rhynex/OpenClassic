@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.Validate;
 
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.Color;
@@ -17,6 +19,7 @@ import ch.spacebase.openclassic.api.command.Command;
 import ch.spacebase.openclassic.api.command.CommandExecutor;
 import ch.spacebase.openclassic.api.command.Sender;
 import ch.spacebase.openclassic.api.config.Configuration;
+import ch.spacebase.openclassic.api.config.yaml.YamlConfig;
 import ch.spacebase.openclassic.api.event.game.CommandNotFoundEvent;
 import ch.spacebase.openclassic.api.event.game.PreCommandEvent;
 import ch.spacebase.openclassic.api.level.generator.Generator;
@@ -41,8 +44,8 @@ public abstract class ClassicGame implements Game {
 	private final PackageManager pkgManager;
 	private final Translator translator = new Translator();
 	
-	private final Map<Command, Plugin> commands = new HashMap<Command, Plugin>();
-	private final Map<CommandExecutor, Plugin> executors = new HashMap<CommandExecutor, Plugin>();
+	private final Map<Object, List<Command>> commands = new HashMap<Object, List<Command>>();
+	protected final Map<Object, List<CommandExecutor>> executors = new HashMap<Object, List<CommandExecutor>>();
 	private final Map<String, Generator> generators = new HashMap<String, Generator>();
 	
 	public ClassicGame(File directory) {
@@ -65,7 +68,7 @@ public abstract class ClassicGame implements Game {
 		
 		OpenClassic.setGame(this);
 		this.pkgManager = new PackageManager();
-		this.config = new Configuration(file);
+		this.config = new YamlConfig(file);
 		this.config.load();
 	}
 	
@@ -83,30 +86,50 @@ public abstract class ClassicGame implements Game {
 	public PluginManager getPluginManager() {
 		return this.pluginManager;
 	}
-
-	public void registerCommand(Plugin plugin, Command command) {
-		this.commands.put(command, plugin);
-	}
 	
-	public void registerExecutor(Plugin plugin, CommandExecutor executor) {
-		this.executors.put(executor, plugin);
+	@Override
+	public void registerCommand(Object owner, Command command) {
+		Validate.notNull(owner, "Owner cannot be null.");
+		Validate.notNull(command, "Command cannot be null.");
+		if(!this.commands.containsKey(owner)) {
+			this.commands.put(owner, new ArrayList<Command>());
+		}
+		
+		this.commands.get(owner).add(command);
 	}
 	
 	@Override
-	public void unregisterCommands(Plugin plugin) {
-		for(Command command : new ArrayList<Command>(this.commands.keySet())) {
-			if(this.commands.get(command) != null && this.commands.get(command).getDescription().getName().equals(plugin.getDescription().getName())) {
-				this.commands.remove(command);
-			}
+	public void registerExecutor(Object owner, CommandExecutor executor) {
+		Validate.notNull(owner, "Owner cannot be null.");
+		Validate.notNull(executor, "Executor cannot be null.");
+		if(!this.executors.containsKey(owner)) {
+			this.executors.put(owner, new ArrayList<CommandExecutor>());
+		}
+		
+		this.executors.get(owner).add(executor);
+	}
+	
+	@Override
+	public void unregisterCommands(Object owner) {
+		Validate.notNull(owner, "Owner cannot be null.");
+		if(!this.commands.containsKey(owner)) {
+			return;
+		}
+		
+		for(Command command : new ArrayList<Command>(this.commands.get(owner))) {
+			this.commands.remove(command);
 		}
 	}
 
 	@Override
-	public void unregisterExecutors(Plugin plugin) {
-		for(CommandExecutor executor : new ArrayList<CommandExecutor>(this.executors.keySet())) {
-			if(this.executors.get(executor) != null && this.executors.get(executor).getDescription().getName().equals(plugin.getDescription().getName())) {
-				this.executors.remove(executor);
-			}
+	public void unregisterExecutors(Object owner) {
+		Validate.notNull(owner, "Owner cannot be null.");
+		if(!this.executors.containsKey(owner)) {
+			return;
+		}
+		
+		for(CommandExecutor command : new ArrayList<CommandExecutor>(this.executors.get(owner))) {
+			this.executors.remove(command);
 		}
 	}
 
@@ -119,7 +142,7 @@ public abstract class ClassicGame implements Game {
 		}
 		
 		String split[] = event.getCommand().split(" ");
-		for(CommandExecutor executor : this.executors.keySet()) {
+		for(CommandExecutor executor : this.getCommandExecutors()) {
 			if(executor.getCommand(split[0]) != null) {
 				try {
 					Method method = executor.getCommand(split[0]);
@@ -209,13 +232,23 @@ public abstract class ClassicGame implements Game {
 		}
 	}
 
-	public Collection<Command> getCommands() {
-		return this.commands.keySet();
+	public List<Command> getCommands() {
+		List<Command> result = new ArrayList<Command>();
+		for(List<Command> commands : this.commands.values()) {
+			result.addAll(commands);
+		}
+		
+		return result;
 	}
 
 	@Override
-	public Collection<CommandExecutor> getCommandExecutors() {
-		return this.executors.keySet();
+	public List<CommandExecutor> getCommandExecutors() {
+		List<CommandExecutor> result = new ArrayList<CommandExecutor>();
+		for(List<CommandExecutor> executors : this.executors.values()) {
+			result.addAll(executors);
+		}
+		
+		return result;
 	}
 
 	@Override
@@ -224,6 +257,8 @@ public abstract class ClassicGame implements Game {
 	}
 
 	public void registerGenerator(String name, Generator generator) {
+		Validate.notNull(name, "Name cannot be null.");
+		Validate.notNull(generator, "Generator cannot be null.");
 		if(generator == null) return;
 		this.generators.put(name, generator);
 	}

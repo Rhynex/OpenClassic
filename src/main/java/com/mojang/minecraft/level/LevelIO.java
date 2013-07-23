@@ -1,14 +1,11 @@
 package com.mojang.minecraft.level;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+
+import org.apache.commons.io.IOUtils;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.data.NBTData;
@@ -81,33 +78,19 @@ public final class LevelIO {
 			return null;
 		}
 	}
-	
-	public static void saveOld(Level level) {
-		if(EventManager.callEvent(new LevelSaveEvent(level.openclassic)).isCancelled()) {
-			return;
-		}
-		
-		try {
-			DataOutputStream data = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(new File(OpenClassic.getGame().getDirectory(), "levels/" + level.name + ".mine"))));
-			data.writeInt(656127880);
-			data.writeByte(2);
-			ObjectOutputStream obj = new ObjectOutputStream(data);
-			obj.writeObject(level);
-			obj.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	public static byte[] processData(InputStream in) {
+		DataInputStream din = null;
 		try {
-			DataInputStream dataIn = new DataInputStream(new GZIPInputStream(in));
-			byte[] data = new byte[dataIn.readInt()];
-			dataIn.readFully(data);
-			dataIn.close();
+			din = new DataInputStream(new GZIPInputStream(in));
+			byte[] data = new byte[din.readInt()];
+			din.readFully(data);
 			return data;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		} finally {
+			IOUtils.closeQuietly(din);
 		}
 	}
+	
 }

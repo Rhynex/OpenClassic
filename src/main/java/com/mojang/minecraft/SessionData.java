@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.client.util.Server;
 
 public final class SessionData {
@@ -54,13 +56,7 @@ public final class SessionData {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(reader);
 		}
 	}
 	
@@ -87,13 +83,7 @@ public final class SessionData {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(writer);
 		}
 	}
 	

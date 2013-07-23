@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
+
 import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
@@ -79,6 +82,8 @@ public class ClientAudioManager implements AudioManager {
 	}
 	
 	public void registerSound(String sound, URL file, boolean included) {
+		Validate.notNull(sound, "Sound cannot be null.");
+		Validate.notNull(file, "URL cannot be null.");
 		if(!included) {
 			this.download(file);
 		}
@@ -88,6 +93,8 @@ public class ClientAudioManager implements AudioManager {
 	}
 	
 	public void registerMusic(String music, URL file, boolean included) {
+		Validate.notNull(music, "Music cannot be null.");
+		Validate.notNull(file, "URL cannot be null.");
 		if(!included) {
 			this.download(file);
 		}
@@ -134,14 +141,8 @@ public class ClientAudioManager implements AudioManager {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					if (in != null)
-						in.close();
-					if (out != null)
-						out.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				IOUtils.closeQuietly(in);
+				IOUtils.closeQuietly(out);
 			}
 
 			System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));

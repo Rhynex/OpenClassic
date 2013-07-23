@@ -2,11 +2,11 @@ package ch.spacebase.openclassic.client.network;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -131,13 +131,7 @@ public class ClientSession extends ClassicSession {
 			return new byte[0];
 		}
 		
-		try {
-			this.levelData.close();
-		} catch(IOException e) {
-			OpenClassic.getLogger().severe("Failed to close level data stream!");
-			e.printStackTrace();
-		}
-		
+		IOUtils.closeQuietly(this.levelData);
 		byte processed[] = LevelIO.processData(new ByteArrayInputStream(this.levelData.toByteArray()));
 		this.levelData = null;
 		return processed;

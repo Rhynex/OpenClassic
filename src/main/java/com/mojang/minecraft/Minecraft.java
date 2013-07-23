@@ -236,6 +236,7 @@ public final class Minecraft implements Runnable {
 			this.resourceThread.running = false;
 		}
 
+		OpenClassic.getClient().unregisterExecutors(OpenClassic.getClient());
 		((ClassicScheduler) OpenClassic.getClient().getScheduler()).stop();
 		this.audio.cleanup();
 		OpenClassic.setGame(null);
@@ -331,6 +332,7 @@ public final class Minecraft implements Runnable {
 	}
 
 	private void handleException(Throwable e) {
+		e.printStackTrace();
 		if(!this.running) {
 			return;
 		}
@@ -350,8 +352,6 @@ public final class Minecraft implements Runnable {
 			JOptionPane.showMessageDialog(null, e.toString(), msg, 0);
 			this.running = false;
 		}
-
-		e.printStackTrace();
 	}
 
 	private ByteBuffer loadIcon(InputStream in) throws IOException {

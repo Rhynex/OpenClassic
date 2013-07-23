@@ -78,10 +78,9 @@ public class ClassicClient extends ClassicGame implements Client {
 	public void init() {
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
 		
-		this.registerExecutor(null, new ClientCommands());
+		this.registerExecutor(this, new ClientCommands());
 		this.registerGenerator("normal", new NormalGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
-		
 
 		VanillaBlock.TNT.setPhysics(new TNTPhysics());
 		

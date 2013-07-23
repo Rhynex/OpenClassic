@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
@@ -26,7 +28,7 @@ public class MCSharpLevelFormat {
 		if (magic != 1874) {
 			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("level.format-mismatch"), "MCSharp v1"));
 			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("level.try-mcforge"));
-			data.close();
+			IOUtils.closeQuietly(data);
 			return MCForgeLevelFormat.load(level, file);
 		}
 
@@ -60,8 +62,7 @@ public class MCSharpLevelFormat {
 
 		level.setData(width, height, depth, blocks);
 		
-		data.close();
-		
+		IOUtils.closeQuietly(data);
 		try {
 			f.delete();
 		} catch(SecurityException e) {

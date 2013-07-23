@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
@@ -230,13 +232,10 @@ public class ServerPlayer implements Player {
 					dataOut.writeInt(b.length);
 					dataOut.write(b);
 					
-					dataOut.close();
-					gzip.close();
-
+					IOUtils.closeQuietly(dataOut);
+					IOUtils.closeQuietly(gzip);
+					IOUtils.closeQuietly(out);
 					byte[] data = out.toByteArray();
-					
-					out.close();
-
 					double numChunks = data.length / 1024;
 					double sent = 0;
 					

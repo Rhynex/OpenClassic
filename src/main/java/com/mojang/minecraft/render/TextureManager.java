@@ -13,6 +13,7 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
@@ -65,7 +66,7 @@ public class TextureManager {
 							img = ImageIO.read(TextureManager.class.getResourceAsStream(file));
 						}
 						
-						zip.close();
+						IOUtils.closeQuietly(zip);
 					}
 				}
 				

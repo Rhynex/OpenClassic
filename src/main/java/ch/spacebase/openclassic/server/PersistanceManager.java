@@ -2,32 +2,31 @@ package ch.spacebase.openclassic.server;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.config.Configuration;
-
+import ch.spacebase.openclassic.api.config.yaml.YamlConfig;
 
 public class PersistanceManager {
 	
-	private Configuration players = new Configuration(new File(OpenClassic.getGame().getDirectory(), "players.yml"));
+	private Configuration players = new YamlConfig(new File(OpenClassic.getGame().getDirectory(), "players.yml"));
 	
 	public void load() {
 		this.players.load();
 		
-		if(this.players.getNode("bans", null) == null) {
+		if(this.players.getNode("bans") == null) {
 			this.players.setValue("bans.exampleban", "reasonhere");
 		}
 		
-		if(this.players.getNode("ipbans", null) == null) {
+		if(this.players.getNode("ipbans") == null) {
 			this.players.setValue("ipbans.example-ip-ban", "reasonhere");
 		}
 		
-		if(this.players.getStringList("whitelist") == null || this.players.getStringList("whitelist").size() == 0) {
-			List<String> whitelist = new ArrayList<String>();
+		List<String> whitelist = this.players.getList("whitelist", String.class);
+		if(whitelist == null || whitelist.size() == 0) {
+			whitelist = new ArrayList<String>();
 			whitelist.add("playergoeshere");
-			
 			this.players.setValue("whitelist", whitelist);
 		}
 	}
@@ -45,7 +44,8 @@ public class PersistanceManager {
 	}
 	
 	public boolean isWhitelisted(String player) {
-		return this.players.getStringList("whitelist") != null && this.players.getStringList("whitelist").contains(player.toLowerCase());
+		List<String> whitelist = this.players.getList("whitelist", String.class);
+		return whitelist != null && whitelist.contains(player.toLowerCase());
 	}
 	
 	public void banPlayer(String player) {
@@ -85,7 +85,7 @@ public class PersistanceManager {
 	public void whitelist(String player) {
 		if(this.isWhitelisted(player)) return;
 		
-		List<String> whitelist = this.players.getStringList("whitelist");
+		List<String> whitelist = this.getWhitelistedPlayers();
 		
 		if(whitelist == null)
 			whitelist = new ArrayList<String>();
@@ -98,7 +98,7 @@ public class PersistanceManager {
 	public void unwhitelist(String player) {
 		if(!this.isWhitelisted(player)) return;
 		
-		List<String> whitelist = this.players.getStringList("whitelist");
+		List<String> whitelist = this.getWhitelistedPlayers();
 		
 		if(whitelist == null)
 			whitelist = new ArrayList<String>();
@@ -120,30 +120,28 @@ public class PersistanceManager {
 		return this.players.getString("ipbans." + address.replaceAll(".", "-"));
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<String> getBannedPlayers() {
 		List<String> bans = new ArrayList<String>();
 		
-		for(String ban : ((HashMap<String, Object>) this.players.getNode("bans", new HashMap<String, String>()).getValue()).keySet()) {
-			if(!ban.contains(".")) bans.add(ban);
+		for(String ban : this.players.getRelativeKeys("bans", false)) {
+			bans.add(ban);
 		}
 		
 		return bans;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<String> getBannedIps() {
 		List<String> bans = new ArrayList<String>();
 		
-		for(String ban : ((HashMap<String, Object>) this.players.getNode("ipbans", new HashMap<String, String>()).getValue()).keySet()) {
-			if(!ban.contains(".")) bans.add(ban.replaceAll("-", "."));
+		for(String ban : this.players.getRelativeKeys("ipbans", false)) {
+			bans.add(ban.replaceAll("-", "."));
 		}
 		
 		return bans;
 	}
 	
 	public List<String> getWhitelistedPlayers() {
-		return this.players.getStringList("whitelist");
+		return this.players.getList("whitelist", String.class);
 	}
 
 }

@@ -2,10 +2,12 @@ package ch.spacebase.openclassic.client.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.util.io.IOUtils;
 
 import com.mojang.minecraft.Minecraft;
 
@@ -54,24 +56,24 @@ public class LWJGLNatives {
 			if(file.exists()) {
 				InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
 				InputStream fin = new FileInputStream(file);
-				if(IOUtils.contentEquals(in, fin)) {
-					if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
-						System.load(file.getPath());
+				try {
+					if(IOUtils.contentEquals(in, fin)) {
+						if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
+							System.load(file.getPath());
+						}
+						
+						return;
 					}
-					
-					in.close();
-					fin.close();
-					return;
+				} finally {
+					IOUtils.closeQuietly(in);
+					IOUtils.closeQuietly(fin);
 				}
-				
-				in.close();
-				fin.close();
 			}
 			
 			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
 			System.out.println("Writing " + lib + " to " + file.getPath());
-			IOUtils.copy(in, file);
-			in.close();
+			IOUtils.copy(in, new FileOutputStream(file));
+			IOUtils.closeQuietly(in);
 			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
 				System.load(file.getPath());
 			}

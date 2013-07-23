@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.model.Quad;
@@ -59,12 +61,8 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 					} catch (IOException e) {
 						e.printStackTrace();
 					} finally {
-						try {
-							if(in != null) in.close();
-							if(out != null) out.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						IOUtils.closeQuietly(in);
+						IOUtils.closeQuietly(out);
 					}
 
 					OpenClassic.getLogger().info(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));

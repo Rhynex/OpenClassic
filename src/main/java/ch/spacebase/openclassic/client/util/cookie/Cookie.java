@@ -1,10 +1,12 @@
-package ch.spacebase.openclassic.client.cookie;
+package ch.spacebase.openclassic.client.util.cookie;
 
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import org.apache.commons.lang3.Validate;
 
 public class Cookie {
 	private static DateFormat expiresFormat1 = new SimpleDateFormat("E, dd MMM yyyy k:m:s 'GMT'", Locale.US);
@@ -45,10 +47,7 @@ public class Cookie {
 					}
 					
 					host = host.substring(host.indexOf('.'));
-					if (!host.equalsIgnoreCase(value)) {
-						throw new IllegalArgumentException("Trying to set foreign cookie");
-					}
-					
+					Validate.isTrue(host.equalsIgnoreCase(value), "Trying to set foreign cookie");
 					this.domain = value.toLowerCase();
 				}
 			} else if (name.equalsIgnoreCase("path")) {

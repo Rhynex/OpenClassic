@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.client.cookie;
+package ch.spacebase.openclassic.client.util.cookie;
 
 import java.io.IOException;
 import java.net.CookieHandler;

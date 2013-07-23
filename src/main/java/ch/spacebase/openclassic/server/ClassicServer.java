@@ -234,6 +234,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		((ClassicScheduler) this.getScheduler()).stop();
 		this.getPluginManager().disablePlugins();
 		this.getPluginManager().clearPlugins();
+		this.unregisterExecutors(this);
 		HeartbeatManager.clearBeats();
 		HeartbeatManager.setURL("");
 		

@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.input.Keyboard;
 
 import ch.spacebase.openclassic.api.OpenClassic;
@@ -181,11 +182,11 @@ public final class GameSettings {
 	}
 
 	private void load() {
+		BufferedReader reader = null;
 		try {
 			if (this.file.exists()) {
-				BufferedReader reader = new BufferedReader(new FileReader(this.file));
+				reader = new BufferedReader(new FileReader(this.file));
 				String line = null;
-
 				while ((line = reader.readLine()) != null) {
 					String[] setting = line.split(":");
 					if (setting[0].equals("music")) {
@@ -241,18 +242,19 @@ public final class GameSettings {
 						}
 					}
 				}
-
-				reader.close();
 			}
 		} catch (IOException e) {
 			System.out.println(OpenClassic.getGame().getTranslator().translate("core.fail-options-load"));
 			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(reader);
 		}
 	}
 
 	public void save() {
+		PrintWriter writer = null;
 		try {
-			PrintWriter writer = new PrintWriter(new FileWriter(this.file));
+			writer = new PrintWriter(new FileWriter(this.file));
 			writer.println("music:" + this.music);
 			writer.println("sound:" + this.sound);
 			writer.println("invertYMouse:" + this.invertMouse);
@@ -268,11 +270,11 @@ public final class GameSettings {
 			for (int binding = 0; binding < this.bindings.length; binding++) {
 				writer.println("key_" + this.bindings[binding].key + ":" + this.bindings[binding].key);
 			}
-
-			writer.close();
 		} catch (Exception e) {
 			System.out.println(OpenClassic.getGame().getTranslator().translate("core.fail-options-save"));
 			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(writer);
 		}
 	}
 

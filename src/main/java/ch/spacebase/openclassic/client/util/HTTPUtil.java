@@ -10,6 +10,8 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
+import org.apache.commons.io.IOUtils;
+
 public class HTTPUtil {
 
 	public static String fetchUrl(String url, String params) {
@@ -29,8 +31,7 @@ public class HTTPUtil {
 				buffer.append("\n");
 			}
 
-			reader.close();
-
+			IOUtils.closeQuietly(reader);
 			return buffer.toString();
 		} catch (IOException e) {
 		}
@@ -51,7 +52,7 @@ public class HTTPUtil {
 				buffer.append("\n");
 			}
 			
-			reader.close();
+			IOUtils.closeQuietly(reader);
 			return buffer.toString();
 		} catch (IOException e) {
 		}
@@ -95,7 +96,7 @@ public class HTTPUtil {
 			OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
 			out.write(params);
 			out.flush();
-			out.close();
+			IOUtils.closeQuietly(out);
 		}
 
 		conn.connect();

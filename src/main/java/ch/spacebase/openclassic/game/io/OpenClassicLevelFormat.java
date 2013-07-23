@@ -7,12 +7,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
-import ch.spacebase.openclassic.api.util.io.IOUtils;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 import ch.spacebase.opennbt.TagBuilder;
 import ch.spacebase.opennbt.stream.NBTInputStream;
@@ -106,12 +107,12 @@ public class OpenClassicLevelFormat {
 				byte blocks[] = ((ByteArrayTag) map.get("Blocks")).getValue();
 				level.setData(width, height, depth, blocks);
 			} else {
-				nbt.close();
+				IOUtils.closeQuietly(nbt);
 				throw new IOException("Unknown OpenClassic map version: " + version);
 			}
 		}
 
-		nbt.close();
+		IOUtils.closeQuietly(nbt);
 		return level;
 	}
 	
@@ -143,8 +144,8 @@ public class OpenClassicLevelFormat {
 		GZIPInputStream gzipIn = new GZIPInputStream(in);
 		DataInputStream data = new DataInputStream(gzipIn);
 		
-		level.setName(IOUtils.readString(data));
-		level.setAuthor(IOUtils.readString(data));
+		level.setName(readString(data));
+		level.setAuthor(readString(data));
 		level.setCreationTime(data.readLong());
 		
 		double x = data.readDouble();
@@ -163,8 +164,7 @@ public class OpenClassicLevelFormat {
 
 		level.setData(width, depth, height, blocks);
 		
-		data.close();
-		
+		IOUtils.closeQuietly(data);
 		try {
 			f.delete();
 		} catch(SecurityException e) {
@@ -203,7 +203,17 @@ public class OpenClassicLevelFormat {
 		root.append(map);
 		
 		nbt.writeTag(root.toCompoundTag());
-		nbt.close();
+		IOUtils.closeQuietly(nbt);
+	}
+	
+	private static String readString(DataInputStream in) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		
+		for(int length = in.readShort(); length > 0; length--) {
+			builder.append(in.readChar());
+		}
+		
+		return builder.toString();
 	}
 	
 	private OpenClassicLevelFormat() {

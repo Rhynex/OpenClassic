@@ -11,6 +11,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
+import org.apache.commons.io.IOUtils;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.client.ClientProgressBar;
 
@@ -34,10 +36,11 @@ public final class ResourceDownloadThread extends Thread {
 
 	public final void run() {
 		BufferedReader reader = null;
-
+		ArrayList<String> list = new ArrayList<String>();
+		
+		URL base = null;
 		try {
-			ArrayList<String> list = new ArrayList<String>();
-			URL base = new URL("https://dl.dropboxusercontent.com/u/40737374/minecraft_resources/");
+			base = new URL("https://dl.dropboxusercontent.com/u/40737374/minecraft_resources/");
 			URL url = new URL(base, "resources/");
 			
 			URLConnection con = url.openConnection();
@@ -45,52 +48,46 @@ public final class ResourceDownloadThread extends Thread {
 			reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String line = null;
 
-			while ((line = reader.readLine()) != null)
+			while ((line = reader.readLine()) != null) {
 				list.add(line);
-
-			reader.close();
-
-			for (String curr : list) {
-				try {
-					String split[] = curr.split(",");
-					int size = Integer.parseInt(split[1]);
-					File file = new File(this.resource, split[0]);
-
-					if (!file.exists() || file.length() != size) {
-						try {
-							file.getParentFile().mkdirs();
-						} catch(SecurityException e) {
-							e.printStackTrace();
-						}
-						
-						this.download(new URL(base, split[0].replaceAll(" ", "%20")), file, size);
-					} else {
-						int index = split[0].indexOf("/");
-						if (split[0].substring(0, index).equalsIgnoreCase("sound")) {
-							this.mc.audio.registerSound(split[0].substring(index + 1, split[0].length() - 4).replaceAll("[1-9]", "").replaceAll("/", "."), file.toURI().toURL(), true);
-						} else if (split[0].substring(0, index).equalsIgnoreCase("music")) {
-							if(split[0].contains("sweden"))  {
-								this.mc.audio.registerMusic("menu", file.toURI().toURL(), true);
-							}
-							
-							this.mc.audio.registerMusic("bg", file.toURI().toURL(), true);
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				if (!this.running) return;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
+			IOUtils.closeQuietly(reader);
+		}
+		
+		for (String curr : list) {
 			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
+				String split[] = curr.split(",");
+				int size = Integer.parseInt(split[1]);
+				File file = new File(this.resource, split[0]);
+
+				if (!file.exists() || file.length() != size) {
+					try {
+						file.getParentFile().mkdirs();
+					} catch(SecurityException e) {
+						e.printStackTrace();
+					}
+					
+					this.download(new URL(base, split[0].replaceAll(" ", "%20")), file, size);
+				} else {
+					int index = split[0].indexOf("/");
+					if (split[0].substring(0, index).equalsIgnoreCase("sound")) {
+						this.mc.audio.registerSound(split[0].substring(index + 1, split[0].length() - 4).replaceAll("[1-9]", "").replaceAll("/", "."), file.toURI().toURL(), true);
+					} else if (split[0].substring(0, index).equalsIgnoreCase("music")) {
+						if(split[0].contains("sweden"))  {
+							this.mc.audio.registerMusic("menu", file.toURI().toURL(), true);
+						}
+						
+						this.mc.audio.registerMusic("bg", file.toURI().toURL(), true);
+					}
+				}
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
+
+			if (!this.running) return;
 		}
 		
 		this.finished = true;
@@ -120,14 +117,8 @@ public final class ResourceDownloadThread extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				if (in != null)
-					in.close();
-				if (out != null)
-					out.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(out);
 		}
 		
 		this.mc.progressBar.setText("");
