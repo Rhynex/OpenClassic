@@ -159,6 +159,8 @@ public final class Minecraft implements Runnable {
 	public HeldBlock heldBlock = new HeldBlock();
 	public HashMap<Byte, NetworkPlayer> netPlayers = new HashMap<Byte, NetworkPlayer>();
 	private int schedTicks = 0;
+	private long lastUpdate = System.currentTimeMillis();
+	private int fps = 0;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -243,8 +245,7 @@ public final class Minecraft implements Runnable {
 		((ClassicScheduler) OpenClassic.getClient().getScheduler()).shutdown();
 		this.audio.cleanup();
 		OpenClassic.setGame(null);
-		Display.destroy();
-
+		this.destroyRender();
 		System.exit(0);
 	}
 
@@ -387,17 +388,6 @@ public final class Minecraft implements Runnable {
 		new ClassicClient(this);
 
 		this.dir = GeneralUtils.getMinecraftDirectory();
-		File lib = new File(this.dir, "lib");
-		if(!lib.exists()) {
-			try {
-				lib.mkdirs();
-			} catch(SecurityException e) {
-				e.printStackTrace();
-			}
-		}
-
-		LWJGLNatives.load(lib);
-
 		File levels = new File(this.dir, "levels");
 		if(!levels.exists()) {
 			try {
@@ -425,6 +415,76 @@ public final class Minecraft implements Runnable {
 			}
 		}
 
+		SessionData.loadFavorites(this.dir);
+		this.audio = new ClientAudioManager(this);
+		this.settings = new GameSettings(this, this.dir);
+		this.mode = this.settings.survival > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		Item.initModels();
+		this.initRender();
+
+		((ClassicClient) OpenClassic.getClient()).init();
+		this.resourceThread = new ResourceDownloadThread(this.dir, this, this.progressBar);
+		this.resourceThread.start();
+
+		this.progressBar.setVisible(true);
+		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.loading"));
+		this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
+		this.progressBar.setProgress(-1);
+		this.lastUpdate = System.currentTimeMillis();
+		this.fps = 0;
+		while(this.running) {
+			if(this.waiting) {
+				try {
+					Thread.sleep(100);
+				} catch(InterruptedException e) {
+				}
+			} else {
+				if(!this.started) {
+					if(this.resourceThread.isFinished()) {
+						this.progressBar.setVisible(false);
+						try {
+							Thread.sleep(1000);
+						} catch(InterruptedException e) {
+						}
+
+						if(this.server == null || this.server.equals("") || this.port == 0) {
+							this.setCurrentScreen(new LoginScreen());
+						} else {
+							this.initGame();
+						}
+
+						this.started = true;
+					}
+				}
+
+				this.timer.update();
+				for(int tick = 0; tick < this.timer.elapsedTicks; tick++) {
+					this.ticks++;
+					this.tick();
+				}
+
+				if(!this.render()) {
+					break;
+				}
+			}
+		}
+
+		this.shutdown();
+		return;
+	}
+	
+	private void initRender() {
+		File lib = new File(this.dir, "lib");
+		if(!lib.exists()) {
+			try {
+				lib.mkdirs();
+			} catch(SecurityException e) {
+				e.printStackTrace();
+			}
+		}
+
+		LWJGLNatives.load(lib);
+		
 		try {
 			if(this.canvas != null) {
 				Display.setParent(this.canvas);
@@ -481,658 +541,587 @@ public final class Minecraft implements Runnable {
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
 		}
 
-		checkGLError("Startup");
-		SessionData.loadFavorites(this.dir);
-
-		this.audio = new ClientAudioManager(this);
-		this.settings = new GameSettings(this, this.dir);
-
-		this.mode = this.settings.survival > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		this.textureManager = new TextureManager(this.settings);
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.LavaTexture()));
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.WaterTexture()));
 		this.fontRenderer = new FontRenderer("/default.png", this.textureManager);
 		this.levelRenderer = new LevelRenderer(this.textureManager);
-		Item.initModels();
-		GL11.glViewport(0, 0, this.width, this.height);
-		checkGLError("Post Startup");
-
-		((ClassicClient) OpenClassic.getClient()).init();
-		this.resourceThread = new ResourceDownloadThread(dir, this, this.progressBar);
-		this.resourceThread.start();
-
-		this.progressBar.setVisible(true);
-		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.loading"));
-		this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
-		this.progressBar.setProgress(-1);
-		this.progressBar.render();
-
 		ShaderManager.setup();
-		long lastUpdate = System.currentTimeMillis();
-		int fps = 0;
-
-		while(this.running) {
-			if(this.waiting) {
-				try {
-					Thread.sleep(100);
-				} catch(InterruptedException e) {
-				}
-			} else {
-				if(Display.isCloseRequested()) {
-					break;
-				}
-
-				if(this.width != Display.getWidth() || this.height != Display.getHeight()) {
-					this.resize();
-				}
-
-				if(!this.started) {
-					if(this.resourceThread.isFinished()) {
-						this.progressBar.setVisible(false);
-						try {
-							Thread.sleep(1000);
-						} catch(InterruptedException e) {
-						}
-
-						if(this.server == null || this.server.equals("") || this.port == 0) {
-							this.setCurrentScreen(new LoginScreen());
-						} else {
-							this.initGame();
-						}
-
-						this.started = true;
-					}
-				}
-
-				long sysClock = System.currentTimeMillis() - this.timer.lastSysClock;
-				long hrClock = System.nanoTime() / 1000000L;
-				if(sysClock > 1000) {
-					long diff = hrClock - this.timer.lastHRClock;
-					double adj = (double) sysClock / (double) diff;
-					this.timer.adjustment += (adj - this.timer.adjustment) * 0.20000000298023224D;
-					this.timer.lastSysClock = System.currentTimeMillis();
-					this.timer.lastHRClock = hrClock;
-				}
-
-				if(sysClock < 0L) {
-					this.timer.lastSysClock = System.currentTimeMillis();
-					this.timer.lastHRClock = hrClock;
-				}
-
-				double sec = hrClock / 1000D;
-				double add = (sec - this.timer.lastHR) * this.timer.adjustment;
-				this.timer.lastHR = sec;
-				if(add < 0) {
-					add = 0;
-				}
-
-				if(add > 1) {
-					add = 1;
-				}
-
-				this.timer.elapsedPartialTicks = (float) (this.timer.elapsedPartialTicks + add * this.timer.speed * this.timer.tps);
-				this.timer.elapsedTicks = (int) this.timer.elapsedPartialTicks;
-				if(this.timer.elapsedTicks > 100) {
-					this.timer.elapsedTicks = 100;
-				}
-
-				this.timer.elapsedPartialTicks -= this.timer.elapsedTicks;
-				this.timer.delta = this.timer.elapsedPartialTicks;
-
-				for(int tick = 0; tick < this.timer.elapsedTicks; tick++) {
-					this.ticks++;
-					this.tick();
-				}
-
-				checkGLError("Pre render");
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-				this.mode.applyBlockCracks(this.timer.delta);
-				if(this.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) { // Fixed
-																																				// focus
-																																				// bug
-																																				// for
-																																				// some
-																																				// computers/OS's
-					this.displayMenu();
-				}
-
-				this.displayActive = Display.isActive();
-				if(Mouse.isGrabbed()) {
-					int x = Mouse.getDX();
-					int y = Mouse.getDY();
-					byte direction = 1;
-					if(this.settings.invertMouse) {
-						direction = -1;
-					}
-
-					this.player.turn(x, (y * direction));
-					Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
-				}
-
-				int width = ClientRenderHelper.getHelper().getGuiWidth();
-				int height = ClientRenderHelper.getHelper().getGuiHeight();
-				if(this.level != null) {
-					float pitch = this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta;
-					float yaw = this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta;
-					Vector pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
-					float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
-					float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
-					float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
-					float psin = MathHelper.sin(-pitch * MathHelper.DEG_TO_RAD);
-					float mx = ysin * pcos;
-					float mz = ycos * pcos;
-					float reach = this.mode.getReachDistance();
-					this.selected = this.level.clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach), true);
-					if(this.selected != null) {
-						reach = this.selected.blockPos.distance(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta));
-					}
-
-					pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
-					if(this.mode instanceof CreativeGameMode) {
-						reach = 32;
-					}
-
-					Entity selectedEntity = null;
-					List<Entity> entities = this.level.blockMap.getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
-
-					float distance = 0;
-					for(int count = 0; count < entities.size(); count++) {
-						Entity entity = entities.get(count);
-						if(entity.isPickable()) {
-							Intersection pos = entity.bb.grow(0.1F, 0.1F, 0.1F).clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach));
-							if(pos != null && (pVec.distance(pos.blockPos) < distance || distance == 0)) {
-								selectedEntity = entity;
-								distance = pVec.distance(pos.blockPos);
-							}
-						}
-					}
-
-					if(selectedEntity != null && !(this.mode instanceof CreativeGameMode)) {
-						this.selected = new Intersection(selectedEntity);
-					}
-
-					int pass = 0;
-					while(true) {
-						if(pass >= 2) {
-							GL11.glColorMask(true, true, true, false);
-							break;
-						}
-
-						if(this.settings.anaglyph) {
-							if(pass == 0) {
-								GL11.glColorMask(false, true, true, false);
-							} else {
-								GL11.glColorMask(true, false, false, false);
-							}
-						}
-
-						GL11.glViewport(0, 0, this.width, this.height);
-						float fogDensity = 1.0F - (float) Math.pow(1.0F / (4 - this.settings.viewDistance), 0.25D);
-						float skyRed = (this.level.skyColor >> 16 & 255) / 255.0F;
-						float skyBlue = (this.level.skyColor >> 8 & 255) / 255.0F;
-						float skyGreen = (this.level.skyColor & 255) / 255.0F;
-						this.fogRenderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
-						this.fogRenderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
-						this.fogRenderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
-						this.fogRenderer.fogRed += (skyRed - this.fogRenderer.fogRed) * fogDensity;
-						this.fogRenderer.fogBlue += (skyBlue - this.fogRenderer.fogBlue) * fogDensity;
-						this.fogRenderer.fogGreen += (skyGreen - this.fogRenderer.fogGreen) * fogDensity;
-						BlockType type = Blocks.fromId(this.level.getTile((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z));
-						if(type != null && type.isLiquid()) {
-							if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER) {
-								this.fogRenderer.fogRed = 0.02F;
-								this.fogRenderer.fogBlue = 0.02F;
-								this.fogRenderer.fogGreen = 0.2F;
-							} else if(type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
-								this.fogRenderer.fogRed = 0.6F;
-								this.fogRenderer.fogBlue = 0.1F;
-								this.fogRenderer.fogGreen = 0.0F;
-							}
-						}
-
-						if(this.settings.anaglyph) {
-							float fred = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 59.0F + this.fogRenderer.fogGreen * 11.0F) / 100.0F;
-							float fblue = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 70.0F) / 100.0F;
-							float fgreen = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogGreen * 70.0F) / 100.0F;
-							this.fogRenderer.fogRed = fred;
-							this.fogRenderer.fogBlue = fblue;
-							this.fogRenderer.fogGreen = fgreen;
-						}
-
-						GL11.glClearColor(this.fogRenderer.fogRed, this.fogRenderer.fogBlue, this.fogRenderer.fogGreen, 0.0F);
-						GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
-						GL11.glEnable(GL11.GL_CULL_FACE);
-						this.fogRenderer.fogEnd = (512 >> (this.settings.viewDistance << 1));
-						GL11.glMatrixMode(GL11.GL_PROJECTION);
-						GL11.glLoadIdentity();
-						if(this.settings.anaglyph) {
-							GL11.glTranslatef((-((pass << 1) - 1)) * 0.07F, 0.0F, 0.0F);
-						}
-
-						float fov = 70;
-						if(this.player.health <= 0) {
-							fov /= (1.0F - 500.0F / (this.player.deathTime + this.timer.delta + 500.0F)) * 2.0F + 1.0F;
-						}
-
-						GLU.gluPerspective(fov, (float) this.width / (float) this.height, 0.05F, this.fogRenderer.fogEnd);
-						GL11.glMatrixMode(GL11.GL_MODELVIEW);
-						GL11.glLoadIdentity();
-						if(this.settings.anaglyph) {
-							GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
-						}
-
-						ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
-						if(this.settings.viewBobbing) {
-							ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
-						}
-
-						GL11.glTranslatef(0.0F, 0.0F, -0.1F);
-						GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1.0F, 0.0F, 0.0F);
-						GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0.0F, 1.0F, 0.0F);
-						float rx = this.player.xo + (this.player.x - this.player.xo) * this.timer.delta;
-						float ry = this.player.yo + (this.player.y - this.player.yo) * this.timer.delta;
-						float rz = this.player.zo + (this.player.z - this.player.zo) * this.timer.delta;
-						GL11.glTranslatef(-rx, -ry, -rz);
-						Frustum.update();
-						for(int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
-							this.levelRenderer.chunkCache[count].clip();
-						}
-
-						try {
-							Collections.sort(this.levelRenderer.chunks, new ChunkVisibleAndDistanceComparator(this.player));
-						} catch(Exception e) {
-						}
-
-						int max = this.levelRenderer.chunks.size() - 1;
-						int amount = this.levelRenderer.chunks.size();
-						if(amount > 3) {
-							amount = 3;
-						}
-
-						for(int count = 0; count < amount; count++) {
-							Chunk chunk = this.levelRenderer.chunks.remove(max - count);
-							chunk.update();
-							chunk.loaded = false;
-						}
-
-						this.fogRenderer.updateFog();
-						GL11.glEnable(GL11.GL_FOG);
-						this.levelRenderer.sortChunks(this.player, 0);
-						if(this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
-							for(int bx = (int) this.player.x - 1; bx <= (int) this.player.x + 1; bx++) {
-								for(int by = (int) this.player.y - 1; by <= (int) this.player.y + 1; by++) {
-									for(int bz = (int) this.player.z - 1; bz <= (int) this.player.z + 1; bz++) {
-										int id = this.levelRenderer.level.getTile(bx, by, bz);
-										if(id != 0 && Blocks.fromId(id) != null && Blocks.fromId(id).getPreventsRendering()) {
-											GL11.glColor4f(0.2F, 0.2F, 0.2F, 1.0F);
-											GL11.glDepthFunc(GL11.GL_LESS);
-											Blocks.fromId(id).getModel().renderAll(bx, by, bz, 0.2F);
-											GL11.glCullFace(GL11.GL_FRONT);
-											Blocks.fromId(id).getModel().renderAll(bx, by, bz, 0.2F);
-											GL11.glCullFace(GL11.GL_BACK);
-											GL11.glDepthFunc(GL11.GL_LEQUAL);
-										}
-									}
-								}
-							}
-						}
-
-						ClientRenderHelper.getHelper().setLighting(true);
-						this.levelRenderer.level.blockMap.render(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.levelRenderer.textures, this.timer.delta);
-						ClientRenderHelper.getHelper().setLighting(false);
-						this.fogRenderer.updateFog();
-						float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);
-						float zmod = -MathHelper.sin(this.player.yaw * MathHelper.DEG_TO_RAD);
-						float xdir = -zmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
-						float zdir = xmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
-						float ymod = MathHelper.cos(this.player.pitch * MathHelper.DEG_TO_RAD);
-
-						for(int particle = 0; particle < 2; particle++) {
-							if(this.particleManager.particles[particle].size() != 0) {
-								int textureId = 0;
-								if(particle == 0) {
-									textureId = this.particleManager.textureManager.bindTexture("/particles.png");
-								}
-
-								if(particle == 1) {
-									textureId = this.particleManager.textureManager.bindTexture("/terrain.png");
-								}
-
-								RenderHelper.getHelper().bindTexture(textureId);
-								Renderer.get().begin();
-
-								for(int count = 0; count < this.particleManager.particles[particle].size(); count++) {
-									this.particleManager.particles[particle].get(count).render(this.timer.delta, xmod, ymod, zmod, xdir, zdir);
-								}
-
-								Renderer.get().end();
-							}
-						}
-
-						RenderHelper.getHelper().bindTexture("/rock.png", true);
-						GL11.glEnable(GL11.GL_TEXTURE_2D);
-						GL11.glCallList(this.levelRenderer.listId);
-						this.fogRenderer.updateFog();
-						RenderHelper.getHelper().bindTexture("/clouds.png", true);
-						GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-						float cloudRed = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255.0F;
-						float cloudBlue = (this.levelRenderer.level.cloudColor >> 8 & 255) / 255.0F;
-						float cloudGreen = (this.levelRenderer.level.cloudColor & 255) / 255.0F;
-						if(this.settings.anaglyph) {
-							cloudRed = (cloudRed * 30.0F + cloudBlue * 59.0F + cloudGreen * 11.0F) / 100.0F;
-							cloudBlue = (cloudRed * 30.0F + cloudBlue * 70.0F) / 100.0F;
-							cloudGreen = (cloudRed * 30.0F + cloudGreen * 70.0F) / 100.0F;
-						}
-
-						float texCoordMod = 1 / 2048f;
-						float cloudHeight = (this.levelRenderer.level.height + 2);
-						float movement = (this.levelRenderer.ticks + this.timer.delta) * texCoordMod * 0.03F;
-						Renderer.get().begin();
-						Renderer.get().color(cloudRed, cloudBlue, cloudGreen);
-
-						for(int x = -2048; x < this.levelRenderer.level.width + 2048; x += 512) {
-							for(int z = -2048; z < this.levelRenderer.level.depth + 2048; z += 512) {
-								Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
-								Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
-								Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
-								Renderer.get().vertexuv(x, cloudHeight, z, x * texCoordMod + movement, z * texCoordMod);
-								Renderer.get().vertexuv(x, cloudHeight, z, x * texCoordMod + movement, z * texCoordMod);
-								Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
-								Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
-								Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
-							}
-						}
-
-						Renderer.get().end();
-						GL11.glDisable(GL11.GL_TEXTURE_2D);
-						Renderer.get().begin();
-						float skRed = (this.levelRenderer.level.skyColor >> 16 & 255) / 255.0F;
-						float skBlue = (this.levelRenderer.level.skyColor >> 8 & 255) / 255.0F;
-						float skGreen = (this.levelRenderer.level.skyColor & 255) / 255.0F;
-						if(this.settings.anaglyph) {
-							skRed = (skRed * 30.0F + skBlue * 59.0F + skGreen * 11.0F) / 100.0F;
-							skBlue = (skRed * 30.0F + skBlue * 70.0F) / 100.0F;
-							skGreen = (skRed * 30.0F + skGreen * 70.0F) / 100.0F;
-						}
-
-						Renderer.get().color(skRed, skBlue, skGreen);
-						float skyHeight = (this.levelRenderer.level.height + 10);
-
-						for(int x = -2048; x < this.levelRenderer.level.width + 2048; x += 512) {
-							for(int z = -2048; z < this.levelRenderer.level.depth + 2048; z += 512) {
-								Renderer.get().vertex(x, skyHeight, z);
-								Renderer.get().vertex((x + 512), skyHeight, z);
-								Renderer.get().vertex((x + 512), skyHeight, (z + 512));
-								Renderer.get().vertex(x, skyHeight, (z + 512));
-							}
-						}
-
-						Renderer.get().end();
-						GL11.glEnable(GL11.GL_TEXTURE_2D);
-						this.fogRenderer.updateFog();
-						if(this.selected != null) {
-							GL11.glDisable(GL11.GL_ALPHA_TEST);
-							GL11.glEnable(GL11.GL_BLEND);
-							GL11.glEnable(GL11.GL_ALPHA_TEST);
-							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-							GL11.glColor4f(1.0F, 1.0F, 1.0F, (MathHelper.sin(System.currentTimeMillis() / 100.0F) * 0.2F + 0.4F) * 0.5F);
-							if(this.levelRenderer.cracks > 0) {
-								GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR);
-								RenderHelper.getHelper().bindTexture("/terrain.png", true);
-								GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
-								GL11.glPushMatrix();
-								int bid = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
-								BlockType btype = bid > 0 ? Blocks.fromId(bid) : null;
-								GL11.glDepthMask(false);
-								if(btype == null) {
-									btype = VanillaBlock.STONE;
-								}
-
-								for(int count = 0; count < btype.getModel().getQuads().size(); count++) {
-									ClientRenderHelper.getHelper().drawCracks(btype.getModel().getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
-								}
-
-								GL11.glDepthMask(true);
-								GL11.glPopMatrix();
-							}
-
-							GL11.glDisable(GL11.GL_BLEND);
-							GL11.glDisable(GL11.GL_ALPHA_TEST);
-							GL11.glEnable(GL11.GL_BLEND);
-							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-							GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.4F);
-							GL11.glLineWidth(2.0F);
-							GL11.glDisable(GL11.GL_TEXTURE_2D);
-							GL11.glDepthMask(false);
-							int block = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
-							if(block > 0) {
-								AABB aabb = BlockUtils.getSelectionBox(block, this.selected.x, this.selected.y, this.selected.z).grow(0.002F, 0.002F, 0.002F);
-								GL11.glBegin(GL11.GL_LINE_STRIP);
-								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
-								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
-								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
-								GL11.glEnd();
-								GL11.glBegin(GL11.GL_LINE_STRIP);
-								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
-								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
-								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
-								GL11.glEnd();
-								GL11.glBegin(GL11.GL_LINES);
-								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
-								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
-								GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
-								GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
-								GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
-								GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
-								GL11.glEnd();
-							}
-
-							GL11.glDepthMask(true);
-							GL11.glEnable(GL11.GL_TEXTURE_2D);
-							GL11.glDisable(GL11.GL_BLEND);
-							GL11.glEnable(GL11.GL_ALPHA_TEST);
-						}
-
-						GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-						this.fogRenderer.updateFog();
-						GL11.glEnable(GL11.GL_TEXTURE_2D);
-						GL11.glEnable(GL11.GL_BLEND);
-						RenderHelper.getHelper().bindTexture("/water.png", true);
-						GL11.glCallList(this.levelRenderer.listId + 1);
-						GL11.glDisable(GL11.GL_BLEND);
-						GL11.glEnable(GL11.GL_BLEND);
-						GL11.glColorMask(false, false, false, false);
-						int cy = this.levelRenderer.sortChunks(this.player, 1);
-						GL11.glColorMask(true, true, true, true);
-						if(this.settings.anaglyph) {
-							if(pass == 0) {
-								GL11.glColorMask(false, true, true, false);
-							} else {
-								GL11.glColorMask(true, false, false, false);
-							}
-						}
-
-						if(cy > 0) {
-							RenderHelper.getHelper().bindTexture("/terrain.png", true);
-							GL11.glCallLists(this.levelRenderer.buffer);
-						}
-
-						GL11.glDepthMask(true);
-						GL11.glDisable(GL11.GL_BLEND);
-						GL11.glDisable(GL11.GL_FOG);
-						if(this.raining) {
-							int x = (int) this.player.x;
-							int y = (int) this.player.y;
-							int z = (int) this.player.z;
-							GL11.glDisable(GL11.GL_CULL_FACE);
-							GL11.glNormal3f(0, 1, 0);
-							GL11.glEnable(GL11.GL_BLEND);
-							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-							RenderHelper.getHelper().bindTexture("/rain.png", true);
-
-							for(int cx = x - 5; cx <= x + 5; cx++) {
-								for(int cz = z - 5; cz <= z + 5; cz++) {
-									cy = this.level.getHighestTile(cx, cz);
-									int minRY = y - 5;
-									int maxRY = y + 5;
-									if(minRY < cy) {
-										minRY = cy;
-									}
-
-									if(maxRY < cy) {
-										maxRY = cy;
-									}
-
-									if(minRY != maxRY) {
-										float downfall = (((this.rainTicks + cx * 3121 + cz * 418711) % 32) + this.timer.delta) / 32.0F;
-										float rax = cx + 0.5F - this.player.x;
-										float raz = cz + 0.5F - this.player.z;
-										float visibility = (float) Math.sqrt(rax * rax + raz * raz) / 5;
-										GL11.glColor4f(1.0F, 1.0F, 1.0F, (1.0F - visibility * visibility) * 0.7F);
-										Renderer.get().begin();
-										Renderer.get().vertexuv(cx, minRY, cz, 0.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv((cx + 1), minRY, (cz + 1), 2.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv((cx + 1), maxRY, (cz + 1), 2.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv(cx, maxRY, cz, 0.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv(cx, minRY, (cz + 1), 0.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv((cx + 1), minRY, cz, 2.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv((cx + 1), maxRY, cz, 2.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().vertexuv(cx, maxRY, (cz + 1), 0.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
-										Renderer.get().end();
-									}
-								}
-							}
-
-							GL11.glEnable(GL11.GL_CULL_FACE);
-							GL11.glDisable(GL11.GL_BLEND);
-						}
-
-						if(selectedEntity != null) {
-							selectedEntity.renderHover(this.textureManager, this.timer.delta);
-						}
-
-						GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-						GL11.glLoadIdentity();
-						if(this.settings.anaglyph) {
-							GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
-						}
-
-						ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
-						if(this.settings.viewBobbing) {
-							ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
-						}
-
-						float heldPos = this.heldBlock.lastPosition + (this.heldBlock.heldPosition - this.heldBlock.lastPosition) * this.timer.delta;
-						GL11.glPushMatrix();
-						GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1.0F, 0.0F, 0.0F);
-						GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0.0F, 1.0F, 0.0F);
-						ClientRenderHelper.getHelper().setLighting(true);
-						GL11.glPopMatrix();
-						GL11.glPushMatrix();
-						if(this.heldBlock.moving) {
-							float off = (this.heldBlock.heldOffset + this.timer.delta) / 7.0F;
-							float offsin = MathHelper.sin(off * MathHelper.PI);
-							GL11.glTranslatef(-MathHelper.sin((float) Math.sqrt(off) * MathHelper.PI) * 0.4F, MathHelper.sin((float) Math.sqrt(off) * MathHelper.TWO_PI) * 0.2F, -offsin * 0.2F);
-						}
-
-						GL11.glTranslatef(0.7F * 0.8F, -0.65F * 0.8F - (1.0F - heldPos) * 0.6F, -0.9F * 0.8F);
-						GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-						GL11.glEnable(GL11.GL_NORMALIZE);
-						if(this.heldBlock.moving) {
-							float off = (this.heldBlock.heldOffset + this.timer.delta) / 7.0F;
-							float offsin = MathHelper.sin((off) * off * MathHelper.PI);
-							GL11.glRotatef(MathHelper.sin((float) Math.sqrt(off) * MathHelper.PI) * 80.0F, 0.0F, 1.0F, 0.0F);
-							GL11.glRotatef(-offsin * 20.0F, 1.0F, 0.0F, 0.0F);
-						}
-
-						float brightness = this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z);
-						GL11.glColor4f(brightness, brightness, brightness, 1);
-
-						if(!this.hideGui) {
-							if(this.heldBlock.block != null) {
-								GL11.glScalef(0.4F, 0.4F, 0.4F);
-								GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-								this.heldBlock.block.getModel().renderAll(0, 0, 0, this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z));
-							} else {
-								this.player.bindTexture(this.textureManager);
-								GL11.glScalef(1.0F, -1.0F, -1.0F);
-								GL11.glTranslatef(0.0F, 0.2F, 0.0F);
-								GL11.glRotatef(-120.0F, 0.0F, 0.0F, 1.0F);
-								GL11.glScalef(1.0F, 1.0F, 1.0F);
-								ModelPart arm = this.player.getModel().leftArm;
-								if(!arm.hasList) {
-									arm.generateList(0.0625F);
-								}
-
-								GL11.glCallList(arm.list);
-							}
-						}
-
-						GL11.glDisable(GL11.GL_NORMALIZE);
-						GL11.glPopMatrix();
-						ClientRenderHelper.getHelper().setLighting(false);
-						if(!this.settings.anaglyph) {
-							break;
-						}
-
-						pass++;
-					}
-
-					ClientRenderHelper.getHelper().ortho();
-					this.hud.render(this.timer.delta, this.currentScreen != null, Mouse.getX() * width / this.width, height - Mouse.getY() * height / this.height - 1);
-				} else {
-					GL11.glViewport(0, 0, this.width, this.height);
-					GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-					GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
-					GL11.glMatrixMode(GL11.GL_PROJECTION);
-					GL11.glLoadIdentity();
-					GL11.glMatrixMode(GL11.GL_MODELVIEW);
-					GL11.glLoadIdentity();
-					ClientRenderHelper.getHelper().ortho();
-				}
-
-				if(this.currentScreen != null) {
-					this.currentScreen.render();
-				}
-
-				if(this.progressBar.isVisible()) {
-					this.progressBar.render(false);
-				}
-
-				Thread.yield();
-				Display.update();
-
-				if(this.settings.limitFPS) {
-					try {
-						Thread.sleep(5);
-					} catch(InterruptedException e) {
-					}
-				}
-
-				checkGLError("Post render");
-				fps++;
-
-				while(System.currentTimeMillis() >= lastUpdate + 1000) {
-					this.debugInfo = fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
-					com.mojang.minecraft.render.Chunk.chunkUpdates = 0;
-					lastUpdate += 1000;
-					fps = 0;
-				}
+		GL11.glViewport(0, 0, this.width, this.height);
+		checkGLError("Startup");
+	}
+	
+	private void destroyRender() {
+		ShaderManager.cleanup();
+		Display.destroy();
+	}
+	
+	private boolean render() {
+		if(Display.isCloseRequested()) {
+			return false;
+		}
+
+		if(this.width != Display.getWidth() || this.height != Display.getHeight()) {
+			this.resize();
+		}
+		
+		checkGLError("Pre render");
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		if(this.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) {
+			this.displayMenu();
+		}
+		
+		this.displayActive = Display.isActive();
+		this.mode.applyBlockCracks(this.timer.delta);
+		if(Mouse.isGrabbed()) {
+			int x = Mouse.getDX();
+			int y = Mouse.getDY();
+			byte direction = 1;
+			if(this.settings.invertMouse) {
+				direction = -1;
+			}
+
+			this.player.turn(x, (y * direction));
+			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+		}
+		
+		RenderHelper.getHelper().bindTexture("/terrain.png", true);
+
+		for(int index = 0; index < this.textureManager.animations.size(); index++) {
+			AnimatedTexture animation = this.textureManager.animations.get(index);
+			animation.anaglyph = this.textureManager.settings.anaglyph;
+			animation.animate();
+
+			ByteBuffer buffer = BufferUtils.createByteBuffer(animation.textureData.length);
+			buffer.put(animation.textureData);
+			buffer.flip();
+			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, animation.textureId % 16 << 4, animation.textureId / 16 << 4, 16, 16, 6408, 5121, buffer);
+			if(animation instanceof WaterTexture) {
+				RenderHelper.getHelper().bindTexture("/water.png", true);
+				GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 16, 16, 6408, 5121, buffer);
+				RenderHelper.getHelper().bindTexture("/terrain.png", true);
 			}
 		}
 
-		ShaderManager.cleanup();
-		this.shutdown();
-		return;
+		int width = ClientRenderHelper.getHelper().getGuiWidth();
+		int height = ClientRenderHelper.getHelper().getGuiHeight();
+		if(this.level != null) {
+			float pitch = this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta;
+			float yaw = this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta;
+			Vector pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
+			float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
+			float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
+			float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
+			float psin = MathHelper.sin(-pitch * MathHelper.DEG_TO_RAD);
+			float mx = ysin * pcos;
+			float mz = ycos * pcos;
+			float reach = this.mode.getReachDistance();
+			this.selected = this.level.clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach), true);
+			if(this.selected != null) {
+				reach = this.selected.blockPos.distance(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta));
+			}
+
+			pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
+			if(this.mode instanceof CreativeGameMode) {
+				reach = 32;
+			}
+
+			Entity selectedEntity = null;
+			List<Entity> entities = this.level.blockMap.getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
+
+			float distance = 0;
+			for(int count = 0; count < entities.size(); count++) {
+				Entity entity = entities.get(count);
+				if(entity.isPickable()) {
+					Intersection pos = entity.bb.grow(0.1F, 0.1F, 0.1F).clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach));
+					if(pos != null && (pVec.distance(pos.blockPos) < distance || distance == 0)) {
+						selectedEntity = entity;
+						distance = pVec.distance(pos.blockPos);
+					}
+				}
+			}
+
+			if(selectedEntity != null && !(this.mode instanceof CreativeGameMode)) {
+				this.selected = new Intersection(selectedEntity);
+			}
+
+			int pass = 0;
+			while(true) {
+				if(pass >= 2) {
+					GL11.glColorMask(true, true, true, false);
+					break;
+				}
+
+				if(this.settings.anaglyph) {
+					if(pass == 0) {
+						GL11.glColorMask(false, true, true, false);
+					} else {
+						GL11.glColorMask(true, false, false, false);
+					}
+				}
+
+				GL11.glViewport(0, 0, this.width, this.height);
+				float fogDensity = 1.0F - (float) Math.pow(1.0F / (4 - this.settings.viewDistance), 0.25D);
+				float skyRed = (this.level.skyColor >> 16 & 255) / 255.0F;
+				float skyBlue = (this.level.skyColor >> 8 & 255) / 255.0F;
+				float skyGreen = (this.level.skyColor & 255) / 255.0F;
+				this.fogRenderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
+				this.fogRenderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
+				this.fogRenderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
+				this.fogRenderer.fogRed += (skyRed - this.fogRenderer.fogRed) * fogDensity;
+				this.fogRenderer.fogBlue += (skyBlue - this.fogRenderer.fogBlue) * fogDensity;
+				this.fogRenderer.fogGreen += (skyGreen - this.fogRenderer.fogGreen) * fogDensity;
+				BlockType type = Blocks.fromId(this.level.getTile((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z));
+				if(type != null && type.isLiquid()) {
+					if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER) {
+						this.fogRenderer.fogRed = 0.02F;
+						this.fogRenderer.fogBlue = 0.02F;
+						this.fogRenderer.fogGreen = 0.2F;
+					} else if(type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
+						this.fogRenderer.fogRed = 0.6F;
+						this.fogRenderer.fogBlue = 0.1F;
+						this.fogRenderer.fogGreen = 0.0F;
+					}
+				}
+
+				if(this.settings.anaglyph) {
+					float fred = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 59.0F + this.fogRenderer.fogGreen * 11.0F) / 100.0F;
+					float fblue = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 70.0F) / 100.0F;
+					float fgreen = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogGreen * 70.0F) / 100.0F;
+					this.fogRenderer.fogRed = fred;
+					this.fogRenderer.fogBlue = fblue;
+					this.fogRenderer.fogGreen = fgreen;
+				}
+
+				GL11.glClearColor(this.fogRenderer.fogRed, this.fogRenderer.fogBlue, this.fogRenderer.fogGreen, 0.0F);
+				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
+				GL11.glEnable(GL11.GL_CULL_FACE);
+				this.fogRenderer.fogEnd = (512 >> (this.settings.viewDistance << 1));
+				GL11.glMatrixMode(GL11.GL_PROJECTION);
+				GL11.glLoadIdentity();
+				if(this.settings.anaglyph) {
+					GL11.glTranslatef((-((pass << 1) - 1)) * 0.07F, 0.0F, 0.0F);
+				}
+
+				float fov = 70;
+				if(this.player.health <= 0) {
+					fov /= (1.0F - 500.0F / (this.player.deathTime + this.timer.delta + 500.0F)) * 2.0F + 1.0F;
+				}
+
+				GLU.gluPerspective(fov, (float) this.width / (float) this.height, 0.05F, this.fogRenderer.fogEnd);
+				GL11.glMatrixMode(GL11.GL_MODELVIEW);
+				GL11.glLoadIdentity();
+				if(this.settings.anaglyph) {
+					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
+				}
+
+				ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
+				if(this.settings.viewBobbing) {
+					ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
+				}
+
+				GL11.glTranslatef(0.0F, 0.0F, -0.1F);
+				GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1.0F, 0.0F, 0.0F);
+				GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0.0F, 1.0F, 0.0F);
+				float rx = this.player.xo + (this.player.x - this.player.xo) * this.timer.delta;
+				float ry = this.player.yo + (this.player.y - this.player.yo) * this.timer.delta;
+				float rz = this.player.zo + (this.player.z - this.player.zo) * this.timer.delta;
+				GL11.glTranslatef(-rx, -ry, -rz);
+				Frustum.update();
+				for(int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
+					this.levelRenderer.chunkCache[count].clip();
+				}
+
+				try {
+					Collections.sort(this.levelRenderer.chunks, new ChunkVisibleAndDistanceComparator(this.player));
+				} catch(Exception e) {
+				}
+
+				int max = this.levelRenderer.chunks.size() - 1;
+				int amount = this.levelRenderer.chunks.size();
+				if(amount > 3) {
+					amount = 3;
+				}
+
+				for(int count = 0; count < amount; count++) {
+					Chunk chunk = this.levelRenderer.chunks.remove(max - count);
+					chunk.update();
+					chunk.loaded = false;
+				}
+
+				this.fogRenderer.updateFog();
+				GL11.glEnable(GL11.GL_FOG);
+				this.levelRenderer.sortChunks(this.player, 0);
+				if(this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
+					for(int bx = (int) this.player.x - 1; bx <= (int) this.player.x + 1; bx++) {
+						for(int by = (int) this.player.y - 1; by <= (int) this.player.y + 1; by++) {
+							for(int bz = (int) this.player.z - 1; bz <= (int) this.player.z + 1; bz++) {
+								int id = this.levelRenderer.level.getTile(bx, by, bz);
+								if(id != 0 && Blocks.fromId(id) != null && Blocks.fromId(id).getPreventsRendering()) {
+									GL11.glColor4f(0.2F, 0.2F, 0.2F, 1.0F);
+									GL11.glDepthFunc(GL11.GL_LESS);
+									Blocks.fromId(id).getModel().renderAll(bx, by, bz, 0.2F);
+									GL11.glCullFace(GL11.GL_FRONT);
+									Blocks.fromId(id).getModel().renderAll(bx, by, bz, 0.2F);
+									GL11.glCullFace(GL11.GL_BACK);
+									GL11.glDepthFunc(GL11.GL_LEQUAL);
+								}
+							}
+						}
+					}
+				}
+
+				ClientRenderHelper.getHelper().setLighting(true);
+				this.levelRenderer.level.blockMap.render(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.levelRenderer.textures, this.timer.delta);
+				ClientRenderHelper.getHelper().setLighting(false);
+				this.fogRenderer.updateFog();
+				float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);
+				float zmod = -MathHelper.sin(this.player.yaw * MathHelper.DEG_TO_RAD);
+				float xdir = -zmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
+				float zdir = xmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
+				float ymod = MathHelper.cos(this.player.pitch * MathHelper.DEG_TO_RAD);
+
+				for(int particle = 0; particle < 2; particle++) {
+					if(this.particleManager.particles[particle].size() != 0) {
+						int textureId = 0;
+						if(particle == 0) {
+							textureId = this.particleManager.textureManager.bindTexture("/particles.png");
+						}
+
+						if(particle == 1) {
+							textureId = this.particleManager.textureManager.bindTexture("/terrain.png");
+						}
+
+						RenderHelper.getHelper().bindTexture(textureId);
+						Renderer.get().begin();
+
+						for(int count = 0; count < this.particleManager.particles[particle].size(); count++) {
+							this.particleManager.particles[particle].get(count).render(this.timer.delta, xmod, ymod, zmod, xdir, zdir);
+						}
+
+						Renderer.get().end();
+					}
+				}
+
+				RenderHelper.getHelper().bindTexture("/rock.png", true);
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+				GL11.glCallList(this.levelRenderer.listId);
+				this.fogRenderer.updateFog();
+				RenderHelper.getHelper().bindTexture("/clouds.png", true);
+				GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+				float cloudRed = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255.0F;
+				float cloudBlue = (this.levelRenderer.level.cloudColor >> 8 & 255) / 255.0F;
+				float cloudGreen = (this.levelRenderer.level.cloudColor & 255) / 255.0F;
+				if(this.settings.anaglyph) {
+					cloudRed = (cloudRed * 30.0F + cloudBlue * 59.0F + cloudGreen * 11.0F) / 100.0F;
+					cloudBlue = (cloudRed * 30.0F + cloudBlue * 70.0F) / 100.0F;
+					cloudGreen = (cloudRed * 30.0F + cloudGreen * 70.0F) / 100.0F;
+				}
+
+				float texCoordMod = 1 / 2048f;
+				float cloudHeight = (this.levelRenderer.level.height + 2);
+				float movement = (this.levelRenderer.ticks + this.timer.delta) * texCoordMod * 0.03F;
+				Renderer.get().begin();
+				Renderer.get().color(cloudRed, cloudBlue, cloudGreen);
+
+				for(int x = -2048; x < this.levelRenderer.level.width + 2048; x += 512) {
+					for(int z = -2048; z < this.levelRenderer.level.depth + 2048; z += 512) {
+						Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
+						Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
+						Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
+						Renderer.get().vertexuv(x, cloudHeight, z, x * texCoordMod + movement, z * texCoordMod);
+						Renderer.get().vertexuv(x, cloudHeight, z, x * texCoordMod + movement, z * texCoordMod);
+						Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
+						Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
+						Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
+					}
+				}
+
+				Renderer.get().end();
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+				Renderer.get().begin();
+				float skRed = (this.levelRenderer.level.skyColor >> 16 & 255) / 255.0F;
+				float skBlue = (this.levelRenderer.level.skyColor >> 8 & 255) / 255.0F;
+				float skGreen = (this.levelRenderer.level.skyColor & 255) / 255.0F;
+				if(this.settings.anaglyph) {
+					skRed = (skRed * 30.0F + skBlue * 59.0F + skGreen * 11.0F) / 100.0F;
+					skBlue = (skRed * 30.0F + skBlue * 70.0F) / 100.0F;
+					skGreen = (skRed * 30.0F + skGreen * 70.0F) / 100.0F;
+				}
+
+				Renderer.get().color(skRed, skBlue, skGreen);
+				float skyHeight = (this.levelRenderer.level.height + 10);
+
+				for(int x = -2048; x < this.levelRenderer.level.width + 2048; x += 512) {
+					for(int z = -2048; z < this.levelRenderer.level.depth + 2048; z += 512) {
+						Renderer.get().vertex(x, skyHeight, z);
+						Renderer.get().vertex((x + 512), skyHeight, z);
+						Renderer.get().vertex((x + 512), skyHeight, (z + 512));
+						Renderer.get().vertex(x, skyHeight, (z + 512));
+					}
+				}
+
+				Renderer.get().end();
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+				this.fogRenderer.updateFog();
+				if(this.selected != null) {
+					GL11.glDisable(GL11.GL_ALPHA_TEST);
+					GL11.glEnable(GL11.GL_BLEND);
+					GL11.glEnable(GL11.GL_ALPHA_TEST);
+					GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+					GL11.glColor4f(1.0F, 1.0F, 1.0F, (MathHelper.sin(System.currentTimeMillis() / 100.0F) * 0.2F + 0.4F) * 0.5F);
+					if(this.levelRenderer.cracks > 0) {
+						GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR);
+						RenderHelper.getHelper().bindTexture("/terrain.png", true);
+						GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+						GL11.glPushMatrix();
+						int bid = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
+						BlockType btype = bid > 0 ? Blocks.fromId(bid) : null;
+						GL11.glDepthMask(false);
+						if(btype == null) {
+							btype = VanillaBlock.STONE;
+						}
+
+						for(int count = 0; count < btype.getModel().getQuads().size(); count++) {
+							ClientRenderHelper.getHelper().drawCracks(btype.getModel().getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10.0F));
+						}
+
+						GL11.glDepthMask(true);
+						GL11.glPopMatrix();
+					}
+
+					GL11.glDisable(GL11.GL_BLEND);
+					GL11.glDisable(GL11.GL_ALPHA_TEST);
+					GL11.glEnable(GL11.GL_BLEND);
+					GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+					GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.4F);
+					GL11.glLineWidth(2.0F);
+					GL11.glDisable(GL11.GL_TEXTURE_2D);
+					GL11.glDepthMask(false);
+					int block = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
+					if(block > 0) {
+						AABB aabb = BlockUtils.getSelectionBox(block, this.selected.x, this.selected.y, this.selected.z).grow(0.002F, 0.002F, 0.002F);
+						GL11.glBegin(GL11.GL_LINE_STRIP);
+						GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
+						GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
+						GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_LINE_STRIP);
+						GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
+						GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
+						GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
+						GL11.glEnd();
+						GL11.glBegin(GL11.GL_LINES);
+						GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z0);
+						GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z0);
+						GL11.glVertex3f(aabb.x1, aabb.y0, aabb.z1);
+						GL11.glVertex3f(aabb.x1, aabb.y1, aabb.z1);
+						GL11.glVertex3f(aabb.x0, aabb.y0, aabb.z1);
+						GL11.glVertex3f(aabb.x0, aabb.y1, aabb.z1);
+						GL11.glEnd();
+					}
+
+					GL11.glDepthMask(true);
+					GL11.glEnable(GL11.GL_TEXTURE_2D);
+					GL11.glDisable(GL11.GL_BLEND);
+					GL11.glEnable(GL11.GL_ALPHA_TEST);
+				}
+
+				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				this.fogRenderer.updateFog();
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+				GL11.glEnable(GL11.GL_BLEND);
+				RenderHelper.getHelper().bindTexture("/water.png", true);
+				GL11.glCallList(this.levelRenderer.listId + 1);
+				GL11.glDisable(GL11.GL_BLEND);
+				GL11.glEnable(GL11.GL_BLEND);
+				GL11.glColorMask(false, false, false, false);
+				int cy = this.levelRenderer.sortChunks(this.player, 1);
+				GL11.glColorMask(true, true, true, true);
+				if(this.settings.anaglyph) {
+					if(pass == 0) {
+						GL11.glColorMask(false, true, true, false);
+					} else {
+						GL11.glColorMask(true, false, false, false);
+					}
+				}
+
+				if(cy > 0) {
+					RenderHelper.getHelper().bindTexture("/terrain.png", true);
+					GL11.glCallLists(this.levelRenderer.buffer);
+				}
+
+				GL11.glDepthMask(true);
+				GL11.glDisable(GL11.GL_BLEND);
+				GL11.glDisable(GL11.GL_FOG);
+				if(this.raining) {
+					int x = (int) this.player.x;
+					int y = (int) this.player.y;
+					int z = (int) this.player.z;
+					GL11.glDisable(GL11.GL_CULL_FACE);
+					GL11.glNormal3f(0, 1, 0);
+					GL11.glEnable(GL11.GL_BLEND);
+					GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+					RenderHelper.getHelper().bindTexture("/rain.png", true);
+
+					for(int cx = x - 5; cx <= x + 5; cx++) {
+						for(int cz = z - 5; cz <= z + 5; cz++) {
+							cy = this.level.getHighestTile(cx, cz);
+							int minRY = y - 5;
+							int maxRY = y + 5;
+							if(minRY < cy) {
+								minRY = cy;
+							}
+
+							if(maxRY < cy) {
+								maxRY = cy;
+							}
+
+							if(minRY != maxRY) {
+								float downfall = (((this.rainTicks + cx * 3121 + cz * 418711) % 32) + this.timer.delta) / 32.0F;
+								float rax = cx + 0.5F - this.player.x;
+								float raz = cz + 0.5F - this.player.z;
+								float visibility = (float) Math.sqrt(rax * rax + raz * raz) / 5;
+								GL11.glColor4f(1.0F, 1.0F, 1.0F, (1.0F - visibility * visibility) * 0.7F);
+								Renderer.get().begin();
+								Renderer.get().vertexuv(cx, minRY, cz, 0.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv((cx + 1), minRY, (cz + 1), 2.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv((cx + 1), maxRY, (cz + 1), 2.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv(cx, maxRY, cz, 0.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv(cx, minRY, (cz + 1), 0.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv((cx + 1), minRY, cz, 2.0F, minRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv((cx + 1), maxRY, cz, 2.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().vertexuv(cx, maxRY, (cz + 1), 0.0F, maxRY * 2.0F / 8.0F + downfall * 2.0F);
+								Renderer.get().end();
+							}
+						}
+					}
+
+					GL11.glEnable(GL11.GL_CULL_FACE);
+					GL11.glDisable(GL11.GL_BLEND);
+				}
+
+				if(selectedEntity != null) {
+					selectedEntity.renderHover(this.textureManager, this.timer.delta);
+				}
+
+				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+				GL11.glLoadIdentity();
+				if(this.settings.anaglyph) {
+					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
+				}
+
+				ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
+				if(this.settings.viewBobbing) {
+					ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
+				}
+
+				float heldPos = this.heldBlock.lastPosition + (this.heldBlock.heldPosition - this.heldBlock.lastPosition) * this.timer.delta;
+				GL11.glPushMatrix();
+				GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1.0F, 0.0F, 0.0F);
+				GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0.0F, 1.0F, 0.0F);
+				ClientRenderHelper.getHelper().setLighting(true);
+				GL11.glPopMatrix();
+				GL11.glPushMatrix();
+				if(this.heldBlock.moving) {
+					float off = (this.heldBlock.heldOffset + this.timer.delta) / 7.0F;
+					float offsin = MathHelper.sin(off * MathHelper.PI);
+					GL11.glTranslatef(-MathHelper.sin((float) Math.sqrt(off) * MathHelper.PI) * 0.4F, MathHelper.sin((float) Math.sqrt(off) * MathHelper.TWO_PI) * 0.2F, -offsin * 0.2F);
+				}
+
+				GL11.glTranslatef(0.7F * 0.8F, -0.65F * 0.8F - (1.0F - heldPos) * 0.6F, -0.9F * 0.8F);
+				GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+				GL11.glEnable(GL11.GL_NORMALIZE);
+				if(this.heldBlock.moving) {
+					float off = (this.heldBlock.heldOffset + this.timer.delta) / 7.0F;
+					float offsin = MathHelper.sin((off) * off * MathHelper.PI);
+					GL11.glRotatef(MathHelper.sin((float) Math.sqrt(off) * MathHelper.PI) * 80.0F, 0.0F, 1.0F, 0.0F);
+					GL11.glRotatef(-offsin * 20.0F, 1.0F, 0.0F, 0.0F);
+				}
+
+				float brightness = this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z);
+				GL11.glColor4f(brightness, brightness, brightness, 1);
+
+				if(!this.hideGui) {
+					if(this.heldBlock.block != null) {
+						GL11.glScalef(0.4F, 0.4F, 0.4F);
+						GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
+						this.heldBlock.block.getModel().renderAll(0, 0, 0, this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z));
+					} else {
+						this.player.bindTexture(this.textureManager);
+						GL11.glScalef(1.0F, -1.0F, -1.0F);
+						GL11.glTranslatef(0.0F, 0.2F, 0.0F);
+						GL11.glRotatef(-120.0F, 0.0F, 0.0F, 1.0F);
+						GL11.glScalef(1.0F, 1.0F, 1.0F);
+						ModelPart arm = this.player.getModel().leftArm;
+						if(!arm.hasList) {
+							arm.generateList(0.0625F);
+						}
+
+						GL11.glCallList(arm.list);
+					}
+				}
+
+				GL11.glDisable(GL11.GL_NORMALIZE);
+				GL11.glPopMatrix();
+				ClientRenderHelper.getHelper().setLighting(false);
+				if(!this.settings.anaglyph) {
+					break;
+				}
+
+				pass++;
+			}
+
+			ClientRenderHelper.getHelper().ortho();
+			this.hud.render(this.timer.delta, this.currentScreen != null, Mouse.getX() * width / this.width, height - Mouse.getY() * height / this.height - 1);
+		} else {
+			GL11.glViewport(0, 0, this.width, this.height);
+			GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glLoadIdentity();
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			GL11.glLoadIdentity();
+			ClientRenderHelper.getHelper().ortho();
+		}
+
+		if(this.currentScreen != null) {
+			this.currentScreen.render();
+		}
+
+		if(this.progressBar.isVisible()) {
+			this.progressBar.render(false);
+		}
+
+		Thread.yield();
+		Display.update();
+
+		if(this.settings.limitFPS) {
+			try {
+				Thread.sleep(5);
+			} catch(InterruptedException e) {
+			}
+		}
+
+		checkGLError("Post render");
+		this.fps++;
+		while(System.currentTimeMillis() >= this.lastUpdate + 1000) {
+			this.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
+			com.mojang.minecraft.render.Chunk.chunkUpdates = 0;
+			this.lastUpdate += 1000;
+			this.fps = 0;
+		}
+		
+		return true;
 	}
 
-	public final void grabMouse() {
+	public void grabMouse() {
 		if(!Mouse.isGrabbed()) {
 			Mouse.setGrabbed(true);
 			this.setCurrentScreen(null);
@@ -1140,7 +1129,7 @@ public final class Minecraft implements Runnable {
 		}
 	}
 
-	public final void displayMenu() {
+	public void displayMenu() {
 		if(this.currentScreen == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
 			this.setCurrentScreen(new MenuScreen());
 		}
@@ -1277,7 +1266,6 @@ public final class Minecraft implements Runnable {
 		}
 
 		if(!this.ingame) return;
-
 		if(System.currentTimeMillis() > this.audio.lastBGM && this.audio.playMusic("bg")) {
 			this.audio.lastBGM = System.currentTimeMillis() + rand.nextInt(900000) + 300000L;
 		}
@@ -1287,24 +1275,6 @@ public final class Minecraft implements Runnable {
 
 		for(int index = 0; index < this.hud.chatHistory.size(); index++) {
 			this.hud.chatHistory.get(index).time++;
-		}
-
-		RenderHelper.getHelper().bindTexture("/terrain.png", true);
-
-		for(int index = 0; index < this.textureManager.animations.size(); index++) {
-			AnimatedTexture animation = this.textureManager.animations.get(index);
-			animation.anaglyph = this.textureManager.settings.anaglyph;
-			animation.animate();
-
-			ByteBuffer buffer = BufferUtils.createByteBuffer(animation.textureData.length);
-			buffer.put(animation.textureData);
-			buffer.flip();
-			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, animation.textureId % 16 << 4, animation.textureId / 16 << 4, 16, 16, 6408, 5121, buffer);
-			if(animation instanceof WaterTexture) {
-				RenderHelper.getHelper().bindTexture("/water.png", true);
-				GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 16, 16, 6408, 5121, buffer);
-				RenderHelper.getHelper().bindTexture("/terrain.png", true);
-			}
 		}
 
 		if(this.isInMultiplayer()) {
