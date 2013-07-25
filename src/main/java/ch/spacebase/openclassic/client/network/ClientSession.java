@@ -83,7 +83,7 @@ public class ClientSession extends ClassicSession {
 	public void disconnect(String reason) {
 		this.disconnected = true;
 		if(reason != null) {
-			System.out.println("Disconnected: " + reason);
+			OpenClassic.getLogger().severe("Disconnected: " + reason);
 			OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.generic"), reason));
 		}
 

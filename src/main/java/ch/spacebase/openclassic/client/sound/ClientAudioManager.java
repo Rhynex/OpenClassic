@@ -43,7 +43,7 @@ public class ClientAudioManager implements AudioManager {
 
 	private SoundSystem system;
 	private Minecraft mc;
-	public long lastBGM = System.currentTimeMillis();
+	public long nextBGM = System.currentTimeMillis();
 
 	public ClientAudioManager(Minecraft mc) {
 		this.mc = mc;
@@ -122,7 +122,7 @@ public class ClientAudioManager implements AudioManager {
 				e.printStackTrace();
 			}
 
-			System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloading"), file.getName()));
+			OpenClassic.getLogger().info(String.format(OpenClassic.getGame().getTranslator().translate("http.downloading"), file.getName()));
 
 			byte[] data = new byte[4096];
 			DataInputStream in = null;
@@ -145,7 +145,7 @@ public class ClientAudioManager implements AudioManager {
 				IOUtils.closeQuietly(out);
 			}
 
-			System.out.println(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
+			OpenClassic.getLogger().info(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
 		}
 	}
 

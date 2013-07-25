@@ -71,14 +71,14 @@ public class LWJGLNatives {
 			}
 
 			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
-			System.out.println("Writing " + lib + " to " + file.getPath());
+			OpenClassic.getLogger().info("Writing " + lib + " to " + file.getPath());
 			IOUtils.copy(in, new FileOutputStream(file));
 			IOUtils.closeQuietly(in);
 			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
 				System.load(file.getPath());
 			}
 		} catch(Exception e) {
-			System.err.println(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
+			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
 			e.printStackTrace();
 		}
 	}

@@ -62,7 +62,7 @@ public class LoginScreen extends GuiScreen {
 					}
 				}
 			} catch(IOException e) {
-				System.out.println(OpenClassic.getGame().getTranslator().translate("gui.login.fail-check"));
+				OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("gui.login.fail-check"));
 				e.printStackTrace();
 			} finally {
 				IOUtils.closeQuietly(reader);
@@ -86,7 +86,7 @@ public class LoginScreen extends GuiScreen {
 					writer.newLine();
 					writer.write(pass);
 				} catch(IOException e) {
-					System.out.println(OpenClassic.getGame().getTranslator().translate("gui.login.fail-create"));
+					OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("gui.login.fail-create"));
 					e.printStackTrace();
 				} finally {
 					IOUtils.closeQuietly(writer);
@@ -139,7 +139,7 @@ public class LoginScreen extends GuiScreen {
 			try {
 				file.createNewFile();
 			} catch(IOException e) {
-				System.out.println(OpenClassic.getGame().getTranslator().translate("gui.login.fail-create"));
+				OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("gui.login.fail-create"));
 				e.printStackTrace();
 			}
 		}
@@ -157,7 +157,7 @@ public class LoginScreen extends GuiScreen {
 		try {
 			result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "login", "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"), Constants.MINECRAFT_URL_HTTPS);
 		} catch(UnsupportedEncodingException e) {
-			System.err.println("UTF-8 not supported!");
+			OpenClassic.getLogger().severe("UTF-8 not supported!");
 			return false;
 		}
 
@@ -176,7 +176,7 @@ public class LoginScreen extends GuiScreen {
 			return true;
 		}
 
-		System.out.println(result);
+		OpenClassic.getLogger().severe(result);
 		return false;
 	}
 

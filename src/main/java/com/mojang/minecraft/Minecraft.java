@@ -222,9 +222,9 @@ public final class Minecraft implements Runnable {
 		int error = GL11.glGetError();
 		if(error != 0) {
 			String message = GLU.gluErrorString(error);
-			System.err.println("########## GL ERROR ##########");
-			System.err.println("@ " + task);
-			System.err.println(error + ": " + message);
+			OpenClassic.getLogger().severe("########## GL ERROR ##########");
+			OpenClassic.getLogger().severe("@ " + task);
+			OpenClassic.getLogger().severe(error + ": " + message);
 			System.exit(0);
 		}
 	}
@@ -295,7 +295,7 @@ public final class Minecraft implements Runnable {
 
 	public void initGame(Generator gen) {
 		this.audio.stopMusic();
-		this.audio.lastBGM = System.currentTimeMillis();
+		this.audio.nextBGM = System.currentTimeMillis();
 		if(this.server != null && this.data != null) {
 			Level level = new Level();
 			level.setData(8, 8, 8, new byte[512]);
@@ -379,7 +379,7 @@ public final class Minecraft implements Runnable {
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				System.err.println("Uncaught exception in thread \"" + t.getName() + "\"");
+				OpenClassic.getLogger().severe("Uncaught exception in thread \"" + t.getName() + "\"");
 				handleException(e);
 			}
 		});
@@ -494,7 +494,7 @@ public final class Minecraft implements Runnable {
 				try {
 					Display.setIcon(new ByteBuffer[] { this.loadIcon(TextureManager.class.getResourceAsStream("/icon.png")) });
 				} catch(IOException e) {
-					System.err.println("Failed to load icon!");
+					OpenClassic.getLogger().severe("Failed to load icon!");
 					e.printStackTrace();
 				}
 			}
@@ -1266,8 +1266,8 @@ public final class Minecraft implements Runnable {
 		}
 
 		if(!this.ingame) return;
-		if(System.currentTimeMillis() > this.audio.lastBGM && this.audio.playMusic("bg")) {
-			this.audio.lastBGM = System.currentTimeMillis() + rand.nextInt(900000) + 300000L;
+		if(System.currentTimeMillis() > this.audio.nextBGM && this.audio.playMusic("bg")) {
+			this.audio.nextBGM = System.currentTimeMillis() + rand.nextInt(900000) + 300000L;
 		}
 
 		this.mode.spawnMobs();

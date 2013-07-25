@@ -8,6 +8,8 @@ import java.util.Locale;
 
 import org.apache.commons.lang3.Validate;
 
+import ch.spacebase.openclassic.api.OpenClassic;
+
 public class Cookie {
 	private static DateFormat expiresFormat1 = new SimpleDateFormat("E, dd MMM yyyy k:m:s 'GMT'", Locale.US);
 	private static DateFormat expiresFormat2 = new SimpleDateFormat("E, dd-MMM-yyyy k:m:s 'GMT'", Locale.US);
@@ -61,7 +63,7 @@ public class Cookie {
 					try {
 						this.expires = expiresFormat2.parse(value);
 					} catch(Exception e1) {
-						System.err.println("Bad date format in header: " + value);
+						OpenClassic.getLogger().warning("Bad date format in header: " + value);
 					}
 				}
 			}

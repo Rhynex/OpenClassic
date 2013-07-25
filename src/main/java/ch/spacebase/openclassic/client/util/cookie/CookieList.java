@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import ch.spacebase.openclassic.api.OpenClassic;
+
 public class CookieList extends CookieHandler {
 	private List<Cookie> cookieJar = Collections.synchronizedList(new CopyOnWriteArrayList<Cookie>());
 
@@ -58,10 +60,11 @@ public class CookieList extends CookieHandler {
 
 	public Cookie getCookie(String uri, String name) {
 		try {
-			return getCookie(new URI(uri), name);
+			return this.getCookie(new URI(uri), name);
 		} catch(URISyntaxException e) {
-			System.err.println("URI syntax exception: " + e);
+			OpenClassic.getLogger().severe("Invalid URI in getCookie");
 		}
+		
 		return null;
 	}
 
@@ -71,6 +74,7 @@ public class CookieList extends CookieHandler {
 				return localCookie;
 			}
 		}
+		
 		return null;
 	}
 }

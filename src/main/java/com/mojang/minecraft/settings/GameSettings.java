@@ -251,7 +251,7 @@ public final class GameSettings {
 				}
 			}
 		} catch(IOException e) {
-			System.out.println(OpenClassic.getGame().getTranslator().translate("core.fail-options-load"));
+			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("core.fail-options-load"));
 			e.printStackTrace();
 		} finally {
 			IOUtils.closeQuietly(reader);
@@ -278,7 +278,7 @@ public final class GameSettings {
 				writer.println("key_" + this.bindings[binding].key + ":" + this.bindings[binding].key);
 			}
 		} catch(Exception e) {
-			System.out.println(OpenClassic.getGame().getTranslator().translate("core.fail-options-save"));
+			OpenClassic.getLogger().severe(OpenClassic.getGame().getTranslator().translate("core.fail-options-save"));
 			e.printStackTrace();
 		} finally {
 			IOUtils.closeQuietly(writer);

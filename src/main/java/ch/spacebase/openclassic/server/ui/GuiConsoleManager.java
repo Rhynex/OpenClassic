@@ -166,7 +166,7 @@ public class GuiConsoleManager implements ConsoleManager {
 							((HTMLEditorKit) frame.log.getEditorKit()).insertHTML((HTMLDocument) frame.log.getDocument(), frame.log.getDocument().getEndPosition().getOffset() - 1, msg, 1, 0, null);
 						} catch(Exception e) {
 							e.printStackTrace();
-							System.err.println("Error appending text to console output: " + msg);
+							OpenClassic.getLogger().severe("Error appending text to console output: " + msg);
 						}
 					}
 				});
