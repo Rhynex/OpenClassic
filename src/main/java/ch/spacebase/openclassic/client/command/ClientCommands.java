@@ -35,13 +35,32 @@ public class ClientCommands extends CommandExecutor {
 			return;
 		}
 
-		List<Command> available = new ArrayList<Command>();
-		for(Method method : this.getCommands()) {
-			Command cmd = method.getAnnotation(Command.class);
-
+		List<Object> available = new ArrayList<Object>();
+		for(CommandExecutor exec : OpenClassic.getGame().getCommandExecutors()) {
+			for(Method method : exec.getCommands()) {
+				Command cmd = method.getAnnotation(Command.class);
+	
+				boolean match = false;
+				if(cmd.senders().length > 0) {
+					for(Class<? extends Sender> allowed : cmd.senders()) {
+						if(allowed.isAssignableFrom(sender.getClass())) {
+							match = true;
+						}
+					}
+				} else {
+					match = true;
+				}
+	
+				if(sender.hasPermission(cmd.permission()) && match) {
+					available.add(cmd);
+				}
+			}
+		}
+		
+		for(ch.spacebase.openclassic.api.command.Command cmd : OpenClassic.getGame().getCommands()) {
 			boolean match = false;
-			if(cmd.senders().length > 0) {
-				for(Class<? extends Sender> allowed : cmd.senders()) {
+			if(cmd.getSenders().length > 0) {
+				for(Class<? extends Sender> allowed : cmd.getSenders()) {
 					if(allowed.isAssignableFrom(sender.getClass())) {
 						match = true;
 					}
@@ -50,7 +69,7 @@ public class ClientCommands extends CommandExecutor {
 				match = true;
 			}
 
-			if(sender.hasPermission(cmd.permission()) && match) {
+			if(sender.hasPermission(cmd.getPermission()) && match) {
 				available.add(cmd);
 			}
 		}
@@ -65,14 +84,27 @@ public class ClientCommands extends CommandExecutor {
 
 		for(int index = (page - 1) * 17; index < ((page - 1) * 17) + 17; index++) {
 			if(index >= available.size()) break;
-			Command cmd = available.get(index);
-
-			String aliases = cmd.aliases()[0];
-			if(cmd.aliases().length > 1) {
-				aliases = Arrays.toString(cmd.aliases());
+			String aliases[] = null;
+			String desc = null;
+			String usage = null;
+			if(available.get(index) instanceof Command) {
+				Command cmd = (Command) available.get(index);
+				aliases = cmd.aliases();
+				desc = cmd.desc();
+				usage = cmd.usage();
+			} else {
+				ch.spacebase.openclassic.api.command.Command cmd = (ch.spacebase.openclassic.api.command.Command) available.get(index);
+				aliases = cmd.getAliases();
+				desc = cmd.getDescription();
+				usage = cmd.getUsage();
 			}
 
-			sender.sendMessage(Color.AQUA + sender.getCommandPrefix() + aliases + " - " + cmd.desc() + Color.AQUA + " - " + sender.getCommandPrefix() + aliases + " " + cmd.usage());
+			String aliasString = aliases[0];
+			if(aliases.length > 1) {
+				aliasString = Arrays.toString(aliases);
+			}
+
+			sender.sendMessage(Color.AQUA + sender.getCommandPrefix() + aliasString + " - " + desc + Color.AQUA + " - " + sender.getCommandPrefix() + aliasString + " " + usage);
 		}
 	}
 
