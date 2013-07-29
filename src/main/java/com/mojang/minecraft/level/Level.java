@@ -1,5 +1,6 @@
 package com.mojang.minecraft.level;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.BlockUtils;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.Entity;
@@ -83,15 +85,14 @@ public class Level {
 				this.waterLevel = this.height / 2;
 			}
 
-			if(this.skyColor == 0) {
+			Minecraft mc = GeneralUtils.getMinecraft();
+			if(mc.settings.night) {
+				this.skyColor = 0;
+				this.fogColor = new Color(30, 30, 30, 70).getRGB();
+				this.cloudColor = new Color(30, 30, 30, 70).getRGB();
+			} else {
 				this.skyColor = 10079487;
-			}
-
-			if(this.fogColor == 0) {
 				this.fogColor = 16777215;
-			}
-
-			if(this.cloudColor == 0) {
 				this.cloudColor = 16777215;
 			}
 
@@ -102,7 +103,6 @@ public class Level {
 			if(this.blockMap == null) {
 				this.blockMap = new BlockMap(this.width, this.height, this.depth);
 			}
-
 		}
 	}
 
@@ -572,7 +572,9 @@ public class Level {
 
 	public float getBrightness(int x, int y, int z) {
 		BlockType block = this.openclassic.getBlockTypeAt(x, y, z);
-		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 : 0.6F;
+		Minecraft mc = GeneralUtils.getMinecraft();
+		float mod = mc.settings.night ? 0.4F : 0;
+		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 - mod : 0.6F - mod;
 	}
 
 	public byte[] copyBlocks() {

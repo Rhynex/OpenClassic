@@ -1,5 +1,6 @@
 package com.mojang.minecraft.settings;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,6 +34,7 @@ public final class GameSettings {
 	public boolean smoothing = false;
 	public boolean speed = false;
 	public boolean flying = false;
+	public boolean night = false;
 	public String texturePack = "none";
 	public KeyBinding forwardKey = new KeyBinding("options.keys.forward", Keyboard.KEY_W);
 	public KeyBinding leftKey = new KeyBinding("options.keys.left", Keyboard.KEY_A);
@@ -54,7 +56,7 @@ public final class GameSettings {
 
 	public GameSettings(Minecraft mc, File path) {
 		this.bindings = new KeyBinding[] { this.forwardKey, this.leftKey, this.backKey, this.rightKey, this.jumpKey, this.buildKey, this.chatKey, this.fogKey, this.saveLocKey, this.loadLocKey, this.speedHackKey, this.flyDownKey };
-		this.count = 10;
+		this.count = 11;
 		this.hacks = 2;
 		this.mc = mc;
 		this.file = new File(path, "options.txt");
@@ -136,6 +138,25 @@ public final class GameSettings {
 				this.mc.levelRenderer.refresh();
 			}
 		}
+		
+		if(setting == 10) {
+			this.night = !this.night;
+			if(this.mc.level != null) {
+				if(this.night) {
+					this.mc.level.skyColor = 0;
+					this.mc.level.fogColor = new Color(30, 30, 30, 70).getRGB();
+					this.mc.level.cloudColor = new Color(30, 30, 30, 70).getRGB();
+				} else {
+					this.mc.level.skyColor = 10079487;
+					this.mc.level.fogColor = 16777215;
+					this.mc.level.cloudColor = 16777215;
+				}
+				
+				if(this.mc.ingame) {
+					this.mc.levelRenderer.refresh();
+				}
+			}
+		}
 
 		this.save();
 	}
@@ -145,11 +166,11 @@ public final class GameSettings {
 	}
 
 	public final String getSettingName(int id) {
-		return id == 0 ? OpenClassic.getGame().getTranslator().translate("options.music") : (id == 1 ? OpenClassic.getGame().getTranslator().translate("options.sound") : (id == 2 ? OpenClassic.getGame().getTranslator().translate("options.invert-mouse") : (id == 3 ? OpenClassic.getGame().getTranslator().translate("options.show-info") : (id == 4 ? OpenClassic.getGame().getTranslator().translate("options.render-distance") : (id == 5 ? OpenClassic.getGame().getTranslator().translate("options.view-bobbing") : (id == 6 ? OpenClassic.getGame().getTranslator().translate("options.3d-anaglyph") : (id == 7 ? OpenClassic.getGame().getTranslator().translate("options.limit-frames") : (id == 8 ? OpenClassic.getGame().getTranslator().translate("options.survival") : id == 9 ? OpenClassic.getGame().getTranslator().translate("options.smoothing") : ""))))))));
+		return id == 0 ? OpenClassic.getGame().getTranslator().translate("options.music") : (id == 1 ? OpenClassic.getGame().getTranslator().translate("options.sound") : (id == 2 ? OpenClassic.getGame().getTranslator().translate("options.invert-mouse") : (id == 3 ? OpenClassic.getGame().getTranslator().translate("options.show-info") : (id == 4 ? OpenClassic.getGame().getTranslator().translate("options.render-distance") : (id == 5 ? OpenClassic.getGame().getTranslator().translate("options.view-bobbing") : (id == 6 ? OpenClassic.getGame().getTranslator().translate("options.3d-anaglyph") : (id == 7 ? OpenClassic.getGame().getTranslator().translate("options.limit-frames") : (id == 8 ? OpenClassic.getGame().getTranslator().translate("options.survival") : id == 9 ? OpenClassic.getGame().getTranslator().translate("options.smoothing") : id == 10 ? OpenClassic.getGame().getTranslator().translate("options.night") : ""))))))));
 	}
 
 	public final String getSettingValue(int id) {
-		return id == 0 ? (this.music ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 1 ? (this.sound ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 2 ? (this.invertMouse ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 3 ? (this.showInfo ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 4 ? FOG[this.viewDistance] : (id == 5 ? (this.viewBobbing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 6 ? (this.anaglyph ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 7 ? (this.limitFPS ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 8 ? SURVIVAL[this.survival] : id == 9 ? (this.smoothing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : ""))))))));
+		return id == 0 ? (this.music ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 1 ? (this.sound ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 2 ? (this.invertMouse ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 3 ? (this.showInfo ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 4 ? FOG[this.viewDistance] : (id == 5 ? (this.viewBobbing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 6 ? (this.anaglyph ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 7 ? (this.limitFPS ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : (id == 8 ? SURVIVAL[this.survival] : id == 9 ? (this.smoothing ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : id == 10 ? (this.night ? OpenClassic.getGame().getTranslator().translate("options.on") : OpenClassic.getGame().getTranslator().translate("options.off")) : ""))))))));
 	}
 
 	public final String getHackName(int id) {
@@ -238,6 +259,10 @@ public final class GameSettings {
 					if(setting[0].equals("smoothing")) {
 						this.smoothing = setting[1].equals("true");
 					}
+					
+					if(setting[0].equals("night")) {
+						this.night = setting[1].equals("true");
+					}
 
 					if(setting[0].equals("texturepack")) {
 						this.texturePack = setting[1];
@@ -272,6 +297,7 @@ public final class GameSettings {
 			writer.println("limitFramerate:" + this.limitFPS);
 			writer.println("survival:" + this.survival);
 			writer.println("smoothing:" + this.smoothing);
+			writer.println("night:" + this.night);
 			writer.println("texturepack:" + this.texturePack);
 
 			for(int binding = 0; binding < this.bindings.length; binding++) {

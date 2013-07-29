@@ -237,6 +237,7 @@ options:
     limit-frames: Limit Framerate
     survival: Survival Mode
     smoothing: Smoothing
+    night: Night Mode
     keys:
         forward: Forward
         left: Left
