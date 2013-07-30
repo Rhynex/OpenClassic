@@ -388,6 +388,16 @@ public final class Minecraft implements Runnable {
 		new ClassicClient(this);
 
 		this.dir = GeneralUtils.getMinecraftDirectory();
+		File lib = new File(this.dir, "lib");
+		if(!lib.exists()) {
+			try {
+				lib.mkdirs();
+			} catch(SecurityException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		LWJGLNatives.load(lib);
 		File levels = new File(this.dir, "levels");
 		if(!levels.exists()) {
 			try {
@@ -474,17 +484,6 @@ public final class Minecraft implements Runnable {
 	}
 	
 	private void initRender() {
-		File lib = new File(this.dir, "lib");
-		if(!lib.exists()) {
-			try {
-				lib.mkdirs();
-			} catch(SecurityException e) {
-				e.printStackTrace();
-			}
-		}
-
-		LWJGLNatives.load(lib);
-		
 		try {
 			if(this.canvas != null) {
 				Display.setParent(this.canvas);
