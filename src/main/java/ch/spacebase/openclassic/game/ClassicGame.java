@@ -1,7 +1,10 @@
 package ch.spacebase.openclassic.game;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +31,7 @@ import ch.spacebase.openclassic.api.plugin.PluginManager;
 import ch.spacebase.openclassic.api.scheduler.Scheduler;
 import ch.spacebase.openclassic.api.translate.Language;
 import ch.spacebase.openclassic.api.translate.Translator;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 
 import com.zachsthings.onevent.EventManager;
@@ -49,7 +53,7 @@ public abstract class ClassicGame implements Game {
 
 	public ClassicGame(File directory) {
 		this.directory = directory;
-		this.translator.register(new Language("English", Main.class.getResourceAsStream("/lang/en_US.lang")));
+		this.translator.register(new Language("English", "US", Main.class.getResourceAsStream("/lang/en_US.lang")));
 		this.translator.setDefault("English");
 
 		File file = new File(this.getDirectory(), "config.yml");
@@ -63,12 +67,58 @@ public abstract class ClassicGame implements Game {
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
+			
 		}
 
 		OpenClassic.setGame(this);
 		this.pkgManager = new PackageManager();
 		this.config = new YamlConfig(file);
 		this.config.load();
+		
+		//Language support modification
+		File lang_dir = GeneralUtils.getMinecraftDirectory();
+		String ld = lang_dir.getPath() + "\\lang";
+		
+		lang_dir = new File(ld);
+		if (!lang_dir.exists())
+			try {
+				lang_dir.mkdirs();
+			} catch (Exception e){
+				e.printStackTrace();
+		}
+				
+		String lang_name, langCode;
+		
+		File[] languages = lang_dir.listFiles();
+		if (languages != null) {
+			for (int i = 0; i < languages.length; i++) {
+				if (languages[i].getName().endsWith(".id")) {
+					try {
+						BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(languages[i])));
+						lang_name = in.readLine();
+						langCode = in.readLine();
+						in.close();
+						String a = languages[i].getName();
+						if (a.endsWith(".id")) {
+							a = a.substring(0, a.length()-3);
+							i++;
+							String b = languages[i].getName();
+							if (languages[i].getName().endsWith(".lang")) {
+								b = b.substring(0, b.length()-5);
+								if (a.equals(b)) {
+									this.translator.register(new Language(lang_name, langCode, lang_dir+"\\"+languages[i].getName()));
+									System.out.println("Language \""+lang_name+"\" has been successfully registered!");
+								}
+							}
+							
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 
 	@Override
