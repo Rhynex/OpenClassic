@@ -54,7 +54,7 @@ public abstract class ClassicGame implements Game {
 	public ClassicGame(File directory) {
 		this.directory = directory;
 		this.translator.register(new Language("English", "US", Main.class.getResourceAsStream("/lang/en_US.lang")));
-		this.translator.setDefault("English");
+		this.translator.setDefault("US");
 
 		File file = new File(this.getDirectory(), "config.yml");
 		if(!file.exists()) {
@@ -67,53 +67,48 @@ public abstract class ClassicGame implements Game {
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
-			
 		}
 
 		OpenClassic.setGame(this);
 		this.pkgManager = new PackageManager();
 		this.config = new YamlConfig(file);
 		this.config.load();
-		
-		//Language support modification
-		File lang_dir = GeneralUtils.getMinecraftDirectory();
-		String ld = lang_dir.getPath() + "\\lang";
-		
-		lang_dir = new File(ld);
-		if (!lang_dir.exists())
-			try {
-				lang_dir.mkdirs();
-			} catch (Exception e){
-				e.printStackTrace();
+		if(this.getTranslator().get(this.config.getString("options.language")) == null) {
+			this.config.setValue("options.language", "US");
 		}
-				
-		String lang_name, langCode;
-		
-		File[] languages = lang_dir.listFiles();
-		if (languages != null) {
-			for (int i = 0; i < languages.length; i++) {
-				if (languages[i].getName().endsWith(".id")) {
+
+		File langs = new File(GeneralUtils.getMinecraftDirectory(), "lang");
+		if(!langs.exists()) {
+			try {
+				langs.mkdirs();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		File[] languages = langs.listFiles();
+		if(languages != null) {
+			for(int ind = 0; ind < languages.length; ind++) {
+				if(languages[ind].getName().endsWith(".id")) {
 					try {
-						BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(languages[i])));
-						lang_name = in.readLine();
-						langCode = in.readLine();
+						BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(languages[ind])));
+						String name = in.readLine();
+						String code = in.readLine();
 						in.close();
-						String a = languages[i].getName();
-						if (a.endsWith(".id")) {
-							a = a.substring(0, a.length()-3);
-							i++;
-							String b = languages[i].getName();
-							if (languages[i].getName().endsWith(".lang")) {
-								b = b.substring(0, b.length()-5);
-								if (a.equals(b)) {
-									this.translator.register(new Language(lang_name, langCode, lang_dir+"\\"+languages[i].getName()));
-									System.out.println("Language \""+lang_name+"\" has been successfully registered!");
+						String nme = languages[ind].getName();
+						if(nme.endsWith(".id")) {
+							nme = nme.substring(0, nme.length() - 3);
+							ind++;
+							String fname = languages[ind].getName();
+							if(languages[ind].getName().endsWith(".lang")) {
+								fname = fname.substring(0, fname.length() - 5);
+								if(nme.equals(fname)) {
+									this.translator.register(new Language(name, code, langs + "\\" + languages[ind].getName()));
+									OpenClassic.getLogger().info("Language \"" + name + "\" has been successfully registered!");
 								}
 							}
-							
 						}
-						
-					} catch (Exception e) {
+					} catch(Exception e) {
 						e.printStackTrace();
 					}
 				}

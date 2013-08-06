@@ -339,7 +339,7 @@ public final class Minecraft implements Runnable {
 		e.printStackTrace();
 		if(!this.running) {
 			return;
-		}
+		} 
 
 		if(this.started) {
 			if(e instanceof LWJGLException) {
