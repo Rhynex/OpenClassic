@@ -3,7 +3,6 @@ package ch.spacebase.openclassic.server.network;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
 
-import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -71,12 +70,12 @@ public class ServerSession extends ClassicSession {
 
 	public void disconnect(String reason) {
 		if(this.getPlayer() != null && this.getState() == State.GAME) {
-			PlayerKickEvent event = EventManager.callEvent(new PlayerKickEvent(this.getPlayer(), reason, this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
+			PlayerKickEvent event = EventManager.callEvent(new PlayerKickEvent(this.getPlayer(), reason, String.format(OpenClassic.getServer().getTranslator().translate("player.kicked"), this.getPlayer().getDisplayName(), reason)));
 			if(event.isCancelled()) {
 				return;
 			}
 
-			EventManager.callEvent(new PlayerQuitEvent(this.getPlayer(), this.getPlayer().getDisplayName() + Color.AQUA + " has been kicked. (" + reason + Color.AQUA + ")"));
+			EventManager.callEvent(new PlayerQuitEvent(this.getPlayer(), event.getMessage()));
 			OpenClassic.getServer().broadcastMessage(event.getMessage());
 		} else {
 			OpenClassic.getLogger().info(this.getAddress() + " disconnected by server: \"" + reason + "\"");

@@ -203,9 +203,9 @@ public abstract class ClassicGame implements Game {
 
 						if(!match) {
 							if(annotation.senders().length == 1) {
-								sender.sendMessage(Color.RED + String.format(this.translator.translate("command.wrong-sender.single", sender.getLanguage()), annotation.senders()[0].getSimpleName().toLowerCase()));
+								sender.sendMessage("command.wrong-sender.single", annotation.senders()[0].getSimpleName().toLowerCase());
 							} else {
-								sender.sendMessage(Color.RED + String.format(this.translator.translate("command.wrong-sender.multi", sender.getLanguage()), Arrays.toString(annotation.senders()).toLowerCase()));
+								sender.sendMessage("command.wrong-sender.multi", Arrays.toString(annotation.senders()).toLowerCase());
 							}
 
 							return;
@@ -213,12 +213,12 @@ public abstract class ClassicGame implements Game {
 					}
 
 					if(!sender.hasPermission(annotation.permission())) {
-						sender.sendMessage(Color.RED + this.translator.translate("command.no-perm", sender.getLanguage()));
+						sender.sendMessage("command.no-perm");
 						return;
 					}
 
 					if(split.length - 1 < annotation.min() || split.length - 1 > annotation.max()) {
-						sender.sendMessage(Color.RED + this.translator.translate("command.usage", sender.getLanguage()) + ": " + sender.getCommandPrefix() + split[0] + " " + annotation.usage());
+						sender.sendMessage("command.usage", sender.getCommandPrefix() + split[0] + " " + annotation.usage());
 						return;
 					}
 

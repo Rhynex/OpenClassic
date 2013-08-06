@@ -33,7 +33,18 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void sendMessage(String message) {
-		OpenClassic.getClient().getMainScreen().addChat(message);
+		this.sendInternal(OpenClassic.getClient().getTranslator().translate(message, this.getLanguage()));
+	}
+	
+	@Override
+	public void sendMessage(String message, Object... args) {
+		this.sendInternal(String.format(OpenClassic.getClient().getTranslator().translate(message, this.getLanguage()), args));
+	}
+	
+	private void sendInternal(String message) {
+		for(String msg : message.split("\n")) {
+			OpenClassic.getClient().getMainScreen().addChat(msg);
+		}
 	}
 
 	@Override

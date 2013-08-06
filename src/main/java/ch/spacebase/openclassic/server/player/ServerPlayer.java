@@ -185,15 +185,26 @@ public class ServerPlayer implements Player {
 		this.pos = null;
 		this.session = null;
 	}
-
+	
 	@Override
 	public void sendMessage(String message) {
+		this.sendInternal(OpenClassic.getServer().getTranslator().translate(message, this.getLanguage()));
+	}
+	
+	@Override
+	public void sendMessage(String message, Object... args) {
+		this.sendInternal(String.format(OpenClassic.getServer().getTranslator().translate(message, this.getLanguage()), args));
+	}
+	
+	private void sendInternal(String message) {
 		if(!this.hasCustomClient()) {
 			message.replace(Color.ORANGE.toString(), Color.RED.toString());
 			message.replace(Color.BROWN.toString(), Color.RED.toString());
 		}
-
-		this.getSession().send(new PlayerChatMessage(this.getPlayerId(), message));
+		
+		for(String msg : message.split("\n")) {
+			this.getSession().send(new PlayerChatMessage(this.getPlayerId(), msg));
+		}
 	}
 
 	public void sendLevel(final Level level) {

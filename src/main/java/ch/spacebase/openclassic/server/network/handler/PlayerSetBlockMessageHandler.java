@@ -24,7 +24,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 
 		BlockType b = Blocks.fromId(message.getBlock());
 		if(b == null || !b.isSelectable()) {
-			player.sendMessage("Denied block type hack.");
+			player.sendMessage("server.denied-hack.block-type");
 			return;
 		}
 
@@ -32,7 +32,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 
 		BlockType old = player.getPosition().getLevel().getBlockTypeAt(message.getX(), message.getY(), message.getZ());
 		if(!message.isPlacing() && old == VanillaBlock.BEDROCK && !player.hasPermission("openclassic.commands.solid")) {
-			player.sendMessage("Denied block break hack.");
+			player.sendMessage("server.denied-hack.block-break");
 			return;
 		}
 

@@ -1368,10 +1368,10 @@ public final class Minecraft implements Runnable {
 
 						try {
 							ImageIO.write(image, "PNG", file);
-							if(this.hud != null) this.hud.addChat(Color.GREEN + String.format(OpenClassic.getGame().getTranslator().translate("screenshot.saved"), file.getName()));
+							if(this.hud != null) this.player.openclassic.sendMessage("screenshot.saved", file.getName());
 						} catch(IOException e) {
 							e.printStackTrace();
-							if(this.hud != null) this.hud.addChat(Color.RED + String.format(OpenClassic.getGame().getTranslator().translate("screenshot.error"), file.getName()));
+							if(this.hud != null) this.player.openclassic.sendMessage("screenshot.error", file.getName());
 						}
 					}
 

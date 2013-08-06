@@ -166,8 +166,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 					}
 				}
 			} else {
-				player.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("server.client-version-mismatch", player.getLanguage()));
-				player.sendMessage(Color.RED + OpenClassic.getGame().getTranslator().translate("server.still-can-play", player.getLanguage()));
+				player.sendMessage("server.client-version-mismatch");
 			}
 		}
 
@@ -175,7 +174,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
 
 		session.setState(State.GAME);
-		OpenClassic.getServer().broadcastMessage(EventManager.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName() + Color.AQUA))).getMessage());
+		OpenClassic.getServer().broadcastMessage(EventManager.callEvent(new PlayerJoinEvent(player, String.format(OpenClassic.getGame().getTranslator().translate("player.login"), player.getDisplayName()))).getMessage());
 	}
 
 	private void kickFromLoginResult(String user, String ip, Session session, PlayerLoginEvent.Result result) {
