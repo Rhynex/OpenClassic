@@ -73,9 +73,6 @@ public abstract class ClassicGame implements Game {
 		this.pkgManager = new PackageManager();
 		this.config = new YamlConfig(file);
 		this.config.load();
-		if(this.getTranslator().get(this.config.getString("options.language")) == null) {
-			this.config.setValue("options.language", "US");
-		}
 
 		File langs = new File(GeneralUtils.getMinecraftDirectory(), "lang");
 		if(!langs.exists()) {
@@ -103,7 +100,7 @@ public abstract class ClassicGame implements Game {
 							if(languages[ind].getName().endsWith(".lang")) {
 								fname = fname.substring(0, fname.length() - 5);
 								if(nme.equals(fname)) {
-									this.translator.register(new Language(name, code, langs + "\\" + languages[ind].getName()));
+									this.translator.register(new Language(name, code, langs + File.separator + languages[ind].getName()));
 									OpenClassic.getLogger().info("Language \"" + name + "\" has been successfully registered!");
 								}
 							}
@@ -113,6 +110,10 @@ public abstract class ClassicGame implements Game {
 					}
 				}
 			}
+		}
+		
+		if(this.getTranslator().get(this.config.getString("options.language")) == null) {
+			this.config.setValue("options.language", "US");
 		}
 	}
 
@@ -341,7 +342,7 @@ public abstract class ClassicGame implements Game {
 
 	@Override
 	public String getLanguage() {
-		return this.config.getString("options.language", "English");
+		return this.config.getString("options.language", "US");
 	}
 
 }
