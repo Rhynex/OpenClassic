@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.translate.Language;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class LanguageScreen extends GuiScreen {
@@ -24,8 +25,8 @@ public class LanguageScreen extends GuiScreen {
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
 
 		List<String> languages = new ArrayList<String>();
-		for(String language : OpenClassic.getGame().getTranslator().getLanguageNames()) {
-			languages.add(language);
+		for (Language language : OpenClassic.getGame().getTranslator().getLanguages()) {
+			languages.add(language.getName() + " (" + language.getLangCode() + ")");
 		}
 
 		this.getWidget(0, ButtonList.class).setContents(languages);
@@ -43,6 +44,12 @@ public class LanguageScreen extends GuiScreen {
 	public void onButtonListClick(ButtonList list, Button button) {
 		if(button.isActive()) {
 			OpenClassic.getGame().getConfig().setValue("options.language", button.getText());
+			//Language support modification
+			String d = OpenClassic.getGame().getConfig().getString("options.language");
+			d = d.substring(0, d.indexOf('(')-1);
+			OpenClassic.getGame().getConfig().setValue("options.language", d);
+			GeneralUtils.getMinecraft().setCurrentScreen(new LanguageScreen(this.parent));
+			OpenClassic.getGame().getConfig().save();
 		}
 	}
 
