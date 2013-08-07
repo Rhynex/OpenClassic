@@ -240,6 +240,7 @@ options:
     smoothing: Smoothing
     night: Night Mode
     sensitivity: Sensitivity
+    blockChooser: Block Chooser
     keys:
         forward: Forward
         left: Left
