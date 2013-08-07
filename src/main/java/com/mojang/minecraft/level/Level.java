@@ -86,7 +86,7 @@ public class Level {
 			}
 
 			Minecraft mc = GeneralUtils.getMinecraft();
-			if(mc.settings.night) {
+			if(mc.settings.getBooleanSetting("options.night").getValue()) {
 				this.skyColor = 0;
 				this.fogColor = new Color(30, 30, 30, 70).getRGB();
 				this.cloudColor = new Color(30, 30, 30, 70).getRGB();
@@ -573,7 +573,7 @@ public class Level {
 	public float getBrightness(int x, int y, int z) {
 		BlockType block = this.openclassic.getBlockTypeAt(x, y, z);
 		Minecraft mc = GeneralUtils.getMinecraft();
-		float mod = mc.settings.night ? 0.4F : 0;
+		float mod = mc.settings.getBooleanSetting("options.night").getValue() ? 0.4F : 0;
 		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 - mod : 0.6F - mod;
 	}
 
@@ -750,7 +750,7 @@ public class Level {
 	public void playSound(String name, Entity entity, float volume, float pitch) {
 		if(this.rendererContext != null) {
 			Minecraft mc = this.rendererContext;
-			if(!mc.settings.sound) {
+			if(!mc.settings.getBooleanSetting("options.sound").getValue()) {
 				return;
 			}
 
@@ -763,7 +763,7 @@ public class Level {
 	public void playSound(String name, float x, float y, float z, float volume, float pitch) {
 		if(this.rendererContext != null) {
 			Minecraft mc = this.rendererContext;
-			if(!mc.settings.sound) {
+			if(!mc.settings.getBooleanSetting("options.sound").getValue()) {
 				return;
 			}
 

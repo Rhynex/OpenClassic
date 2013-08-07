@@ -1,6 +1,6 @@
 package com.mojang.minecraft.entity.player;
 
-import com.mojang.minecraft.settings.GameSettings;
+import com.mojang.minecraft.settings.Bindings;
 
 public final class InputHandler {
 
@@ -13,40 +13,40 @@ public final class InputHandler {
 	public boolean toggleFly = false;
 
 	private boolean[] keyStates = new boolean[10];
-	private GameSettings settings;
+	private Bindings bindings;
 
-	public InputHandler(GameSettings settings) {
-		this.settings = settings;
+	public InputHandler(Bindings bindings) {
+		this.bindings = bindings;
 	}
 
 	public final void setKeyState(int key, boolean pressed) {
 		byte index = -1;
 
-		if(key == this.settings.forwardKey.key) {
+		if(key == this.bindings.forwardKey.key) {
 			index = 0;
 		}
 
-		if(key == this.settings.backKey.key) {
+		if(key == this.bindings.backKey.key) {
 			index = 1;
 		}
 
-		if(key == this.settings.leftKey.key) {
+		if(key == this.bindings.leftKey.key) {
 			index = 2;
 		}
 
-		if(key == this.settings.rightKey.key) {
+		if(key == this.bindings.rightKey.key) {
 			index = 3;
 		}
 
-		if(key == this.settings.jumpKey.key) {
+		if(key == this.bindings.jumpKey.key) {
 			index = 4;
 		}
 
-		if(key == this.settings.speedHackKey.key) {
+		if(key == this.bindings.speedHackKey.key) {
 			index = 5;
 		}
 
-		if(key == this.settings.flyDownKey.key) {
+		if(key == this.bindings.flyDownKey.key) {
 			index = 6;
 		}
 
@@ -91,7 +91,7 @@ public final class InputHandler {
 	}
 
 	public final void keyPress(int key) {
-		if(key == this.settings.jumpKey.key) {
+		if(key == this.bindings.jumpKey.key) {
 			if(this.flyDelay == 0) {
 				this.flyDelay = 10;
 			} else {

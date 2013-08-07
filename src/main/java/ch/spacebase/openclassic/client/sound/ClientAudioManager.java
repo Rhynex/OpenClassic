@@ -150,7 +150,7 @@ public class ClientAudioManager implements AudioManager {
 	}
 
 	public boolean playSound(String sound, float x, float y, float z, float volume, float pitch) {
-		if(!this.mc.settings.sound) return true;
+		if(!this.mc.settings.getBooleanSetting("options.sound").getValue()) return true;
 
 		List<URL> files = this.sounds.get(sound);
 		if(files != null) {
@@ -184,7 +184,7 @@ public class ClientAudioManager implements AudioManager {
 	}
 
 	public boolean playMusic(String music, boolean loop) {
-		if(!this.mc.settings.music) return true;
+		if(!this.mc.settings.getBooleanSetting("options.music").getValue()) return true;
 		List<URL> files = this.music.get(music);
 		if(files != null) {
 			URL file = files.get(rand.nextInt(files.size()));

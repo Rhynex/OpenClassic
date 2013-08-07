@@ -155,6 +155,7 @@ gui:
         remove: Remove Favorite
         enter-url: Enter the server's URL.
         enter-name: Enter the favorite's name.
+    controls: Controls
     favorites:
         select: Select a server.
         delete: Select a server to delete.
@@ -234,10 +235,11 @@ options:
     render-distance: Render Distance
     view-bobbing: View Bobbing
     3d-anaglyph: 3D Anaglyph
-    limit-frames: Limit Framerate
+    limit-fps: Limit Framerate
     survival: Survival Mode
     smoothing: Smoothing
     night: Night Mode
+    sensitivity: Sensitivity
     keys:
         forward: Forward
         left: Left
@@ -251,9 +253,9 @@ options:
         load-loc: Load Location
         speedhack: Speed Hack
         fly-down: Fly Down
-    hacks:
-        speed: Speedhack
-        fly: Fly Hack
+hacks:
+    speed: Speedhack
+    flying: Fly Hack
 screenshot:
     saved: "&aSaved screenshot \"%s\"!"
     error: "&cError saving screenshot: %s"

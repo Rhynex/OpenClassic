@@ -21,10 +21,10 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL30;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.settings.Settings;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.render.animation.AnimatedTexture;
-import com.mojang.minecraft.settings.GameSettings;
 
 public class TextureManager {
 
@@ -33,9 +33,9 @@ public class TextureManager {
 	public HashMap<Integer, BufferedImage> textureImgs = new HashMap<Integer, BufferedImage>();
 	public IntBuffer textureBuffer = BufferUtils.createIntBuffer(1);
 	public List<AnimatedTexture> animations = new ArrayList<AnimatedTexture>();
-	public GameSettings settings;
+	public Settings settings;
 
-	public TextureManager(GameSettings settings) {
+	public TextureManager(Settings settings) {
 		this.settings = settings;
 	}
 
@@ -56,10 +56,11 @@ public class TextureManager {
 				if(!jar) {
 					img = ImageIO.read(new FileInputStream(file));
 				} else {
-					if(this.settings.texturePack.equals("none")) {
+					String pack = OpenClassic.getGame().getConfig().getString("options.texture-pack");
+					if(pack.equals("none")) {
 						img = ImageIO.read(TextureManager.class.getResourceAsStream(file));
 					} else {
-						ZipFile zip = new ZipFile(new File(OpenClassic.getClient().getDirectory(), "texturepacks/" + this.settings.texturePack));
+						ZipFile zip = new ZipFile(new File(OpenClassic.getClient().getDirectory(), "texturepacks/" + pack));
 						if(zip.getEntry(file.startsWith("/") ? file.substring(1, file.length()) : file) != null) {
 							img = ImageIO.read(zip.getInputStream(zip.getEntry(file.startsWith("/") ? file.substring(1, file.length()) : file)));
 						} else {
@@ -92,7 +93,7 @@ public class TextureManager {
 		if(image == null) return;
 
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-		if(this.settings.smoothing && GeneralUtils.getMinecraft().mipmapMode > 0) {
+		if(this.settings.getBooleanSetting("options.smoothing").getValue() && GeneralUtils.getMinecraft().mipmapMode > 0) {
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 2);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
@@ -114,7 +115,7 @@ public class TextureManager {
 				int green = (pixel >> 8) & 0xFF;
 				int alpha = (pixel >> 24) & 0xFF;
 
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					green = (red * 30 + green * 70) / 100;
 					blue = (red * 30 + blue * 70) / 100;
 					red = (red * 30 + green * 59 + blue * 11) / 100;
@@ -131,7 +132,7 @@ public class TextureManager {
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 		this.textureImgs.put(textureId, image);
 
-		if(this.settings.smoothing) {
+		if(this.settings.getBooleanSetting("options.smoothing").getValue()) {
 			switch(GeneralUtils.getMinecraft().mipmapMode) {
 				case 1:
 					GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);

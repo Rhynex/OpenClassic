@@ -33,7 +33,7 @@ public class FogRenderer {
 				float r = 0.4F;
 				float g = 0.4F;
 				float b = 0.9F;
-				if(this.mc.settings.anaglyph) {
+				if(this.mc.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					r = (r * 30.0F + g * 59.0F + b * 11.0F) / 100.0F;
 					g = (r * 30.0F + g * 70.0F) / 100.0F;
 					b = (r * 30.0F + b * 70.0F) / 100.0F;
@@ -45,7 +45,7 @@ public class FogRenderer {
 				float r = 0.4F;
 				float g = 0.3F;
 				float b = 0.3F;
-				if(this.mc.settings.anaglyph) {
+				if(this.mc.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					r = (r * 30.0F + g * 59.0F + b * 11.0F) / 100.0F;
 					g = (r * 30.0F + g * 70.0F) / 100.0F;
 					b = (r * 30.0F + b * 70.0F) / 100.0F;
