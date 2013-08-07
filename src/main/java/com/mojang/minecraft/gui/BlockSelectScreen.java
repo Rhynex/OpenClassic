@@ -1,11 +1,17 @@
 package com.mojang.minecraft.gui;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
+import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
@@ -17,38 +23,56 @@ public final class BlockSelectScreen extends GuiScreen {
 	private float localSine = 0;
 	private float localSineModifier = 0;
 	private boolean fancy;
+	
+	private Map<Integer, List<ScreenBlock>> blocks = new LinkedHashMap<Integer, List<ScreenBlock>>();
+	private int page = 0;
 
-	public BlockSelectScreen() {
+	@Override
+	public void onOpen() {
 		this.setGrabsInput(false);
-	}
-
-	private int getBlockOnScreen(int x, int y) {
 		int count = 0;
 		for(BlockType block : Blocks.getBlocks()) {
 			if(block != null && block.isSelectable()) {
-				int blockX = this.getWidth() / 2 + count % 9 * 24 + -108 - 3;
-				int blockZ = this.getHeight() / 2 + count / 9 * 24 + -60 + 3;
-				if(x >= blockX && x <= blockX + 24 && y >= blockZ - 12 && y <= blockZ + 12) {
-					return count;
+				int page = (int) Math.floor(((float) count) / 36);
+				if(!this.blocks.containsKey(page)) {
+					this.blocks.put(page, new ArrayList<ScreenBlock>());
 				}
-
+				
+				int ind = count - (page * 36);
+				int blockX = this.getWidth() / 2 + ind % 9 * 24 + -108 - 3;
+				int blockY = this.getHeight() / 2 + ind / 9 * 24 + -60 + 3;
+				this.blocks.get(page).add(new ScreenBlock(block, blockX, blockY));
 				count++;
 			}
 		}
-
-		return -1;
+		
+		this.attachWidget(new Button(0, this.getWidth() / 2 - 115, 155, 25, 20, this, "<<"));
+		this.attachWidget(new Button(1, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>"));
+		
+		if(this.blocks.size() == 0) {
+			GeneralUtils.getMinecraft().setCurrentScreen(null);
+		}
 	}
 
-	public final void render() {
+	private ScreenBlock getBlockOnScreen(int x, int y) {
+		for(ScreenBlock block : this.blocks.get(this.page)) {
+			if(x >= block.x && x <= block.x + 24 && y >= block.y - 12 && y <= block.y + 12) {
+				return block;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public void render() {
 		int mouseX = RenderHelper.getHelper().getRenderMouseX();
 		int mouseY = RenderHelper.getHelper().getRenderMouseY();
 
-		int block = this.getBlockOnScreen(mouseX, mouseY);
+		ScreenBlock block = this.getBlockOnScreen(mouseX, mouseY);
 		RenderHelper.getHelper().color(this.getWidth() / 2 - 120, 30, this.getWidth() / 2 + 120, 180, -1878719232, -1070583712);
-		if(block >= 0) {
-			int selectX = this.getWidth() / 2 + block % 9 * 24 + -108;
-			int selectY = this.getHeight() / 2 + block / 9 * 24 + -60;
-			RenderHelper.getHelper().color(selectX - 3, selectY - 8, selectX + 23, selectY + 24 - 6, -1862270977, -1056964609);
+		if(block != null) {
+			RenderHelper.getHelper().color(block.x - 3, block.y - 8, block.x + 23, block.y + 18, -1862270977, -1056964609);
 		}
 
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), this.getWidth() / 2, 40);
@@ -88,37 +112,54 @@ public final class BlockSelectScreen extends GuiScreen {
 			this.localSine = MathHelper.sin(this.localSineModifier * MathHelper.DEG_TO_RAD);
 		}
 		
-		int count = 0;
-		for(BlockType b : Blocks.getBlocks()) {
-			if(b != null && b.isSelectable()) {
-				GL11.glPushMatrix();
-				GL11.glTranslatef(this.getWidth() / 2 + count % 9 * 24 + -108, this.getHeight() / 2 + count / 9 * 24 + -60, 0);
-				GL11.glScalef(10.0F, 10.0F, 10.0F);
-				GL11.glTranslatef(1.0F, 0.5F, 8.0F);
-				GL11.glRotatef(this.pitchAngle, 1.0F, 0.0F, 0.0F);
-				if(this.fancy && block == count) {
-					GL11.glTranslatef(0.0F, 0.15F * this.localSine, 0.0F);
-				}
-				
-				GL11.glRotatef(this.yawAngle, 0.0F, 1.0F, 0.0F);
-				if(block == count) {
-					GL11.glScalef(1.55F, 1.55F, 1.55F);
-				}
+		for(ScreenBlock b : this.blocks.get(this.page)) {
+			GL11.glPushMatrix();
+			GL11.glTranslatef(b.x, b.y, 0);
+			GL11.glScalef(10.0F, 10.0F, 10.0F);
+			GL11.glTranslatef(1.0F, 0.5F, 8.0F);
+			GL11.glRotatef(this.pitchAngle, 1.0F, 0.0F, 0.0F);
+			if(this.fancy && block != null && b.block == block.block) {
+				GL11.glTranslatef(0.0F, 0.15F * this.localSine, 0.0F);
+			}
+			
+			GL11.glRotatef(this.yawAngle, 0.0F, 1.0F, 0.0F);
+			if(block != null && b.block == block.block) {
+				GL11.glScalef(1.55F, 1.55F, 1.55F);
+			}
 
-				GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
-				GL11.glScalef(-1.0F, -1.0F, -1.0F);
-				b.getModel().renderAll(-2, 0, 0, 1);
-				GL11.glPopMatrix();
-
-				count++;
+			GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
+			GL11.glScalef(-1.0F, -1.0F, -1.0F);
+			b.block.getModel().renderAll(-2, 0, 0, 1);
+			GL11.glPopMatrix();
+		}
+		
+		super.render();
+	}
+	
+	@Override
+	public void onButtonClick(Button button) {
+		if(button.getId() == 0) {
+			if(this.page > 0) {
+				this.page--;
+			}
+		} else if(button.getId() == 1) {
+			if(this.page < this.blocks.size() - 1) {
+				this.page++;
 			}
 		}
 	}
 
-	public final void onMouseClick(int x, int y, int state) {
-		if(state == 0) {
-			GeneralUtils.getMinecraft().player.inventory.replaceSlot(this.getBlockOnScreen(x, y));
-			GeneralUtils.getMinecraft().setCurrentScreen(null);
+	@Override
+	public void onMouseClick(int x, int y, int button) {
+		if(button == 0) {
+			ScreenBlock block = this.getBlockOnScreen(x, y);
+			if(block != null) {
+				GeneralUtils.getMinecraft().player.inventory.replaceSlot(block.block);
+				GeneralUtils.getMinecraft().setCurrentScreen(null);
+				return;
+			}
 		}
+		
+		super.onMouseClick(x, y, button);
 	}
 }

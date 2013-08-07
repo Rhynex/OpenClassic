@@ -131,6 +131,9 @@ gui:
     back: Back
     done: Done
     hacks: Hacks
+    list:
+        back: Back
+        next: Next
     login:
         enter: Enter your username and password.
         user: Username
