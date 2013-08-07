@@ -5,6 +5,7 @@ import java.util.List;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
@@ -175,6 +176,37 @@ public class LocalPlayer extends Player {
 			super.moveRelative(forward, strafe, 2.5F);
 		} else {
 			super.moveRelative(forward, strafe, speed);
+		}
+	}
+	
+	@Override
+	public void turn(float yaw, float pitch) {
+		float oldPitch = this.pitch;
+		float oldYaw = this.yaw;
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		if(this.pitch < -90.0F) {
+			this.pitch = -90.0F;
+		}
+
+		if(this.pitch > 90.0F) {
+			this.pitch = 90.0F;
+		}
+
+		this.oPitch += this.pitch - oldPitch;
+		this.oYaw += this.yaw - oldYaw;
+	}
+
+	@Override
+	public void interpolateTurn(float yaw, float pitch) {
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		if(this.pitch < -90.0F) {
+			this.pitch = -90.0F;
+		}
+
+		if(this.pitch > 90.0F) {
+			this.pitch = 90.0F;
 		}
 	}
 
