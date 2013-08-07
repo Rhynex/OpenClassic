@@ -5,6 +5,7 @@ import java.util.List;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
@@ -171,10 +172,41 @@ public class LocalPlayer extends Player {
 	}
 
 	public void moveRelative(float forward, float strafe, float speed) {
-		if(GeneralUtils.getMinecraft().settings.speed && this.speedHack && GeneralUtils.getMinecraft().hacks) {
+		if(GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.speed").getValue() && this.speedHack && GeneralUtils.getMinecraft().hacks) {
 			super.moveRelative(forward, strafe, 2.5F);
 		} else {
 			super.moveRelative(forward, strafe, speed);
+		}
+	}
+	
+	@Override
+	public void turn(float yaw, float pitch) {
+		float oldPitch = this.pitch;
+		float oldYaw = this.yaw;
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		if(this.pitch < -90.0F) {
+			this.pitch = -90.0F;
+		}
+
+		if(this.pitch > 90.0F) {
+			this.pitch = 90.0F;
+		}
+
+		this.oPitch += this.pitch - oldPitch;
+		this.oYaw += this.yaw - oldYaw;
+	}
+
+	@Override
+	public void interpolateTurn(float yaw, float pitch) {
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		if(this.pitch < -90.0F) {
+			this.pitch = -90.0F;
+		}
+
+		if(this.pitch > 90.0F) {
+			this.pitch = 90.0F;
 		}
 	}
 
@@ -203,14 +235,14 @@ public class LocalPlayer extends Player {
 			this.parent.speedHack = this.parent.input.speed;
 			this.xxa = this.parent.input.xxa;
 			this.yya = this.parent.input.yya;
-			if(this.parent.input.toggleFly && GeneralUtils.getMinecraft().settings.flying && GeneralUtils.getMinecraft().hacks) {
+			if(this.parent.input.toggleFly && GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue() && GeneralUtils.getMinecraft().hacks) {
 				this.flying = !this.flying;
 				if(this.flying) {
 					this.mob.yd = 0;
 				}
 			}
 
-			if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().settings.flying) {
+			if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
 				this.flying = false;
 			}
 

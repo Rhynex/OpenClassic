@@ -11,7 +11,6 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
-import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.network.msg.Message;
@@ -44,7 +43,7 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		((ClassicServer) OpenClassic.getGame()).getSessionRegistry().remove(session);
 
 		if(session.getPlayer() != null) {
-			OpenClassic.getServer().broadcastMessage(EventManager.callEvent(new PlayerQuitEvent(session.getPlayer(), String.format(OpenClassic.getGame().getTranslator().translate("player.logout"), session.getPlayer().getDisplayName() + Color.AQUA))).getMessage());
+			OpenClassic.getServer().broadcastMessage(EventManager.callEvent(new PlayerQuitEvent(session.getPlayer(), String.format(OpenClassic.getGame().getTranslator().translate("player.logout"), session.getPlayer().getDisplayName()))).getMessage());
 			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
 				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().players;
 				if(model.indexOf(session.getPlayer().getName()) != -1) {

@@ -36,7 +36,7 @@ public final class MobSpawner {
 			}
 
 			Class<? extends Mob> spawnable[] = ANIMALS;
-			if(GeneralUtils.getMinecraft().settings.survival > 1) {
+			if(GeneralUtils.getMinecraft().settings.getIntSetting("options.survival").getValue() > 1) {
 				spawnable = ALL;
 			}
 

@@ -10,7 +10,6 @@ import ch.spacebase.openclassic.api.util.GuiTextures;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.gui.LoadLevelScreen;
-import com.mojang.minecraft.gui.OptionsScreen;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -31,7 +30,7 @@ public class MainMenuScreen extends GuiScreen {
 			OpenClassic.getClient().getAudioManager().playMusic("menu", true);
 		}
 
-		if(GeneralUtils.getMinecraft().data == null || GeneralUtils.getMinecraft().settings.survival > 0) {
+		if(GeneralUtils.getMinecraft().data == null || GeneralUtils.getMinecraft().settings.getIntSetting("options.survival").getValue() > 0) {
 			this.getWidget(1, Button.class).setActive(false);
 		}
 	}

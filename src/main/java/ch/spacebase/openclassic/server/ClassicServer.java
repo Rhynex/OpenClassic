@@ -23,7 +23,6 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.HeartbeatManager;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Server;
@@ -297,10 +296,16 @@ public class ClassicServer extends ClassicGame implements Server {
 	}
 
 	public void broadcastMessage(String message) {
-		OpenClassic.getLogger().info(message);
-
+		this.getConsoleSender().sendMessage(message);
 		for(Player player : this.getPlayers()) {
 			player.sendMessage(message);
+		}
+	}
+	
+	public void broadcastMessage(String message, Object... args) {
+		this.getConsoleSender().sendMessage(message, args);
+		for(Player player : this.getPlayers()) {
+			player.sendMessage(message, args);
 		}
 	}
 
@@ -526,7 +531,7 @@ public class ClassicServer extends ClassicGame implements Server {
 			}
 
 			EventManager.callEvent(new LevelLoadEvent(level));
-			this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.load-success"), name));
+			this.broadcastMessage("level.load-success", name);
 			return level;
 		} catch(IOException e) {
 			OpenClassic.getLogger().severe(String.format(this.getTranslator().translate("level.load-fail"), name));
@@ -544,7 +549,7 @@ public class ClassicServer extends ClassicGame implements Server {
 	public void unloadLevel(String name, boolean announce) {
 		if(this.getLevel(name) != null) {
 			if(this.getDefaultLevel().getName().equals(name)) {
-				if(announce) this.broadcastMessage(Color.RED + this.getTranslator().translate("level.unload-main"));
+				if(announce) this.broadcastMessage("level.unload-main");
 				return;
 			}
 
@@ -569,7 +574,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				}
 			}
 
-			if(announce) this.broadcastMessage(Color.BLUE + String.format(this.getTranslator().translate("level.unload-success"), name));
+			if(announce) this.broadcastMessage("level.unload-success", name);
 		}
 	}
 

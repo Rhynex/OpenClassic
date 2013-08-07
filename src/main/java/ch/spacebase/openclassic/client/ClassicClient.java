@@ -25,6 +25,7 @@ import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.settings.Settings;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.block.physics.TNTPhysics;
@@ -220,6 +221,11 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public String getServerVersion() {
 		return this.mc.openclassicVersion;
+	}
+
+	@Override
+	public Settings getSettings() {
+		return this.mc.settings;
 	}
 
 }

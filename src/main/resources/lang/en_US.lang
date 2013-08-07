@@ -18,77 +18,76 @@ config:
     fail-load: Failed to load config!
 command:
     wrong-sender:
-        single: You must be a %s to use this command.
-        multi: You must be one of the following (%s) to use this command.
-    no-perm: You don't have permission to use this command!
-    usage: Usage
-    fail-invoke: Failed to invoke command %s!
-    unknown: Unknown command.
-    multiple-players: Multiple players found. Try being more specific.
-    player-not-found: Player not found.
-    player-only: You must be a player to do that.
-    second-not-found: Second player not found.
-    deny-higher-group: You cannot do that to a player in a higher group!
+        single: "&cYou must be a %s to use this command."
+        multi: "&cYou must be one of the following (%s) to use this command."
+    no-perm: "&cYou don't have permission to use this command!"
+    usage: "&cUsage: %s"
+    fail-invoke: "&cFailed to invoke command %s!"
+    unknown: "&cUnknown command."
+    multiple-players: "&cMultiple players found. Try being more specific."
+    player-not-found: "&cPlayer not found."
+    player-only: "&cYou must be a player to do that."
+    second-not-found: "&cSecond player not found."
+    deny-higher-group: "&cYou cannot do that to a player in a higher group!"
 help:
-    invalid-page: Invalid page number.
-    page-not-found: Page not found.
-    pages: Available commands (page %s of %s)
+    invalid-page: "&cInvalid page number."
+    page-not-found: "&cPage not found."
+    pages: "&9Available commands (page %s of %s)"
 pkg:
-    invalid-operation: Invalid operation. Valid operations are %s.
+    invalid-operation: "&cInvalid operation. Valid operations are %s."
 reload:
-    reloading: Reloading OpenClassic...
-    complete: Reload complete.
+    reloading: "&bReloading OpenClassic..."
+    complete: "&aReload complete."
 spawn:
-    set: Spawn set to %s, %s, %s!
+    set: "&aSpawn set to %s, %s, %s!"
 solid:
-    enable: Bedrock mode enabled.
-    disable: Bedrock mode disabled.
+    enable: "&aBedrock mode enabled."
+    disable: "&cBedrock mode disabled."
 water:
-    enable: Water mode enabled.
-    disable: Water mode disabled.
+    enable: "&aWater mode enabled."
+    disable: "&cWater mode disabled."
 stillwater:
-    enable: Still Water mode enabled.
-    disable: Still Water mode disabled.
+    enable: "&aStill Water mode enabled."
+    disable: "&cStill Water mode disabled."
 lava:
-    enable: Lava mode enabled.
-    disable: Lava mode disabled.
+    enable: "&aLava mode enabled."
+    disable: "&cLava mode disabled."
 stilllava:
-    enable: Still Lava mode enabled.
-    disable: Still Lava mode disabled.
-stop: Stopping the server...
+    enable: "&aStill Lava mode enabled."
+    disable: "&cStill Lava mode disabled."
 ban:
-    banned: "%s has been banned!"
-    unbanned: "%s has been unbanned!"
+    banned: "%s &ahas been banned!"
+    unbanned: "%s &ahas been unbanned!"
 kick:
-    kicked: "%s has been kicked!"
+    kicked: "%s &ahas been kicked!"
 whitelist:
-    whitelisted: "%s has been whitelisted!"
-    unwhitelisted: "%s has been unwhitelisted!"
+    whitelisted: "%s &ahas been whitelisted!"
+    unwhitelisted: "%s &ahas been unwhitelisted!"
 group:
-    invalid: Invalid group!
-    cant-set: You cannot set that group!
-    set-notify: You are now in group %s!
-    set: "%s is now in group %s!"
+    invalid: "&cInvalid group!"
+    cant-set: "&cYou cannot set that group!"
+    set-notify: "&aYou are now in group %s!"
+    set: "%s &ais now in group %s&a!"
 teleport:
-    teleport-to: Teleported to %s!
-    teleported-to: "%s teleported you to %s!"
-    teleported-to-notify: Teleported %s to %s!
-    teleported-to-you: Teleported %s to you!
-    invalid-coords: Invalid coordinates.
+    teleport-to: "&aTeleported to %s!"
+    teleported-to: "%s &ateleported you to %s&a!"
+    teleported-to-notify: "&aTeleported %s &ato %s&a!"
+    teleported-to-you: "&aTeleported %s &ato you!"
+    invalid-coords: "&cInvalid coordinates."
 level:
-    level-not-found: Level not found.
-    loaded: Loaded levels
-    load-success: Level "%s" has been loaded!
+    level-not-found: "&cLevel not found."
+    loaded: "&bLoaded levels:"
+    load-success: "&9Level \"%s\" has been loaded!"
     load-fail: Failed to load level "%s"!
     save-fail: Failed to save level "%s"!
-    unload-success: Level "%s" has been unloaded!
-    unload-main: Cannot unload the main world!
-    create-success: The level has been successfully created!
-    invalid-dim: Invalid width, depth, or height.
-    invalid-type: Invalid world type.
-    exists: The level already exists.
-    not-loaded: Level not loaded.
-    goto: "%s went to %s!"
+    unload-success: "&9Level \"%s\" has been unloaded!"
+    unload-main: "&cCannot unload the main world!"
+    create-success: "&aThe level has been successfully created!"
+    invalid-dim: "&cInvalid width, depth, or height."
+    invalid-type: "&cInvalid world type."
+    exists: "&cThe level already exists."
+    not-loaded: "&cLevel not loaded."
+    goto: "%s &bwent to &a%s&b!"
     format-mismatch: Only %s levels are supported!
     try-mcforge: Trying MCForge 6...
     unknown-version: Unknown map version!
@@ -110,8 +109,9 @@ level:
     saving: Saving level...
     save-all: Saving levels...
 player:
-    login: "%s has logged in."
-    logout: "%s has logged out."
+    login: "%s &bhas logged in."
+    logout: "%s &bhas logged out."
+    kicked: "%s &bhas been kicked (%s&b)"
 disconnect:
     invalid-user: Invalid username.
     user-length: Username too long or too short!
@@ -155,6 +155,7 @@ gui:
         remove: Remove Favorite
         enter-url: Enter the server's URL.
         enter-name: Enter the favorite's name.
+    controls: Controls
     favorites:
         select: Select a server.
         delete: Select a server to delete.
@@ -234,10 +235,11 @@ options:
     render-distance: Render Distance
     view-bobbing: View Bobbing
     3d-anaglyph: 3D Anaglyph
-    limit-frames: Limit Framerate
+    limit-fps: Limit Framerate
     survival: Survival Mode
     smoothing: Smoothing
     night: Night Mode
+    sensitivity: Sensitivity
     keys:
         forward: Forward
         left: Left
@@ -251,16 +253,19 @@ options:
         load-loc: Load Location
         speedhack: Speed Hack
         fly-down: Fly Down
-    hacks:
-        speed: Speedhack
-        fly: Fly Hack
+hacks:
+    speed: Speedhack
+    flying: Fly Hack
 screenshot:
-    saved: Saved screenshot "%s"!
-    error: "Error saving screenshot: %s"
+    saved: "&aSaved screenshot \"%s\"!"
+    error: "&cError saving screenshot: %s"
 progress-bar:
     singleplayer: Singleplayer
     multiplayer: Multiplayer
     loading: Loading
 server:
-    client-version-mismatch: "Your OpenClassic Client was detected, however its protocol version does not match the server's."
-    still-can-play: "You can still play, but you will not get enhanced client features."
+    denied-hack:
+        block-type: "&cDenied block type hack."
+        block-break: "&cDenied block break hack."
+    stop: "&cStopping the server..."
+    client-version-mismatch: "&cYour OpenClassic Client was detected, however its protocol version does not match the server's.\n&cYou can still play, but you will not get enhanced client features."

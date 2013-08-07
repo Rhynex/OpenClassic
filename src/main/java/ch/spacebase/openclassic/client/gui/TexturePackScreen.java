@@ -46,20 +46,21 @@ public class TexturePackScreen extends GuiScreen {
 	public void onButtonListClick(ButtonList list, Button button) {
 		if(button.isActive()) {
 			if(button.getText().equals("Default")) {
-				GeneralUtils.getMinecraft().settings.texturePack = "none";
+				OpenClassic.getClient().getConfig().setValue("options.texture-pack", "none");
 			} else {
-				GeneralUtils.getMinecraft().settings.texturePack = button.getText() + ".zip";
+				OpenClassic.getClient().getConfig().setValue("options.texture-pack", button.getText() + ".zip");
 			}
 
-			GeneralUtils.getMinecraft().settings.save();
+			OpenClassic.getClient().getConfig().save();
 			GeneralUtils.getMinecraft().textureManager.clear();
 		}
 	}
 
 	public void render() {
+		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
 		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), this.getWidth() / 2, 15, 16777215);
-		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!GeneralUtils.getMinecraft().settings.texturePack.equals("none") ? GeneralUtils.getMinecraft().settings.texturePack.substring(0, GeneralUtils.getMinecraft().settings.texturePack.indexOf('.')) : "Default")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
+		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
 		super.render();
 	}
 }

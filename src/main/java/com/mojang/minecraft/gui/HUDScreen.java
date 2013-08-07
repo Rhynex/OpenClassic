@@ -126,7 +126,7 @@ public class HUDScreen extends MainScreen {
 			}
 
 			this.mc.fontRenderer.renderWithShadow(Constants.VERSION, 2, 2, 16777215);
-			if(this.mc.settings.showInfo) {
+			if(this.mc.settings.getBooleanSetting("options.show-info").getValue()) {
 				this.mc.fontRenderer.renderWithShadow(this.mc.debugInfo, 2, 12, 16777215);
 				this.mc.fontRenderer.renderWithShadow("Position: " + (int) Math.floor(this.mc.player.x) + ", " + (int) Math.floor(this.mc.player.y) + ", " + (int) Math.floor(this.mc.player.z), 2, 22, 16777215);
 			}

@@ -43,11 +43,8 @@ public class LanguageScreen extends GuiScreen {
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
 		if(button.isActive()) {
-			OpenClassic.getGame().getConfig().setValue("options.language", button.getText());
-			//Language support modification
-			String d = OpenClassic.getGame().getConfig().getString("options.language");
-			d = d.substring(0, d.indexOf('(')-1);
-			OpenClassic.getGame().getConfig().setValue("options.language", d);
+			String code = button.getText().substring(button.getText().indexOf('(') + 1, button.getText().indexOf(')'));
+			OpenClassic.getGame().getConfig().setValue("options.language", code);
 			GeneralUtils.getMinecraft().setCurrentScreen(new LanguageScreen(this.parent));
 			OpenClassic.getGame().getConfig().save();
 		}

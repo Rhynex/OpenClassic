@@ -3,22 +3,24 @@ package ch.spacebase.openclassic.client.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.minecraft.settings.Bindings;
+
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.api.settings.Settings;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-public final class HacksScreen extends GuiScreen {
+public final class ControlsScreen extends GuiScreen {
 
 	private GuiScreen parent;
-	private Settings settings;
+	private Bindings bindings;
+	private int binding = -1;
 
-	public HacksScreen(GuiScreen parent, Settings settings) {
+	public ControlsScreen(GuiScreen parent, Bindings bindings) {
 		this.parent = parent;
-		this.settings = settings;
+		this.bindings = bindings;
 	}
 
 	@Override
@@ -31,8 +33,8 @@ public final class HacksScreen extends GuiScreen {
 	
 	private List<String> buildContents() {
 		List<String> contents = new ArrayList<String>();
-		for(int count = 0; count < this.settings.getSettings().size(); count++) {
-			contents.add(OpenClassic.getGame().getTranslator().translate(this.settings.getSetting(count).getName()) + ": " + this.settings.getSetting(count).getStringValue());
+		for(int binding = 0; binding < this.bindings.bindings.length; binding++) {
+			contents.add(OpenClassic.getGame().getTranslator().translate(this.bindings.getBindingName(binding) + ": " + this.bindings.getBindingValue(binding)));
 		}
 		
 		return contents;
@@ -48,9 +50,23 @@ public final class HacksScreen extends GuiScreen {
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
 		int page = list.getCurrentPage();
-		this.settings.getSetting((list.getCurrentPage() * 5) + button.getId()).toggle();
 		this.getWidget(0, ButtonList.class).setContents(this.buildContents());
 		list.setCurrentPage(page);
+		this.binding = (list.getCurrentPage() * 5) + button.getId();
+		button.setText("> " + this.bindings.getBindingName(this.binding) + ": " + this.bindings.getBindingValue(this.binding) + " <");
+	}
+	
+	@Override
+	public void onKeyPress(char c, int key) {
+		if(this.binding >= 0) {
+			this.bindings.setBinding(this.binding, key);
+			int page = this.getWidget(0, ButtonList.class).getCurrentPage();
+			this.getWidget(0, ButtonList.class).setContents(this.buildContents());
+			this.getWidget(0, ButtonList.class).setCurrentPage(page);
+			this.binding = -1;
+		} else {
+			super.onKeyPress(c, key);
+		}
 	}
 
 	@Override
@@ -61,7 +77,7 @@ public final class HacksScreen extends GuiScreen {
 			RenderHelper.getHelper().drawDefaultBG();
 		}
 
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.hacks"), this.getWidth() / 2, 20);
+		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.controls"), this.getWidth() / 2, 20);
 		super.render();
 	}
 }

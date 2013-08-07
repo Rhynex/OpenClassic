@@ -7,6 +7,7 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 
 import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.player.LocalPlayer;
@@ -140,8 +141,8 @@ public abstract class Entity {
 	public void turn(float yaw, float pitch) {
 		float oldPitch = this.pitch;
 		float oldYaw = this.yaw;
-		this.yaw = (float) (this.yaw + yaw * 0.15D);
-		this.pitch = (float) (this.pitch - pitch * 0.15D);
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[1]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[1]);
 		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}
@@ -155,8 +156,8 @@ public abstract class Entity {
 	}
 
 	public void interpolateTurn(float yaw, float pitch) {
-		this.yaw = (float) (this.yaw + yaw * 0.15D);
-		this.pitch = (float) (this.pitch - pitch * 0.15D);
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[1]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[1]);
 		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}

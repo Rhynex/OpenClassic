@@ -33,7 +33,6 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.GLU;
 
-import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
@@ -55,6 +54,9 @@ import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.settings.BooleanSetting;
+import ch.spacebase.openclassic.api.settings.IntSetting;
+import ch.spacebase.openclassic.api.settings.Settings;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.ClientProgressBar;
@@ -101,7 +103,11 @@ import com.mojang.minecraft.render.FogRenderer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 import com.mojang.minecraft.render.animation.WaterTexture;
-import com.mojang.minecraft.settings.GameSettings;
+import com.mojang.minecraft.settings.Bindings;
+import com.mojang.minecraft.settings.MusicSetting;
+import com.mojang.minecraft.settings.NightSetting;
+import com.mojang.minecraft.settings.SurvivalSetting;
+import com.mojang.minecraft.settings.TextureRefreshSetting;
 import com.zachsthings.onevent.EventManager;
 
 public final class Minecraft implements Runnable {
@@ -132,7 +138,6 @@ public final class Minecraft implements Runnable {
 	public HUDScreen hud;
 	public boolean awaitingLevel;
 	public Intersection selected;
-	public GameSettings settings;
 	public String server;
 	public int port;
 	public volatile boolean running;
@@ -161,6 +166,9 @@ public final class Minecraft implements Runnable {
 	private int schedTicks = 0;
 	private long lastUpdate = System.currentTimeMillis();
 	private int fps = 0;
+	public Settings settings;
+	public Settings hackSettings;
+	public Bindings bindings;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -284,8 +292,8 @@ public final class Minecraft implements Runnable {
 		this.ingame = false;
 		this.hacks = true;
 		this.player = null;
-		this.settings.speed = false;
-		this.settings.flying = false;
+		this.hackSettings.getBooleanSetting("hacks.speed").setValue(false);
+		this.hackSettings.getBooleanSetting("hacks.flying").setValue(false);
 		this.hideGui = false;
 	}
 
@@ -323,7 +331,7 @@ public final class Minecraft implements Runnable {
 			this.hacks = false;
 		}
 
-		this.mode = this.settings.survival > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		if(this.level != null) {
 			this.mode.apply(this.level);
 		}
@@ -339,7 +347,7 @@ public final class Minecraft implements Runnable {
 		e.printStackTrace();
 		if(!this.running) {
 			return;
-		}
+		} 
 
 		if(this.started) {
 			if(e instanceof LWJGLException) {
@@ -427,8 +435,34 @@ public final class Minecraft implements Runnable {
 
 		SessionData.loadFavorites(this.dir);
 		this.audio = new ClientAudioManager(this);
-		this.settings = new GameSettings(this, this.dir);
-		this.mode = this.settings.survival > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		this.bindings = new Bindings(this.dir);
+		this.settings = new Settings();
+		this.settings.registerSetting(new MusicSetting("options.music", "options.music"));
+		this.settings.getBooleanSetting("options.music").setDefault(true);
+		this.settings.registerSetting(new BooleanSetting("options.sound", "options.sound"));
+		this.settings.getBooleanSetting("options.sound").setDefault(true);
+		this.settings.registerSetting(new BooleanSetting("options.invert-mouse", "options.invert-mouse"));
+		this.settings.registerSetting(new BooleanSetting("options.show-info", "options.show-info"));
+		this.settings.registerSetting(new IntSetting("options.render-distance", "options.render-distance", new String[] { "FAR", "NORMAL", "SHORT", "TINY" }));
+		this.settings.registerSetting(new BooleanSetting("options.view-bobbing", "options.view-bobbing"));
+		this.settings.getBooleanSetting("options.view-bobbing").setDefault(true);
+		this.settings.registerSetting(new TextureRefreshSetting("options.3d-anaglyph", "options.3d-anaglyph"));
+		this.settings.registerSetting(new BooleanSetting("options.limit-fps", "options.limit-fps"));
+		this.settings.registerSetting(new SurvivalSetting("options.survival", "options.survival", new String[] { "OFF", "PEACEFUL", "NORMAL" }));
+		this.settings.registerSetting(new TextureRefreshSetting("options.smoothing", "options.smoothing"));
+		this.settings.registerSetting(new NightSetting("options.night", "options.night"));
+		this.settings.registerSetting(new IntSetting("options.sensitivity", "options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
+		this.settings.getIntSetting("options.sensitivity").setDefault(1);
+		
+		this.hackSettings = new Settings();
+		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed", "hacks.speed"));
+		this.hackSettings.getBooleanSetting("hacks.speed").setValue(false);
+		this.hackSettings.registerSetting(new BooleanSetting("hacks.flying", "hacks.flying"));
+		this.hackSettings.getBooleanSetting("hacks.flying").setValue(false);
+		OpenClassic.getClient().getConfig().applyDefault("options.texture-pack", "none");
+		OpenClassic.getClient().getConfig().save();
+		
+		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		Item.initModels();
 		this.initRender();
 
@@ -576,7 +610,7 @@ public final class Minecraft implements Runnable {
 			int x = Mouse.getDX();
 			int y = Mouse.getDY();
 			byte direction = 1;
-			if(this.settings.invertMouse) {
+			if(this.settings.getBooleanSetting("options.invert-mouse").getValue()) {
 				direction = -1;
 			}
 
@@ -588,7 +622,7 @@ public final class Minecraft implements Runnable {
 
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);
-			animation.anaglyph = this.textureManager.settings.anaglyph;
+			animation.anaglyph = this.textureManager.settings.getBooleanSetting("options.3d-anaglyph").getValue();
 			animation.animate();
 
 			ByteBuffer buffer = BufferUtils.createByteBuffer(animation.textureData.length);
@@ -651,7 +685,7 @@ public final class Minecraft implements Runnable {
 					break;
 				}
 
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					if(pass == 0) {
 						GL11.glColorMask(false, true, true, false);
 					} else {
@@ -660,7 +694,7 @@ public final class Minecraft implements Runnable {
 				}
 
 				GL11.glViewport(0, 0, this.width, this.height);
-				float fogDensity = 1.0F - (float) Math.pow(1.0F / (4 - this.settings.viewDistance), 0.25D);
+				float fogDensity = 1.0F - (float) Math.pow(1.0F / (4 - this.settings.getIntSetting("options.render-distance").getValue()), 0.25D);
 				float skyRed = (this.level.skyColor >> 16 & 255) / 255.0F;
 				float skyBlue = (this.level.skyColor >> 8 & 255) / 255.0F;
 				float skyGreen = (this.level.skyColor & 255) / 255.0F;
@@ -683,7 +717,7 @@ public final class Minecraft implements Runnable {
 					}
 				}
 
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					float fred = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 59.0F + this.fogRenderer.fogGreen * 11.0F) / 100.0F;
 					float fblue = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 70.0F) / 100.0F;
 					float fgreen = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogGreen * 70.0F) / 100.0F;
@@ -695,10 +729,10 @@ public final class Minecraft implements Runnable {
 				GL11.glClearColor(this.fogRenderer.fogRed, this.fogRenderer.fogBlue, this.fogRenderer.fogGreen, 0.0F);
 				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
 				GL11.glEnable(GL11.GL_CULL_FACE);
-				this.fogRenderer.fogEnd = (512 >> (this.settings.viewDistance << 1));
+				this.fogRenderer.fogEnd = (512 >> (this.settings.getIntSetting("options.render-distance").getValue() << 1));
 				GL11.glMatrixMode(GL11.GL_PROJECTION);
 				GL11.glLoadIdentity();
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					GL11.glTranslatef((-((pass << 1) - 1)) * 0.07F, 0.0F, 0.0F);
 				}
 
@@ -710,12 +744,12 @@ public final class Minecraft implements Runnable {
 				GLU.gluPerspective(fov, (float) this.width / (float) this.height, 0.05F, this.fogRenderer.fogEnd);
 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
 				GL11.glLoadIdentity();
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
 				}
 
 				ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
-				if(this.settings.viewBobbing) {
+				if(this.settings.getBooleanSetting("options.view-bobbing").getValue()) {
 					ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
 				}
 
@@ -811,7 +845,7 @@ public final class Minecraft implements Runnable {
 				float cloudRed = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255.0F;
 				float cloudBlue = (this.levelRenderer.level.cloudColor >> 8 & 255) / 255.0F;
 				float cloudGreen = (this.levelRenderer.level.cloudColor & 255) / 255.0F;
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					cloudRed = (cloudRed * 30.0F + cloudBlue * 59.0F + cloudGreen * 11.0F) / 100.0F;
 					cloudBlue = (cloudRed * 30.0F + cloudBlue * 70.0F) / 100.0F;
 					cloudGreen = (cloudRed * 30.0F + cloudGreen * 70.0F) / 100.0F;
@@ -842,7 +876,7 @@ public final class Minecraft implements Runnable {
 				float skRed = (this.levelRenderer.level.skyColor >> 16 & 255) / 255.0F;
 				float skBlue = (this.levelRenderer.level.skyColor >> 8 & 255) / 255.0F;
 				float skGreen = (this.levelRenderer.level.skyColor & 255) / 255.0F;
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					skRed = (skRed * 30.0F + skBlue * 59.0F + skGreen * 11.0F) / 100.0F;
 					skBlue = (skRed * 30.0F + skBlue * 70.0F) / 100.0F;
 					skGreen = (skRed * 30.0F + skGreen * 70.0F) / 100.0F;
@@ -943,7 +977,7 @@ public final class Minecraft implements Runnable {
 				GL11.glColorMask(false, false, false, false);
 				int cy = this.levelRenderer.sortChunks(this.player, 1);
 				GL11.glColorMask(true, true, true, true);
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					if(pass == 0) {
 						GL11.glColorMask(false, true, true, false);
 					} else {
@@ -1012,12 +1046,12 @@ public final class Minecraft implements Runnable {
 
 				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 				GL11.glLoadIdentity();
-				if(this.settings.anaglyph) {
+				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0.0F, 0.0F);
 				}
 
 				ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
-				if(this.settings.viewBobbing) {
+				if(this.settings.getBooleanSetting("options.view-bobbing").getValue()) {
 					ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
 				}
 
@@ -1070,7 +1104,7 @@ public final class Minecraft implements Runnable {
 				GL11.glDisable(GL11.GL_NORMALIZE);
 				GL11.glPopMatrix();
 				ClientRenderHelper.getHelper().setLighting(false);
-				if(!this.settings.anaglyph) {
+				if(!this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					break;
 				}
 
@@ -1101,7 +1135,7 @@ public final class Minecraft implements Runnable {
 		Thread.yield();
 		Display.update();
 
-		if(this.settings.limitFPS) {
+		if(this.settings.getBooleanSetting("options.limit-fps").getValue()) {
 			try {
 				Thread.sleep(5);
 			} catch(InterruptedException e) {
@@ -1368,10 +1402,10 @@ public final class Minecraft implements Runnable {
 
 						try {
 							ImageIO.write(image, "PNG", file);
-							if(this.hud != null) this.hud.addChat(Color.GREEN + String.format(OpenClassic.getGame().getTranslator().translate("screenshot.saved"), file.getName()));
+							if(this.hud != null) this.player.openclassic.sendMessage("screenshot.saved", file.getName());
 						} catch(IOException e) {
 							e.printStackTrace();
-							if(this.hud != null) this.hud.addChat(Color.RED + String.format(OpenClassic.getGame().getTranslator().translate("screenshot.error"), file.getName()));
+							if(this.hud != null) this.player.openclassic.sendMessage("screenshot.error", file.getName());
 						}
 					}
 
@@ -1381,14 +1415,14 @@ public final class Minecraft implements Runnable {
 						}
 
 						if(this.mode instanceof CreativeGameMode) {
-							if(Keyboard.getEventKey() == this.settings.loadLocKey.key && !this.ctf) {
+							if(Keyboard.getEventKey() == this.bindings.loadLocKey.key && !this.ctf) {
 								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, this.level.yawSpawn, this.level.pitchSpawn));
 								if(!event.isCancelled()) {
 									this.player.resetPos(event.getPosition());
 								}
 							}
 
-							if(Keyboard.getEventKey() == this.settings.saveLocKey.key && !this.ctf) {
+							if(Keyboard.getEventKey() == this.bindings.saveLocKey.key && !this.ctf) {
 								this.level.setSpawnPos(this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch);
 								this.player.resetPos();
 							}
@@ -1404,11 +1438,11 @@ public final class Minecraft implements Runnable {
 							this.player.arrows--;
 						}
 
-						if(Keyboard.getEventKey() == this.settings.buildKey.key) {
+						if(Keyboard.getEventKey() == this.bindings.buildKey.key) {
 							this.mode.openInventory();
 						}
 
-						if(Keyboard.getEventKey() == this.settings.chatKey.key) {
+						if(Keyboard.getEventKey() == this.bindings.chatKey.key) {
 							this.player.releaseAllKeys();
 							this.setCurrentScreen(new ChatInputScreen());
 						}
@@ -1421,8 +1455,8 @@ public final class Minecraft implements Runnable {
 					}
 				}
 
-				if(Keyboard.getEventKey() == this.settings.fogKey.key) {
-					this.settings.toggleSetting(4, !Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 1 : -1);
+				if(Keyboard.getEventKey() == this.bindings.fogKey.key) {
+					this.settings.getSetting("options.render-distance").toggle();
 				}
 			}
 
@@ -1612,7 +1646,7 @@ public final class Minecraft implements Runnable {
 		}
 
 		if(this.player != null) {
-			this.player.input = new InputHandler(this.settings);
+			this.player.input = new InputHandler(this.bindings);
 			this.mode.apply(this.player);
 		}
 
