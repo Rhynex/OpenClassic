@@ -454,7 +454,8 @@ public final class Minecraft implements Runnable {
 		this.settings.registerSetting(new IntSetting("options.sensitivity", "options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
 		this.settings.getIntSetting("options.sensitivity").setDefault(1);
 		this.settings.registerSetting(new IntSetting("options.blockChooser", "options.blockChooser", new String[] { "DEFAULT", "MODIFIED", "FANCY" } ));
-
+		this.settings.registerSetting(new BooleanSetting("options.minimap", "options.minimap"));
+		
 		this.hackSettings = new Settings();
 		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed", "hacks.speed"));
 		this.hackSettings.getBooleanSetting("hacks.speed").setValue(false);

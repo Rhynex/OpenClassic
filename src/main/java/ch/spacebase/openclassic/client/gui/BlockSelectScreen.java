@@ -1,4 +1,4 @@
-package com.mojang.minecraft.gui;
+package ch.spacebase.openclassic.client.gui;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
+
+import com.mojang.minecraft.gui.ScreenBlock;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
@@ -53,21 +55,38 @@ public final class BlockSelectScreen extends GuiScreen {
 			GeneralUtils.getMinecraft().setCurrentScreen(null);
 		}
 	}
-
-	private ScreenBlock getBlockOnScreen(int x, int y) {
-		for(ScreenBlock block : this.blocks.get(this.page)) {
-			if(x >= block.x && x <= block.x + 24 && y >= block.y - 12 && y <= block.y + 12) {
-				return block;
+	
+	@Override
+	public void onButtonClick(Button button) {
+		if(button.getId() == 0) {
+			if(this.page > 0) {
+				this.page--;
+			}
+		} else if(button.getId() == 1) {
+			if(this.page < this.blocks.size() - 1) {
+				this.page++;
 			}
 		}
-
-		return null;
 	}
 
 	@Override
+	public void onMouseClick(int x, int y, int button) {
+		if(button == 0) {
+			ScreenBlock block = this.getBlockOnScreen(x, y);
+			if(block != null) {
+				GeneralUtils.getMinecraft().player.inventory.replaceSlot(block.block);
+				GeneralUtils.getMinecraft().setCurrentScreen(null);
+				return;
+			}
+		}
+		
+		super.onMouseClick(x, y, button);
+	}
+	
+	@Override
 	public void render() {
-		int mouseX = RenderHelper.getHelper().getRenderMouseX();
-		int mouseY = RenderHelper.getHelper().getRenderMouseY();
+		int mouseX = RenderHelper.getHelper().getScaledMouseX();
+		int mouseY = RenderHelper.getHelper().getScaledMouseY();
 
 		ScreenBlock block = this.getBlockOnScreen(mouseX, mouseY);
 		RenderHelper.getHelper().color(this.getWidth() / 2 - 120, 30, this.getWidth() / 2 + 120, 180, -1878719232, -1070583712);
@@ -76,7 +95,6 @@ public final class BlockSelectScreen extends GuiScreen {
 		}
 
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), this.getWidth() / 2, 40);
-
 		switch(GeneralUtils.getMinecraft().settings.getIntSetting("options.blockChooser").getValue()) {
 			case 0: {
 				this.yawAngle = -45.0F;
@@ -108,7 +126,6 @@ public final class BlockSelectScreen extends GuiScreen {
 			
 			this.yawAngle += 0.6F;
 			this.localSineModifier += 6F;
-
 			this.localSine = MathHelper.sin(this.localSineModifier * MathHelper.DEG_TO_RAD);
 		}
 		
@@ -136,30 +153,13 @@ public final class BlockSelectScreen extends GuiScreen {
 		super.render();
 	}
 	
-	@Override
-	public void onButtonClick(Button button) {
-		if(button.getId() == 0) {
-			if(this.page > 0) {
-				this.page--;
-			}
-		} else if(button.getId() == 1) {
-			if(this.page < this.blocks.size() - 1) {
-				this.page++;
+	private ScreenBlock getBlockOnScreen(int x, int y) {
+		for(ScreenBlock block : this.blocks.get(this.page)) {
+			if(x >= block.x && x <= block.x + 24 && y >= block.y - 12 && y <= block.y + 12) {
+				return block;
 			}
 		}
-	}
 
-	@Override
-	public void onMouseClick(int x, int y, int button) {
-		if(button == 0) {
-			ScreenBlock block = this.getBlockOnScreen(x, y);
-			if(block != null) {
-				GeneralUtils.getMinecraft().player.inventory.replaceSlot(block.block);
-				GeneralUtils.getMinecraft().setCurrentScreen(null);
-				return;
-			}
-		}
-		
-		super.onMouseClick(x, y, button);
+		return null;
 	}
 }

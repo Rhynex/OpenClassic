@@ -2,10 +2,10 @@ package com.mojang.minecraft.gamemode;
 
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.client.gui.BlockSelectScreen;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.gui.BlockSelectScreen;
 import com.mojang.minecraft.level.Level;
 
 public final class CreativeGameMode extends GameMode {

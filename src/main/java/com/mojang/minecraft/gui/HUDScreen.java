@@ -12,6 +12,7 @@ import ch.spacebase.openclassic.api.gui.MainScreen;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.gui.Minimap;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 
 import com.mojang.minecraft.Minecraft;
@@ -31,10 +32,17 @@ public class HUDScreen extends MainScreen {
 		this.mc = mc;
 		this.width = ClientRenderHelper.getHelper().getGuiWidth();
 		this.height = ClientRenderHelper.getHelper().getGuiHeight();
-		// this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
 	}
 
 	public void render(float dt, boolean focus, int mouseX, int mouseY) {
+		if(this.mc.settings.getBooleanSetting("options.minimap").getValue()) {
+			if(this.getWidget(0) == null) {
+				this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
+			}
+		} else if(this.getWidget(0) != null) {
+			this.removeWidget(0);
+		}
+		
 		RenderHelper.getHelper().bindTexture("/gui/gui.png", true);
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_BLEND);

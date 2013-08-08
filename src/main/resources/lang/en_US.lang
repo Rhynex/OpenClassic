@@ -244,6 +244,7 @@ options:
     night: Night Mode
     sensitivity: Sensitivity
     blockChooser: Block Chooser
+    minimap: Minimap
     keys:
         forward: Forward
         left: Left
