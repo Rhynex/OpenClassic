@@ -227,14 +227,14 @@ public final class Minecraft implements Runnable {
 	}
 
 	private static void checkGLError(String task) {
-		int error = GL11.glGetError();
+		/* int error = GL11.glGetError();
 		if(error != 0) {
 			String message = GLU.gluErrorString(error);
 			OpenClassic.getLogger().severe("########## GL ERROR ##########");
 			OpenClassic.getLogger().severe("@ " + task);
 			OpenClassic.getLogger().severe(error + ": " + message);
 			System.exit(0);
-		}
+		} */
 	}
 
 	public final void shutdown() {
@@ -349,19 +349,15 @@ public final class Minecraft implements Runnable {
 			return;
 		} 
 
-		if(this.started) {
-			if(e instanceof LWJGLException) {
-				this.running = false;
-			} else {
-				this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
-			}
+		if(this.started && !(e instanceof LWJGLException) && !(e instanceof RuntimeException)) {
+			this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
 		} else {
-			String msg = "Failed to start the game.";
+			String msg = "Exception occured";
 			if(OpenClassic.getGame() != null && OpenClassic.getGame().getTranslator() != null) {
-				msg = OpenClassic.getGame().getTranslator().translate("core.fail-start");
+				msg = OpenClassic.getGame().getTranslator().translate("core.exception");
 			}
 
-			JOptionPane.showMessageDialog(null, e.toString(), msg, 0);
+			JOptionPane.showMessageDialog(null, "See .minecraft_classic/client.log for more details.\n" + e.toString(), msg, 0);
 			this.running = false;
 		}
 	}
@@ -394,7 +390,6 @@ public final class Minecraft implements Runnable {
 
 		this.running = true;
 		new ClassicClient(this);
-
 		this.dir = GeneralUtils.getMinecraftDirectory();
 		File lib = new File(this.dir, "lib");
 		if(!lib.exists()) {
@@ -600,7 +595,6 @@ public final class Minecraft implements Runnable {
 			this.resize();
 		}
 		
-		checkGLError("Pre render");
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(this.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) {
 			this.displayMenu();
@@ -620,8 +614,8 @@ public final class Minecraft implements Runnable {
 			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
 		}
 		
+		checkGLError("Pre render");
 		RenderHelper.getHelper().bindTexture("/terrain.png", true);
-
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);
 			animation.anaglyph = this.textureManager.settings.getBooleanSetting("options.3d-anaglyph").getValue();
@@ -1118,11 +1112,7 @@ public final class Minecraft implements Runnable {
 		} else {
 			GL11.glViewport(0, 0, this.width, this.height);
 			GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			GL11.glLoadIdentity();
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			ClientRenderHelper.getHelper().ortho();
 		}
 
@@ -1134,6 +1124,7 @@ public final class Minecraft implements Runnable {
 			this.progressBar.render(false);
 		}
 
+		checkGLError("Render");
 		Thread.yield();
 		Display.update();
 

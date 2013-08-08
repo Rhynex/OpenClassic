@@ -8,6 +8,7 @@ core:
     fail-font: Failed to load font image!
     fail-texture: Failed to bind texture!
     fail-start: Failed to start Minecraft!
+    exception: Exception occured
     client-error: Client error
     game-broke: The game broke! [%s]
     tick-error: "Exception while ticking: %s"
