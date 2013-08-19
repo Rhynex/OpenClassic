@@ -154,9 +154,7 @@ public final class Minecraft implements Runnable {
 	public boolean hideGui = false;
 	public boolean openclassicServer = false;
 	public String openclassicVersion = "";
-	public boolean hacks = true;
 	public List<RemotePluginInfo> serverPlugins = new ArrayList<RemotePluginInfo>();
-	public boolean ctf;
 	public int mipmapMode = 0;
 	public ClientSession session;
 	public boolean displayActive = false;
@@ -290,10 +288,7 @@ public final class Minecraft implements Runnable {
 		this.server = null;
 		this.port = 0;
 		this.ingame = false;
-		this.hacks = true;
 		this.player = null;
-		this.hackSettings.getBooleanSetting("hacks.speed").setValue(false);
-		this.hackSettings.getBooleanSetting("hacks.flying").setValue(false);
 		this.hideGui = false;
 	}
 
@@ -328,7 +323,6 @@ public final class Minecraft implements Runnable {
 
 		if(this.server != null && this.data != null && this.player != null) {
 			this.session = new ClientSession(this.player.openclassic, this.data.key, this.server, this.port);
-			this.hacks = false;
 		}
 
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
@@ -453,9 +447,7 @@ public final class Minecraft implements Runnable {
 		
 		this.hackSettings = new Settings();
 		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed", "hacks.speed"));
-		this.hackSettings.getBooleanSetting("hacks.speed").setValue(false);
 		this.hackSettings.registerSetting(new BooleanSetting("hacks.flying", "hacks.flying"));
-		this.hackSettings.getBooleanSetting("hacks.flying").setValue(false);
 		OpenClassic.getClient().getConfig().applyDefault("options.texture-pack", "none");
 		OpenClassic.getClient().getConfig().save();
 		
@@ -1408,14 +1400,14 @@ public final class Minecraft implements Runnable {
 						}
 
 						if(this.mode instanceof CreativeGameMode) {
-							if(Keyboard.getEventKey() == this.bindings.loadLocKey.key && !this.ctf) {
+							if(Keyboard.getEventKey() == this.bindings.loadLocKey.key) {
 								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, this.level.yawSpawn, this.level.pitchSpawn));
 								if(!event.isCancelled()) {
 									this.player.resetPos(event.getPosition());
 								}
 							}
 
-							if(Keyboard.getEventKey() == this.bindings.saveLocKey.key && !this.ctf) {
+							if(Keyboard.getEventKey() == this.bindings.saveLocKey.key) {
 								this.level.setSpawnPos(this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch);
 								this.player.resetPos();
 							}

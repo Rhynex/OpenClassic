@@ -29,10 +29,6 @@ public final class OptionsScreen extends GuiScreen {
 		this.attachWidget(new Button(75, this.getWidth() / 2 - 100, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.hacks")));
 		this.attachWidget(new Button(100, this.getWidth() / 2 + 2, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")));
 		this.attachWidget(new Button(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
-
-		if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().ingame) {
-			this.getWidget(75, Button.class).setActive(false);
-		}
 	}
 	
 	private List<String> buildContents() {

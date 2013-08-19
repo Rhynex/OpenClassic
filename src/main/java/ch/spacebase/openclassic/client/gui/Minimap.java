@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.gui.Screen;
 import ch.spacebase.openclassic.api.gui.widget.Widget;
 import ch.spacebase.openclassic.api.render.RenderHelper;
@@ -79,19 +80,21 @@ public class Minimap extends Widget {
 
 	// TODO: Possible to base on block texture?
 	private int getRGB(BlockType type) {
-		if(type == VanillaBlock.AIR) return 0;
-		if(!GeneralUtils.getMinecraft().textureManager.textures.containsKey(type.getModel().getQuad(1).getTexture().getParent().getTexture())) {
-			RenderHelper.getHelper().bindTexture(type.getModel().getQuad(1).getTexture().getParent().getTexture(), type.getModel().getQuad(1).getTexture().getParent().isInJar());
+		if(type == VanillaBlock.AIR || type == null || type.getModel() == null || type.getModel().getQuads().size() == 0) return 0;
+		int quad = 1;
+		if(type.getModel().getQuads().size() < 2) {
+			quad = 0;
+		}
+		
+		SubTexture tex = type.getModel().getQuad(quad).getTexture();
+		if(tex == null) return 0;
+		
+		if(!GeneralUtils.getMinecraft().textureManager.textures.containsKey(tex.getParent().getTexture())) {
+			RenderHelper.getHelper().bindTexture(tex.getParent().getTexture(), tex.getParent().isInJar());
 		}
 
-		BufferedImage img = GeneralUtils.getMinecraft().textureManager.textureImgs.get(GeneralUtils.getMinecraft().textureManager.textures.get(type.getModel().getQuad(1).getTexture().getParent().getTexture()));
-		return img.getRGB((int) type.getModel().getQuad(1).getTexture().getX1(), (int) type.getModel().getQuad(1).getTexture().getY1());
-		/*
-		 * if(type instanceof VanillaBlock) { switch((VanillaBlock) type) { case
-		 * STONE: return Color.gray.getRGB(); case GRASS: return
-		 * Color.green.getRGB(); default: return 0; } } else { return 0; // TODO
-		 * }
-		 */
+		BufferedImage img = GeneralUtils.getMinecraft().textureManager.textureImgs.get(GeneralUtils.getMinecraft().textureManager.textures.get(tex.getParent().getTexture()));
+		return img.getRGB((int) tex.getX1(), (int) tex.getY1());
 	}
 
 }
