@@ -23,7 +23,12 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			if(event.getResult() != Result.ALLOWED) {
 				GeneralUtils.getMinecraft().stopGame(false);
 				OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
+				return;
 			}
+		}
+		
+		if(message.getVerificationKeyOrMotd().contains("-hax")) {
+			GeneralUtils.getMinecraft().hacks = false;
 		}
 
 		OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));

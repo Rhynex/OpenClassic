@@ -172,7 +172,7 @@ public class LocalPlayer extends Player {
 	}
 
 	public void moveRelative(float forward, float strafe, float speed) {
-		if(GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.speed").getValue() && this.speedHack) {
+		if(GeneralUtils.getMinecraft().hacks && GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.speed").getValue() && this.speedHack) {
 			super.moveRelative(forward, strafe, 2.5F);
 		} else {
 			super.moveRelative(forward, strafe, speed);
@@ -235,14 +235,14 @@ public class LocalPlayer extends Player {
 			this.parent.speedHack = this.parent.input.speed;
 			this.xxa = this.parent.input.xxa;
 			this.yya = this.parent.input.yya;
-			if(this.parent.input.toggleFly && GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
+			if(GeneralUtils.getMinecraft().hacks && this.parent.input.toggleFly && GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
 				this.flying = !this.flying;
 				if(this.flying) {
 					this.mob.yd = 0;
 				}
 			}
 
-			if(!GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
+			if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
 				this.flying = false;
 			}
 

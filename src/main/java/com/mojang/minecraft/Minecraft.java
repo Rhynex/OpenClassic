@@ -167,6 +167,7 @@ public final class Minecraft implements Runnable {
 	public Settings settings;
 	public Settings hackSettings;
 	public Bindings bindings;
+	public boolean hacks = true;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -290,6 +291,7 @@ public final class Minecraft implements Runnable {
 		this.ingame = false;
 		this.player = null;
 		this.hideGui = false;
+		this.hacks = true;
 	}
 
 	public void initGame() {
