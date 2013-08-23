@@ -41,7 +41,12 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().isGas() ? 1 : 0);
 		buffer.writeByte(message.getBlock().getPreventsOwnRenderingRaw() ? 1 : 0);
 		buffer.writeFloat(message.getBlock().getBrightness());
-		ChannelBufferUtils.writeString(buffer, message.getBlock().getModel().getNetworkClass().getSimpleName());
+		buffer.writeFloat(message.getBlock().getSpeedModifier());
+		buffer.writeInt(message.getBlock().getFogRed());
+		buffer.writeInt(message.getBlock().getFogGreen());
+		buffer.writeInt(message.getBlock().getFogBlue());
+		buffer.writeFloat(message.getBlock().getFogDensity());
+		ChannelBufferUtils.writeString(buffer, message.getBlock().getModel().getNetworkClass().getName());
 
 		buffer.writeByte(message.getBlock().getModel().getDefaultCollisionBox() != null ? (byte) 1 : (byte) 0);
 		if(message.getBlock().getModel().getDefaultCollisionBox() != null) {
@@ -98,6 +103,11 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		boolean gas = buffer.readByte() == 1;
 		boolean preventsOwnRendering = buffer.readByte() == 1;
 		float brightness = buffer.readFloat();
+		float speedModifier = buffer.readFloat();
+		int fogRed = buffer.readInt();
+		int fogGreen = buffer.readInt();
+		int fogBlue = buffer.readInt();
+		float fogDensity = buffer.readFloat();
 
 		String type = ChannelBufferUtils.readString(buffer);
 		Model model = type.equals(EmptyModel.class.getName()) ? new EmptyModel() : type.equals(LiquidModel.class.getName()) ? new LiquidModel("/terrain.png", 16) : (type.equals(CuboidModel.class.getName()) ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (type.equals(CubeModel.class.getName()) ? new CubeModel("/terrain.png", 16) : type.equals(PlantModel.class.getName()) ? new PlantModel("/terrain.png", 16) : new Model()));
@@ -156,6 +166,11 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		block.setGas(gas);
 		block.setPreventsOwnRendering(preventsOwnRendering);
 		block.setBrightness(brightness);
+		block.setSpeedModifier(speedModifier);
+		block.setFogRed(fogRed);
+		block.setFogGreen(fogGreen);
+		block.setFogBlue(fogBlue);
+		block.setFogDensity(fogDensity);
 
 		return new CustomBlockMessage(block);
 	}

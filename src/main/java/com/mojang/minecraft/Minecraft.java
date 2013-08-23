@@ -686,37 +686,14 @@ public final class Minecraft implements Runnable {
 				GL11.glViewport(0, 0, this.width, this.height);
 				float fogDensity = 1.0F - (float) Math.pow(1.0F / (4 - this.settings.getIntSetting("options.render-distance").getValue()), 0.25D);
 				float skyRed = (this.level.skyColor >> 16 & 255) / 255.0F;
-				float skyBlue = (this.level.skyColor >> 8 & 255) / 255.0F;
-				float skyGreen = (this.level.skyColor & 255) / 255.0F;
+				float skyGreen = (this.level.skyColor >> 8 & 255) / 255.0F;
+				float skyBlue = (this.level.skyColor & 255) / 255.0F;
 				this.fogRenderer.fogRed = (this.level.fogColor >> 16 & 255) / 255.0F;
-				this.fogRenderer.fogBlue = (this.level.fogColor >> 8 & 255) / 255.0F;
-				this.fogRenderer.fogGreen = (this.level.fogColor & 255) / 255.0F;
+				this.fogRenderer.fogGreen = (this.level.fogColor >> 8 & 255) / 255.0F;
+				this.fogRenderer.fogBlue = (this.level.fogColor & 255) / 255.0F;
 				this.fogRenderer.fogRed += (skyRed - this.fogRenderer.fogRed) * fogDensity;
-				this.fogRenderer.fogBlue += (skyBlue - this.fogRenderer.fogBlue) * fogDensity;
 				this.fogRenderer.fogGreen += (skyGreen - this.fogRenderer.fogGreen) * fogDensity;
-				BlockType type = Blocks.fromId(this.level.getTile((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z));
-				if(type != null && type.isLiquid()) {
-					if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER) {
-						this.fogRenderer.fogRed = 0.02F;
-						this.fogRenderer.fogBlue = 0.02F;
-						this.fogRenderer.fogGreen = 0.2F;
-					} else if(type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA) {
-						this.fogRenderer.fogRed = 0.6F;
-						this.fogRenderer.fogBlue = 0.1F;
-						this.fogRenderer.fogGreen = 0.0F;
-					}
-				}
-
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					float fred = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 59.0F + this.fogRenderer.fogGreen * 11.0F) / 100.0F;
-					float fblue = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogBlue * 70.0F) / 100.0F;
-					float fgreen = (this.fogRenderer.fogRed * 30.0F + this.fogRenderer.fogGreen * 70.0F) / 100.0F;
-					this.fogRenderer.fogRed = fred;
-					this.fogRenderer.fogBlue = fblue;
-					this.fogRenderer.fogGreen = fgreen;
-				}
-
-				GL11.glClearColor(this.fogRenderer.fogRed, this.fogRenderer.fogBlue, this.fogRenderer.fogGreen, 0.0F);
+				this.fogRenderer.fogBlue += (skyBlue - this.fogRenderer.fogBlue) * fogDensity;
 				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
 				GL11.glEnable(GL11.GL_CULL_FACE);
 				this.fogRenderer.fogEnd = (512 >> (this.settings.getIntSetting("options.render-distance").getValue() << 1));

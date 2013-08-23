@@ -54,7 +54,7 @@ public final class Chunk {
 							BlockType block = Blocks.fromId(type);
 							if(block == null) block = VanillaBlock.STONE;
 
-							int requiredPass = block.getId() == VanillaBlock.WATER.getId() || block.getId() == VanillaBlock.STATIONARY_WATER.getId() ? 1 : 0;
+							int requiredPass = block.isLiquid() ? 1 : 0;
 							if(requiredPass != pass) {
 								continuing = true;
 							} else {

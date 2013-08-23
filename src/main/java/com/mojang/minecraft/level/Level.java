@@ -400,6 +400,120 @@ public class Level {
 	public float getWaterLevel() {
 		return this.waterLevel;
 	}
+	
+	public BlockType getLiquid(AABB aabb) {
+		int x0 = (int) aabb.x0;
+		int x1 = (int) aabb.x1 + 1;
+		int y0 = (int) aabb.y0;
+		int y1 = (int) aabb.y1 + 1;
+		int z0 = (int) aabb.z0;
+		int z1 = (int) aabb.z1 + 1;
+		if(aabb.x0 < 0.0F) {
+			x0--;
+		}
+
+		if(aabb.y0 < 0.0F) {
+			y0--;
+		}
+
+		if(aabb.z0 < 0.0F) {
+			z0--;
+		}
+
+		if(x0 < 0) {
+			x0 = 0;
+		}
+
+		if(y0 < 0) {
+			y0 = 0;
+		}
+
+		if(z0 < 0) {
+			z0 = 0;
+		}
+
+		if(x1 > this.width) {
+			x1 = this.width;
+		}
+
+		if(y1 > this.height) {
+			y1 = this.height;
+		}
+
+		if(z1 > this.depth) {
+			z1 = this.depth;
+		}
+
+		for(int x = x0; x < x1; x++) {
+			for(int y = y0; y < y1; y++) {
+				for(int z = z0; z < z1; z++) {
+					BlockType type = Blocks.fromId(this.getTile(x, y, z));
+					if(type != null && type.isLiquid()) {
+						return type;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+	
+	public BlockType getBlockIn(AABB aabb) {
+		int x0 = (int) aabb.x0;
+		int x1 = (int) aabb.x1 + 1;
+		int y0 = (int) aabb.y0;
+		int y1 = (int) aabb.y1 + 1;
+		int z0 = (int) aabb.z0;
+		int z1 = (int) aabb.z1 + 1;
+		if(aabb.x0 < 0.0F) {
+			x0--;
+		}
+
+		if(aabb.y0 < 0.0F) {
+			y0--;
+		}
+
+		if(aabb.z0 < 0.0F) {
+			z0--;
+		}
+
+		if(x0 < 0) {
+			x0 = 0;
+		}
+
+		if(y0 < 0) {
+			y0 = 0;
+		}
+
+		if(z0 < 0) {
+			z0 = 0;
+		}
+
+		if(x1 > this.width) {
+			x1 = this.width;
+		}
+
+		if(y1 > this.height) {
+			y1 = this.height;
+		}
+
+		if(z1 > this.depth) {
+			z1 = this.depth;
+		}
+
+		for(int x = x0; x < x1; x++) {
+			for(int y = y0; y < y1; y++) {
+				for(int z = z0; z < z1; z++) {
+					BlockType type = Blocks.fromId(this.getTile(x, y, z));
+					if(type != null) {
+						return type;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
 
 	public boolean containsAnyLiquid(AABB aabb) {
 		int x0 = (int) aabb.x0;
@@ -506,7 +620,7 @@ public class Level {
 			for(int y = y0; y < y1; y++) {
 				for(int z = z0; z < z1; z++) {
 					BlockType type = Blocks.fromId(this.getTile(x, y, z));
-					if(type != null && toMoving(type) == block) {
+					if(type != null && toMoving(type).getId() == block.getId()) {
 						return true;
 					}
 				}
@@ -579,11 +693,6 @@ public class Level {
 
 	public byte[] copyBlocks() {
 		return Arrays.copyOf(this.blocks, this.blocks.length);
-	}
-
-	public boolean isWater(int x, int y, int z) {
-		int tile = this.getTile(x, y, z);
-		return tile > 0 && (Blocks.fromId(tile) == VanillaBlock.WATER || Blocks.fromId(tile) == VanillaBlock.STATIONARY_WATER);
 	}
 
 	public void setNetworkMode(boolean network) {

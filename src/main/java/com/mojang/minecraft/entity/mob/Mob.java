@@ -2,6 +2,8 @@ package com.mojang.minecraft.entity.mob;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.block.BlockType;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 
@@ -105,12 +107,12 @@ public class Mob extends Entity {
 			this.airSupply = 300;
 		}
 
-		if(this.isInWater()) {
+		BlockType liquid = this.getLiquid();
+		if(liquid != null) {
 			this.fallDistance = 0;
-		}
-
-		if(this.isInLava()) {
-			this.hurt(null, 10);
+			if(liquid.getId() == VanillaBlock.LAVA.getId() || liquid.getId() == VanillaBlock.STATIONARY_LAVA.getId()) {
+				this.hurt(null, 10);
+			}
 		}
 
 		this.animStepO = this.animStep;
@@ -394,27 +396,14 @@ public class Mob extends Entity {
 
 	public void travel(float x, float z) {
 		boolean flying = this.ai instanceof BasicAI && ((BasicAI) this.ai).flying;
-		if(this.isInWater()) {
+		BlockType blockIn = this.getBlockIn();
+		if(blockIn != null && blockIn.isLiquid()) {
 			float y = this.y;
 			this.moveRelative(x, z, flying ? 0.125F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
-			this.xd *= 0.8F;
-			this.yd *= 0.8F;
-			this.zd *= 0.8F;
-			if(!flying) {
-				this.yd = (float) (this.yd - 0.02D);
-			}
-
-			if(this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
-				this.yd = 0.3F;
-			}
-		} else if(this.isInLava()) {
-			float y = this.y;
-			this.moveRelative(x, z, flying ? 0.125F : 0.02F);
-			this.move(this.xd, this.yd, this.zd);
-			this.xd *= 0.5F;
-			this.yd *= 0.5F;
-			this.zd *= 0.5F;
+			this.xd *= blockIn.getSpeedModifier();
+			this.yd *= blockIn.getSpeedModifier();
+			this.zd *= blockIn.getSpeedModifier();
 			if(!flying) {
 				this.yd = (float) (this.yd - 0.02D);
 			}
@@ -428,6 +417,12 @@ public class Mob extends Entity {
 			this.xd *= 0.91F;
 			this.yd *= 0.98F;
 			this.zd *= 0.91F;
+			if(blockIn != null) {
+				this.xd *= blockIn.getSpeedModifier();
+				this.yd *= blockIn.getSpeedModifier();
+				this.zd *= blockIn.getSpeedModifier();
+			}
+			
 			if(!flying) {
 				this.yd = (float) (this.yd - 0.08D);
 			}

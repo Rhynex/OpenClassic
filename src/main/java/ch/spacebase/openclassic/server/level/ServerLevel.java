@@ -384,7 +384,7 @@ public class ServerLevel implements ClassicLevel {
 
 	@Override
 	public boolean isLit(int x, int y, int z) {
-		boolean lit = false;
+		boolean lit = true;
 
 		for(int curr = y; curr <= this.getHeight(); curr++) {
 			BlockType block = this.getBlockTypeAt(x, curr, z);

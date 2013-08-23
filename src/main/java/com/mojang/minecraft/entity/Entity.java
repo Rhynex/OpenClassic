@@ -3,6 +3,7 @@ package com.mojang.minecraft.entity;
 import java.util.ArrayList;
 
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
@@ -341,18 +342,18 @@ public abstract class Entity {
 
 	protected void causeFallDamage(float distance) {
 	}
-
-	public boolean isInWater() {
-		return this.level.containsLiquid(this.bb.grow(0.0F, -0.4F, 0.0F), VanillaBlock.WATER);
+	
+	public BlockType getLiquid() {
+		return this.level.getLiquid(this.bb.grow(0.0F, -0.4F, 0.0F));
+	}
+	
+	public BlockType getBlockIn() {
+		return this.level.getBlockIn(this.bb.grow(0.0F, -0.4F, 0.0F));
 	}
 
 	public boolean isUnderWater() {
 		int block = this.level.getTile((int) this.x, (int) (this.y + 0.12F), (int) this.z);
 		return block != 0 && (Blocks.fromId(block) == VanillaBlock.WATER || Blocks.fromId(block) == VanillaBlock.STATIONARY_WATER);
-	}
-
-	public boolean isInLava() {
-		return this.level.containsLiquid(this.bb.grow(0.0F, -0.4F, 0.0F), VanillaBlock.LAVA);
 	}
 
 	public void moveRelative(float forward, float strafe, float speed) {

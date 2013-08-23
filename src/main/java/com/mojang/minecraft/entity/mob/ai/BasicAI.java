@@ -55,12 +55,10 @@ public class BasicAI extends AI {
 			this.update();
 		}
 
-		boolean water = mob.isInWater();
-		boolean lava = mob.isInLava();
 		if(this.jumping) {
 			if(this.flying) {
 				mob.move(0, 0.4F, 0);
-			} else if(water || lava) {
+			} else if(mob.getLiquid() != null) {
 				mob.yd += 0.04F;
 			} else if(mob.onGround) {
 				this.jumpFromGround();
@@ -114,12 +112,9 @@ public class BasicAI extends AI {
 			this.jumping = this.random.nextFloat() < 0.04F;
 		}
 
-		boolean water = this.mob.isInWater();
-		boolean lava = this.mob.isInLava();
-		if(water || lava) {
+		if(this.mob.getLiquid() != null) {
 			this.jumping = this.random.nextFloat() < 0.8F;
 		}
-
 	}
 
 	public void beforeRemove() {
