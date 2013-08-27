@@ -84,7 +84,12 @@ public class FavoriteServersScreen extends GuiScreen {
 
 		if(mppass.length() > 0) {
 			String user = HTTPUtil.getParameterOffPage(play, "username");
-			mc.data = new SessionData(user);
+			if(mc.data == null) {
+				mc.data = new SessionData(user);
+			} else {
+				mc.data.username = user;
+			}
+			
 			mc.data.key = mppass;
 
 			try {

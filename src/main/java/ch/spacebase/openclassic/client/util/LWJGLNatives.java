@@ -72,8 +72,10 @@ public class LWJGLNatives {
 
 			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
 			OpenClassic.getLogger().info("Writing " + lib + " to " + file.getPath());
-			IOUtils.copy(in, new FileOutputStream(file));
+			FileOutputStream out = new FileOutputStream(file);
+			IOUtils.copy(in, out);
 			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(out);
 			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
 				System.load(file.getPath());
 			}

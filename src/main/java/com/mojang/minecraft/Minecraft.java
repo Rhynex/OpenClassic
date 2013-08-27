@@ -260,7 +260,9 @@ public final class Minecraft implements Runnable {
 		this.audio.stopMusic();
 		this.serverPlugins.clear();
 		if(menu) this.setCurrentScreen(new MainMenuScreen());
-		if(this.data != null) this.data.key = "";
+		if(this.data != null) {
+			this.data.key = "";
+		}
 
 		this.level = null;
 		this.particleManager = null;
@@ -612,9 +614,6 @@ public final class Minecraft implements Runnable {
 		RenderHelper.getHelper().bindTexture("/terrain.png", true);
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);
-			animation.anaglyph = this.textureManager.settings.getBooleanSetting("options.3d-anaglyph").getValue();
-			animation.animate();
-
 			ByteBuffer buffer = BufferUtils.createByteBuffer(animation.textureData.length);
 			buffer.put(animation.textureData);
 			buffer.flip();
@@ -1272,6 +1271,12 @@ public final class Minecraft implements Runnable {
 
 		for(int index = 0; index < this.hud.chatHistory.size(); index++) {
 			this.hud.chatHistory.get(index).time++;
+		}
+		
+		for(int index = 0; index < this.textureManager.animations.size(); index++) {
+			AnimatedTexture animation = this.textureManager.animations.get(index);
+			animation.anaglyph = this.textureManager.settings.getBooleanSetting("options.3d-anaglyph").getValue();
+			animation.animate();
 		}
 
 		if(this.isInMultiplayer()) {

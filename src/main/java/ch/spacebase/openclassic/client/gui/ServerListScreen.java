@@ -85,7 +85,12 @@ public class ServerListScreen extends GuiScreen {
 			OpenClassic.getClient().getProgressBar().render();
 
 			String page = HTTPUtil.fetchUrl(server.getUrl(), "", Constants.MINECRAFT_URL_HTTPS + "classic/list/");
-			mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
+			if(mc.data == null) {
+				mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
+			} else {
+				mc.data.username = HTTPUtil.getParameterOffPage(page, "username");
+			}
+			
 			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
 			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));
 			mc.server = HTTPUtil.getParameterOffPage(page, "server");
