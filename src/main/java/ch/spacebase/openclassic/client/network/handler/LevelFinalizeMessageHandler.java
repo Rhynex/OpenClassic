@@ -24,6 +24,7 @@ public class LevelFinalizeMessageHandler extends MessageHandler<LevelFinalizeMes
 		level.setData(message.getWidth(), message.getHeight(), message.getDepth(), data);
 		GeneralUtils.getMinecraft().setLevel(level);
 		session.setState(State.GAME);
+		OpenClassic.getClient().getProgressBar().setSubtitleScaled(true);
 		OpenClassic.getClient().getProgressBar().setVisible(false);
 	}
 

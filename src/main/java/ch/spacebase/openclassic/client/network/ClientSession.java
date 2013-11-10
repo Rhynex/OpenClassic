@@ -63,9 +63,11 @@ public class ClientSession extends ClassicSession {
 						successful = true;
 					} else {
 						OpenClassic.getClient().getProgressBar().setVisible(false);
+						OpenClassic.getClient().getProgressBar().setSubtitleScaled(true);
 					}
 				} catch(Exception e) {
 					OpenClassic.getClient().getProgressBar().setVisible(false);
+					OpenClassic.getClient().getProgressBar().setSubtitleScaled(true);
 					OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.probably-down")));
 					e.printStackTrace();
 					successful = false;

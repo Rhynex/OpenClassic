@@ -167,21 +167,21 @@ public class HUDScreen extends MainScreen {
 		}
 
 		this.clickedPlayer = null;
-		if(InputHelper.getHelper().isKeyDown(Keyboard.KEY_TAB) && OpenClassic.getClient().isInMultiplayer()) {
+		if(InputHelper.getHelper().isKeyDown(Keyboard.KEY_TAB)) {
 			List<Player> players = OpenClassic.getClient().getLevel().getPlayers();
 			RenderHelper.getHelper().enableBlend();
 			RenderHelper.getHelper().drawTranslucentBox(this.width / 2 - 128, this.height / 2 - 80, 256, 148);
 
 
-			RenderHelper.getHelper().renderText("Connected players:", this.width / 2 - RenderHelper.getHelper().getStringWidth("Connected players:") / 2, this.height / 2 - 64 - 12, false);
+			RenderHelper.getHelper().renderText("Players in the level:", this.width / 2 - RenderHelper.getHelper().getStringWidth("Connected players:") / 2, this.height / 2 - 64 - 12, false);
 			for(int count = 0; count < players.size(); count++) {
 				int x = this.width / 2 + count % 2 * 120 - 120;
 				int y = this.height / 2 - 64 + (count / 2 << 3);
 				if(focus && mouseX >= x && mouseY >= y && mouseX < x + 120 && mouseY < y + 8) {
 					this.clickedPlayer = players.get(count).getName();
-					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x + 2, y, 16777215);
+					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x + 2, y, false);
 				} else {
-					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x, y, 15658734);
+					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x, y, 15658734, false);
 				}
 			}
 		}

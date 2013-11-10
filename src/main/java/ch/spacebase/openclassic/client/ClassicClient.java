@@ -270,6 +270,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		}
 		
 		this.getProgressBar().setVisible(true);
+		this.getProgressBar().setSubtitleScaled(false);
 		this.getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 		this.getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
 		this.getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
@@ -300,11 +301,13 @@ public class ClassicClient extends ClassicGame implements Client {
 				this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
 				this.mc.server = null;
 				this.getProgressBar().setVisible(false);
+				this.getProgressBar().setSubtitleScaled(true);
 				return;
 			}
 		} else {
 			this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
 			this.getProgressBar().setVisible(false);
+			this.getProgressBar().setSubtitleScaled(true);
 			return;
 		}
 

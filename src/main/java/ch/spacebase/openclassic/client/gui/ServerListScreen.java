@@ -58,8 +58,17 @@ public class ServerListScreen extends GuiScreen {
 
 	@Override
 	public void onButtonListClick(ButtonList list, Button button) {
-		Server server = SessionData.servers.get(list.getCurrentPage() * 5 + button.getId());
-
+		String text = button.getText();
+		int index = 0;
+		for(String t : list.getContents()) {
+			if(text.equals(t)) {
+				break;
+			}
+			
+			index++;
+		}
+		
+		Server server = SessionData.servers.get(index);
 		if(this.select) {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.select = false;

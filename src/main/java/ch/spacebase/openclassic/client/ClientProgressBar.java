@@ -16,6 +16,7 @@ public final class ClientProgressBar implements ProgressBar {
 	private String title = "";
 	private int progress = 0;
 	private boolean visible = false;
+	private boolean scaled = true;
 
 	@Override
 	public String getTitle() {
@@ -105,7 +106,11 @@ public final class ClientProgressBar implements ProgressBar {
 			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0), 10, 10, 0, 0.5625f, 1);
 			GL11.glDisable(GL11.GL_BLEND);
 			RenderHelper.getHelper().renderScaledText(this.title, width - 10 - ClientRenderHelper.getHelper().getStringWidth(this.title), 10);
-			RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 32);
+			if(this.isSubtitleScaled()) {
+				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 32);
+			} else {
+				RenderHelper.getHelper().renderText(this.subtitle, width / 2, height / 2 - 32);
+			}
 			RenderHelper.getHelper().renderText(this.text, width / 2, height - 19);
 			if(fresh) {
 				Display.update();
@@ -142,6 +147,16 @@ public final class ClientProgressBar implements ProgressBar {
 		if(fresh) {
 			Display.update();
 		}
+	}
+
+	@Override
+	public boolean isSubtitleScaled() {
+		return this.scaled;
+	}
+
+	@Override
+	public void setSubtitleScaled(boolean scaled) {
+		this.scaled = scaled;
 	}
 
 }
