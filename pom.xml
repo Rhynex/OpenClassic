@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.spacebase</groupId>
 	<artifactId>openclassic</artifactId>
-	<version>1.3.7-SNAPSHOT</version>
+	<version>1.3.7</version>
 	<packaging>jar</packaging>
 
 	<name>OpenClassic</name>
