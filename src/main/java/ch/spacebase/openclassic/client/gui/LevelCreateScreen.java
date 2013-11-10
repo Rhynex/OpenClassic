@@ -1,17 +1,14 @@
-package com.mojang.minecraft.gui;
+package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
+import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.level.LevelIO;
-
-public final class LevelCreateScreen extends GuiScreen {
+public class LevelCreateScreen extends GuiScreen {
 
 	private GuiScreen parent;
 	private TextBox widget;
@@ -21,7 +18,7 @@ public final class LevelCreateScreen extends GuiScreen {
 		this.parent = parent;
 	}
 
-	public final void onOpen() {
+	public void onOpen() {
 		this.widget = new TextBox(0, this.getWidth() / 2 - 100, this.getHeight() / 2 - 45, this, 30);
 
 		this.clearWidgets();
@@ -38,42 +35,36 @@ public final class LevelCreateScreen extends GuiScreen {
 		this.getWidget(3, Button.class).setActive(false);
 	}
 
-	public final void onButtonClick(Button button) {
-		if(button.isActive()) {
-			Minecraft mc = GeneralUtils.getMinecraft();
-
-			if(button.getId() == 0) {
-				this.type++;
-				if(this.type >= OpenClassic.getGame().getGenerators().size()) {
-					this.type = 0;
-				}
-
-				((StateButton) button).setState(OpenClassic.getGame().getGenerators().keySet().toArray(new String[OpenClassic.getGame().getGenerators().keySet().size()])[this.type]);
+	public void onButtonClick(Button button) {
+		if(button.getId() == 0) {
+			this.type++;
+			if(this.type >= OpenClassic.getGame().getGenerators().size()) {
+				this.type = 0;
 			}
 
-			if((button.getId() == 1 || button.getId() == 2 || button.getId() == 3) && this.widget.getText().trim().length() > 0) {
-				mc.levelName = this.widget.getText();
-				mc.levelSize = button.getId() - 1;
-				mc.initGame(OpenClassic.getGame().getGenerator(this.getWidget(0, StateButton.class).getState()));
-				LevelIO.save(mc.level);
-				mc.setCurrentScreen(null);
-				mc.grabMouse();
-			}
+			((StateButton) button).setState(OpenClassic.getGame().getGenerators().keySet().toArray(new String[OpenClassic.getGame().getGenerators().keySet().size()])[this.type]);
+		}
 
-			if(button.getId() == 4) {
-				mc.setCurrentScreen(this.parent);
-			}
+		if((button.getId() == 1 || button.getId() == 2 || button.getId() == 3) && this.widget.getText().trim().length() > 0) {
+			short size = (short) (128 << (button.getId() - 1));
+			OpenClassic.getClient().createLevel(new LevelInfo(this.widget.getText(), null, size, (short) 128, size), OpenClassic.getGame().getGenerator(this.getWidget(0, StateButton.class).getState()));
+			OpenClassic.getClient().saveLevel();
+			OpenClassic.getClient().setCurrentScreen(null);
+		}
+
+		if(button.getId() == 4) {
+			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
 
-	public final void onKeyPress(char c, int key) {
+	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
 		this.getWidget(1, Button.class).setActive(this.widget.getText().trim().length() > 0);
 		this.getWidget(2, Button.class).setActive(this.widget.getText().trim().length() > 0);
 		this.getWidget(3, Button.class).setActive(this.widget.getText().trim().length() > 0);
 	}
 
-	public final void render() {
+	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.level-create.name"), this.getWidth() / 2, 40);
 

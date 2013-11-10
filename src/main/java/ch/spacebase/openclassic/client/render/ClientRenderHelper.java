@@ -183,7 +183,7 @@ public class ClientRenderHelper extends RenderHelper {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
-	public void drawImage(int x, int y, int z, int imgX, int imgY, int imgWidth, int imgHeight) {
+	public void drawSubImage(int x, int y, int z, int imgX, int imgY, int imgWidth, int imgHeight) {
 		Renderer.get().begin();
 		Renderer.get().vertexuv(x, (y + imgHeight), z, imgX * 0.00390625F, (imgY + imgHeight) * 0.00390625F);
 		Renderer.get().vertexuv((x + imgWidth), (y + imgHeight), z, (imgX + imgWidth) * 0.00390625F, (imgY + imgHeight) * 0.00390625F);
@@ -732,6 +732,55 @@ public class ClientRenderHelper extends RenderHelper {
 		GL11.glRotatef(MathHelper.sin(dist * MathHelper.PI) * bob * 3.0F, 0, 0, 1);
 		GL11.glRotatef(Math.abs(MathHelper.cos(dist * MathHelper.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
 		GL11.glRotatef(tilt, 1, 0, 0);
+	}
+	
+	public void pushMatrix() {
+		GL11.glPushMatrix();
+	}
+	
+	public void popMatrix() {
+		GL11.glPopMatrix();
+	}
+	
+	public void scale(float x, float y, float z) {
+		GL11.glScalef(x, y, z);
+	}
+
+	public void translate(float x, float y, float z) {
+		GL11.glTranslatef(x, y, z);
+	}
+
+	public void rotate(float angle, float x, float y, float z) {
+		GL11.glRotatef(angle, x, y, z);
+	}
+
+	public void enableBlend() {
+		GL11.glEnable(GL11.GL_BLEND);
+	}
+
+	public void disableBlend() {
+		GL11.glDisable(GL11.GL_BLEND);
+	}
+	
+	public void drawTranslucentBox(int x, int y, int width, int height) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glColor4f(0, 0, 0, 0.7F);
+		GL11.glVertex2f(x + width, y);
+		GL11.glVertex2f(x, y);
+		GL11.glColor4f(0.2F, 0.2F, 0.2F, 0.8F);
+		GL11.glVertex2f(x, y + height);
+		GL11.glVertex2f(x + width, y + height);
+		GL11.glEnd();
+
+		RenderHelper.getHelper().disableBlend();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+	
+	public int getMipmapMode() {
+		return GeneralUtils.getMinecraft().mipmapMode;
 	}
 
 }

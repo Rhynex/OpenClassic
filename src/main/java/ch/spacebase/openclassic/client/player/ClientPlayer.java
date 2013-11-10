@@ -5,6 +5,7 @@ import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
@@ -21,12 +22,13 @@ import com.zachsthings.onevent.EventManager;
 
 public class ClientPlayer implements Player {
 
-	private com.mojang.minecraft.entity.player.LocalPlayer handle;
+	private com.mojang.minecraft.entity.player.Player handle;
 	private byte placeMode = 0;
 	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
+	private boolean breakBedrock = false;
 
-	public ClientPlayer(com.mojang.minecraft.entity.player.LocalPlayer handle) {
+	public ClientPlayer(com.mojang.minecraft.entity.player.Player handle) {
 		this.handle = handle;
 		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 	}
@@ -155,7 +157,7 @@ public class ClientPlayer implements Player {
 		this.getSession().disconnect(reason);
 	}
 
-	public com.mojang.minecraft.entity.player.LocalPlayer getHandle() {
+	public com.mojang.minecraft.entity.player.Player getHandle() {
 		return this.handle;
 	}
 
@@ -200,6 +202,130 @@ public class ClientPlayer implements Player {
 	@Override
 	public String getLanguage() {
 		return OpenClassic.getGame().getLanguage();
+	}
+
+	@Override
+	public int getInvulnerableTime() {
+		return this.handle.invulnerableTime;
+	}
+
+	@Override
+	public boolean isUnderwater() {
+		return this.handle.isUnderWater();
+	}
+
+	@Override
+	public int getHealth() {
+		return this.handle.health;
+	}
+
+	@Override
+	public void setHealth(int health) {
+		if(health < 0) {
+			health = 0;
+		}
+		
+		if(health > Constants.MAX_HEALTH) {
+			health = Constants.MAX_HEALTH;
+		}
+		
+		this.handle.health = health;
+	}
+
+	@Override
+	public boolean isDead() {
+		return this.handle.dead;
+	}
+
+	@Override
+	public int getPreviousHealth() {
+		return this.handle.lastHealth;
+	}
+
+	@Override
+	public int getAir() {
+		return this.handle.airSupply;
+	}
+
+	@Override
+	public void setAir(int air) {
+		if(air < 0) {
+			air = 0;
+		}
+		
+		if(air > Constants.MAX_AIR) {
+			air = Constants.MAX_AIR;
+		}
+		
+		this.handle.airSupply = air;
+	}
+
+	@Override
+	public int getScore() {
+		return this.handle.getScore();
+	}
+
+	@Override
+	public void setScore(int score) {
+		this.handle.score = score;
+	}
+
+	@Override
+	public int getArrows() {
+		return this.handle.arrows;
+	}
+
+	@Override
+	public void setArrows(int arrows) {
+		if(arrows < 0) {
+			arrows = 0;
+		}
+		
+		if(arrows > Constants.MAX_ARROWS) {
+			arrows = Constants.MAX_ARROWS;
+		}
+		
+		this.handle.airSupply = arrows;
+	}
+
+	@Override
+	public int getSelectedSlot() {
+		return this.handle.inventory.selected;
+	}
+
+	@Override
+	public int[] getInventoryContents() {
+		return this.handle.inventory.slots;
+	}
+
+	@Override
+	public int[] getInventoryAmounts() {
+		return this.handle.inventory.count;
+	}
+
+	@Override
+	public int[] getInventoryPopTimes() {
+		return this.handle.inventory.popTime;
+	}
+	
+	@Override
+	public void replaceSelected(BlockType block) {
+		this.handle.inventory.replaceSlot(block);
+	}
+
+	@Override
+	public void respawn() {
+		this.handle.resetPos();
+	}
+
+	@Override
+	public boolean canBreakBedrock() {
+		return this.breakBedrock;
+	}
+
+	@Override
+	public void setCanBreakBedrock(boolean canBreak) {
+		this.breakBedrock = canBreak;
 	}
 
 }

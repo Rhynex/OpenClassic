@@ -13,8 +13,7 @@ import org.jboss.netty.handler.timeout.ReadTimeoutException;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.network.msg.Message;
-
-import com.mojang.minecraft.gui.ErrorScreen;
+import ch.spacebase.openclassic.client.gui.ErrorScreen;
 
 public class ClientHandler extends SimpleChannelUpstreamHandler {
 

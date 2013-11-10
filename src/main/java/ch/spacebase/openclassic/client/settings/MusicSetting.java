@@ -1,12 +1,12 @@
-package com.mojang.minecraft.settings;
+package ch.spacebase.openclassic.client.settings;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
 
 public class MusicSetting extends BooleanSetting {
 
-	public MusicSetting(String name, String configKey) {
-		super(name, configKey);
+	public MusicSetting(String name) {
+		super(name);
 	}
 	
 	@Override

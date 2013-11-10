@@ -1,6 +1,6 @@
 package com.mojang.minecraft.entity.player;
 
-import com.mojang.minecraft.settings.Bindings;
+import ch.spacebase.openclassic.api.settings.bindings.Bindings;
 
 public final class InputHandler {
 
@@ -22,31 +22,31 @@ public final class InputHandler {
 	public final void setKeyState(int key, boolean pressed) {
 		byte index = -1;
 
-		if(key == this.bindings.forwardKey.key) {
+		if(key == this.bindings.getBinding("options.keys.forward").getKey()) {
 			index = 0;
 		}
 
-		if(key == this.bindings.backKey.key) {
+		if(key == this.bindings.getBinding("options.keys.back").getKey()) {
 			index = 1;
 		}
 
-		if(key == this.bindings.leftKey.key) {
+		if(key == this.bindings.getBinding("options.keys.left").getKey()) {
 			index = 2;
 		}
 
-		if(key == this.bindings.rightKey.key) {
+		if(key == this.bindings.getBinding("options.keys.right").getKey()) {
 			index = 3;
 		}
 
-		if(key == this.bindings.jumpKey.key) {
+		if(key == this.bindings.getBinding("options.keys.jump").getKey()) {
 			index = 4;
 		}
 
-		if(key == this.bindings.speedHackKey.key) {
+		if(key == this.bindings.getBinding("options.keys.speedhack").getKey()) {
 			index = 5;
 		}
 
-		if(key == this.bindings.flyDownKey.key) {
+		if(key == this.bindings.getBinding("options.keys.fly-down").getKey()) {
 			index = 6;
 		}
 
@@ -91,7 +91,7 @@ public final class InputHandler {
 	}
 
 	public final void keyPress(int key) {
-		if(key == this.bindings.jumpKey.key) {
+		if(key == this.bindings.getBinding("options.keys.jump").getKey()) {
 			if(this.flyDelay == 0) {
 				this.flyDelay = 10;
 			} else {

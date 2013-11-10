@@ -10,7 +10,6 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
 
 public class ClientLevel implements ClassicLevel {
@@ -50,7 +49,10 @@ public class ClientLevel implements ClassicLevel {
 	@Override
 	public List<Player> getPlayers() {
 		List<Player> result = new ArrayList<Player>();
-		result.add(GeneralUtils.getMinecraft().player.openclassic);
+		for(com.mojang.minecraft.entity.player.Player p : this.handle.findAll(com.mojang.minecraft.entity.player.Player.class)) {
+			result.add(p.openclassic);
+		}
+		
 		return result;
 	}
 

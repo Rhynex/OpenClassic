@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.translate.Language;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class LanguageScreen extends GuiScreen {
 
@@ -35,7 +34,7 @@ public class LanguageScreen extends GuiScreen {
 	public final void onButtonClick(Button button) {
 		if(button.isActive()) {
 			if(button.getId() == 1) {
-				GeneralUtils.getMinecraft().setCurrentScreen(this.parent);
+				OpenClassic.getClient().setCurrentScreen(this.parent);
 			}
 		}
 	}
@@ -45,7 +44,7 @@ public class LanguageScreen extends GuiScreen {
 		if(button.isActive()) {
 			String code = button.getText().substring(button.getText().indexOf('(') + 1, button.getText().indexOf(')'));
 			OpenClassic.getGame().getConfig().setValue("options.language", code);
-			GeneralUtils.getMinecraft().setCurrentScreen(new LanguageScreen(this.parent));
+			OpenClassic.getClient().setCurrentScreen(new LanguageScreen(this.parent));
 			OpenClassic.getGame().getConfig().save();
 		}
 	}

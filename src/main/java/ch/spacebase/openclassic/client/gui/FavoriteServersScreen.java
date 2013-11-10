@@ -1,7 +1,5 @@
 package ch.spacebase.openclassic.client.gui;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import ch.spacebase.openclassic.api.Color;
@@ -10,13 +8,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-import ch.spacebase.openclassic.client.util.HTTPUtil;
-
-import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.SessionData;
-import com.mojang.minecraft.gui.ErrorScreen;
 
 public class FavoriteServersScreen extends GuiScreen {
 
@@ -66,55 +58,8 @@ public class FavoriteServersScreen extends GuiScreen {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.delete = false;
 		} else {
-			this.joinServer(SessionData.favorites.get(button.getText()));
+			OpenClassic.getClient().joinServer(SessionData.favorites.get(button.getText()));
 		}
-	}
-
-	private void joinServer(String url) {
-		Minecraft mc = GeneralUtils.getMinecraft();
-
-		mc.progressBar.setVisible(true);
-		mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
-		mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
-		mc.progressBar.setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
-		mc.progressBar.setProgress(-1);
-		mc.progressBar.render();
-		String play = HTTPUtil.fetchUrl(url, "", Constants.MINECRAFT_URL_HTTPS + "classic/list");
-		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
-
-		if(mppass.length() > 0) {
-			String user = HTTPUtil.getParameterOffPage(play, "username");
-			if(mc.data == null) {
-				mc.data = new SessionData(user);
-			} else {
-				mc.data.username = user;
-			}
-			
-			mc.data.key = mppass;
-
-			try {
-				mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
-			} catch(UnsupportedEncodingException e) {
-			}
-
-			mc.server = HTTPUtil.getParameterOffPage(play, "server");
-			try {
-				mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));
-			} catch(NumberFormatException e) {
-				mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
-				mc.server = null;
-				mc.progressBar.setVisible(false);
-				return;
-			}
-		} else {
-			mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
-			mc.progressBar.setVisible(false);
-			return;
-		}
-
-		mc.progressBar.setVisible(false);
-		mc.initGame();
-		OpenClassic.getClient().setCurrentScreen(null);
 	}
 
 	public void render() {

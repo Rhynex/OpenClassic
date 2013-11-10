@@ -21,8 +21,8 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL30;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 
@@ -93,7 +93,7 @@ public class TextureManager {
 		if(image == null) return;
 
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-		if(this.settings.getBooleanSetting("options.smoothing").getValue() && GeneralUtils.getMinecraft().mipmapMode > 0) {
+		if(this.settings.getBooleanSetting("options.smoothing").getValue() && RenderHelper.getHelper().getMipmapMode() > 0) {
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 2);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
@@ -133,7 +133,7 @@ public class TextureManager {
 		this.textureImgs.put(textureId, image);
 
 		if(this.settings.getBooleanSetting("options.smoothing").getValue()) {
-			switch(GeneralUtils.getMinecraft().mipmapMode) {
+			switch(RenderHelper.getHelper().getMipmapMode()) {
 				case 1:
 					GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 					break;

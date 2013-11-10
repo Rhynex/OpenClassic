@@ -3,7 +3,6 @@ package com.mojang.minecraft.level;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.ClientProgressBar;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.Creeper;
@@ -36,7 +35,7 @@ public final class MobSpawner {
 			}
 
 			Class<? extends Mob> spawnable[] = ANIMALS;
-			if(GeneralUtils.getMinecraft().settings.getIntSetting("options.survival").getValue() > 1) {
+			if(OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 1) {
 				spawnable = ALL;
 			}
 

@@ -1,55 +1,51 @@
-package com.mojang.minecraft.gui;
-
-import org.lwjgl.opengl.GL11;
+package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.api.util.Constants;
 
-import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.entity.player.LocalPlayer;
+public class GameOverScreen extends GuiScreen {
 
-public final class GameOverScreen extends GuiScreen {
-
-	public final void onOpen() {
+	public void onOpen() {
 		this.clearWidgets();
 		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 4 + 72, this, OpenClassic.getGame().getTranslator().translate("gui.game-over.respawn")));
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 96, this, OpenClassic.getGame().getTranslator().translate("gui.game-over.main-menu")));
 	}
 
-	public final void onButtonClick(Button button) {
-		Minecraft mc = GeneralUtils.getMinecraft();
-
+	public void onButtonClick(Button button) {
 		if(button.getId() == 0) {
+			Player player = OpenClassic.getClient().getPlayer();
 			for(int slot = 0; slot < 9; slot++) {
-				mc.player.inventory.slots[slot] = -1;
-				mc.player.inventory.count[slot] = 0;
+				player.getInventoryContents()[slot] = -1;
+				player.getInventoryAmounts()[slot] = 0;
 			}
 
-			mc.player.airSupply = 20;
-			mc.player.arrows = 20;
-			mc.player.deathTime = 0;
-			mc.player.health = LocalPlayer.MAX_HEALTH;
-			mc.player.resetPos();
+			player.setAir(20);
+			player.setArrows(20);
+			player.setHealth(Constants.MAX_HEALTH);
+			player.respawn();
 
 			OpenClassic.getClient().setCurrentScreen(null);
 		}
 
 		if(button.getId() == 1) {
-			mc.stopGame(true);
+			OpenClassic.getClient().exitGameSession();
 		}
 	}
 
-	public final void render() {
+	public void render() {
+		Player player = OpenClassic.getClient().getPlayer();
 		RenderHelper.getHelper().color(0, 0, this.getWidth(), this.getHeight(), 1615855616, -1602211792);
 
-		GL11.glPushMatrix();
-		GL11.glScalef(2.0F, 2.0F, 2.0F);
+		RenderHelper.getHelper().pushMatrix();
+		RenderHelper.getHelper().scale(2, 2, 2);
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.game-over.game-over"), this.getWidth() / 2 / 2, 30);
-		GL11.glPopMatrix();
-		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.game-over.score"), GeneralUtils.getMinecraft().player.getScore()), this.getWidth() / 2, 100);
+		RenderHelper.getHelper().popMatrix();
+		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.game-over.score"), player.getScore()), this.getWidth() / 2, 100);
 		super.render();
 	}
+	
 }

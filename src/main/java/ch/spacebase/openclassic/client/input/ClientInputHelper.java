@@ -38,4 +38,9 @@ public class ClientInputHelper extends InputHelper {
 		Keyboard.enableRepeatEvents(enabled);
 	}
 
+	@Override
+	public String getKeyName(int key) {
+		return Keyboard.getKeyName(key);
+	}
+
 }

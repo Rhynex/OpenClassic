@@ -2,6 +2,8 @@ package ch.spacebase.openclassic.client;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -26,19 +28,24 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
+import ch.spacebase.openclassic.api.settings.bindings.Bindings;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.block.physics.TNTPhysics;
 import ch.spacebase.openclassic.client.command.ClientCommands;
+import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.input.ClientInputHelper;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.game.ClassicGame;
 import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
 import ch.spacebase.openclassic.game.util.LoggerOutputStream;
 
 import com.mojang.minecraft.Minecraft;
+import com.mojang.minecraft.SessionData;
+import com.mojang.minecraft.gamemode.SurvivalGameMode;
 import com.mojang.minecraft.level.LevelIO;
 import com.zachsthings.onevent.EventManager;
 
@@ -96,6 +103,10 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public Level createLevel(LevelInfo info, Generator generator) {
+		if(this.isInGame()) {
+			this.exitGameSession();
+		}
+		
 		com.mojang.minecraft.level.Level level = new com.mojang.minecraft.level.Level();
 		level.name = info.getName();
 		level.creator = this.mc.data != null ? this.mc.data.username : "unknown";
@@ -145,6 +156,10 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(this.mc.level != null && this.mc.level.name.equals(name)) {
 			return this.mc.level.openclassic;
 		}
+		
+		if(this.isInGame()) {
+			this.exitGameSession();
+		}
 
 		VanillaBlock.registerAll();
 		com.mojang.minecraft.level.Level level = LevelIO.load(name);
@@ -165,17 +180,18 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(this.mc.level == null) return;
 		LevelIO.save(this.mc.level);
 	}
-
+	
 	@Override
-	public void exitLevel() {
-		this.exitLevel(true);
-	}
-
-	@Override
-	public void exitLevel(boolean save) {
+	public void saveLevel(String name) {
 		if(this.mc.level == null) return;
-
-		if(save) this.saveLevel();
+		String old = this.mc.level.name;
+		this.mc.level.name = name;
+		this.saveLevel();
+		this.mc.level.name = old;
+	}
+	
+	@Override
+	public void exitGameSession() {
 		this.mc.stopGame(true);
 	}
 
@@ -207,10 +223,20 @@ public class ClassicClient extends ClassicGame implements Client {
 	public MainScreen getMainScreen() {
 		return this.mc.hud;
 	}
+	
+	@Override
+	public boolean isInMultiplayer() {
+		return this.mc.isInMultiplayer();
+	}
 
 	@Override
 	public boolean isConnectedToOpenClassic() {
 		return this.mc.openclassicServer;
+	}
+	
+	@Override
+	public String getServerVersion() {
+		return this.mc.openclassicVersion;
 	}
 
 	@Override
@@ -219,13 +245,77 @@ public class ClassicClient extends ClassicGame implements Client {
 	}
 
 	@Override
-	public String getServerVersion() {
-		return this.mc.openclassicVersion;
+	public Settings getSettings() {
+		return this.mc.settings;
+	}
+	
+	@Override
+	public Bindings getBindings() {
+		return this.mc.bindings;
 	}
 
 	@Override
-	public Settings getSettings() {
-		return this.mc.settings;
+	public boolean isHUDHidden() {
+		return this.mc.hideGui;
+	}
+
+	@Override
+	public boolean isInSurvival() {
+		return this.mc.mode instanceof SurvivalGameMode && !this.isInMultiplayer();
+	}
+	
+	public void joinServer(String url) {
+		if(this.isInGame()) {
+			this.exitGameSession();
+		}
+		
+		this.getProgressBar().setVisible(true);
+		this.getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
+		this.getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+		this.getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
+		this.getProgressBar().setProgress(-1);
+		this.getProgressBar().render();
+		String play = HTTPUtil.fetchUrl(url, "", Constants.MINECRAFT_URL_HTTPS + "classic/list");
+		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
+
+		if(mppass.length() > 0) {
+			String user = HTTPUtil.getParameterOffPage(play, "username");
+			if(this.mc.data == null) {
+				this.mc.data = new SessionData(user);
+			} else {
+				this.mc.data.username = user;
+			}
+			
+			this.mc.data.key = mppass;
+
+			try {
+				this.mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
+			} catch(UnsupportedEncodingException e) {
+			}
+
+			this.mc.server = HTTPUtil.getParameterOffPage(play, "server");
+			try {
+				this.mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));
+			} catch(NumberFormatException e) {
+				this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
+				this.mc.server = null;
+				this.getProgressBar().setVisible(false);
+				return;
+			}
+		} else {
+			this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
+			this.getProgressBar().setVisible(false);
+			return;
+		}
+
+		this.getProgressBar().setVisible(false);
+		this.mc.initGame();
+		this.setCurrentScreen(null);
+	}
+
+	@Override
+	public Settings getHackSettings() {
+		return this.mc.hackSettings;
 	}
 
 }

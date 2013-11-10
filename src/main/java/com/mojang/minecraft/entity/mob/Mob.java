@@ -50,7 +50,7 @@ public class Mob extends Entity {
 	public int attackTime = 0;
 	public float oTilt;
 	public float tilt;
-	protected boolean dead = false;
+	public boolean dead = false;
 	public AI ai;
 
 	public Mob(Level level) {

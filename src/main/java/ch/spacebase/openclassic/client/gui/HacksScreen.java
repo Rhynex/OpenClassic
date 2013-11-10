@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public final class HacksScreen extends GuiScreen {
 
@@ -55,7 +54,7 @@ public final class HacksScreen extends GuiScreen {
 
 	@Override
 	public void render() {
-		if(GeneralUtils.getMinecraft().ingame) {
+		if(OpenClassic.getClient().isInGame()) {
 			RenderHelper.getHelper().color(0, 0, this.getWidth(), this.getHeight(), 1610941696, -1607454624);
 		} else {
 			RenderHelper.getHelper().drawDefaultBG();

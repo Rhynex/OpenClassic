@@ -1,4 +1,4 @@
-package com.mojang.minecraft.settings;
+package ch.spacebase.openclassic.client.settings;
 
 import java.awt.Color;
 
@@ -9,8 +9,8 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class NightSetting extends BooleanSetting {
 
-	public NightSetting(String name, String configKey) {
-		super(name, configKey);
+	public NightSetting(String name) {
+		super(name);
 	}
 	
 	@Override

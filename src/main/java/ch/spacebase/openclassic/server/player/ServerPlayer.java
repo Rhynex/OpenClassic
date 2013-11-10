@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.data.NBTData;
@@ -23,6 +24,7 @@ import ch.spacebase.openclassic.api.network.msg.LevelFinalizeMessage;
 import ch.spacebase.openclassic.api.network.msg.LevelInitializeMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
+import ch.spacebase.openclassic.api.network.msg.PlayerOpMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerSpawnMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
@@ -48,6 +50,7 @@ public class ServerPlayer implements Player {
 	private ClientInfo client = new ClientInfo(this);
 	private NBTData data;
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
+	private boolean breakBedrock = false;
 
 	private boolean sendingLevel = false;
 
@@ -335,6 +338,102 @@ public class ServerPlayer implements Player {
 	@Override
 	public String getLanguage() {
 		return this.client.getLanguage().equals("") ? OpenClassic.getGame().getLanguage() : this.client.getLanguage();
+	}
+
+	@Override
+	public int getInvulnerableTime() {
+		return 0;
+	}
+
+	@Override
+	public boolean isUnderwater() {
+		return false;
+	}
+
+	@Override
+	public int getHealth() {
+		return 0;
+	}
+
+	@Override
+	public void setHealth(int health) {
+	}
+
+	@Override
+	public boolean isDead() {
+		return false;
+	}
+
+	@Override
+	public int getPreviousHealth() {
+		return 0;
+	}
+
+	@Override
+	public int getAir() {
+		return 0;
+	}
+
+	@Override
+	public void setAir(int air) {
+	}
+
+	@Override
+	public int getScore() {
+		return 0;
+	}
+
+	@Override
+	public void setScore(int score) {
+	}
+
+	@Override
+	public int getArrows() {
+		return 0;
+	}
+
+	@Override
+	public void setArrows(int arrows) {
+	}
+
+	@Override
+	public int getSelectedSlot() {
+		return 0;
+	}
+
+	@Override
+	public int[] getInventoryContents() {
+		return new int[0];
+	}
+
+	@Override
+	public int[] getInventoryAmounts() {
+		return new int[0];
+	}
+
+	@Override
+	public int[] getInventoryPopTimes() {
+		return new int[0];
+	}
+	
+	@Override
+	public void replaceSelected(BlockType block) {
+	}
+
+	@Override
+	public void respawn() {
+		this.setPosition(this.getPosition().getLevel().getSpawn());
+	}
+
+	@Override
+	public boolean canBreakBedrock() {
+		return this.breakBedrock;
+	}
+
+	@Override
+	public void setCanBreakBedrock(boolean canBreak) {
+		this.breakBedrock = canBreak;
+		this.getSession().send(new PlayerOpMessage(canBreak ? Constants.OP : Constants.NOT_OP));
 	}
 
 }

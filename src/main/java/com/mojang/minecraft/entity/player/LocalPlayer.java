@@ -2,11 +2,11 @@ package com.mojang.minecraft.entity.player;
 
 import java.util.List;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
@@ -19,19 +19,10 @@ import com.zachsthings.onevent.EventManager;
 
 public class LocalPlayer extends Player {
 
-	public static final int MAX_HEALTH = 20;
-	public static final int MAX_ARROWS = 99;
-
 	public transient InputHandler input;
-	public Inventory inventory = new Inventory();
-	public byte userType = 0;
 	public float oBob;
 	public float bob;
-	public int score = 0;
-	public int arrows = 20;
 	public transient boolean speedHack = false;
-
-	public transient ClientPlayer openclassic = new ClientPlayer(this);
 
 	public LocalPlayer(Level level) {
 		super(level, 0, 0, 0);
@@ -53,6 +44,7 @@ public class LocalPlayer extends Player {
 	}
 
 	public void resetPos(Position pos) {
+		this.deathTime = 0;
 		this.heightOffset = 1.62F;
 		this.setSize(0.6F, 1.8F);
 		super.resetPos(pos);
@@ -121,10 +113,6 @@ public class LocalPlayer extends Player {
 		return result;
 	}
 
-	public int getScore() {
-		return this.score;
-	}
-
 	public HumanoidModel getModel() {
 		return (HumanoidModel) modelCache.getModel(this.modelName);
 	}
@@ -172,7 +160,7 @@ public class LocalPlayer extends Player {
 	}
 
 	public void moveRelative(float forward, float strafe, float speed) {
-		if(GeneralUtils.getMinecraft().hacks && GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.speed").getValue() && this.speedHack) {
+		if(GeneralUtils.getMinecraft().hacks && OpenClassic.getClient().getHackSettings().getBooleanSetting("hacks.speed").getValue() && this.speedHack) {
 			super.moveRelative(forward, strafe, 2.5F);
 		} else {
 			super.moveRelative(forward, strafe, speed);
@@ -183,8 +171,8 @@ public class LocalPlayer extends Player {
 	public void turn(float yaw, float pitch) {
 		float oldPitch = this.pitch;
 		float oldYaw = this.yaw;
-		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
-		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
 		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}
@@ -199,8 +187,8 @@ public class LocalPlayer extends Player {
 
 	@Override
 	public void interpolateTurn(float yaw, float pitch) {
-		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
-		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[GeneralUtils.getMinecraft().settings.getIntSetting("options.sensitivity").getValue()]);
+		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
 		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}
@@ -235,14 +223,14 @@ public class LocalPlayer extends Player {
 			this.parent.speedHack = this.parent.input.speed;
 			this.xxa = this.parent.input.xxa;
 			this.yya = this.parent.input.yya;
-			if(GeneralUtils.getMinecraft().hacks && this.parent.input.toggleFly && GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
+			if(GeneralUtils.getMinecraft().hacks && this.parent.input.toggleFly && OpenClassic.getClient().getHackSettings().getBooleanSetting("hacks.flying").getValue()) {
 				this.flying = !this.flying;
 				if(this.flying) {
 					this.mob.yd = 0;
 				}
 			}
 
-			if(!GeneralUtils.getMinecraft().hacks || !GeneralUtils.getMinecraft().hackSettings.getBooleanSetting("hacks.flying").getValue()) {
+			if(!GeneralUtils.getMinecraft().hacks || !OpenClassic.getClient().getHackSettings().getBooleanSetting("hacks.flying").getValue()) {
 				this.flying = false;
 			}
 

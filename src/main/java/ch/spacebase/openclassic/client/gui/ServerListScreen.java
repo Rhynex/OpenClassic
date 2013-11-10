@@ -6,14 +6,9 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
-import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
 
-import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.SessionData;
-import com.mojang.minecraft.gui.ErrorScreen;
 
 public class ServerListScreen extends GuiScreen {
 
@@ -70,40 +65,7 @@ public class ServerListScreen extends GuiScreen {
 			this.select = false;
 			SessionData.favorites.put(server.name, server.getUrl());
 		} else {
-			this.joinServer(server);
-		}
-	}
-
-	private void joinServer(Server server) {
-		if(server != null) {
-			Minecraft mc = GeneralUtils.getMinecraft();
-
-			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
-			OpenClassic.getClient().getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
-			OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
-			OpenClassic.getClient().getProgressBar().setProgress(-1);
-			OpenClassic.getClient().getProgressBar().render();
-
-			String page = HTTPUtil.fetchUrl(server.getUrl(), "", Constants.MINECRAFT_URL_HTTPS + "classic/list/");
-			if(mc.data == null) {
-				mc.data = new SessionData(HTTPUtil.getParameterOffPage(page, "username"));
-			} else {
-				mc.data.username = HTTPUtil.getParameterOffPage(page, "username");
-			}
-			
-			mc.data.key = HTTPUtil.getParameterOffPage(page, "mppass");
-			mc.data.haspaid = Boolean.valueOf(HTTPUtil.getParameterOffPage(page, "haspaid"));
-			mc.server = HTTPUtil.getParameterOffPage(page, "server");
-			try {
-				mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(page, "port"));
-			} catch(NumberFormatException e) {
-				mc.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
-				mc.server = null;
-				return;
-			}
-
-			mc.initGame();
-			mc.setCurrentScreen(null);
+			OpenClassic.getClient().joinServer(server.getUrl());
 		}
 	}
 

@@ -37,7 +37,7 @@ public class TexturePackScreen extends GuiScreen {
 	public final void onButtonClick(Button button) {
 		if(button.isActive()) {
 			if(button.getId() == 1) {
-				GeneralUtils.getMinecraft().setCurrentScreen(this.parent);
+				OpenClassic.getClient().setCurrentScreen(this.parent);
 			}
 		}
 	}

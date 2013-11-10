@@ -31,7 +31,6 @@ import ch.spacebase.openclassic.api.plugin.PluginManager;
 import ch.spacebase.openclassic.api.scheduler.Scheduler;
 import ch.spacebase.openclassic.api.translate.Language;
 import ch.spacebase.openclassic.api.translate.Translator;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 
 import com.zachsthings.onevent.EventManager;
@@ -74,7 +73,7 @@ public abstract class ClassicGame implements Game {
 		this.config = new YamlConfig(file);
 		this.config.load();
 
-		File langs = new File(GeneralUtils.getMinecraftDirectory(), "lang");
+		File langs = new File(this.directory, "lang");
 		if(!langs.exists()) {
 			try {
 				langs.mkdirs();
@@ -304,7 +303,6 @@ public abstract class ClassicGame implements Game {
 	public void registerGenerator(String name, Generator generator) {
 		Validate.notNull(name, "Name cannot be null.");
 		Validate.notNull(generator, "Generator cannot be null.");
-		if(generator == null) return;
 		this.generators.put(name, generator);
 	}
 

@@ -57,14 +57,25 @@ import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
 import ch.spacebase.openclassic.api.settings.IntSetting;
 import ch.spacebase.openclassic.api.settings.Settings;
+import ch.spacebase.openclassic.api.settings.bindings.Bindings;
+import ch.spacebase.openclassic.api.settings.bindings.KeyBinding;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.ClientProgressBar;
+import ch.spacebase.openclassic.client.gui.ChatInputScreen;
+import ch.spacebase.openclassic.client.gui.ErrorScreen;
+import ch.spacebase.openclassic.client.gui.GameOverScreen;
+import ch.spacebase.openclassic.client.gui.HUDScreen;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
+import ch.spacebase.openclassic.client.gui.MenuScreen;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
+import ch.spacebase.openclassic.client.settings.MusicSetting;
+import ch.spacebase.openclassic.client.settings.NightSetting;
+import ch.spacebase.openclassic.client.settings.SurvivalSetting;
+import ch.spacebase.openclassic.client.settings.TextureRefreshSetting;
 import ch.spacebase.openclassic.client.sound.ClientAudioManager;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
@@ -85,11 +96,6 @@ import com.mojang.minecraft.entity.player.net.NetworkPlayer;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.GameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.gui.ChatInputScreen;
-import com.mojang.minecraft.gui.ErrorScreen;
-import com.mojang.minecraft.gui.GameOverScreen;
-import com.mojang.minecraft.gui.HUDScreen;
-import com.mojang.minecraft.gui.MenuScreen;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.phys.Intersection;
@@ -103,11 +109,6 @@ import com.mojang.minecraft.render.FogRenderer;
 import com.mojang.minecraft.render.TextureManager;
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 import com.mojang.minecraft.render.animation.WaterTexture;
-import com.mojang.minecraft.settings.Bindings;
-import com.mojang.minecraft.settings.MusicSetting;
-import com.mojang.minecraft.settings.NightSetting;
-import com.mojang.minecraft.settings.SurvivalSetting;
-import com.mojang.minecraft.settings.TextureRefreshSetting;
 import com.zachsthings.onevent.EventManager;
 
 public final class Minecraft implements Runnable {
@@ -141,7 +142,6 @@ public final class Minecraft implements Runnable {
 	public String server;
 	public int port;
 	public volatile boolean running;
-	public String debugInfo;
 	private int lastClick;
 	public boolean raining;
 	public File dir;
@@ -176,7 +176,6 @@ public final class Minecraft implements Runnable {
 		this.server = null;
 		this.port = 0;
 		this.running = false;
-		this.debugInfo = "";
 		this.lastClick = 0;
 		this.raining = false;
 
@@ -323,7 +322,7 @@ public final class Minecraft implements Runnable {
 		}
 
 		this.particleManager = new ParticleManager(this.level, this.textureManager);
-		this.hud = new HUDScreen(this);
+		this.hud = new HUDScreen();
 
 		if(this.server != null && this.data != null && this.player != null) {
 			this.session = new ClientSession(this.player.openclassic, this.data.key, this.server, this.port);
@@ -428,30 +427,42 @@ public final class Minecraft implements Runnable {
 
 		SessionData.loadFavorites(this.dir);
 		this.audio = new ClientAudioManager(this);
-		this.bindings = new Bindings(this.dir);
+		this.bindings = new Bindings();
+		this.bindings.registerBinding(new KeyBinding("options.keys.forward", Keyboard.KEY_W));
+		this.bindings.registerBinding(new KeyBinding("options.keys.left", Keyboard.KEY_A));
+		this.bindings.registerBinding(new KeyBinding("options.keys.back", Keyboard.KEY_S));
+		this.bindings.registerBinding(new KeyBinding("options.keys.right", Keyboard.KEY_D));
+		this.bindings.registerBinding(new KeyBinding("options.keys.jump", Keyboard.KEY_SPACE));
+		this.bindings.registerBinding(new KeyBinding("options.keys.blocks", Keyboard.KEY_B));
+		this.bindings.registerBinding(new KeyBinding("options.keys.chat", Keyboard.KEY_T));
+		this.bindings.registerBinding(new KeyBinding("options.keys.toggle-fog", Keyboard.KEY_F));
+		this.bindings.registerBinding(new KeyBinding("options.keys.save-loc", Keyboard.KEY_RETURN));
+		this.bindings.registerBinding(new KeyBinding("options.keys.load-loc", Keyboard.KEY_R));
+		this.bindings.registerBinding(new KeyBinding("options.keys.speedhack", Keyboard.KEY_LCONTROL));
+		this.bindings.registerBinding(new KeyBinding("options.keys.fly-down", Keyboard.KEY_LSHIFT));
 		this.settings = new Settings();
-		this.settings.registerSetting(new MusicSetting("options.music", "options.music"));
+		this.settings.registerSetting(new MusicSetting("options.music"));
 		this.settings.getBooleanSetting("options.music").setDefault(true);
-		this.settings.registerSetting(new BooleanSetting("options.sound", "options.sound"));
+		this.settings.registerSetting(new BooleanSetting("options.sound"));
 		this.settings.getBooleanSetting("options.sound").setDefault(true);
-		this.settings.registerSetting(new BooleanSetting("options.invert-mouse", "options.invert-mouse"));
-		this.settings.registerSetting(new BooleanSetting("options.show-info", "options.show-info"));
-		this.settings.registerSetting(new IntSetting("options.render-distance", "options.render-distance", new String[] { "FAR", "NORMAL", "SHORT", "TINY" }));
-		this.settings.registerSetting(new BooleanSetting("options.view-bobbing", "options.view-bobbing"));
+		this.settings.registerSetting(new BooleanSetting("options.invert-mouse"));
+		this.settings.registerSetting(new BooleanSetting("options.show-info"));
+		this.settings.registerSetting(new IntSetting("options.render-distance", new String[] { "FAR", "NORMAL", "SHORT", "TINY" }));
+		this.settings.registerSetting(new BooleanSetting("options.view-bobbing"));
 		this.settings.getBooleanSetting("options.view-bobbing").setDefault(true);
-		this.settings.registerSetting(new TextureRefreshSetting("options.3d-anaglyph", "options.3d-anaglyph"));
-		this.settings.registerSetting(new BooleanSetting("options.limit-fps", "options.limit-fps"));
-		this.settings.registerSetting(new SurvivalSetting("options.survival", "options.survival", new String[] { "OFF", "PEACEFUL", "NORMAL" }));
-		this.settings.registerSetting(new TextureRefreshSetting("options.smoothing", "options.smoothing"));
-		this.settings.registerSetting(new NightSetting("options.night", "options.night"));
-		this.settings.registerSetting(new IntSetting("options.sensitivity", "options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
+		this.settings.registerSetting(new TextureRefreshSetting("options.3d-anaglyph"));
+		this.settings.registerSetting(new BooleanSetting("options.limit-fps"));
+		this.settings.registerSetting(new SurvivalSetting("options.survival", new String[] { "OFF", "PEACEFUL", "NORMAL" }));
+		this.settings.registerSetting(new TextureRefreshSetting("options.smoothing"));
+		this.settings.registerSetting(new NightSetting("options.night"));
+		this.settings.registerSetting(new IntSetting("options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
 		this.settings.getIntSetting("options.sensitivity").setDefault(1);
-		this.settings.registerSetting(new IntSetting("options.blockChooser", "options.blockChooser", new String[] { "DEFAULT", "MODIFIED", "FANCY" } ));
-		this.settings.registerSetting(new BooleanSetting("options.minimap", "options.minimap"));
+		this.settings.registerSetting(new IntSetting("options.blockChooser", new String[] { "DEFAULT", "MODIFIED", "FANCY" } ));
+		this.settings.registerSetting(new BooleanSetting("options.minimap"));
 		
 		this.hackSettings = new Settings();
-		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed", "hacks.speed"));
-		this.hackSettings.registerSetting(new BooleanSetting("hacks.flying", "hacks.flying"));
+		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed"));
+		this.hackSettings.registerSetting(new BooleanSetting("hacks.flying"));
 		OpenClassic.getClient().getConfig().applyDefault("options.texture-pack", "none");
 		OpenClassic.getClient().getConfig().save();
 		
@@ -1108,7 +1119,10 @@ public final class Minecraft implements Runnable {
 		checkGLError("Post render");
 		this.fps++;
 		while(System.currentTimeMillis() >= this.lastUpdate + 1000) {
-			this.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
+			if(this.hud != null) {
+				this.hud.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
+			}
+			
 			com.mojang.minecraft.render.Chunk.chunkUpdates = 0;
 			this.lastUpdate += 1000;
 			this.fps = 0;
@@ -1183,7 +1197,7 @@ public final class Minecraft implements Runnable {
 					}
 
 					if(button == 0) {
-						if(this.level != null && (Blocks.fromId(this.level.getTile(x, y, z)) != VanillaBlock.BEDROCK || this.player.userType >= 100)) {
+						if(this.level != null && (Blocks.fromId(this.level.getTile(x, y, z)) != VanillaBlock.BEDROCK || this.player.openclassic.canBreakBedrock())) {
 							this.mode.hitBlock(x, y, z);
 							return;
 						}
@@ -1267,11 +1281,7 @@ public final class Minecraft implements Runnable {
 		}
 
 		this.mode.spawnMobs();
-		this.hud.ticks++;
-
-		for(int index = 0; index < this.hud.chatHistory.size(); index++) {
-			this.hud.chatHistory.get(index).time++;
-		}
+		this.hud.update();
 		
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);
@@ -1384,14 +1394,14 @@ public final class Minecraft implements Runnable {
 						}
 
 						if(this.mode instanceof CreativeGameMode) {
-							if(Keyboard.getEventKey() == this.bindings.loadLocKey.key) {
+							if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.load-loc").getKey()) {
 								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, this.level.yawSpawn, this.level.pitchSpawn));
 								if(!event.isCancelled()) {
 									this.player.resetPos(event.getPosition());
 								}
 							}
 
-							if(Keyboard.getEventKey() == this.bindings.saveLocKey.key) {
+							if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.save-loc").getKey()) {
 								this.level.setSpawnPos(this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch);
 								this.player.resetPos();
 							}
@@ -1407,11 +1417,11 @@ public final class Minecraft implements Runnable {
 							this.player.arrows--;
 						}
 
-						if(Keyboard.getEventKey() == this.bindings.buildKey.key) {
+						if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.blocks").getKey()) {
 							this.mode.openInventory();
 						}
 
-						if(Keyboard.getEventKey() == this.bindings.chatKey.key) {
+						if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.chat").getKey()) {
 							this.player.releaseAllKeys();
 							this.setCurrentScreen(new ChatInputScreen());
 						}
@@ -1424,7 +1434,7 @@ public final class Minecraft implements Runnable {
 					}
 				}
 
-				if(Keyboard.getEventKey() == this.bindings.fogKey.key) {
+				if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.toggle-fog").getKey()) {
 					this.settings.getSetting("options.render-distance").toggle();
 				}
 			}

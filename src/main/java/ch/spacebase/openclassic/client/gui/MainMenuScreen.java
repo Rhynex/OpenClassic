@@ -1,15 +1,11 @@
 package ch.spacebase.openclassic.client.gui;
 
-import org.lwjgl.opengl.GL11;
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.GuiTextures;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
-
-import com.mojang.minecraft.gui.LoadLevelScreen;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -30,7 +26,7 @@ public class MainMenuScreen extends GuiScreen {
 			OpenClassic.getClient().getAudioManager().playMusic("menu", true);
 		}
 
-		if(GeneralUtils.getMinecraft().data == null || GeneralUtils.getMinecraft().settings.getIntSetting("options.survival").getValue() > 0) {
+		if(GeneralUtils.getMinecraft().data == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
 			this.getWidget(1, Button.class).setActive(false);
 		}
 	}
@@ -45,7 +41,7 @@ public class MainMenuScreen extends GuiScreen {
 		}
 
 		if(button.getId() == 2) {
-			OpenClassic.getClient().setCurrentScreen(new OptionsScreen(this, GeneralUtils.getMinecraft().settings));
+			OpenClassic.getClient().setCurrentScreen(new OptionsScreen(this, OpenClassic.getClient().getSettings()));
 		}
 
 		if(button.getId() == 3) {
@@ -67,9 +63,9 @@ public class MainMenuScreen extends GuiScreen {
 
 	public void render() {
 		RenderHelper.getHelper().drawDefaultBG();
-		GL11.glEnable(GL11.GL_BLEND);
+		RenderHelper.getHelper().enableBlend();
 		RenderHelper.getHelper().drawTexture(GuiTextures.LOGO, this.getWidth() / 2 - GuiTextures.LOGO.getWidth() / 2, 20, 1);
-		GL11.glDisable(GL11.GL_BLEND);
+		RenderHelper.getHelper().disableBlend();
 		super.render();
 	}
 }

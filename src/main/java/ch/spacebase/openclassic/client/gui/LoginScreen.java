@@ -107,7 +107,7 @@ public class LoginScreen extends GuiScreen {
 			}
 
 			OpenClassic.getClient().getProgressBar().setVisible(false);
-			GeneralUtils.getMinecraft().setCurrentScreen(new MainMenuScreen());
+			OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
 		}
 
 		if(button.getId() == 1) {
@@ -115,7 +115,7 @@ public class LoginScreen extends GuiScreen {
 		}
 
 		if(button.getId() == 4) {
-			GeneralUtils.getMinecraft().setCurrentScreen(new MainMenuScreen());
+			OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
 		}
 	}
 

@@ -251,7 +251,6 @@ public class BlockMap {
 				}
 			}
 		}
-
 	}
 
 	public static class Slot {
@@ -294,14 +293,14 @@ public class BlockMap {
 
 		public void add(Entity entity) {
 			if(this.xSlot >= 0 && this.ySlot >= 0 && this.zSlot >= 0) {
-				parent.entityGrid[(this.zSlot * parent.height + this.ySlot) * parent.width + this.xSlot].add(entity);
+				this.parent.entityGrid[(this.zSlot * this.parent.height + this.ySlot) * this.parent.width + this.xSlot].add(entity);
 			}
 
 		}
 
 		public void remove(Entity entity) {
 			if(this.xSlot >= 0 && this.ySlot >= 0 && this.zSlot >= 0) {
-				parent.entityGrid[(this.zSlot * parent.height + this.ySlot) * parent.width + this.xSlot].remove(entity);
+				this.parent.entityGrid[(this.zSlot * this.parent.height + this.ySlot) * this.parent.width + this.xSlot].remove(entity);
 			}
 		}
 	}

@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public final class OptionsScreen extends GuiScreen {
 
@@ -34,11 +33,11 @@ public final class OptionsScreen extends GuiScreen {
 	private List<String> buildContents() {
 		List<String> contents = new ArrayList<String>();
 		for(int count = 0; count < this.settings.getSettings().size(); count++) {
-			if(GeneralUtils.getMinecraft().isInMultiplayer() && this.settings.getSetting(count).getName().equals("options.survival")) {
+			if(OpenClassic.getClient().isInMultiplayer() && this.settings.getSetting(count).getName().equals("options.survival")) {
 				continue;
 			}
 			
-			if(GeneralUtils.getMinecraft().mipmapMode == 0 && this.settings.getSetting(count).getName().equals("options.smoothing")) {
+			if(RenderHelper.getHelper().getMipmapMode() == 0 && this.settings.getSetting(count).getName().equals("options.smoothing")) {
 				continue;
 			}
 			
@@ -51,15 +50,15 @@ public final class OptionsScreen extends GuiScreen {
 	@Override
 	public void onButtonClick(Button button) {
 		if(button.getId() == 75) {
-			GeneralUtils.getMinecraft().setCurrentScreen(new HacksScreen(this, GeneralUtils.getMinecraft().hackSettings));
+			OpenClassic.getClient().setCurrentScreen(new HacksScreen(this, OpenClassic.getClient().getHackSettings()));
 		}
 
 		if(button.getId() == 100) {
-			GeneralUtils.getMinecraft().setCurrentScreen(new ControlsScreen(this, GeneralUtils.getMinecraft().bindings));
+			OpenClassic.getClient().setCurrentScreen(new ControlsScreen(this, OpenClassic.getClient().getBindings()));
 		}
 
 		if(button.getId() == 200) {
-			GeneralUtils.getMinecraft().setCurrentScreen(this.parent);
+			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
 	
@@ -73,7 +72,7 @@ public final class OptionsScreen extends GuiScreen {
 
 	@Override
 	public void render() {
-		if(GeneralUtils.getMinecraft().ingame) {
+		if(OpenClassic.getClient().isInGame()) {
 			RenderHelper.getHelper().color(0, 0, this.getWidth(), this.getHeight(), 1610941696, -1607454624);
 		} else {
 			RenderHelper.getHelper().drawDefaultBG();

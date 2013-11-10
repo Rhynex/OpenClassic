@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 
 import com.mojang.minecraft.entity.mob.HumanoidMob;
 import com.mojang.minecraft.level.Level;
@@ -14,6 +15,11 @@ public abstract class Player extends HumanoidMob {
 	protected int newTextureId = -1;
 	protected BufferedImage newTexture = null;
 	protected TextureManager textures;
+	public Inventory inventory = new Inventory();
+	public int score = 0;
+	public int arrows = 20;
+	
+	public transient ClientPlayer openclassic = new ClientPlayer(this);
 
 	public Player(Level level, float x, float y, float z) {
 		super(level, x, y, z);
@@ -27,23 +33,14 @@ public abstract class Player extends HumanoidMob {
 		if(this.newTexture != null) {
 			int[] imageData = new int[512];
 			this.newTexture.getRGB(32, 0, 32, 16, imageData, 0, 32);
-			int index = 0;
-
-			boolean hair;
-			while(true) {
-				if(index >= imageData.length) {
-					hair = false;
-					break;
-				}
-
+			boolean hair = false;
+			for(int index = 0; index < imageData.length; index++) {
 				if(imageData[index] >>> 24 < 128) {
 					hair = true;
 					break;
 				}
-
-				index++;
 			}
-
+			
 			this.hasHair = hair;
 			this.newTextureId = textures.bindTexture(this.newTexture);
 			this.newTexture = null;
@@ -57,5 +54,9 @@ public abstract class Player extends HumanoidMob {
 	}
 
 	public abstract String getName();
+	
+	public int getScore() {
+		return this.score;
+	}
 
 }

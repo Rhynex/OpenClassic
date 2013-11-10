@@ -38,7 +38,7 @@
        <distributionManagement>        
                 <repository>            
                         <id>dropbox</id>                        
-                        <url>file:///home/steven/Dropbox/Public/maven</url>                      
+                        <url>file://C:\Users\Steven\Dropbox\Public\maven</url>                      
                 </repository>           
         </distributionManagement>
 

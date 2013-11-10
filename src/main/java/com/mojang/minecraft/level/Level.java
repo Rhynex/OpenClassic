@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -14,7 +15,6 @@ import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.BlockUtils;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.Entity;
@@ -85,8 +85,7 @@ public class Level {
 				this.waterLevel = this.height / 2;
 			}
 
-			Minecraft mc = GeneralUtils.getMinecraft();
-			if(mc.settings.getBooleanSetting("options.night").getValue()) {
+			if(OpenClassic.getClient().getSettings().getBooleanSetting("options.night").getValue()) {
 				this.skyColor = 0;
 				this.fogColor = new Color(30, 30, 30, 70).getRGB();
 				this.cloudColor = new Color(30, 30, 30, 70).getRGB();
@@ -686,8 +685,7 @@ public class Level {
 
 	public float getBrightness(int x, int y, int z) {
 		BlockType block = this.openclassic.getBlockTypeAt(x, y, z);
-		Minecraft mc = GeneralUtils.getMinecraft();
-		float mod = mc.settings.getBooleanSetting("options.night").getValue() ? 0.4F : 0;
+		float mod = OpenClassic.getClient().getSettings().getBooleanSetting("options.night").getValue() ? 0.4F : 0;
 		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 - mod : 0.6F - mod;
 	}
 
@@ -993,6 +991,18 @@ public class Level {
 		}
 
 		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends Entity> List<T> findAll(Class<T> clazz) {
+		List<T> ret = new ArrayList<T>();
+		for(Entity entity : this.blockMap.all) {
+			if(clazz.isAssignableFrom(entity.getClass())) {
+				ret.add((T) entity);
+			}
+		}
+
+		return ret;
 	}
 
 	public void removeAllNonCreativeModeEntities() {

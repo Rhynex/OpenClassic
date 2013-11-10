@@ -19,10 +19,10 @@ import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent.Result;
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 
-import com.mojang.minecraft.gui.ErrorScreen;
 import com.mojang.minecraft.level.LevelIO;
 import com.zachsthings.onevent.EventManager;
 

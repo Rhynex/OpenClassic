@@ -5,10 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.opengl.GL11;
-
-import com.mojang.minecraft.gui.ScreenBlock;
-
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -16,7 +12,6 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public final class BlockSelectScreen extends GuiScreen {
 
@@ -52,7 +47,7 @@ public final class BlockSelectScreen extends GuiScreen {
 		this.attachWidget(new Button(1, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>"));
 		
 		if(this.blocks.size() == 0) {
-			GeneralUtils.getMinecraft().setCurrentScreen(null);
+			OpenClassic.getClient().setCurrentScreen(null);
 		}
 	}
 	
@@ -74,8 +69,8 @@ public final class BlockSelectScreen extends GuiScreen {
 		if(button == 0) {
 			ScreenBlock block = this.getBlockOnScreen(x, y);
 			if(block != null) {
-				GeneralUtils.getMinecraft().player.inventory.replaceSlot(block.block);
-				GeneralUtils.getMinecraft().setCurrentScreen(null);
+				OpenClassic.getClient().getPlayer().replaceSelected(block.getBlock());
+				OpenClassic.getClient().setCurrentScreen(null);
 				return;
 			}
 		}
@@ -91,11 +86,11 @@ public final class BlockSelectScreen extends GuiScreen {
 		ScreenBlock block = this.getBlockOnScreen(mouseX, mouseY);
 		RenderHelper.getHelper().color(this.getWidth() / 2 - 120, 30, this.getWidth() / 2 + 120, 180, -1878719232, -1070583712);
 		if(block != null) {
-			RenderHelper.getHelper().color(block.x - 3, block.y - 8, block.x + 23, block.y + 18, -1862270977, -1056964609);
+			RenderHelper.getHelper().color(block.getX() - 3, block.getX() - 8, block.getX() + 23, block.getX() + 18, -1862270977, -1056964609);
 		}
 
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), this.getWidth() / 2, 40);
-		switch(GeneralUtils.getMinecraft().settings.getIntSetting("options.blockChooser").getValue()) {
+		switch(OpenClassic.getClient().getSettings().getIntSetting("options.blockChooser").getValue()) {
 			case 0: {
 				this.yawAngle = -45.0F;
 				this.pitchAngle = -30.0F;
@@ -130,24 +125,24 @@ public final class BlockSelectScreen extends GuiScreen {
 		}
 		
 		for(ScreenBlock b : this.blocks.get(this.page)) {
-			GL11.glPushMatrix();
-			GL11.glTranslatef(b.x, b.y, 0);
-			GL11.glScalef(10.0F, 10.0F, 10.0F);
-			GL11.glTranslatef(1.0F, 0.5F, 8.0F);
-			GL11.glRotatef(this.pitchAngle, 1.0F, 0.0F, 0.0F);
-			if(this.fancy && block != null && b.block == block.block) {
-				GL11.glTranslatef(0.0F, 0.15F * this.localSine, 0.0F);
+			RenderHelper.getHelper().pushMatrix();
+			RenderHelper.getHelper().translate(b.getX(), b.getY(), 0);
+			RenderHelper.getHelper().scale(10.0F, 10.0F, 10.0F);
+			RenderHelper.getHelper().translate(1.0F, 0.5F, 8.0F);
+			RenderHelper.getHelper().rotate(this.pitchAngle, 1.0F, 0.0F, 0.0F);
+			if(this.fancy && block != null && b.getBlock() == block.getBlock()) {
+				RenderHelper.getHelper().translate(0.0F, 0.15F * this.localSine, 0.0F);
 			}
 			
-			GL11.glRotatef(this.yawAngle, 0.0F, 1.0F, 0.0F);
-			if(block != null && b.block == block.block) {
-				GL11.glScalef(1.55F, 1.55F, 1.55F);
+			RenderHelper.getHelper().rotate(this.yawAngle, 0.0F, 1.0F, 0.0F);
+			if(block != null && b.getBlock() == block.getBlock()) {
+				RenderHelper.getHelper().scale(1.55F, 1.55F, 1.55F);
 			}
 
-			GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
-			GL11.glScalef(-1.0F, -1.0F, -1.0F);
-			b.block.getModel().renderAll(-2, 0, 0, 1);
-			GL11.glPopMatrix();
+			RenderHelper.getHelper().translate(-1.5F, 0.5F, 0.5F);
+			RenderHelper.getHelper().scale(-1.0F, -1.0F, -1.0F);
+			b.getBlock().getModel().renderAll(-2, 0, 0, 1);
+			RenderHelper.getHelper().popMatrix();
 		}
 		
 		super.render();
@@ -155,7 +150,7 @@ public final class BlockSelectScreen extends GuiScreen {
 	
 	private ScreenBlock getBlockOnScreen(int x, int y) {
 		for(ScreenBlock block : this.blocks.get(this.page)) {
-			if(x >= block.x && x <= block.x + 24 && y >= block.y - 12 && y <= block.y + 12) {
+			if(x >= block.getX() && x <= block.getX() + 24 && y >= block.getX() - 12 && y <= block.getX() + 12) {
 				return block;
 			}
 		}
