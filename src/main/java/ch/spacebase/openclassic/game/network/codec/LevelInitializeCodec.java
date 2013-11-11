@@ -6,6 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.LevelInitializeMessage;
+import ch.spacebase.openclassic.game.network.MessageCodec;
 
 public class LevelInitializeCodec extends MessageCodec<LevelInitializeMessage> {
 

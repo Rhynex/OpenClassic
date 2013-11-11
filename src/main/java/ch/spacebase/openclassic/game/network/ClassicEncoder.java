@@ -9,7 +9,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 
 import ch.spacebase.openclassic.api.network.msg.Message;
-import ch.spacebase.openclassic.game.network.codec.MessageCodec;
 
 public class ClassicEncoder extends OneToOneEncoder {
 

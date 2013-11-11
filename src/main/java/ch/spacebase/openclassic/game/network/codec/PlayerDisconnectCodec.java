@@ -6,6 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.PlayerDisconnectMessage;
+import ch.spacebase.openclassic.game.network.MessageCodec;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
 public class PlayerDisconnectCodec extends MessageCodec<PlayerDisconnectMessage> {

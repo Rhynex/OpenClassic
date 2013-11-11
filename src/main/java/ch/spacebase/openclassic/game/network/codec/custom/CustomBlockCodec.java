@@ -18,7 +18,7 @@ import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
 import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
-import ch.spacebase.openclassic.game.network.codec.MessageCodec;
+import ch.spacebase.openclassic.game.network.MessageCodec;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
 public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {

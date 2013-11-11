@@ -6,7 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.custom.audio.AudioPlayMessage;
-import ch.spacebase.openclassic.game.network.codec.MessageCodec;
+import ch.spacebase.openclassic.game.network.MessageCodec;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
 public class AudioPlayCodec extends MessageCodec<AudioPlayMessage> {

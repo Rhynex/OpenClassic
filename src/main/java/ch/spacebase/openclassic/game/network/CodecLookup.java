@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.game.network.codec.IdentificationCodec;
 import ch.spacebase.openclassic.game.network.codec.LevelDataCodec;
 import ch.spacebase.openclassic.game.network.codec.LevelFinalizeCodec;
 import ch.spacebase.openclassic.game.network.codec.LevelInitializeCodec;
-import ch.spacebase.openclassic.game.network.codec.MessageCodec;
 import ch.spacebase.openclassic.game.network.codec.PingCodec;
 import ch.spacebase.openclassic.game.network.codec.PlayerChatCodec;
 import ch.spacebase.openclassic.game.network.codec.PlayerDespawnCodec;
@@ -33,9 +32,8 @@ import ch.spacebase.openclassic.game.network.codec.custom.PluginCodec;
 
 public final class CodecLookup {
 
-	private static MessageCodec<?>[] opcodeTable = new MessageCodec<?>[256];
-
-	private static Map<Class<? extends Message>, MessageCodec<?>> classTable = new HashMap<Class<? extends Message>, MessageCodec<?>>();
+	private static final MessageCodec<?>[] opcodeTable = new MessageCodec<?>[256];
+	private static final Map<Class<? extends Message>, MessageCodec<?>> classTable = new HashMap<Class<? extends Message>, MessageCodec<?>>();
 
 	static {
 		try {

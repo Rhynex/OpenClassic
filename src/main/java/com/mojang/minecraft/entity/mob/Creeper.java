@@ -48,7 +48,7 @@ public class Creeper extends Mob {
 				float xd = particleX / len / len;
 				float yd = particleY / len / len;
 				float zd = particleZ / len / len;
-				this.level.particleEngine.spawnParticle(new TerrainParticle(this.level, this.mob.x + particleX, this.mob.y + particleY, this.mob.z + particleZ, xd, yd, zd, VanillaBlock.LEAVES));
+				this.level.minecraft.particleManager.spawnParticle(new TerrainParticle(this.level, this.mob.x + particleX, this.mob.y + particleY, this.mob.z + particleZ, xd, yd, zd, VanillaBlock.LEAVES));
 			}
 		}
 	}

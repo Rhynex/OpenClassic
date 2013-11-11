@@ -121,7 +121,7 @@ public final class SurvivalGameMode extends GameMode {
 	public final void spawnMobs() {
 		int area = this.spawner.level.width * this.spawner.level.height * this.spawner.level.depth / 64 / 64 / 64;
 		if(this.spawner.level.random.nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
-			this.spawner.spawn(area, this.spawner.level.player, null);
+			this.spawner.spawn(area, this.spawner.level.minecraft.player, null);
 		}
 
 	}

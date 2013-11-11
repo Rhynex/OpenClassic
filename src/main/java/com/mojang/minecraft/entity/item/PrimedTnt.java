@@ -69,7 +69,7 @@ public class PrimedTnt extends Entity {
 
 		if(!this.defused) {
 			if(this.life-- > 0) {
-				this.level.particleEngine.spawnParticle(new SmokeParticle(this.level, this.x, this.y + 0.6F, this.z));
+				this.level.minecraft.particleManager.spawnParticle(new SmokeParticle(this.level, this.x, this.y + 0.6F, this.z));
 			} else {
 				this.remove();
 				Random rand = new Random();
@@ -82,7 +82,7 @@ public class PrimedTnt extends Entity {
 					float dx = ox / len / len;
 					float dy = oy / len / len;
 					float dz = oz / len / len;
-					this.level.particleEngine.spawnParticle(new TerrainParticle(this.level, this.x + ox, this.y + oy, this.z + oz, dx, dy, dz, VanillaBlock.TNT));
+					this.level.minecraft.particleManager.spawnParticle(new TerrainParticle(this.level, this.x + ox, this.y + oy, this.z + oz, dx, dy, dz, VanillaBlock.TNT));
 				}
 
 			}

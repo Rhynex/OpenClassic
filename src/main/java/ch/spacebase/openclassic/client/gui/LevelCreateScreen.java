@@ -47,8 +47,15 @@ public class LevelCreateScreen extends GuiScreen {
 
 		if((button.getId() == 1 || button.getId() == 2 || button.getId() == 3) && this.widget.getText().trim().length() > 0) {
 			short size = (short) (128 << (button.getId() - 1));
+			OpenClassic.getClient().getProgressBar().setVisible(true);
+			OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
+			OpenClassic.getClient().getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
+			OpenClassic.getClient().getProgressBar().setText("");
+			OpenClassic.getClient().getProgressBar().setProgress(-1);
+			OpenClassic.getClient().getProgressBar().render();
 			OpenClassic.getClient().createLevel(new LevelInfo(this.widget.getText(), null, size, (short) 128, size), OpenClassic.getGame().getGenerator(this.getWidget(0, StateButton.class).getState()));
 			OpenClassic.getClient().saveLevel();
+			OpenClassic.getClient().getProgressBar().setVisible(false);
 			OpenClassic.getClient().setCurrentScreen(null);
 		}
 

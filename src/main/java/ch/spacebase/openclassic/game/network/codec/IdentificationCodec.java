@@ -6,6 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
+import ch.spacebase.openclassic.game.network.MessageCodec;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
 public class IdentificationCodec extends MessageCodec<IdentificationMessage> {

@@ -20,7 +20,6 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.PrimedTnt;
 import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.phys.Intersection;
 import com.zachsthings.onevent.EventManager;
@@ -29,34 +28,32 @@ public class Level {
 
 	private static final Random rand = new Random();
 
-	public int width;
-	public int height;
-	public int depth;
-	public byte[] blocks;
 	public String name;
 	public String creator;
 	public long createTime;
+	public int width;
+	public int height;
+	public int depth;
+	public int waterLevel;
+	public byte[] blocks;
 	public float xSpawn;
 	public float ySpawn;
 	public float zSpawn;
 	public float yawSpawn;
 	public float pitchSpawn;
-	private transient int[] highest;
-	public transient Random random = new Random();
-	private transient int id;
-	private transient ArrayList<TickNextTick> tickNextTicks;
-	public BlockMap blockMap;
-	private boolean networkMode;
-	public transient Minecraft rendererContext;
-	public boolean creativeMode;
-	public int waterLevel;
 	public int skyColor;
 	public int fogColor;
 	public int cloudColor;
+	public BlockMap blockMap;
+	
+	private int[] highest;
+	public Random random = new Random();
+	private int id;
+	private ArrayList<TickNextTick> tickNextTicks;
+	private boolean networkMode;
+	public Minecraft minecraft;
+	public boolean creativeMode;
 	private int unprocessed;
-	public Entity player;
-	public transient ParticleManager particleEngine;
-	public transient Object font;
 	public boolean growTrees;
 
 	public transient ClientLevel openclassic;
@@ -114,8 +111,8 @@ public class Level {
 		this.highest = new int[width * height];
 		Arrays.fill(this.highest, this.height);
 		this.calcLightDepths(0, 0, width, height);
-		if(this.rendererContext != null) {
-			this.rendererContext.levelRenderer.refresh();
+		if(this.minecraft != null) {
+			this.minecraft.levelRenderer.refresh();
 		}
 
 		this.tickNextTicks.clear();
@@ -161,8 +158,8 @@ public class Level {
 				if(highest != blocker) {
 					int lower = highest < blocker ? highest : blocker;
 					highest = highest > blocker ? highest : blocker;
-					if(this.rendererContext != null) {
-						this.rendererContext.levelRenderer.queueChunks(x - 1, lower - 1, z - 1, x + 1, highest + 1, z + 1);
+					if(this.minecraft != null) {
+						this.minecraft.levelRenderer.queueChunks(x - 1, lower - 1, z - 1, x + 1, highest + 1, z + 1);
 					}
 				}
 			}
@@ -243,8 +240,8 @@ public class Level {
 
 				this.blocks[(y * this.depth + z) * this.width + x] = (byte) type;
 				this.calcLightDepths(x, z, 1, 1);
-				if(this.rendererContext != null) {
-					this.rendererContext.levelRenderer.queueChunks(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
+				if(this.minecraft != null) {
+					this.minecraft.levelRenderer.queueChunks(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
 				}
 
 				return true;
@@ -855,8 +852,8 @@ public class Level {
 	}
 
 	public void playSound(String name, Entity entity, float volume, float pitch) {
-		if(this.rendererContext != null) {
-			Minecraft mc = this.rendererContext;
+		if(this.minecraft != null) {
+			Minecraft mc = this.minecraft;
 			if(!mc.settings.getBooleanSetting("options.sound").getValue()) {
 				return;
 			}
@@ -868,8 +865,8 @@ public class Level {
 	}
 
 	public void playSound(String name, float x, float y, float z, float volume, float pitch) {
-		if(this.rendererContext != null) {
-			Minecraft mc = this.rendererContext;
+		if(this.minecraft != null) {
+			Minecraft mc = this.minecraft;
 			if(!mc.settings.getBooleanSetting("options.sound").getValue()) {
 				return;
 			}
@@ -933,7 +930,7 @@ public class Level {
 	}
 
 	public Entity getPlayer() {
-		return this.player;
+		return this.minecraft.player;
 	}
 
 	public void addEntity(Entity entity) {

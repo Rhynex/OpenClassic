@@ -2,16 +2,39 @@ package ch.spacebase.openclassic.game.network;
 
 import java.net.SocketAddress;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 import org.jboss.netty.channel.Channel;
 
-import ch.spacebase.openclassic.api.network.msg.Message;
+import ch.spacebase.openclassic.api.network.msg.*;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.player.Session;
 
 public abstract class ClassicSession implements Session {
 
+	private static final List<Class<? extends Message>> VANILLA = new ArrayList<Class<? extends Message>>();
+	
+	static {
+		VANILLA.add(IdentificationMessage.class);
+		VANILLA.add(PingMessage.class);
+		VANILLA.add(LevelInitializeMessage.class);
+		VANILLA.add(LevelDataMessage.class);
+		VANILLA.add(LevelFinalizeMessage.class);
+		VANILLA.add(PlayerSetBlockMessage.class);
+		VANILLA.add(BlockChangeMessage.class);
+		VANILLA.add(PlayerSpawnMessage.class);
+		VANILLA.add(PlayerTeleportMessage.class);
+		VANILLA.add(PlayerPositionRotationMessage.class);
+		VANILLA.add(PlayerPositionMessage.class);
+		VANILLA.add(PlayerRotationMessage.class);
+		VANILLA.add(PlayerDespawnMessage.class);
+		VANILLA.add(PlayerChatMessage.class);
+		VANILLA.add(PlayerDisconnectMessage.class);
+		VANILLA.add(PlayerOpMessage.class);
+	}
+	
 	protected Channel channel;
 	private final Queue<Message> messageQueue = new ArrayDeque<Message>();
 	private State state = State.IDENTIFYING;
@@ -60,7 +83,7 @@ public abstract class ClassicSession implements Session {
 			return;
 		}
 
-		if(message.getClass().getPackage().getName().contains("custom") && !this.sendCustomMessages()) {
+		if(!VANILLA.contains(message.getClass()) && !this.sendCustomMessages()) {
 			return;
 		}
 

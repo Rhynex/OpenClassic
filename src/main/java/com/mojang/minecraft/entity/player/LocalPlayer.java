@@ -27,7 +27,6 @@ public class LocalPlayer extends Player {
 	public LocalPlayer(Level level) {
 		super(level, 0, 0, 0);
 		if(level != null) {
-			level.player = this;
 			level.removeEntity(this);
 			level.addEntity(this);
 		}
@@ -48,10 +47,6 @@ public class LocalPlayer extends Player {
 		this.heightOffset = 1.62F;
 		this.setSize(0.6F, 1.8F);
 		super.resetPos(pos);
-		if(this.level != null) {
-			this.level.player = this;
-		}
-
 		this.deathTime = 0;
 	}
 

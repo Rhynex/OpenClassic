@@ -43,7 +43,7 @@ public class ClientAudioManager implements AudioManager {
 
 	private SoundSystem system;
 	private Minecraft mc;
-	public long nextBGM = System.currentTimeMillis();
+	public long nextMusic = System.currentTimeMillis();
 
 	public ClientAudioManager(Minecraft mc) {
 		this.mc = mc;
@@ -251,6 +251,14 @@ public class ClientAudioManager implements AudioManager {
 	@Override
 	public void stop(Player player, String music) {
 		this.stop(music);
+	}
+	
+	public long getMusicTime() {
+		return this.nextMusic;
+	}
+	
+	public void setMusicTime(long time) {
+		this.nextMusic = time;
 	}
 
 }

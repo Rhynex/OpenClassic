@@ -113,14 +113,9 @@ public class ClassicClient extends ClassicGame implements Client {
 		level.createTime = System.currentTimeMillis();
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-		this.mc.progressBar.setVisible(true);
-		this.mc.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
-		this.mc.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
-		this.mc.progressBar.render();
 		level.openclassic.setGenerating(true);
 		generator.generate(level.openclassic, data);
 		level.openclassic.setGenerating(false);
-		this.mc.progressBar.setVisible(false);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
 		level.openclassic.setSpawn(generator.findSpawn(level.openclassic));
 		if(info.getSpawn() != null) {
@@ -129,8 +124,8 @@ public class ClassicClient extends ClassicGame implements Client {
 
 		level.openclassic.data = new NBTData(level.name);
 		level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
+		this.openLevel(level);
 		this.mc.mode.prepareLevel(level);
-		this.mc.setLevel(level);
 		EventManager.callEvent(new LevelCreateEvent(level.openclassic));
 		return level.openclassic;
 	}
@@ -156,23 +151,29 @@ public class ClassicClient extends ClassicGame implements Client {
 		if(this.mc.level != null && this.mc.level.name.equals(name)) {
 			return this.mc.level.openclassic;
 		}
+
+		com.mojang.minecraft.level.Level level = LevelIO.load(name);
+		if(level != null) {
+			this.openLevel(level);
+			return level.openclassic;
+		}
+
+		return null;
+	}
+	
+	private void openLevel(com.mojang.minecraft.level.Level level) {
+		if(this.mc.level != null && this.mc.level == level) {
+			return;
+		}
 		
 		if(this.isInGame()) {
 			this.exitGameSession();
 		}
 
 		VanillaBlock.registerAll();
-		com.mojang.minecraft.level.Level level = LevelIO.load(name);
-		if(level != null) {
-			this.mc.setLevel(level);
-			this.mc.initGame();
-			this.mc.setCurrentScreen(null);
-			return level.openclassic;
-		} else {
-			VanillaBlock.unregisterAll();
-		}
-
-		return null;
+		this.mc.setLevel(level);
+		this.mc.initGame();
+		this.mc.setCurrentScreen(null);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.game.network.codec;
+package ch.spacebase.openclassic.game.network;
 
 import java.io.IOException;
 

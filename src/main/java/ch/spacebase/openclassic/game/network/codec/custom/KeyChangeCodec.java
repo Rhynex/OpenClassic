@@ -6,7 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.network.msg.custom.KeyChangeMessage;
-import ch.spacebase.openclassic.game.network.codec.MessageCodec;
+import ch.spacebase.openclassic.game.network.MessageCodec;
 
 public class KeyChangeCodec extends MessageCodec<KeyChangeMessage> {
 

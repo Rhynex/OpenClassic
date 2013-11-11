@@ -44,8 +44,6 @@ import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.level.LevelInfo;
-import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
@@ -201,6 +199,10 @@ public final class Minecraft implements Runnable {
 			}
 		}
 	}
+	
+	public boolean isInMultiplayer() {
+		return this.session != null;
+	}
 
 	public final void setCurrentScreen(GuiScreen screen) {
 		if(this.currentScreen != null) {
@@ -223,36 +225,85 @@ public final class Minecraft implements Runnable {
 			this.grabMouse();
 		}
 	}
+	
+	private void resize() {
+		this.width = Display.getWidth();
+		this.height = Display.getHeight();
 
-	private static void checkGLError(String task) {
-		/* int error = GL11.glGetError();
-		if(error != 0) {
-			String message = GLU.gluErrorString(error);
-			OpenClassic.getLogger().severe("########## GL ERROR ##########");
-			OpenClassic.getLogger().severe("@ " + task);
-			OpenClassic.getLogger().severe(error + ": " + message);
-			System.exit(0);
-		} */
+		if(this.hud != null) {
+			this.hud.width = ClientRenderHelper.getHelper().getGuiWidth();
+			this.hud.height = ClientRenderHelper.getHelper().getGuiHeight();
+		}
+
+		if(this.currentScreen != null) {
+			this.currentScreen.setSize(this.width, this.height);
+		}
 	}
 
-	public final void shutdown() {
-		if(this.shutdown) {
-			return;
+	public void setLevel(Level level) {
+		this.level = level;
+		if(level != null) {
+			level.initTransient();
+			this.mode.apply(level);
+			level.minecraft = this;
+			if(this.isInMultiplayer() && this.player != null) {
+				this.player.resetPos();
+				this.mode.preparePlayer(this.player);
+				level.addEntity(this.player);
+			}
 		}
 
-		this.shutdown = true;
-		this.running = false;
-		if(this.ingame) this.stopGame(false);
-		if(this.resourceThread != null) {
-			this.resourceThread.running = false;
+		if(this.player == null) {
+			this.player = new LocalPlayer(level);
+			this.player.resetPos();
+			this.mode.preparePlayer(this.player);
 		}
 
-		OpenClassic.getClient().unregisterExecutors(OpenClassic.getClient());
-		((ClassicScheduler) OpenClassic.getClient().getScheduler()).shutdown();
-		this.audio.cleanup();
-		OpenClassic.setGame(null);
-		this.destroyRender();
-		System.exit(0);
+		if(this.player != null) {
+			this.player.input = new InputHandler(this.bindings);
+			this.mode.apply(this.player);
+		}
+
+		if(this.levelRenderer != null) {
+			if(this.levelRenderer.level != level) {
+				if(this.levelRenderer.level != null) {
+					this.levelRenderer.level.minecraft = null;
+				}
+	
+				this.levelRenderer.level = level;
+			}
+			
+			if(level != null) {
+				this.levelRenderer.refresh();
+			}
+		}
+
+		if(this.particleManager != null) {
+			for(int particle = 0; particle < 2; particle++) {
+				this.particleManager.particles[particle].clear();
+			}
+		}
+	}
+	
+	public void initGame() {
+		this.audio.stopMusic();
+		this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000));
+		if(this.level == null) {
+			Level level = new Level();
+			level.setData(8, 8, 8, new byte[512]);
+			this.setLevel(level);
+		}
+		
+		if(this.server != null && this.data != null) {
+			this.session = new ClientSession(this.player.openclassic, this.data.key, this.server, this.port);
+		}
+
+		this.particleManager = new ParticleManager(this.textureManager);
+		this.hud = new HUDScreen();
+		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
+		this.mode.apply(this.level);
+		this.mode.apply(this.player);
+		this.ingame = true;
 	}
 
 	public void stopGame(boolean menu) {
@@ -294,50 +345,25 @@ public final class Minecraft implements Runnable {
 		this.hideGui = false;
 		this.hacks = true;
 	}
-
-	public void initGame() {
-		this.initGame(OpenClassic.getGame().getGenerator("normal"));
-	}
-
-	public void initGame(Generator gen) {
-		this.audio.stopMusic();
-		this.audio.nextBGM = System.currentTimeMillis();
-		if(this.server != null && this.data != null) {
-			Level level = new Level();
-			level.setData(8, 8, 8, new byte[512]);
-			this.setLevel(level);
-		} else {
-			if(this.level == null) {
-				VanillaBlock.registerAll();
-				this.progressBar.setVisible(true);
-				this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
-				this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("level.generating"));
-				this.progressBar.setText("");
-				this.progressBar.setProgress(-1);
-				this.progressBar.render();
-				OpenClassic.getClient().createLevel(new LevelInfo(!this.levelName.equals("") ? this.levelName : "A Nice World", null, (short) (128 << this.levelSize), (short) 128, (short) (128 << this.levelSize)), gen);
-				this.progressBar.setVisible(false);
-				this.levelName = "";
-			}
+	
+	public final void shutdown() {
+		if(this.shutdown) {
+			return;
 		}
 
-		this.particleManager = new ParticleManager(this.level, this.textureManager);
-		this.hud = new HUDScreen();
-
-		if(this.server != null && this.data != null && this.player != null) {
-			this.session = new ClientSession(this.player.openclassic, this.data.key, this.server, this.port);
+		this.shutdown = true;
+		this.running = false;
+		if(this.ingame) this.stopGame(false);
+		if(this.resourceThread != null) {
+			this.resourceThread.running = false;
 		}
 
-		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
-		if(this.level != null) {
-			this.mode.apply(this.level);
-		}
-
-		if(this.player != null) {
-			this.mode.apply(this.player);
-		}
-
-		this.ingame = true;
+		OpenClassic.getClient().unregisterExecutors(OpenClassic.getClient());
+		((ClassicScheduler) OpenClassic.getClient().getScheduler()).shutdown();
+		this.audio.cleanup();
+		OpenClassic.setGame(null);
+		this.destroyRender();
+		System.exit(0);
 	}
 
 	private void handleException(Throwable e) {
@@ -556,7 +582,6 @@ public final class Minecraft implements Runnable {
 			e.printStackTrace();
 		}
 
-		checkGLError("Pre startup");
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glShadeModel(GL11.GL_SMOOTH);
 		GL11.glClearDepth(GL11.GL_CLIENT_PIXEL_STORE_BIT);
@@ -585,7 +610,6 @@ public final class Minecraft implements Runnable {
 		this.levelRenderer = new LevelRenderer(this.textureManager);
 		ShaderManager.setup();
 		GL11.glViewport(0, 0, this.width, this.height);
-		checkGLError("Startup");
 	}
 	
 	private void destroyRender() {
@@ -621,7 +645,6 @@ public final class Minecraft implements Runnable {
 			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
 		}
 		
-		checkGLError("Pre render");
 		RenderHelper.getHelper().bindTexture("/terrain.png", true);
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);
@@ -1105,10 +1128,8 @@ public final class Minecraft implements Runnable {
 			this.progressBar.render(false);
 		}
 
-		checkGLError("Render");
 		Thread.yield();
 		Display.update();
-
 		if(this.settings.getBooleanSetting("options.limit-fps").getValue()) {
 			try {
 				Thread.sleep(5);
@@ -1116,7 +1137,6 @@ public final class Minecraft implements Runnable {
 			}
 		}
 
-		checkGLError("Post render");
 		this.fps++;
 		while(System.currentTimeMillis() >= this.lastUpdate + 1000) {
 			if(this.hud != null) {
@@ -1246,12 +1266,8 @@ public final class Minecraft implements Runnable {
 	private void tick() {
 		this.audio.update(this.player);
 		((ClassicScheduler) OpenClassic.getGame().getScheduler()).tick(this.schedTicks);
-
 		if(this.currentScreen != null) {
 			this.lastClick = this.ticks + 10000;
-		}
-
-		if(this.currentScreen != null) {
 			while(Mouse.next()) {
 				if(this.currentScreen != null && Mouse.getEventButtonState()) {
 					int x = Mouse.getEventX() * this.currentScreen.getWidth() / this.width;
@@ -1276,8 +1292,8 @@ public final class Minecraft implements Runnable {
 		}
 
 		if(!this.ingame) return;
-		if(System.currentTimeMillis() > this.audio.nextBGM && this.audio.playMusic("bg")) {
-			this.audio.nextBGM = System.currentTimeMillis() + rand.nextInt(900000) + 300000L;
+		if(System.currentTimeMillis() > this.audio.getMusicTime() && this.audio.playMusic("bg")) {
+			this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000) + 300000L);
 		}
 
 		this.mode.spawnMobs();
@@ -1317,8 +1333,8 @@ public final class Minecraft implements Runnable {
 			}
 		}
 
-		if(this.currentScreen == null && this.player != null && this.player.health <= 0) {
-			this.setCurrentScreen(null);
+		if(this.currentScreen == null && this.player != null && this.mode instanceof SurvivalGameMode && this.player.health <= 0) {
+			this.setCurrentScreen(new GameOverScreen());
 		}
 
 		while(Keyboard.next()) {
@@ -1326,6 +1342,7 @@ public final class Minecraft implements Runnable {
 			if(Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
 				this.player.keyPress(Keyboard.getEventKey());
 			}
+			
 			if(Keyboard.getEventKeyState()) {
 				if(this.currentScreen != null) {
 					if(Keyboard.getEventKeyState()) {
@@ -1581,85 +1598,5 @@ public final class Minecraft implements Runnable {
 
 		this.schedTicks++;
 	}
-
-	private void resize() {
-		this.width = Display.getWidth();
-		this.height = Display.getHeight();
-
-		if(this.hud != null) {
-			this.hud.width = ClientRenderHelper.getHelper().getGuiWidth();
-			this.hud.height = ClientRenderHelper.getHelper().getGuiHeight();
-		}
-
-		if(this.currentScreen != null) {
-			this.currentScreen.setSize(this.width, this.height);
-		}
-	}
-
-	public boolean isInMultiplayer() {
-		return this.session != null;
-	}
-
-	public void setLevel(Level level) {
-		this.level = level;
-		if(level != null) {
-			level.initTransient();
-			this.mode.apply(level);
-			level.font = this.fontRenderer;
-			level.rendererContext = this;
-			if(this.isInMultiplayer() && this.player != null) {
-				this.player.resetPos();
-				this.mode.preparePlayer(this.player);
-				level.player = this.player;
-				level.addEntity(this.player);
-			}
-		}
-
-		if(this.player == null) {
-			this.player = new LocalPlayer(level);
-			this.player.resetPos();
-			this.mode.preparePlayer(this.player);
-			if(level != null) {
-				level.player = this.player;
-			}
-		}
-
-		if(this.player != null) {
-			this.player.input = new InputHandler(this.bindings);
-			this.mode.apply(this.player);
-		}
-
-		if(this.levelRenderer != null) {
-			if(this.levelRenderer.level != null) {
-				this.levelRenderer.level.rendererContext = null;
-			}
-
-			this.levelRenderer.level = level;
-			if(level != null) {
-				this.levelRenderer.refresh();
-			}
-		}
-
-		if(this.particleManager != null) {
-			if(level != null) {
-				level.particleEngine = this.particleManager;
-			}
-
-			for(int particle = 0; particle < 2; particle++) {
-				this.particleManager.particles[particle].clear();
-			}
-		}
-	}
-
-	public List<String> getPlayers() {
-		ArrayList<String> players = new ArrayList<String>();
-		players.add(this.data != null ? this.data.username : "Player");
-		if(this.isInMultiplayer()) {
-			for(NetworkPlayer player : this.netPlayers.values()) {
-				players.add(player.name);
-			}
-		}
-
-		return players;
-	}
+	
 }
