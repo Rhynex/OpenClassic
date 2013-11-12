@@ -19,9 +19,9 @@ public class PlayerPositionCodec extends MessageCodec<PlayerPositionMessage> {
 		ChannelBuffer buffer = ChannelBuffers.buffer(7);
 
 		buffer.writeByte(message.getPlayerId());
-		buffer.writeShort((short) (message.getXChange() * 32));
-		buffer.writeShort((short) (message.getYChange() * 32));
-		buffer.writeShort((short) (message.getZChange() * 32));
+		buffer.writeByte((byte) (message.getXChange() * 32));
+		buffer.writeByte((byte) (message.getYChange() * 32));
+		buffer.writeByte((byte) (message.getZChange() * 32));
 
 		return buffer;
 	}
@@ -29,9 +29,9 @@ public class PlayerPositionCodec extends MessageCodec<PlayerPositionMessage> {
 	@Override
 	public PlayerPositionMessage decode(ChannelBuffer buffer) throws IOException {
 		byte playerId = buffer.readByte();
-		float xChange = buffer.readShort() / 32f;
-		float yChange = buffer.readShort() / 32f;
-		float zChange = buffer.readShort() / 32f;
+		float xChange = buffer.readByte() / 32f;
+		float yChange = buffer.readByte() / 32f;
+		float zChange = buffer.readByte() / 32f;
 
 		return new PlayerPositionMessage(playerId, xChange, yChange, zChange);
 	}

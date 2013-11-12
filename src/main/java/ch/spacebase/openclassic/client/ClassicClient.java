@@ -2,8 +2,6 @@ package ch.spacebase.openclassic.client;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -16,6 +14,8 @@ import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
+import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
+import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.MainScreen;
 import ch.spacebase.openclassic.api.input.InputHelper;
@@ -35,18 +35,19 @@ import ch.spacebase.openclassic.client.block.physics.TNTPhysics;
 import ch.spacebase.openclassic.client.command.ClientCommands;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.input.ClientInputHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.ClientRenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
+import ch.spacebase.openclassic.client.util.ServerDataStore;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
 import ch.spacebase.openclassic.game.util.LoggerOutputStream;
 
 import com.mojang.minecraft.Minecraft;
-import com.mojang.minecraft.SessionData;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.level.LevelIO;
 import com.zachsthings.onevent.EventManager;
 
 public class ClassicClient extends ClassicGame implements Client {
@@ -86,6 +87,7 @@ public class ClassicClient extends ClassicGame implements Client {
 	public void init() {
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
 
+		ServerDataStore.loadFavorites(this.getDirectory());
 		this.registerExecutor(this, new ClientCommands());
 		this.registerGenerator("normal", new NormalGenerator());
 		this.registerGenerator("flat", new FlatLandGenerator());
@@ -109,7 +111,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		
 		com.mojang.minecraft.level.Level level = new com.mojang.minecraft.level.Level();
 		level.name = info.getName();
-		level.creator = this.mc.data != null ? this.mc.data.username : "unknown";
+		level.creator = this.mc.username != null ? this.mc.username : "unknown";
 		level.createTime = System.currentTimeMillis();
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
@@ -152,13 +154,33 @@ public class ClassicClient extends ClassicGame implements Client {
 			return this.mc.level.openclassic;
 		}
 
-		com.mojang.minecraft.level.Level level = LevelIO.load(name);
-		if(level != null) {
+		OpenClassic.getClient().getProgressBar().setVisible(true);
+		OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.singleplayer"));
+		OpenClassic.getClient().getProgressBar().setSubtitle(OpenClassic.getGame().getTranslator().translate("level.loading"));
+		OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("level.reading"));
+		OpenClassic.getClient().getProgressBar().setProgress(-1);
+		OpenClassic.getClient().getProgressBar().render();
+		com.mojang.minecraft.level.Level level = null;
+		try {
+			level = new com.mojang.minecraft.level.Level();
+			level = ((ClientLevel) OpenClassicLevelFormat.load(level.openclassic, name, false)).getHandle();
+			level.openclassic.data = new NBTData(level.name);
+			level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
+			EventManager.callEvent(new LevelLoadEvent(level.openclassic));
 			this.openLevel(level);
+			OpenClassic.getClient().getProgressBar().setVisible(false);
 			return level.openclassic;
-		}
+		} catch(IOException e) {
+			OpenClassic.getClient().getProgressBar().setText(String.format(OpenClassic.getGame().getTranslator().translate("level.load-fail"), name));
+			e.printStackTrace();
+			try {
+				Thread.sleep(1000L);
+			} catch(InterruptedException e1) {
+			}
 
-		return null;
+			OpenClassic.getClient().getProgressBar().setVisible(false);
+			return null;
+		}
 	}
 	
 	private void openLevel(com.mojang.minecraft.level.Level level) {
@@ -177,18 +199,34 @@ public class ClassicClient extends ClassicGame implements Client {
 	}
 
 	@Override
-	public void saveLevel() {
-		if(this.mc.level == null) return;
-		LevelIO.save(this.mc.level);
+	public boolean saveLevel() {
+		if(this.mc.level == null) return false;
+		if(EventManager.callEvent(new LevelSaveEvent(this.mc.level.openclassic)).isCancelled()) {
+			return false;
+		}
+
+		try {
+			OpenClassicLevelFormat.save(this.mc.level.openclassic);
+			if(this.mc.level.openclassic.getData() != null) {
+				this.mc.level.openclassic.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.mc.level.name + ".nbt");
+			}
+			
+			return true;
+		} catch(IOException e) {
+			OpenClassic.getLogger().severe("Failed to save level \"" + this.mc.level.name + "\"");
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	@Override
-	public void saveLevel(String name) {
-		if(this.mc.level == null) return;
+	public boolean saveLevel(String name) {
+		if(this.mc.level == null) return false;
 		String old = this.mc.level.name;
 		this.mc.level.name = name;
-		this.saveLevel();
+		boolean ret = this.saveLevel();
 		this.mc.level.name = old;
+		return ret;
 	}
 	
 	@Override
@@ -281,20 +319,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 
 		if(mppass.length() > 0) {
-			String user = HTTPUtil.getParameterOffPage(play, "username");
-			if(this.mc.data == null) {
-				this.mc.data = new SessionData(user);
-			} else {
-				this.mc.data.username = user;
-			}
-			
-			this.mc.data.key = mppass;
-
-			try {
-				this.mc.data.haspaid = Boolean.valueOf(HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(user, "UTF-8")));
-			} catch(UnsupportedEncodingException e) {
-			}
-
+			this.mc.tempKey = mppass;
 			this.mc.server = HTTPUtil.getParameterOffPage(play, "server");
 			try {
 				this.mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));

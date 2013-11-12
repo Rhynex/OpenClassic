@@ -45,7 +45,14 @@ public class MenuScreen extends GuiScreen {
 				progress.setText("");
 				progress.setProgress(-1);
 				progress.render();
-				OpenClassic.getClient().saveLevel();
+				if(!OpenClassic.getClient().saveLevel()) {
+					OpenClassic.getClient().getProgressBar().setText(String.format(OpenClassic.getGame().getTranslator().translate("level.save-fail")));
+					try {
+						Thread.sleep(1000L);
+					} catch(InterruptedException e1) {
+					}
+				}
+				
 				progress.setVisible(false);
 			}
 

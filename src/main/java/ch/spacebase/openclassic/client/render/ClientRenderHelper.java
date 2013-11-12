@@ -7,6 +7,8 @@ import java.util.Random;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.opengl.GLContext;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockFace;
@@ -19,6 +21,7 @@ import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.render.MipmapMode;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
@@ -43,6 +46,18 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 
 	private int binded = -1;
+	private MipmapMode mipmap = MipmapMode.NONE;
+	
+	public void init() {
+		if(GLContext.getCapabilities().OpenGL30) {
+			this.mipmap = MipmapMode.GL30;
+		} else if(GLContext.getCapabilities().GL_EXT_framebuffer_object) {
+			this.mipmap = MipmapMode.FRAMEBUFFER_EXT;
+		} else if(GLContext.getCapabilities().OpenGL14) {
+			this.mipmap = MipmapMode.GL14;
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
+		}
+	}
 
 	public void drawDefaultBG() {
 		this.bindTexture("/dirt.png", true);
@@ -779,8 +794,8 @@ public class ClientRenderHelper extends RenderHelper {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
-	public int getMipmapMode() {
-		return GeneralUtils.getMinecraft().mipmapMode;
+	public MipmapMode getMipmapMode() {
+		return this.mipmap;
 	}
 
 }

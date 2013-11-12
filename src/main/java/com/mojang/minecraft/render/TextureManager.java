@@ -21,6 +21,7 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL30;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.render.MipmapMode;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
 
@@ -93,7 +94,7 @@ public class TextureManager {
 		if(image == null) return;
 
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
-		if(this.settings.getBooleanSetting("options.smoothing").getValue() && RenderHelper.getHelper().getMipmapMode() > 0) {
+		if(this.settings.getBooleanSetting("options.smoothing").getValue() && RenderHelper.getHelper().getMipmapMode() != MipmapMode.NONE) {
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_MAX_LEVEL, 2);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
@@ -134,10 +135,10 @@ public class TextureManager {
 
 		if(this.settings.getBooleanSetting("options.smoothing").getValue()) {
 			switch(RenderHelper.getHelper().getMipmapMode()) {
-				case 1:
+				case GL30:
 					GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 					break;
-				case 2:
+				case FRAMEBUFFER_EXT:
 					EXTFramebufferObject.glGenerateMipmapEXT(GL11.GL_TEXTURE_2D);
 					break;
 			}

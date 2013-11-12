@@ -32,6 +32,8 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			GeneralUtils.getMinecraft().hacks = false;
 		}
 
+		OpenClassic.getClient().getProgressBar().setVisible(true);
+		OpenClassic.getClient().getProgressBar().setSubtitleScaled(false);
 		OpenClassic.getClient().getProgressBar().setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
 		OpenClassic.getClient().getProgressBar().setSubtitle(message.getUsernameOrServerName());
 		OpenClassic.getClient().getProgressBar().setText(message.getVerificationKeyOrMotd());

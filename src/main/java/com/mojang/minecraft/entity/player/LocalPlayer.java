@@ -19,13 +19,15 @@ import com.zachsthings.onevent.EventManager;
 
 public class LocalPlayer extends Player {
 
-	public transient InputHandler input;
+	public InputHandler input;
 	public float oBob;
 	public float bob;
-	public transient boolean speedHack = false;
+	public boolean speedHack = false;
+	private String name;
 
-	public LocalPlayer(Level level) {
+	public LocalPlayer(Level level, String name) {
 		super(level, 0, 0, 0);
+		this.name = name;
 		if(level != null) {
 			level.removeEntity(this);
 			level.addEntity(this);
@@ -235,7 +237,7 @@ public class LocalPlayer extends Player {
 
 	@Override
 	public String getName() {
-		return GeneralUtils.getMinecraft().data != null ? GeneralUtils.getMinecraft().data.username : "Player";
+		return this.name;
 	}
 
 }

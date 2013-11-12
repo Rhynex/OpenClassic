@@ -1,5 +1,8 @@
 package ch.spacebase.openclassic.client.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
@@ -7,8 +10,7 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.Server;
-
-import com.mojang.minecraft.SessionData;
+import ch.spacebase.openclassic.client.util.ServerDataStore;
 
 public class ServerListScreen extends GuiScreen {
 
@@ -22,9 +24,14 @@ public class ServerListScreen extends GuiScreen {
 	}
 
 	public void onOpen() {
+		List<String> contents = new ArrayList<String>();
+		for(Server server : ServerDataStore.getServers()) {
+			contents.add(server.name);
+		}
+		
 		this.clearWidgets();
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this, true));
-		this.getWidget(0, ButtonList.class).setContents(SessionData.serverInfo);
+		this.getWidget(0, ButtonList.class).setContents(contents);
 
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 206, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")));
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 102, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
@@ -68,11 +75,11 @@ public class ServerListScreen extends GuiScreen {
 			index++;
 		}
 		
-		Server server = SessionData.servers.get(index);
+		Server server = ServerDataStore.getServers().get(index);
 		if(this.select) {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.select = false;
-			SessionData.favorites.put(server.name, server.getUrl());
+			ServerDataStore.addFavorite(server.name, server.getUrl());
 		} else {
 			OpenClassic.getClient().joinServer(server.getUrl());
 		}

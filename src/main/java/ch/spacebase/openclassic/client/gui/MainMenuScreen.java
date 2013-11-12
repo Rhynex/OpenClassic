@@ -26,7 +26,7 @@ public class MainMenuScreen extends GuiScreen {
 			OpenClassic.getClient().getAudioManager().playMusic("menu", true);
 		}
 
-		if(GeneralUtils.getMinecraft().data == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
+		if(GeneralUtils.getMinecraft().username == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
 			this.getWidget(1, Button.class).setActive(false);
 		}
 	}

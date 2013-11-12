@@ -7,6 +7,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.util.Constants;
 
@@ -15,7 +16,6 @@ import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.entity.player.net.PositionUpdate;
 import com.mojang.minecraft.level.BlockMap;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.TextureManager;
 
 public abstract class Entity {
@@ -34,7 +34,7 @@ public abstract class Entity {
 	public float pitch;
 	public float oYaw;
 	public float oPitch;
-	public AABB bb;
+	public BoundingBox bb;
 	public boolean onGround = false;
 	public boolean horizontalCollision = false;
 	public boolean collision = false;
@@ -136,7 +136,7 @@ public abstract class Entity {
 		this.z = z;
 		float widthCenter = this.bbWidth / 2.0F;
 		float heightCenter = this.bbHeight / 2.0F;
-		this.bb = new AABB(x - widthCenter, y - heightCenter, z - widthCenter, x + widthCenter, y + heightCenter, z + widthCenter);
+		this.bb = new BoundingBox(x - widthCenter, y - heightCenter, z - widthCenter, x + widthCenter, y + heightCenter, z + widthCenter);
 	}
 
 	public void turn(float yaw, float pitch) {
@@ -178,31 +178,31 @@ public abstract class Entity {
 	}
 
 	public boolean isFree(float x, float y, float z, float radius) {
-		AABB grown = this.bb.grow(radius, radius, radius).cloneMove(x, y, z);
+		BoundingBox grown = this.bb.grow(radius, radius, radius).cloneMove(x, y, z);
 		return this.level.getCubes(grown).size() <= 0 || !this.level.containsAnyLiquid(grown);
 	}
 
 	public boolean isFree(float x, float y, float z) {
-		AABB moved = this.bb.cloneMove(x, y, z);
+		BoundingBox moved = this.bb.cloneMove(x, y, z);
 		return this.level.getCubes(moved).size() <= 0 || !this.level.containsAnyLiquid(moved);
 	}
 
 	public void move(float x, float y, float z) {
 		if(this.noPhysics) {
 			this.bb.move(x, y, z);
-			this.x = (this.bb.x0 + this.bb.x1) / 2.0F;
-			this.y = this.bb.y0 + this.heightOffset - this.ySlideOffset;
-			this.z = (this.bb.z0 + this.bb.z1) / 2.0F;
+			this.x = (this.bb.getX1() + this.bb.getX2()) / 2.0F;
+			this.y = this.bb.getY1() + this.heightOffset - this.ySlideOffset;
+			this.z = (this.bb.getZ1() + this.bb.getZ2()) / 2.0F;
 		} else {
 			float oldEntityX = this.x;
 			float oldEntityZ = this.z;
 			float oldX = x;
 			float oldY = y;
 			float oldZ = z;
-			AABB copy = this.bb.copy();
-			ArrayList<AABB> cubes = this.level.getCubes(this.bb.expand(x, y, z));
+			BoundingBox copy = this.bb.clone();
+			ArrayList<BoundingBox> cubes = this.level.getCubes(this.bb.expand(x, y, z));
 
-			for(AABB cube : cubes) {
+			for(BoundingBox cube : cubes) {
 				y = cube.clipYCollide(this.bb, y);
 			}
 
@@ -215,7 +215,7 @@ public abstract class Entity {
 
 			boolean stepFurther = this.onGround || oldY != y && oldY < 0.0F;
 
-			for(AABB cube : cubes) {
+			for(BoundingBox cube : cubes) {
 				x = cube.clipXCollide(this.bb, x);
 			}
 
@@ -226,7 +226,7 @@ public abstract class Entity {
 				x = 0.0F;
 			}
 
-			for(AABB cube : cubes) {
+			for(BoundingBox cube : cubes) {
 				z = cube.clipZCollide(this.bb, z);
 			}
 
@@ -244,11 +244,11 @@ public abstract class Entity {
 				x = oldX;
 				y = this.footSize;
 				z = oldZ;
-				AABB newCopy = this.bb.copy();
-				this.bb = copy.copy();
+				BoundingBox newCopy = this.bb.clone();
+				this.bb = copy.clone();
 				cubes = this.level.getCubes(this.bb.expand(oldX, y, oldZ));
 
-				for(AABB cube : cubes) {
+				for(BoundingBox cube : cubes) {
 					y = cube.clipYCollide(this.bb, y);
 				}
 
@@ -259,7 +259,7 @@ public abstract class Entity {
 					x = 0.0F;
 				}
 
-				for(AABB cube : cubes) {
+				for(BoundingBox cube : cubes) {
 					x = cube.clipXCollide(this.bb, x);
 				}
 
@@ -270,7 +270,7 @@ public abstract class Entity {
 					x = 0.0F;
 				}
 
-				for(AABB cube : cubes) {
+				for(BoundingBox cube : cubes) {
 					z = cube.clipZCollide(this.bb, z);
 				}
 
@@ -285,7 +285,7 @@ public abstract class Entity {
 					x = newX;
 					y = newY;
 					z = newZ;
-					this.bb = newCopy.copy();
+					this.bb = newCopy.clone();
 				} else {
 					this.ySlideOffset = (float) (this.ySlideOffset + 0.5D);
 				}
@@ -315,9 +315,9 @@ public abstract class Entity {
 				this.zd = 0.0F;
 			}
 
-			this.x = (this.bb.x0 + this.bb.x1) / 2.0F;
-			this.y = this.bb.y0 + this.heightOffset - this.ySlideOffset;
-			this.z = (this.bb.z0 + this.bb.z1) / 2.0F;
+			this.x = (this.bb.getX1() + this.bb.getX2()) / 2.0F;
+			this.y = this.bb.getY1() + this.heightOffset - this.ySlideOffset;
+			this.z = (this.bb.getZ1() + this.bb.getZ2()) / 2.0F;
 			float xDiff = this.x - oldEntityX;
 			float zDiff = this.z - oldEntityZ;
 			if(this.onGround) {

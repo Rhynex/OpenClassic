@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
-import ch.spacebase.openclassic.api.block.model.BoundingBox;
 import ch.spacebase.openclassic.api.block.model.CubeModel;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.block.model.EmptyModel;
@@ -17,6 +16,7 @@ import ch.spacebase.openclassic.api.block.model.PlantModel;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
+import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.game.network.MessageCodec;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;

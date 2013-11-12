@@ -2,9 +2,12 @@ package ch.spacebase.openclassic.client.network;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -23,7 +26,6 @@ import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 
-import com.mojang.minecraft.level.LevelIO;
 import com.zachsthings.onevent.EventManager;
 
 public class ClientSession extends ClassicSession {
@@ -134,9 +136,23 @@ public class ClientSession extends ClassicSession {
 		}
 
 		IOUtils.closeQuietly(this.levelData);
-		byte processed[] = LevelIO.processData(new ByteArrayInputStream(this.levelData.toByteArray()));
+		byte processed[] = this.processData(new ByteArrayInputStream(this.levelData.toByteArray()));
 		this.levelData = null;
 		return processed;
+	}
+	
+	private byte[] processData(InputStream in) {
+		DataInputStream din = null;
+		try {
+			din = new DataInputStream(new GZIPInputStream(in));
+			byte[] data = new byte[din.readInt()];
+			din.readFully(data);
+			return data;
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			IOUtils.closeQuietly(din);
+		}
 	}
 
 }

@@ -8,7 +8,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-import com.mojang.minecraft.SessionData;
+import ch.spacebase.openclassic.client.util.ServerDataStore;
 
 public class FavoriteServersScreen extends GuiScreen {
 
@@ -24,7 +24,7 @@ public class FavoriteServersScreen extends GuiScreen {
 	public void onOpen() {
 		this.clearWidgets();
 		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this));
-		this.getWidget(0, ButtonList.class).setContents(new ArrayList<String>(SessionData.favorites.keySet()));
+		this.getWidget(0, ButtonList.class).setContents(new ArrayList<String>(ServerDataStore.getFavorites().keySet()));
 
 		this.attachWidget(new Button(1, this.getWidth() / 2 - 156, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
 		this.attachWidget(new Button(2, this.getWidth() / 2 - 52, this.getHeight() / 6 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.remove")));
@@ -58,7 +58,7 @@ public class FavoriteServersScreen extends GuiScreen {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.delete = false;
 		} else {
-			OpenClassic.getClient().joinServer(SessionData.favorites.get(button.getText()));
+			OpenClassic.getClient().joinServer(ServerDataStore.getFavorites().get(button.getText()));
 		}
 	}
 

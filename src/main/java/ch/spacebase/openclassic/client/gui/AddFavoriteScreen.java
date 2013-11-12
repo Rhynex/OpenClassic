@@ -6,8 +6,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.render.RenderHelper;
-
-import com.mojang.minecraft.SessionData;
+import ch.spacebase.openclassic.client.util.ServerDataStore;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -44,8 +43,8 @@ public class AddFavoriteScreen extends GuiScreen {
 				this.error = true;
 			}
 
-			SessionData.favorites.put(this.name.getText(), this.url.getText());
-			SessionData.saveFavorites();
+			ServerDataStore.addFavorite(this.name.getText(), this.url.getText());
+			ServerDataStore.saveFavorites();
 
 			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}

@@ -13,6 +13,7 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
+import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 
@@ -20,8 +21,7 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.PrimedTnt;
 import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.phys.AABB;
-import com.mojang.minecraft.phys.Intersection;
+import com.mojang.minecraft.util.Intersection;
 import com.zachsthings.onevent.EventManager;
 
 public class Level {
@@ -49,7 +49,7 @@ public class Level {
 	private int[] highest;
 	public Random random = new Random();
 	private int id;
-	private ArrayList<TickNextTick> tickNextTicks;
+	private ArrayList<DelayedTick> tickNextTicks;
 	private boolean networkMode;
 	public Minecraft minecraft;
 	public boolean creativeMode;
@@ -60,7 +60,7 @@ public class Level {
 
 	public Level() {
 		this.id = this.random.nextInt();
-		this.tickNextTicks = new ArrayList<TickNextTick>();
+		this.tickNextTicks = new ArrayList<DelayedTick>();
 		this.networkMode = false;
 		this.unprocessed = 0;
 		this.growTrees = false;
@@ -77,7 +77,7 @@ public class Level {
 			this.calcLightDepths(0, 0, this.width, this.depth);
 			this.random = new Random();
 			this.id = this.random.nextInt();
-			this.tickNextTicks = new ArrayList<TickNextTick>();
+			this.tickNextTicks = new ArrayList<DelayedTick>();
 			if(this.waterLevel == 0) {
 				this.waterLevel = this.height / 2;
 			}
@@ -172,23 +172,23 @@ public class Level {
 		return block != null && block.isOpaque();
 	}
 
-	public ArrayList<AABB> getCubes(AABB aabb) {
-		ArrayList<AABB> ret = new ArrayList<AABB>();
-		int x0 = (int) aabb.x0;
-		int x1 = (int) aabb.x1 + 1;
-		int y0 = (int) aabb.y0;
-		int y1 = (int) aabb.y1 + 1;
-		int z0 = (int) aabb.z0;
-		int z1 = (int) aabb.z1 + 1;
-		if(aabb.x0 < 0.0F) {
+	public ArrayList<BoundingBox> getCubes(BoundingBox bb) {
+		ArrayList<BoundingBox> ret = new ArrayList<BoundingBox>();
+		int x0 = (int) bb.getX1();
+		int x1 = (int) bb.getX2() + 1;
+		int y0 = (int) bb.getY1();
+		int y1 = (int) bb.getY2() + 1;
+		int z0 = (int) bb.getZ1();
+		int z1 = (int) bb.getZ2() + 1;
+		if(bb.getX1() < 0.0F) {
 			x0--;
 		}
 
-		if(aabb.y0 < 0.0F) {
+		if(bb.getY1() < 0.0F) {
 			y0--;
 		}
 
-		if(aabb.z0 < 0.0F) {
+		if(bb.getZ1() < 0.0F) {
 			z0--;
 		}
 
@@ -197,14 +197,14 @@ public class Level {
 				for(int z = z0; z < z1; z++) {
 					if(x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth) {
 						BlockType type = Blocks.fromId(this.getTile(x, y, z));
-						AABB bb = BlockUtils.getCollisionBox(type.getId(), x, y, z);
-						if(type != null && bb != null && aabb.intersectsInner(bb)) {
-							ret.add(bb);
+						BoundingBox bb2 = type.getModel().getCollisionBox(x, y, z);
+						if(type != null && bb2 != null && bb.intersectsInner(bb2)) {
+							ret.add(bb2);
 						}
 					} else if(x < 0 || y < 0 || z < 0 || x >= this.width || z >= this.depth) {
-						AABB bb = BlockUtils.getCollisionBox(VanillaBlock.BEDROCK.getId(), x, y, z);
-						if(bb != null && aabb.intersectsInner(bb)) {
-							ret.add(bb);
+						BoundingBox bb2 = VanillaBlock.BEDROCK.getModel().getCollisionBox(x, y, z);
+						if(bb2 != null && bb.intersectsInner(bb2)) {
+							ret.add(bb2);
 						}
 					}
 				}
@@ -337,7 +337,7 @@ public class Level {
 
 		int size = this.tickNextTicks.size();
 		for(int ct = 0; ct < size; ct++) {
-			TickNextTick next = this.tickNextTicks.remove(0);
+			DelayedTick next = this.tickNextTicks.remove(0);
 			if(next.ticks > 0) {
 				next.ticks--;
 				this.tickNextTicks.add(next);
@@ -397,22 +397,22 @@ public class Level {
 		return this.waterLevel;
 	}
 	
-	public BlockType getLiquid(AABB aabb) {
-		int x0 = (int) aabb.x0;
-		int x1 = (int) aabb.x1 + 1;
-		int y0 = (int) aabb.y0;
-		int y1 = (int) aabb.y1 + 1;
-		int z0 = (int) aabb.z0;
-		int z1 = (int) aabb.z1 + 1;
-		if(aabb.x0 < 0.0F) {
+	public BlockType getLiquid(BoundingBox bb) {
+		int x0 = (int) bb.getX1();
+		int x1 = (int) bb.getX2() + 1;
+		int y0 = (int) bb.getY1();
+		int y1 = (int) bb.getY2() + 1;
+		int z0 = (int) bb.getZ1();
+		int z1 = (int) bb.getZ2() + 1;
+		if(bb.getX1() < 0.0F) {
 			x0--;
 		}
 
-		if(aabb.y0 < 0.0F) {
+		if(bb.getY1() < 0.0F) {
 			y0--;
 		}
 
-		if(aabb.z0 < 0.0F) {
+		if(bb.getZ1() < 0.0F) {
 			z0--;
 		}
 
@@ -454,22 +454,22 @@ public class Level {
 		return null;
 	}
 	
-	public BlockType getBlockIn(AABB aabb) {
-		int x0 = (int) aabb.x0;
-		int x1 = (int) aabb.x1 + 1;
-		int y0 = (int) aabb.y0;
-		int y1 = (int) aabb.y1 + 1;
-		int z0 = (int) aabb.z0;
-		int z1 = (int) aabb.z1 + 1;
-		if(aabb.x0 < 0.0F) {
+	public BlockType getBlockIn(BoundingBox bb) {
+		int x0 = (int) bb.getX1();
+		int x1 = (int) bb.getX2() + 1;
+		int y0 = (int) bb.getY1();
+		int y1 = (int) bb.getY2() + 1;
+		int z0 = (int) bb.getZ1();
+		int z1 = (int) bb.getZ2() + 1;
+		if(bb.getX1() < 0.0F) {
 			x0--;
 		}
 
-		if(aabb.y0 < 0.0F) {
+		if(bb.getY1() < 0.0F) {
 			y0--;
 		}
 
-		if(aabb.z0 < 0.0F) {
+		if(bb.getZ1() < 0.0F) {
 			z0--;
 		}
 
@@ -511,22 +511,22 @@ public class Level {
 		return null;
 	}
 
-	public boolean containsAnyLiquid(AABB aabb) {
-		int x0 = (int) aabb.x0;
-		int x1 = (int) aabb.x1 + 1;
-		int y0 = (int) aabb.y0;
-		int y1 = (int) aabb.y1 + 1;
-		int z0 = (int) aabb.z0;
-		int z1 = (int) aabb.z1 + 1;
-		if(aabb.x0 < 0.0F) {
+	public boolean containsAnyLiquid(BoundingBox bb) {
+		int x0 = (int) bb.getX1();
+		int x1 = (int) bb.getX2() + 1;
+		int y0 = (int) bb.getY1();
+		int y1 = (int) bb.getY2() + 1;
+		int z0 = (int) bb.getZ1();
+		int z1 = (int) bb.getZ2() + 1;
+		if(bb.getX1() < 0.0F) {
 			x0--;
 		}
 
-		if(aabb.y0 < 0.0F) {
+		if(bb.getY1() < 0.0F) {
 			y0--;
 		}
 
-		if(aabb.z0 < 0.0F) {
+		if(bb.getZ1() < 0.0F) {
 			z0--;
 		}
 
@@ -568,23 +568,23 @@ public class Level {
 		return false;
 	}
 
-	public boolean containsLiquid(AABB aabb, BlockType block) {
+	public boolean containsLiquid(BoundingBox bb, BlockType block) {
 		block = toMoving(block);
-		int x0 = (int) aabb.x0;
-		int x1 = (int) aabb.x1 + 1;
-		int y0 = (int) aabb.y0;
-		int y1 = (int) aabb.y1 + 1;
-		int z0 = (int) aabb.z0;
-		int z1 = (int) aabb.z1 + 1;
-		if(aabb.x0 < 0.0F) {
+		int x0 = (int) bb.getX1();
+		int x1 = (int) bb.getX2() + 1;
+		int y0 = (int) bb.getY1();
+		int y1 = (int) bb.getY2() + 1;
+		int z0 = (int) bb.getZ1();
+		int z1 = (int) bb.getZ2() + 1;
+		if(bb.getX1() < 0.0F) {
 			x0--;
 		}
 
-		if(aabb.y0 < 0.0F) {
+		if(bb.getY1() < 0.0F) {
 			y0--;
 		}
 
-		if(aabb.z0 < 0.0F) {
+		if(bb.getZ1() < 0.0F) {
 			z0--;
 		}
 
@@ -634,7 +634,7 @@ public class Level {
 
 	public void addToTickNextTick(int x, int y, int z, int block) {
 		if(!this.networkMode) {
-			TickNextTick next = new TickNextTick(x, y, z, block);
+			DelayedTick next = new DelayedTick(x, y, z, block);
 			if(block > 0 && Blocks.fromId(block) != null) {
 				next.ticks = Blocks.fromId(block).getTickDelay();
 			}
@@ -643,12 +643,12 @@ public class Level {
 		}
 	}
 
-	public boolean isFree(AABB aabb) {
-		return this.blockMap.getEntities(null, aabb).size() == 0;
+	public boolean isFree(BoundingBox bb) {
+		return this.blockMap.getEntities(null, bb).size() == 0;
 	}
 
-	public List<Entity> findEntities(Entity entity, AABB aabb) {
-		return this.blockMap.getEntities(entity, aabb);
+	public List<Entity> findEntities(Entity entity, BoundingBox bb) {
+		return this.blockMap.getEntities(entity, bb);
 	}
 
 	public boolean preventsRendering(float x, float y, float z, float distance) {

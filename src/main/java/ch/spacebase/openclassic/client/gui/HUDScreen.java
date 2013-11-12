@@ -39,7 +39,7 @@ public class HUDScreen extends MainScreen {
 		super.update();
 	}
 
-	public void render(float dt, boolean focus, int mouseX, int mouseY) {
+	public void render(float dt) {
 		if(OpenClassic.getClient().getSettings().getBooleanSetting("options.minimap").getValue()) {
 			if(this.getWidget(0) == null) {
 				this.attachWidget(new Minimap(0, this.width - 85, 10, 75, 75, this));
@@ -167,17 +167,17 @@ public class HUDScreen extends MainScreen {
 		}
 
 		this.clickedPlayer = null;
-		if(InputHelper.getHelper().isKeyDown(Keyboard.KEY_TAB)) {
+		if(InputHelper.getHelper().isKeyDown(Keyboard.KEY_TAB) && OpenClassic.getClient().isInMultiplayer()) {
 			List<Player> players = OpenClassic.getClient().getLevel().getPlayers();
 			RenderHelper.getHelper().enableBlend();
 			RenderHelper.getHelper().drawTranslucentBox(this.width / 2 - 128, this.height / 2 - 80, 256, 148);
-
-
 			RenderHelper.getHelper().renderText("Players in the level:", this.width / 2 - RenderHelper.getHelper().getStringWidth("Connected players:") / 2, this.height / 2 - 64 - 12, false);
+			int mouseX = RenderHelper.getHelper().getScaledMouseX();
+			int mouseY = RenderHelper.getHelper().getScaledMouseY();
 			for(int count = 0; count < players.size(); count++) {
 				int x = this.width / 2 + count % 2 * 120 - 120;
 				int y = this.height / 2 - 64 + (count / 2 << 3);
-				if(focus && mouseX >= x && mouseY >= y && mouseX < x + 120 && mouseY < y + 8) {
+				if(OpenClassic.getClient().getCurrentScreen() != null && mouseX >= x && mouseY >= y && mouseX < x + 120 && mouseY < y + 8) {
 					this.clickedPlayer = players.get(count).getName();
 					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x + 2, y, false);
 				} else {

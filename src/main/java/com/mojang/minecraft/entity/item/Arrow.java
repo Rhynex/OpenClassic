@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
@@ -11,7 +12,6 @@ import ch.spacebase.openclassic.client.render.Renderer;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Arrow extends Entity {
@@ -95,7 +95,7 @@ public class Arrow extends Entity {
 			float movZ = this.zd / len;
 
 			for(int mov = 0; mov < len && !this.collision; mov++) {
-				AABB collision = this.bb.expand(movX, movY, movZ);
+				BoundingBox collision = this.bb.expand(movX, movY, movZ);
 				if(this.level.getCubes(collision).size() > 0) {
 					this.collision = true;
 				}

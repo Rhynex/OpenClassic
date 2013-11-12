@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.settings.Setting;
 import ch.spacebase.openclassic.api.settings.Settings;
 
 public final class OptionsScreen extends GuiScreen {
@@ -33,15 +34,10 @@ public final class OptionsScreen extends GuiScreen {
 	private List<String> buildContents() {
 		List<String> contents = new ArrayList<String>();
 		for(int count = 0; count < this.settings.getSettings().size(); count++) {
-			if(OpenClassic.getClient().isInMultiplayer() && this.settings.getSetting(count).getName().equals("options.survival")) {
-				continue;
+			Setting setting = this.settings.getSetting(count);
+			if(setting.isVisible()) {
+				contents.add(OpenClassic.getGame().getTranslator().translate(setting.getName()) + ": " + setting.getStringValue());
 			}
-			
-			if(RenderHelper.getHelper().getMipmapMode() == 0 && this.settings.getSetting(count).getName().equals("options.smoothing")) {
-				continue;
-			}
-			
-			contents.add(OpenClassic.getGame().getTranslator().translate(this.settings.getSetting(count).getName()) + ": " + this.settings.getSetting(count).getStringValue());
 		}
 		
 		return contents;

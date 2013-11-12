@@ -24,10 +24,9 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
+import ch.spacebase.openclassic.client.util.ServerDataStore;
 import ch.spacebase.openclassic.client.util.cookie.Cookie;
 import ch.spacebase.openclassic.client.util.cookie.CookieList;
-
-import com.mojang.minecraft.SessionData;
 
 /**
  * @author Steveice10 <Steveice10@gmail.com>
@@ -165,13 +164,7 @@ public class LoginScreen extends GuiScreen {
 		if(cookie != null) result = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS, "", Constants.MINECRAFT_URL_HTTPS + "login");
 
 		if(result.contains("Logged in as")) {
-			GeneralUtils.getMinecraft().data = new SessionData(result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | ")));
-
-			try {
-				GeneralUtils.getMinecraft().data.haspaid = HTTPUtil.fetchUrl(Constants.MINECRAFT_URL_HTTPS + "haspaid.jsp", "user=" + URLEncoder.encode(GeneralUtils.getMinecraft().data.username, "UTF-8")).equals("true");
-			} catch(UnsupportedEncodingException e) {
-			}
-
+			GeneralUtils.getMinecraft().username = result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | "));
 			parseServers(HTTPUtil.rawFetchUrl(Constants.MINECRAFT_URL_HTTPS + "classic/list", "", Constants.MINECRAFT_URL_HTTPS));
 			return true;
 		}
@@ -197,8 +190,7 @@ public class LoginScreen extends GuiScreen {
 			String max = data.substring(index, data.indexOf("</td>", index));
 
 			Server s = new Server(name, Integer.valueOf(users).intValue(), Integer.valueOf(max).intValue(), id);
-			SessionData.servers.add(s);
-			SessionData.serverInfo.add(s.name);
+			ServerDataStore.addServer(s);
 		}
 	}
 

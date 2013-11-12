@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.settings;
 
+import ch.spacebase.openclassic.api.render.MipmapMode;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
 
@@ -11,7 +12,7 @@ public class SmoothingSetting extends BooleanSetting {
 	
 	@Override
 	public boolean isVisible() {
-		return RenderHelper.getHelper().getMipmapMode() != 0;
+		return RenderHelper.getHelper().getMipmapMode() != MipmapMode.NONE;
 	}
 
 }

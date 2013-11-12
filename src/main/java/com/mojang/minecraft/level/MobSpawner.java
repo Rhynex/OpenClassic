@@ -27,6 +27,10 @@ public final class MobSpawner {
 	}
 
 	public final int spawn(int max, Entity player, ClientProgressBar progress) {
+		if(progress != null) {
+			progress.setText("Spawning...");
+		}
+		
 		int count = 0;
 		for(int mob = 0; mob < max; mob++) {
 			if(progress != null) {

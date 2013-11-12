@@ -3,9 +3,10 @@ package com.mojang.minecraft.level;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.spacebase.openclassic.api.math.BoundingBox;
+
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.phys.AABB;
 import com.mojang.minecraft.render.Frustum;
 import com.mojang.minecraft.render.TextureManager;
 
@@ -138,13 +139,13 @@ public class BlockMap {
 		}
 	}
 
-	public List<Entity> getEntities(Entity exclude, AABB bb) {
+	public List<Entity> getEntities(Entity exclude, BoundingBox bb) {
 		this.tmp.clear();
-		return this.getEntities(exclude, bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1, this.tmp);
+		return this.getEntities(exclude, bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2(), this.tmp);
 	}
 
-	public List<Entity> getEntities(Entity exclude, AABB bb, List<Entity> to) {
-		return this.getEntities(exclude, bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1, to);
+	public List<Entity> getEntities(Entity exclude, BoundingBox bb, List<Entity> to) {
+		return this.getEntities(exclude, bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2(), to);
 	}
 
 	public void tickAll() {
@@ -237,8 +238,8 @@ public class BlockMap {
 								Entity entity = entities.get(index);
 								if(entity.shouldRender(pos)) {
 									if(!empty) {
-										AABB aabb = entity.bb;
-										if(!Frustum.isBoxInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1)) {
+										BoundingBox bb = entity.bb;
+										if(!Frustum.isBoxInFrustum(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2())) {
 											continue;
 										}
 									}

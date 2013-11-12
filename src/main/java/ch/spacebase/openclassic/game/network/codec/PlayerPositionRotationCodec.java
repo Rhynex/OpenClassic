@@ -19,9 +19,9 @@ public class PlayerPositionRotationCodec extends MessageCodec<PlayerPositionRota
 		ChannelBuffer buffer = ChannelBuffers.buffer(9);
 
 		buffer.writeByte(message.getPlayerId());
-		buffer.writeShort((short) (message.getXChange() * 32));
-		buffer.writeShort((short) (message.getYChange() * 32));
-		buffer.writeShort((short) (message.getZChange() * 32));
+		buffer.writeByte((byte) (message.getXChange() * 32));
+		buffer.writeByte((byte) (message.getYChange() * 32));
+		buffer.writeByte((byte) (message.getZChange() * 32));
 		buffer.writeByte((byte) ((int) (message.getYaw() * 256 / 360) & 255));
 		buffer.writeByte((byte) ((int) (message.getPitch() * 256 / 360) & 255));
 
@@ -31,9 +31,9 @@ public class PlayerPositionRotationCodec extends MessageCodec<PlayerPositionRota
 	@Override
 	public PlayerPositionRotationMessage decode(ChannelBuffer buffer) throws IOException {
 		byte playerId = buffer.readByte();
-		float xChange = buffer.readShort() / 32;
-		float yChange = buffer.readShort() / 32;
-		float zChange = buffer.readShort() / 32;
+		float xChange = buffer.readByte() / 32;
+		float yChange = buffer.readByte() / 32;
+		float zChange = buffer.readByte() / 32;
 		float yaw = (buffer.readByte() * 360) / 256f;
 		float pitch = (buffer.readByte() * 360) / 256f;
 
