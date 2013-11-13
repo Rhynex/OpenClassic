@@ -56,9 +56,9 @@ public class GameMode {
 
 			if(old.getStepSound() != StepSound.NONE) {
 				if(old.getStepSound() == StepSound.SAND) {
-					this.mc.level.playSound(StepSound.GRAVEL.getSound(), x, y, z, (StepSound.GRAVEL.getVolume() + 1.0F) / 2.0F, StepSound.GRAVEL.getPitch() * 0.8F);
+					this.mc.audio.playSound(StepSound.GRAVEL.getSound(), x, y, z, (StepSound.GRAVEL.getVolume() + 1.0F) / 2.0F, StepSound.GRAVEL.getPitch() * 0.8F);
 				} else {
-					this.mc.level.playSound(old.getStepSound().getSound(), x, y, z, (old.getStepSound().getVolume() + 1.0F) / 2.0F, old.getStepSound().getPitch() * 0.8F);
+					this.mc.audio.playSound(old.getStepSound().getSound(), x, y, z, (old.getStepSound().getVolume() + 1.0F) / 2.0F, old.getStepSound().getPitch() * 0.8F);
 				}
 			}
 
@@ -76,7 +76,7 @@ public class GameMode {
 	}
 
 	public float getReachDistance() {
-		return 5.0F;
+		return 5;
 	}
 
 	public boolean useItem(LocalPlayer player, int type) {

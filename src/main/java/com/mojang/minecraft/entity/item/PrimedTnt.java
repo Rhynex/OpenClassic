@@ -25,7 +25,7 @@ public class PrimedTnt extends Entity {
 	public PrimedTnt(Level level, float x, float y, float z) {
 		super(level);
 		this.setSize(0.98F, 0.98F);
-		this.heightOffset = this.bbHeight / 2.0F;
+		this.heightOffset = this.bbHeight / 2;
 		this.setPos(x, y, z);
 		float motion = (float) (Math.random() * MathHelper.DTWO_PI);
 		this.xd = -MathHelper.sin(motion * MathHelper.DEG_TO_RAD) * 0.02F;
@@ -91,7 +91,7 @@ public class PrimedTnt extends Entity {
 
 	public void playerTouch(LocalPlayer player) {
 		if(this.defused) {
-			if(player.addResource(VanillaBlock.TNT.getId())) {
+			if(player.inventory.addResource(VanillaBlock.TNT.getId())) {
 				this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 				this.remove();
 			}
@@ -121,4 +121,5 @@ public class PrimedTnt extends Entity {
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glPopMatrix();
 	}
+	
 }

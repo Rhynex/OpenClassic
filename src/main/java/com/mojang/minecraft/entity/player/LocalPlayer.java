@@ -84,32 +84,7 @@ public class LocalPlayer extends Player {
 
 	public void render(TextureManager textureManager, float dt) {
 	}
-
-	public void releaseAllKeys() {
-		this.input.resetKeys();
-	}
-
-	public void setKey(int key, boolean pressed) {
-		this.input.setKeyState(key, pressed);
-	}
-
-	public void keyPress(int key) {
-		this.input.keyPress(key);
-	}
-
-	public boolean addResource(int block) {
-		return this.inventory.addResource(block);
-	}
-
-	public boolean addResource(int block, int count) {
-		boolean result = false;
-		for(int cnt = 0; cnt < count; cnt++) {
-			if(this.addResource(block)) result = true;
-		}
-
-		return result;
-	}
-
+	
 	public HumanoidModel getModel() {
 		return (HumanoidModel) modelCache.getModel(this.modelName);
 	}
@@ -118,7 +93,6 @@ public class LocalPlayer extends Player {
 		this.setSize(0.2F, 0.2F);
 		this.setPos(this.x, this.y, this.z);
 		this.yd = 0.1F;
-
 		if(cause != null) {
 			this.xd = -MathHelper.cos((this.hurtDir + this.yaw) * MathHelper.DEG_TO_RAD) * 0.1F;
 			this.zd = -MathHelper.sin((this.hurtDir + this.yaw) * MathHelper.DEG_TO_RAD) * 0.1F;
@@ -138,10 +112,6 @@ public class LocalPlayer extends Player {
 	public void remove() {
 	}
 
-	public void awardKillScore(Entity killed, int score) {
-		this.score += score;
-	}
-
 	public boolean isShootable() {
 		return true;
 	}
@@ -156,11 +126,11 @@ public class LocalPlayer extends Player {
 		return true;
 	}
 
-	public void moveRelative(float forward, float strafe, float speed) {
+	public void moveHeading(float forward, float strafe, float speed) {
 		if(GeneralUtils.getMinecraft().hacks && OpenClassic.getClient().getHackSettings().getBooleanSetting("hacks.speed").getValue() && this.speedHack) {
-			super.moveRelative(forward, strafe, 2.5F);
+			super.moveHeading(forward, strafe, 2.5F);
 		} else {
-			super.moveRelative(forward, strafe, speed);
+			super.moveHeading(forward, strafe, speed);
 		}
 	}
 	
@@ -206,6 +176,11 @@ public class LocalPlayer extends Player {
 
 		super.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
 	}
+	
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
 	public static class PlayerAI extends BasicAI {
 		private LocalPlayer parent;
@@ -233,11 +208,6 @@ public class LocalPlayer extends Player {
 
 			this.parent.input.toggleFly = false;
 		}
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
 	}
 
 }

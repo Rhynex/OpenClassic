@@ -1,5 +1,7 @@
 package com.mojang.minecraft.render;
 
+import java.nio.IntBuffer;
+
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.BlockType;
@@ -12,9 +14,10 @@ import com.mojang.minecraft.level.Level;
 
 public final class Chunk {
 
+	public static int chunkUpdates = 0;
+	
 	private Level level;
 	private int baseListId = -1;
-	public static int chunkUpdates = 0;
 	private int x;
 	private int y;
 	private int z;
@@ -52,7 +55,9 @@ public final class Chunk {
 						int type = this.level.getTile(x, y, z);
 						if(type > 0) {
 							BlockType block = Blocks.fromId(type);
-							if(block == null) block = VanillaBlock.STONE;
+							if(block == null) {
+								block = VanillaBlock.STONE;
+							}
 
 							int requiredPass = block.isLiquid() ? 1 : 0;
 							if(requiredPass != pass) {
@@ -96,15 +101,9 @@ public final class Chunk {
 		this.level = null;
 	}
 
-	public final int appendData(int[] data, int start, int pass) {
-		if(!this.visible) {
-			return start;
-		} else {
-			if(!this.dirty[pass]) {
-				data[start++] = this.baseListId + pass;
-			}
-
-			return start;
+	public final void appendLists(IntBuffer buffer, int pass) {
+		if(this.visible && !this.dirty[pass]) {
+			buffer.put(this.baseListId + pass);
 		}
 	}
 

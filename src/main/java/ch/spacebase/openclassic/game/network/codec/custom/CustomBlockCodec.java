@@ -46,6 +46,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeInt(message.getBlock().getFogGreen());
 		buffer.writeInt(message.getBlock().getFogBlue());
 		buffer.writeFloat(message.getBlock().getFogDensity());
+		buffer.writeInt(message.getBlock().getLiquidId());
 		ChannelBufferUtils.writeString(buffer, message.getBlock().getModel().getNetworkClass().getName());
 
 		buffer.writeByte(message.getBlock().getModel().getDefaultCollisionBox() != null ? (byte) 1 : (byte) 0);
@@ -108,6 +109,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		int fogGreen = buffer.readInt();
 		int fogBlue = buffer.readInt();
 		float fogDensity = buffer.readFloat();
+		int liquidId = buffer.readInt();
 
 		String type = ChannelBufferUtils.readString(buffer);
 		Model model = type.equals(EmptyModel.class.getName()) ? new EmptyModel() : type.equals(LiquidModel.class.getName()) ? new LiquidModel("/terrain.png", 16) : (type.equals(CuboidModel.class.getName()) ? new CuboidModel("/terrain.png", 16, 0, 0, 0, 1, 1, 1) : (type.equals(CubeModel.class.getName()) ? new CubeModel("/terrain.png", 16) : type.equals(PlantModel.class.getName()) ? new PlantModel("/terrain.png", 16) : new Model()));
@@ -171,6 +173,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		block.setFogGreen(fogGreen);
 		block.setFogBlue(fogBlue);
 		block.setFogDensity(fogDensity);
+		block.setLiquidId(liquidId);
 
 		return new CustomBlockMessage(block);
 	}

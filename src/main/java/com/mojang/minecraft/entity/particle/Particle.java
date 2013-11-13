@@ -21,19 +21,19 @@ public class Particle extends Entity {
 	public Particle(Level level, float x, float y, float z, float xd, float yd, float zd) {
 		super(level);
 		this.setSize(0.2F, 0.2F);
-		this.heightOffset = this.bbHeight / 2.0F;
+		this.heightOffset = this.bbHeight / 2;
 		this.setPos(x, y, z);
 		this.rCol = this.gCol = this.bCol = 1.0F;
-		this.xd = xd + (float) (Math.random() * 2.0D - 1.0D) * 0.4F;
-		this.yd = yd + (float) (Math.random() * 2.0D - 1.0D) * 0.4F;
-		this.zd = zd + (float) (Math.random() * 2.0D - 1.0D) * 0.4F;
-		float multiplier = (float) (Math.random() + Math.random() + 1.0D) * 0.15F;
+		this.xd = xd + (float) (Math.random() * 2 - 1) * 0.4F;
+		this.yd = yd + (float) (Math.random() * 2 - 1) * 0.4F;
+		this.zd = zd + (float) (Math.random() * 2 - 1) * 0.4F;
+		float multiplier = (float) (Math.random() + Math.random() + 1) * 0.15F;
 		float len = (float) Math.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
 		this.xd = this.xd / len * multiplier * 0.4F;
 		this.yd = this.yd / len * multiplier * 0.4F + 0.1F;
 		this.zd = this.zd / len * multiplier * 0.4F;
-		this.uo = (float) Math.random() * 3.0F;
-		this.vo = (float) Math.random() * 3.0F;
+		this.uo = (float) Math.random() * 3;
+		this.vo = (float) Math.random() * 3;
 		this.size = (float) (Math.random() * 0.5D + 0.5D);
 		this.lifetime = (int) (4.0D / (Math.random() * 0.9D + 0.1D));
 		this.age = 0;
@@ -73,9 +73,9 @@ public class Particle extends Entity {
 	}
 
 	public void render(float dt, float xmod, float ymod, float zmod, float xdir, float zdir) {
-		float tminX = (this.tex % 16) / 16.0F;
+		float tminX = (this.tex % 16) / 16f;
 		float tmaxX = tminX + 0.0624375F;
-		float tminY = (this.tex / 16f) / 16.0F;
+		float tminY = (this.tex / 16f) / 16f;
 		float tmaxY = tminY + 0.0624375F;
 		float size = 0.1F * this.size;
 		float x = this.xo + (this.x - this.xo) * dt;
@@ -89,7 +89,8 @@ public class Particle extends Entity {
 		Renderer.get().vertexuv(x + xmod * size - xdir * size, y - ymod * size, z + zmod * size - zdir * size, tmaxX, tmaxY);
 	}
 
-	public int getParticleId() {
+	public int getParticleTextureId() {
 		return 0;
 	}
+	
 }

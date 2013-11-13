@@ -7,7 +7,7 @@ import com.mojang.minecraft.render.TextureManager;
 public class TakeEntityAnim extends Entity {
 
 	private int time = 0;
-	private Entity item;
+	private Entity taking;
 	private Entity player;
 	private float xorg;
 	private float yorg;
@@ -15,9 +15,9 @@ public class TakeEntityAnim extends Entity {
 
 	public TakeEntityAnim(Level level, Entity item, Entity player) {
 		super(level);
-		this.item = item;
+		this.taking = item;
 		this.player = player;
-		this.setSize(1.0F, 1.0F);
+		this.setSize(1, 1);
 		this.xorg = item.x;
 		this.yorg = item.y;
 		this.zorg = item.z;
@@ -29,17 +29,17 @@ public class TakeEntityAnim extends Entity {
 			this.remove();
 		}
 
-		float distance = (this.time / 3.0F) * (this.time / 3.0F);
-		this.xo = this.item.xo = this.item.x;
-		this.yo = this.item.yo = this.item.y;
-		this.zo = this.item.zo = this.item.z;
-		this.x = this.item.x = this.xorg + (this.player.x - this.xorg) * distance;
-		this.y = this.item.y = this.yorg + (this.player.y - 1.0F - this.yorg) * distance;
-		this.z = this.item.z = this.zorg + (this.player.z - this.zorg) * distance;
+		float distance = (this.time / 3) * (this.time / 3);
+		this.xo = this.taking.xo = this.taking.x;
+		this.yo = this.taking.yo = this.taking.y;
+		this.zo = this.taking.zo = this.taking.z;
+		this.x = this.taking.x = this.xorg + (this.player.x - this.xorg) * distance;
+		this.y = this.taking.y = this.yorg + (this.player.y - 1 - this.yorg) * distance;
+		this.z = this.taking.z = this.zorg + (this.player.z - this.zorg) * distance;
 		this.setPos(this.x, this.y, this.z);
 	}
 
 	public void render(TextureManager textures, float dt) {
-		this.item.render(textures, dt);
+		this.taking.render(textures, dt);
 	}
 }

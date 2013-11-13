@@ -12,7 +12,7 @@ import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.level.MobSpawner;
 
-public final class SurvivalGameMode extends GameMode {
+public class SurvivalGameMode extends GameMode {
 
 	private int hitX;
 	private int hitY;
@@ -26,35 +26,34 @@ public final class SurvivalGameMode extends GameMode {
 		super(mc);
 	}
 
-	public final void preparePlayer(LocalPlayer player) {
+	public void preparePlayer(LocalPlayer player) {
 		player.inventory.slots[8] = VanillaBlock.TNT.getId();
 		player.inventory.count[8] = 10;
 	}
 
-	public final void breakBlock(int x, int y, int z) {
+	public void breakBlock(int x, int y, int z) {
 		int block = this.mc.level.getTile(x, y, z);
 		BlockUtils.dropItems(block, this.mc.level, x, y, z);
 		super.breakBlock(x, y, z);
 	}
 
-	public final boolean canPlace(int block) {
+	public boolean canPlace(int block) {
 		return this.mc.player.inventory.removeSelected(block);
 	}
 
-	public final void hitBlock(int x, int y, int z) {
+	public void hitBlock(int x, int y, int z) {
 		int block = this.mc.level.getTile(x, y, z);
 		if(block > 0 && BlockUtils.getHardness(Blocks.fromId(block)) == 0) {
 			this.breakBlock(x, y, z);
 		}
-
 	}
 
-	public final void resetHits() {
+	public void resetHits() {
 		this.hits = 0;
 		this.hitDelay = 0;
 	}
 
-	public final void hitBlock(int x, int y, int z, int side) {
+	public void hitBlock(int x, int y, int z, int side) {
 		if(this.hitDelay > 0) {
 			this.hitDelay--;
 		} else if(x == this.hitX && y == this.hitY && z == this.hitZ) {
@@ -78,7 +77,7 @@ public final class SurvivalGameMode extends GameMode {
 		}
 	}
 
-	public final void applyBlockCracks(float time) {
+	public void applyBlockCracks(float time) {
 		if(this.hits <= 0) {
 			this.mc.levelRenderer.cracks = 0;
 		} else {
@@ -86,11 +85,11 @@ public final class SurvivalGameMode extends GameMode {
 		}
 	}
 
-	public final float getReachDistance() {
-		return 4.0F;
+	public float getReachDistance() {
+		return 4;
 	}
 
-	public final boolean useItem(LocalPlayer player, int type) {
+	public boolean useItem(LocalPlayer player, int type) {
 		BlockType block = Blocks.fromId(type);
 		if(block == VanillaBlock.RED_MUSHROOM && this.mc.player.inventory.removeSelected(type)) {
 			player.hurt(null, 3);
@@ -103,12 +102,12 @@ public final class SurvivalGameMode extends GameMode {
 		return false;
 	}
 
-	public final void apply(Level level) {
+	public void apply(Level level) {
 		super.apply(level);
 		this.spawner = new MobSpawner(level);
 	}
 
-	public final void apply(LocalPlayer player) {
+	public void apply(LocalPlayer player) {
 		for(int slot = 0; slot < 9; slot++) {
 			player.inventory.slots[slot] = -1;
 			player.inventory.count[slot] = 0;
@@ -118,15 +117,14 @@ public final class SurvivalGameMode extends GameMode {
 		player.inventory.count[8] = 10;
 	}
 
-	public final void spawnMobs() {
+	public void spawnMobs() {
 		int area = this.spawner.level.width * this.spawner.level.height * this.spawner.level.depth / 64 / 64 / 64;
 		if(this.spawner.level.random.nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
 			this.spawner.spawn(area, this.spawner.level.minecraft.player, null);
 		}
-
 	}
 
-	public final void prepareLevel(Level level) {
+	public void prepareLevel(Level level) {
 		this.spawner = new MobSpawner(level);
 		int area = level.width * level.height * level.depth / 800;
 		this.spawner.spawn(area, null, this.mc.progressBar);

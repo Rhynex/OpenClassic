@@ -5,16 +5,16 @@ import com.mojang.minecraft.level.Level;
 public class RainParticle extends Particle {
 
 	public RainParticle(Level level, float x, float y, float z) {
-		super(level, x, y, z, 0.0F, 0.0F, 0.0F);
+		super(level, x, y, z, 0, 0, 0);
 		this.xd *= 0.3F;
 		this.yd = (float) Math.random() * 0.2F + 0.1F;
 		this.zd *= 0.3F;
-		this.rCol = 1.0F;
-		this.gCol = 1.0F;
-		this.bCol = 1.0F;
+		this.rCol = 1;
+		this.gCol = 1;
+		this.bCol = 1;
 		this.tex = 16;
 		this.setSize(0.01F, 0.01F);
-		this.lifetime = (int) (8.0D / (Math.random() * 0.8D + 0.2D));
+		this.lifetime = (int) (8 / (Math.random() * 0.8D + 0.2D));
 	}
 
 	public void tick() {

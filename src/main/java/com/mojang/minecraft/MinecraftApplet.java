@@ -37,16 +37,8 @@ public class MinecraftApplet extends Applet {
 		this.validate();
 	}
 
-	public void start() {
-		this.minecraft.waiting = false;
-	}
-
-	public void stop() {
-		this.minecraft.waiting = true;
-	}
-
 	public void destroy() {
-		this.canvas.stopThread();
+		this.remove(this.canvas);
 	}
 
 	public Minecraft getMinecraft() {

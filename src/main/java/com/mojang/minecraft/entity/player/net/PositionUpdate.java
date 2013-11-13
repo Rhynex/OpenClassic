@@ -1,6 +1,6 @@
 package com.mojang.minecraft.entity.player.net;
 
-public final class PositionUpdate {
+public class PositionUpdate {
 
 	public float x;
 	public float y;
@@ -34,4 +34,5 @@ public final class PositionUpdate {
 		this.rotation = true;
 		this.position = false;
 	}
+	
 }

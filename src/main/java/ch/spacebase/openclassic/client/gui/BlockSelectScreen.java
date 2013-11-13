@@ -86,7 +86,7 @@ public final class BlockSelectScreen extends GuiScreen {
 		ScreenBlock block = this.getBlockOnScreen(mouseX, mouseY);
 		RenderHelper.getHelper().color(this.getWidth() / 2 - 120, 30, this.getWidth() / 2 + 120, 180, -1878719232, -1070583712);
 		if(block != null) {
-			RenderHelper.getHelper().color(block.getX() - 3, block.getX() - 8, block.getX() + 23, block.getX() + 18, -1862270977, -1056964609);
+			RenderHelper.getHelper().color(block.getX() - 3, block.getY() - 8, block.getX() + 23, block.getY() + 18, -1862270977, -1056964609);
 		}
 
 		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), this.getWidth() / 2, 40);
@@ -150,7 +150,7 @@ public final class BlockSelectScreen extends GuiScreen {
 	
 	private ScreenBlock getBlockOnScreen(int x, int y) {
 		for(ScreenBlock block : this.blocks.get(this.page)) {
-			if(x >= block.getX() && x <= block.getX() + 24 && y >= block.getX() - 12 && y <= block.getX() + 12) {
+			if(x >= block.getX() && x <= block.getX() + 24 && y >= block.getY() - 12 && y <= block.getY() + 12) {
 				return block;
 			}
 		}

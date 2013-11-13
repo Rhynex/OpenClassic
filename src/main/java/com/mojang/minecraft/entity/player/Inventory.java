@@ -43,7 +43,7 @@ public class Inventory {
 		return -1;
 	}
 
-	public void grabTexture(int block, boolean creative) {
+	public void selectBlock(int block, boolean creative) {
 		int slot = this.getFirst(block);
 		if(slot >= 0) {
 			this.selected = slot;
@@ -54,7 +54,7 @@ public class Inventory {
 		}
 	}
 
-	public void swapPaint(int direction) {
+	public void scrollSelection(int direction) {
 		if(direction > 0) {
 			direction = 1;
 		}
@@ -70,18 +70,6 @@ public class Inventory {
 
 		while(this.selected >= this.slots.length) {
 			this.selected -= this.slots.length;
-		}
-	}
-
-	public void replaceSlot(int block) {
-		int count = 0;
-		if(block >= 0) {
-			for(BlockType b : Blocks.getBlocks()) {
-				if(b != null && b.isSelectable()) {
-					if(count == block) this.replaceSlot(b);
-					count++;
-				}
-			}
 		}
 	}
 
@@ -111,28 +99,23 @@ public class Inventory {
 
 		return false;
 	}
+	
+	public boolean addResource(int block, int count) {
+		boolean result = false;
+		for(int cnt = 0; cnt < count; cnt++) {
+			if(this.addResource(block)) {
+				result = true;
+			}
+		}
+
+		return result;
+	}
 
 	public void tick() {
 		for(int slot = 0; slot < this.popTime.length; slot++) {
 			if(this.popTime[slot] > 0) {
 				this.popTime[slot]--;
 			}
-		}
-
-	}
-
-	public boolean removeResource(int block) {
-		int slot = this.getFirst(block);
-		if(slot < 0) {
-			return false;
-		} else {
-			this.count[slot]--;
-			if(this.count[slot] <= 0) {
-				this.slots[slot] = -1;
-				this.count[slot] = 0;
-			}
-
-			return true;
 		}
 	}
 

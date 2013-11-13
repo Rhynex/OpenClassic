@@ -13,4 +13,5 @@ public abstract class AI {
 	public abstract void beforeRemove();
 
 	public abstract void hurt(Entity cause, int damage);
+	
 }

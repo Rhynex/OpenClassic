@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 
+import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.HumanoidMob;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
@@ -19,7 +20,7 @@ public abstract class Player extends HumanoidMob {
 	public int score = 0;
 	public int arrows = 20;
 	
-	public transient ClientPlayer openclassic = new ClientPlayer(this);
+	public ClientPlayer openclassic = new ClientPlayer(this);
 
 	public Player(Level level, float x, float y, float z) {
 		super(level, x, y, z);
@@ -27,6 +28,8 @@ public abstract class Player extends HumanoidMob {
 		this.helmet = false;
 		OpenClassic.getGame().getScheduler().scheduleAsyncTask(this, new SkinDownloadTask(this));
 	}
+	
+	public abstract String getName();
 
 	public void bindTexture(TextureManager textures) {
 		this.textures = textures;
@@ -52,11 +55,13 @@ public abstract class Player extends HumanoidMob {
 			RenderHelper.getHelper().bindTexture(this.newTextureId);
 		}
 	}
-
-	public abstract String getName();
 	
 	public int getScore() {
 		return this.score;
+	}
+	
+	public void awardKillScore(Entity killed, int score) {
+		this.score += score;
 	}
 
 }

@@ -10,4 +10,5 @@ public class QuadrupedMob extends Mob {
 		this.setPos(x, y, z);
 		this.modelName = "pig";
 	}
+	
 }

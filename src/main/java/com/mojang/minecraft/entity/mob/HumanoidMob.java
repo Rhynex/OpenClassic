@@ -10,8 +10,8 @@ import com.mojang.minecraft.render.TextureManager;
 
 public class HumanoidMob extends Mob {
 
-	public boolean helmet = Math.random() < 0.20000000298023224D;
-	public boolean armor = Math.random() < 0.20000000298023224D;
+	public boolean helmet = Math.random() < 0.2D;
+	public boolean armor = Math.random() < 0.2D;
 
 	public HumanoidMob(Level level, float x, float y, float z) {
 		super(level);
@@ -64,4 +64,5 @@ public class HumanoidMob extends Mob {
 
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
 	}
+	
 }

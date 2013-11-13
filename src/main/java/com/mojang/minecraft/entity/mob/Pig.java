@@ -20,12 +20,12 @@ public class Pig extends QuadrupedMob {
 			cause.awardKillScore(this, 10);
 		}
 
-		int drops = (int) (Math.random() + Math.random() + 1.0D);
-
+		int drops = (int) (Math.random() + Math.random() + 1);
 		for(int count = 0; count < drops; count++) {
 			this.level.addEntity(new Item(this.level, this.x, this.y, this.z, VanillaBlock.BROWN_MUSHROOM.getId()));
 		}
 
 		super.die(cause);
 	}
+	
 }

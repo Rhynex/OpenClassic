@@ -47,7 +47,7 @@ public final class MobSpawner {
 			int rx = this.level.random.nextInt(this.level.width);
 			int ry = (int) (Math.min(this.level.random.nextFloat(), this.level.random.nextFloat()) * this.level.height);
 			int rz = this.level.random.nextInt(this.level.depth);
-			if(!this.level.getPreventsRendering(rx, ry, rz) && !(Blocks.fromId(this.level.getTile(rx, ry, rz)) != null && Blocks.fromId(this.level.getTile(rx, ry, rz)).isLiquid()) && (!this.level.isLit(rx, ry, rz) || this.level.random.nextInt(5) == 0)) {
+			if(!this.level.preventsRendering(rx, ry, rz) && !(Blocks.fromId(this.level.getTile(rx, ry, rz)) != null && Blocks.fromId(this.level.getTile(rx, ry, rz)).isLiquid()) && (!this.level.isLit(rx, ry, rz) || this.level.random.nextInt(5) == 0)) {
 				for(int pass = 0; pass < 3; pass++) {
 					int bx = rx;
 					int by = ry;
@@ -56,7 +56,7 @@ public final class MobSpawner {
 						bx += this.level.random.nextInt(6) - this.level.random.nextInt(6);
 						by += this.level.random.nextInt(1) - this.level.random.nextInt(1);
 						bz += this.level.random.nextInt(6) - this.level.random.nextInt(6);
-						if(bx >= 0 && bz >= 1 && by >= 0 && by < this.level.height - 2 && bx < this.level.width && bz < this.level.depth && this.level.getPreventsRendering(bx, by - 1, bz) && !this.level.getPreventsRendering(bx, by, bz) && !this.level.getPreventsRendering(bx, by + 1, bz)) {
+						if(bx >= 0 && bz >= 1 && by >= 0 && by < this.level.height - 2 && bx < this.level.width && bz < this.level.depth && this.level.preventsRendering(bx, by - 1, bz) && !this.level.preventsRendering(bx, by, bz) && !this.level.preventsRendering(bx, by + 1, bz)) {
 							float sx = bx + 0.5F;
 							float sy = by + 1.0F;
 							float sz = bz + 0.5F;

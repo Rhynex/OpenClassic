@@ -2,7 +2,7 @@ package com.mojang.minecraft.entity.model;
 
 import org.lwjgl.opengl.GL11;
 
-public final class ModelPart {
+public class ModelPart {
 
 	public Vertex[] vertices;
 	public Quad[] quads;
@@ -24,7 +24,7 @@ public final class ModelPart {
 		this.v = v;
 	}
 
-	public final void setBounds(float x, float y, float z, int width, int height, int depth, float offset) {
+	public void setBounds(float x, float y, float z, int width, int height, int depth, float offset) {
 		this.vertices = new Vertex[8];
 		this.quads = new Quad[6];
 		float x2 = x + width + offset;
@@ -75,13 +75,13 @@ public final class ModelPart {
 
 	}
 
-	public final void setPosition(float x, float y, float z) {
+	public void setPosition(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 
-	public final void render(float scale) {
+	public void render(float scale) {
 		if(this.render) {
 			if(!this.hasList) {
 				this.generateList(scale);

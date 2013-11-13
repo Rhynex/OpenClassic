@@ -530,7 +530,7 @@ public class ClientRenderHelper extends RenderHelper {
 				return false;
 			}
 
-			if(Level.toMoving(relative) == Level.toMoving(block)) {
+			if(relative.getLiquidId() != -1 && relative.getLiquidId() == block.getLiquidId()) {
 				return false;
 			}
 

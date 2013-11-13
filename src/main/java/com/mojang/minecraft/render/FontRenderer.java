@@ -110,10 +110,10 @@ public final class FontRenderer {
 
 				int tx = chars[count] % 16 << 3;
 				int ty = chars[count] / 16 << 3;
-				Renderer.get().vertexuv((x + width), y + 7.99F, 0.0F, tx / 128.0F, (ty + 7.99F) / 128.0F);
-				Renderer.get().vertexuv((x + width) + 7.99F, y + 7.99F, 0.0F, (tx + 7.99F) / 128.0F, (ty + 7.99F) / 128.0F);
-				Renderer.get().vertexuv((x + width) + 7.99F, y, 0.0F, (tx + 7.99F) / 128.0F, ty / 128.0F);
-				Renderer.get().vertexuv((x + width), y, 0.0F, tx / 128.0F, ty / 128.0F);
+				Renderer.get().vertexuv((x + width), y + 7.99F, 0, tx / 128F, (ty + 7.99F) / 128F);
+				Renderer.get().vertexuv((x + width) + 7.99F, y + 7.99F, 0, (tx + 7.99F) / 128F, (ty + 7.99F) / 128F);
+				Renderer.get().vertexuv((x + width) + 7.99F, y, 0, (tx + 7.99F) / 128F, ty / 128F);
+				Renderer.get().vertexuv((x + width), y, 0, tx / 128F, ty / 128F);
 				if(chars[count] < this.font.length) {
 					width += this.font[chars[count]];
 				}
@@ -124,7 +124,7 @@ public final class FontRenderer {
 
 		if(scaled) {
 			GL11.glTranslatef(x / 2, y / 2, 0);
-			GL11.glScalef(0.5f, 0.5f, 0.5f);
+			GL11.glScalef(0.5F, 0.5F, 0.5F);
 		}
 	}
 

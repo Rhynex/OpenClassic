@@ -14,7 +14,6 @@ public class MinecraftCanvas extends Canvas {
 
 	public synchronized void addNotify() {
 		super.addNotify();
-
 		if(this.thread == null) {
 			this.thread = new Thread(this.mc, "Client");
 			this.thread.start();
@@ -22,11 +21,6 @@ public class MinecraftCanvas extends Canvas {
 	}
 
 	public synchronized void removeNotify() {
-		this.stopThread();
-		super.removeNotify();
-	}
-
-	public synchronized void stopThread() {
 		if(this.thread != null) {
 			this.mc.running = false;
 
@@ -38,6 +32,8 @@ public class MinecraftCanvas extends Canvas {
 
 			this.thread = null;
 		}
+		
+		super.removeNotify();
 	}
 
 }

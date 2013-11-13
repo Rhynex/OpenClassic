@@ -8,39 +8,37 @@ import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 
-public final class CreativeGameMode extends GameMode {
+public class CreativeGameMode extends GameMode {
 
 	public CreativeGameMode(Minecraft mc) {
 		super(mc);
 		this.creative = true;
 	}
 
-	public final void openInventory() {
+	public void openInventory() {
 		this.mc.setCurrentScreen(new BlockSelectScreen());
 	}
 
-	public final void apply(Level level) {
+	public void apply(Level level) {
 		super.apply(level);
-
 		level.removeAllNonCreativeModeEntities();
 		level.creativeMode = true;
 		level.growTrees = false;
 	}
 
-	public final void apply(LocalPlayer player) {
+	public void apply(LocalPlayer player) {
 		int slot = 0;
 		for(BlockType block : Blocks.getBlocks()) {
 			if(slot >= 9) break;
 			if(block != null && block.isSelectable()) {
 				player.inventory.count[slot] = 1;
 				player.inventory.slots[slot] = block.getId();
-
 				slot++;
 			}
 		}
 	}
 
-	public final boolean isSurvival() {
+	public boolean isSurvival() {
 		return false;
 	}
 }

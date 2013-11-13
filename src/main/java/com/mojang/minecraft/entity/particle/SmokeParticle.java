@@ -5,12 +5,12 @@ import com.mojang.minecraft.level.Level;
 public class SmokeParticle extends Particle {
 
 	public SmokeParticle(Level level, float x, float y, float z) {
-		super(level, x, y, z, 0.0F, 0.0F, 0.0F);
+		super(level, x, y, z, 0, 0, 0);
 		this.xd *= 0.1F;
 		this.yd *= 0.1F;
 		this.zd *= 0.1F;
-		this.rCol = this.gCol = this.bCol = (float) (Math.random() * 0.30000001192092896D);
-		this.lifetime = (int) (8.0D / (Math.random() * 0.8D + 0.2D));
+		this.rCol = this.gCol = this.bCol = (float) (Math.random() * 0.3D);
+		this.lifetime = (int) (8 / (Math.random() * 0.8D + 0.2D));
 		this.noPhysics = true;
 	}
 

@@ -18,7 +18,7 @@ public class BasicAttackAI extends BasicAI {
 	}
 
 	protected void doAttack() {
-		Entity player = this.level.getPlayer();
+		Entity player = this.level.minecraft.player;
 		if(this.attackTarget != null && this.attackTarget.removed) {
 			this.attackTarget = null;
 		}
@@ -46,7 +46,7 @@ public class BasicAttackAI extends BasicAI {
 
 			if(this.attackTarget != null) {
 				float distance = (float) Math.sqrt(sqDistance);
-				this.mob.yaw = (float) (Math.atan2(zDistance, xDistance) * MathHelper.DRAD_TO_DEG) - 90.0F;
+				this.mob.yaw = (float) (Math.atan2(zDistance, xDistance) * MathHelper.DRAD_TO_DEG) - 90;
 				this.mob.pitch = -((float) (Math.atan2(yDistance, (float) Math.sqrt(distance)) * MathHelper.DRAD_TO_DEG));
 				if((float) Math.sqrt(sqDistance) < 2 && this.attackDelay == 0) {
 					this.attack(this.attackTarget);
@@ -62,7 +62,7 @@ public class BasicAttackAI extends BasicAI {
 		} else {
 			this.mob.attackTime = 5;
 			this.attackDelay = this.random.nextInt(20) + 10;
-			int damage = (int) ((this.random.nextFloat() + this.random.nextFloat()) / 2.0F * this.damage + 1.0F);
+			int damage = (int) ((this.random.nextFloat() + this.random.nextFloat()) / 2 * this.damage + 1);
 			entity.hurt(this.mob, damage);
 			this.noActionTime = 0;
 			return true;
@@ -78,6 +78,6 @@ public class BasicAttackAI extends BasicAI {
 		if(cause != null && !cause.getClass().equals(this.mob.getClass())) {
 			this.attackTarget = cause;
 		}
-
 	}
+	
 }

@@ -5,25 +5,25 @@ import com.mojang.minecraft.entity.model.Vector;
 
 public class Intersection {
 
-	public boolean entityPos;
+	public boolean hasEntity;
 	public int x;
 	public int y;
 	public int z;
 	public int side;
-	public Vector blockPos;
+	public Vector pos;
 	public Entity entity;
 
-	public Intersection(int x, int y, int z, int side, Vector blockPos) {
-		this.entityPos = false;
+	public Intersection(int x, int y, int z, int side, Vector pos) {
+		this.hasEntity = false;
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.side = side;
-		this.blockPos = new Vector(blockPos.x, blockPos.y, blockPos.z);
+		this.pos = new Vector(pos.x, pos.y, pos.z);
 	}
 
 	public Intersection(Entity entity) {
-		this.entityPos = true;
+		this.hasEntity = true;
 		this.entity = entity;
 	}
 	

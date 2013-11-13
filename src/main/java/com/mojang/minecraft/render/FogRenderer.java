@@ -11,7 +11,7 @@ import com.mojang.minecraft.Minecraft;
 public class FogRenderer {
 
 	public Minecraft mc;
-	public float fogEnd = 0.0F;
+	public float fogEnd;
 	public float fogRed;
 	public float fogGreen;
 	public float fogBlue;
@@ -48,9 +48,9 @@ public class FogRenderer {
 				float g = type.getFogGreen() != -1 ? type.getFogGreen() / 255f : 1;
 				float b = type.getFogBlue() != -1 ? type.getFogBlue() / 255f : 1;
 				if(this.mc.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					r = (r * 30.0F + g * 59.0F + b * 11.0F) / 100.0F;
-					g = (r * 30.0F + g * 70.0F) / 100.0F;
-					b = (r * 30.0F + b * 70.0F) / 100.0F;
+					r = (r * 30 + g * 59 + b * 11) / 100;
+					g = (r * 30 + g * 70) / 100;
+					b = (r * 30 + b * 70) / 100;
 				}
 
 				GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(r, g, b, 1));
@@ -63,15 +63,15 @@ public class FogRenderer {
 		}
 		
 		if(this.mc.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-			float fred = (fogRed * 30.0F + fogBlue * 59.0F + fogGreen * 11.0F) / 100.0F;
-			float fgreen = (fogRed * 30.0F + fogGreen * 70.0F) / 100.0F;
-			float fblue = (fogRed * 30.0F + fogBlue * 70.0F) / 100.0F;
+			float fred = (fogRed * 30 + fogBlue * 59 + fogGreen * 11) / 100;
+			float fgreen = (fogRed * 30 + fogGreen * 70) / 100;
+			float fblue = (fogRed * 30 + fogBlue * 70) / 100;
 			fogRed = fred;
 			fogGreen = fgreen;
 			fogBlue = fblue;
 		}
 		
-		GL11.glClearColor(fogRed, fogGreen, fogBlue, 0.0F);
+		GL11.glClearColor(fogRed, fogGreen, fogBlue, 0);
 		GL11.glFog(GL11.GL_FOG_COLOR, ClientRenderHelper.getHelper().getParamBuffer(fogRed, fogGreen, fogBlue, 1));
 		GL11.glNormal3f(0, -1, 0);
 		GL11.glColor4f(1, 1, 1, 1);

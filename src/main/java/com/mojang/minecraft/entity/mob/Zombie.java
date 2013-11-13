@@ -13,6 +13,6 @@ public class Zombie extends HumanoidMob {
 		this.deathScore = 80;
 		this.ai = new BasicAttackAI();
 		this.ai.defaultLookAngle = 30;
-		((BasicAttackAI) this.ai).runSpeed = 1.0F;
+		((BasicAttackAI) this.ai).runSpeed = 1;
 	}
 }

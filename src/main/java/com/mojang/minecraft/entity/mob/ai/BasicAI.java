@@ -26,14 +26,14 @@ public class BasicAI extends AI {
 	public void tick(Level level, Mob mob) {
 		this.noActionTime++;
 
-		Entity player = level.getPlayer();
+		Entity player = level.minecraft.player;
 		if(this.noActionTime > 600 && this.random.nextInt(800) == 0 && player != null) {
 			float xDistance = player.x - mob.x;
 			float yDistance = player.y - mob.y;
 			float zDistance = player.z - mob.z;
 			float sqDistance = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
 
-			if(sqDistance < 1024.0F) {
+			if(sqDistance < 1024) {
 				this.noActionTime = 0;
 			} else {
 				mob.remove();
@@ -79,7 +79,7 @@ public class BasicAI extends AI {
 
 		this.yawA *= 0.9F;
 		mob.travel(this.xxa, this.yya);
-		List<Entity> entities = level.findEntities(mob, mob.bb.grow(0.2F, 0.0F, 0.2F));
+		List<Entity> entities = level.findEntities(mob, mob.bb.grow(0.2F, 0, 0.2F));
 		if(entities != null && entities.size() > 0) {
 			for(Entity e : entities) {
 				if(e.isPushable()) {
@@ -102,7 +102,7 @@ public class BasicAI extends AI {
 
 		this.jumping = this.random.nextFloat() < 0.01F;
 		if(this.random.nextFloat() < 0.04F) {
-			this.yawA = (this.random.nextFloat() - 0.5F) * 60.0F;
+			this.yawA = (this.random.nextFloat() - 0.5F) * 60;
 		}
 
 		this.mob.yaw += this.yawA;
@@ -123,4 +123,5 @@ public class BasicAI extends AI {
 	public void hurt(Entity cause, int damage) {
 		this.noActionTime = 0;
 	}
+	
 }

@@ -2,7 +2,7 @@ package com.mojang.minecraft.entity.player;
 
 import ch.spacebase.openclassic.api.settings.bindings.Bindings;
 
-public final class InputHandler {
+public class InputHandler {
 
 	public float xxa = 0;
 	public float yya = 0;
@@ -19,7 +19,7 @@ public final class InputHandler {
 		this.bindings = bindings;
 	}
 
-	public final void setKeyState(int key, boolean pressed) {
+	public void setKeyState(int key, boolean pressed) {
 		byte index = -1;
 
 		if(key == this.bindings.getBinding("options.keys.forward").getKey()) {
@@ -55,13 +55,13 @@ public final class InputHandler {
 		}
 	}
 
-	public final void resetKeys() {
+	public void resetKeys() {
 		for(int index = 0; index < 10; index++) {
 			this.keyStates[index] = false;
 		}
 	}
 
-	public final void updateMovement() {
+	public void updateMovement() {
 		if(this.flyDelay > 0) {
 			this.flyDelay--;
 		}
@@ -90,7 +90,7 @@ public final class InputHandler {
 		this.flyDown = this.keyStates[6];
 	}
 
-	public final void keyPress(int key) {
+	public void keyPress(int key) {
 		if(key == this.bindings.getBinding("options.keys.jump").getKey()) {
 			if(this.flyDelay == 0) {
 				this.flyDelay = 10;

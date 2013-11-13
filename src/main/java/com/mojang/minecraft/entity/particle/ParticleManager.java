@@ -5,35 +5,32 @@ import java.util.List;
 
 import com.mojang.minecraft.render.TextureManager;
 
-public final class ParticleManager {
+public class ParticleManager {
 
 	@SuppressWarnings("unchecked")
 	public List<Particle>[] particles = new List[2];
-	public TextureManager textureManager;
 
 	public ParticleManager(TextureManager textureManager) {
-		this.textureManager = textureManager;
-		for(int index = 0; index < particles.length; index++) {
-			this.particles[index] = new ArrayList<Particle>();
+		for(int texture = 0; texture < this.particles.length; texture++) {
+			this.particles[texture] = new ArrayList<Particle>();
 		}
 	}
 
-	public final void spawnParticle(Particle particle) {
-		int id = particle.getParticleId();
-		this.particles[id].add(particle);
+	public void spawnParticle(Particle particle) {
+		int texture = particle.getParticleTextureId();
+		this.particles[texture].add(particle);
 	}
 
-	public final void tickParticles() {
-		for(int pIndex = 0; pIndex < 2; pIndex++) {
-			for(int index = 0; index < this.particles[pIndex].size(); index++) {
-				Particle particle = this.particles[pIndex].get(index);
+	public void tickParticles() {
+		for(int texture = 0; texture < 2; texture++) {
+			for(int index = 0; index < this.particles[texture].size(); index++) {
+				Particle particle = this.particles[texture].get(index);
 				particle.tick();
-
 				if(particle.removed) {
-					this.particles[pIndex].remove(index--);
+					this.particles[texture].remove(index--);
 				}
 			}
 		}
-
 	}
+	
 }

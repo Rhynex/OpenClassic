@@ -15,6 +15,7 @@ import com.mojang.minecraft.render.TextureManager;
 public class Item extends Entity {
 
 	private static ItemModel[] models = new ItemModel[256];
+	
 	private float xd;
 	private float yd;
 	private float zd;
@@ -22,7 +23,7 @@ public class Item extends Entity {
 	private int resource;
 	private int tickCount;
 	private int age = 0;
-	private transient int count = 0;
+	private int count = 0;
 
 	public static void initModels() {
 		for(int id = 1; id < 256; id++) {
@@ -31,7 +32,6 @@ public class Item extends Entity {
 				models[id] = new ItemModel(id, quad.getTexture().getId());
 			}
 		}
-
 	}
 
 	public Item(Level level, float x, float y, float z, int block) {
@@ -41,14 +41,14 @@ public class Item extends Entity {
 	public Item(Level level, float x, float y, float z, int block, int count) {
 		super(level);
 		this.setSize(0.25F, 0.25F);
-		this.heightOffset = this.bbHeight / 2.0F;
+		this.heightOffset = this.bbHeight / 2;
 		this.setPos(x, y, z);
 		this.resource = block;
 		this.count = count;
-		this.rot = (float) (Math.random() * 360.0D);
-		this.xd = (float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D);
+		this.rot = (float) (Math.random() * 360);
+		this.xd = (float) (Math.random() * 0.2D - 0.1D);
 		this.yd = 0.2F;
-		this.zd = (float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D);
+		this.zd = (float) (Math.random() * 0.2D - 0.1D);
 		this.makeStepSound = false;
 	}
 
@@ -72,17 +72,16 @@ public class Item extends Entity {
 		if(this.age >= 6000) {
 			this.remove();
 		}
-
 	}
 
 	public void render(TextureManager textures, float dt) {
 		this.textureId = RenderHelper.getHelper().bindTexture("/terrain.png", true);
-		float rot = this.rot + (this.tickCount + dt) * 3.0F;
+		float rot = this.rot + (this.tickCount + dt) * 3;
 		GL11.glPushMatrix();
-		float rsin = MathHelper.sin(rot / 10.0F);
+		float rsin = MathHelper.sin(rot / 10);
 		float bob = rsin * 0.1F + 0.1F;
 		GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt + bob, this.zo + (this.z - this.zo) * dt);
-		GL11.glRotatef(rot, 0.0F, 1.0F, 0.0F);
+		GL11.glRotatef(rot, 0, 1, 0);
 
 		if(models[this.resource] == null && Blocks.fromId(this.resource) != null) {
 			Quad quad = Blocks.fromId(this.resource).getModel().getQuads().size() >= 3 ? Blocks.fromId(this.resource).getModel().getQuad(2) : Blocks.fromId(this.resource).getModel().getQuad(Blocks.fromId(this.resource).getModel().getQuads().size() - 1);
@@ -95,7 +94,7 @@ public class Item extends Entity {
 	}
 
 	public void playerTouch(LocalPlayer player) {
-		if(player.addResource(this.resource, this.count)) {
+		if(player.inventory.addResource(this.resource, this.count)) {
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			this.remove();
 		}

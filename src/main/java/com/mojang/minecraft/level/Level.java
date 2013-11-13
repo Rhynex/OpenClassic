@@ -48,35 +48,24 @@ public class Level {
 	
 	private int[] highest;
 	public Random random = new Random();
-	private int id;
-	private ArrayList<DelayedTick> tickNextTicks;
-	private boolean networkMode;
+	private int physicsRandom = this.random.nextInt();
+	private ArrayList<DelayedTick> tickNextTicks = new ArrayList<DelayedTick>();
+	private boolean networkMode = false;
 	public Minecraft minecraft;
 	public boolean creativeMode;
-	private int unprocessed;
-	public boolean growTrees;
+	public boolean growTrees = false;
 
-	public transient ClientLevel openclassic;
+	public transient ClientLevel openclassic = new ClientLevel(this);
 
-	public Level() {
-		this.id = this.random.nextInt();
-		this.tickNextTicks = new ArrayList<DelayedTick>();
-		this.networkMode = false;
-		this.unprocessed = 0;
-		this.growTrees = false;
-
-		this.openclassic = new ClientLevel(this);
-	}
-
-	public void initTransient() {
+	public void initialize() {
 		if(this.blocks == null) {
-			throw new RuntimeException("The level is corrupt!");
+			throw new IllegalStateException("Missing block data!");
 		} else {
 			this.highest = new int[this.width * this.depth];
 			Arrays.fill(this.highest, this.height);
 			this.calcLightDepths(0, 0, this.width, this.depth);
 			this.random = new Random();
-			this.id = this.random.nextInt();
+			this.physicsRandom = this.random.nextInt();
 			this.tickNextTicks = new ArrayList<DelayedTick>();
 			if(this.waterLevel == 0) {
 				this.waterLevel = this.height / 2;
@@ -116,7 +105,7 @@ public class Level {
 		}
 
 		this.tickNextTicks.clear();
-		this.initTransient();
+		this.initialize();
 	}
 
 	public void findSpawn() {
@@ -195,7 +184,7 @@ public class Level {
 		for(int x = x0; x < x1; x++) {
 			for(int y = y0; y < y1; y++) {
 				for(int z = z0; z < z1; z++) {
-					if(x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth) {
+					if(this.isInBounds(x, y, z)) {
 						BlockType type = Blocks.fromId(this.getTile(x, y, z));
 						BoundingBox bb2 = type.getModel().getCollisionBox(x, y, z);
 						if(type != null && bb2 != null && bb.intersectsInner(bb2)) {
@@ -214,23 +203,12 @@ public class Level {
 		return ret;
 	}
 
-	public void swap(int x1, int y1, int z1, int x2, int y2, int z2) {
-		if(!this.networkMode) {
-			int b1 = this.getTile(x1, y1, z1);
-			int b2 = this.getTile(x2, y2, z2);
-			this.setTileNoNeighborChange(x1, y1, z1, b2);
-			this.setTileNoNeighborChange(x2, y2, z2, b1);
-			this.updateNeighborsAt(x1, y1, z1);
-			this.updateNeighborsAt(x2, y2, z2);
-		}
-	}
-
 	public boolean setTileNoNeighborChange(int x, int y, int z, int type) {
 		return this.networkMode ? false : this.netSetTileNoNeighborChange(x, y, z, type);
 	}
 
 	public boolean netSetTileNoNeighborChange(int x, int y, int z, int type) {
-		if(x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth) {
+		if(this.isInBounds(x, y, z)) {
 			if(type == this.blocks[(y * this.depth + z) * this.width + x]) {
 				return false;
 			} else {
@@ -282,8 +260,20 @@ public class Level {
 		}
 	}
 
+	private void updateNeighbor(int x, int y, int z, int nx, int nz, int ny) {
+		if(this.isInBounds(x, y, z)) {
+			BlockType type = Blocks.fromId(this.getTile(x, y, z));
+			if(type != null) {
+				if(type.getPhysics() != null) {
+					type.getPhysics().onNeighborChange(this.openclassic.getBlockAt(x, y, z), this.openclassic.getBlockAt(nx, ny, nz));
+				}
+			}
+
+		}
+	}
+	
 	public boolean setTileNoUpdate(int x, int y, int z, int type) {
-		if(x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth) {
+		if(this.isInBounds(x, y, z)) {
 			if(type == this.blocks[(y * this.depth + z) * this.width + x]) {
 				return false;
 			} else {
@@ -295,31 +285,14 @@ public class Level {
 		}
 	}
 
-	private void updateNeighbor(int x, int y, int z, int nx, int nz, int ny) {
-		if(x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth) {
-			BlockType type = Blocks.fromId(this.getTile(x, y, z));
-			if(type != null) {
-				if(type.getPhysics() != null) {
-					type.getPhysics().onNeighborChange(this.openclassic.getBlockAt(x, y, z), this.openclassic.getBlockAt(nx, ny, nz));
-				}
-			}
-
-		}
-	}
-
 	public boolean isLit(int x, int y, int z) {
-		return x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth ? y >= this.highest[x + z * this.width] : true;
+		return this.isInBounds(x, y, z) ? y >= this.highest[x + z * this.width] : true;
 	}
 
 	public int getTile(int x, int y, int z) {
-		return x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.depth ? this.blocks[(y * this.depth + z) * this.width + x] & 255 : 0;
+		return this.isInBounds(x, y, z) ? this.blocks[(y * this.depth + z) * this.width + x] & 255 : 0;
 	}
-
-	public boolean getPreventsRendering(int x, int y, int z) {
-		BlockType type = Blocks.fromId(this.getTile(x, y, z));
-		return type != null && type.getPreventsRendering();
-	}
-
+	
 	public void tickEntities() {
 		this.blockMap.tickAll();
 	}
@@ -353,16 +326,13 @@ public class Level {
 			}
 		}
 
-		this.unprocessed += this.width * this.height * this.depth;
-		int ticks = this.unprocessed / 200;
-		this.unprocessed = 0;
-
+		int ticks = (this.width * this.height * this.depth) / 200;
 		for(int count = 0; count < ticks; count++) {
-			this.id = this.id * 3 + 1013904223;
-			int y = this.id >> 2;
-			int x = (y) & (this.width - 1);
-			int z = y >> wshift & (this.depth - 1);
-			y = y >> wshift + dshift & (this.height - 1);
+			this.physicsRandom = this.physicsRandom * 3 + 1013904223;
+			int rand = this.physicsRandom >> 2;
+			int x = rand & (this.width - 1);
+			int z = rand >> wshift & (this.depth - 1);
+			int y = rand >> wshift + dshift & (this.height - 1);
 			BlockType block = Blocks.fromId(this.blocks[(y * this.depth + z) * this.width + x]);
 			if(block != null && block.getPhysics() != null && this.openclassic.getPhysicsEnabled() && !EventManager.callEvent(new BlockPhysicsEvent(this.openclassic.getBlockAt(x, y, z))).isCancelled()) {
 				block.getPhysics().update(this.openclassic.getBlockAt(x, y, z));
@@ -390,7 +360,7 @@ public class Level {
 	}
 
 	public float getGroundLevel() {
-		return this.getWaterLevel() - 2.0F;
+		return this.getWaterLevel() - 2;
 	}
 
 	public float getWaterLevel() {
@@ -568,70 +538,6 @@ public class Level {
 		return false;
 	}
 
-	public boolean containsLiquid(BoundingBox bb, BlockType block) {
-		block = toMoving(block);
-		int x0 = (int) bb.getX1();
-		int x1 = (int) bb.getX2() + 1;
-		int y0 = (int) bb.getY1();
-		int y1 = (int) bb.getY2() + 1;
-		int z0 = (int) bb.getZ1();
-		int z1 = (int) bb.getZ2() + 1;
-		if(bb.getX1() < 0.0F) {
-			x0--;
-		}
-
-		if(bb.getY1() < 0.0F) {
-			y0--;
-		}
-
-		if(bb.getZ1() < 0.0F) {
-			z0--;
-		}
-
-		if(x0 < 0) {
-			x0 = 0;
-		}
-
-		if(y0 < 0) {
-			y0 = 0;
-		}
-
-		if(z0 < 0) {
-			z0 = 0;
-		}
-
-		if(x1 > this.width) {
-			x1 = this.width;
-		}
-
-		if(y1 > this.height) {
-			y1 = this.height;
-		}
-
-		if(z1 > this.depth) {
-			z1 = this.depth;
-		}
-
-		for(int x = x0; x < x1; x++) {
-			for(int y = y0; y < y1; y++) {
-				for(int z = z0; z < z1; z++) {
-					BlockType type = Blocks.fromId(this.getTile(x, y, z));
-					if(type != null && toMoving(type).getId() == block.getId()) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public static BlockType toMoving(BlockType block) {
-		if(block == VanillaBlock.STATIONARY_LAVA) return VanillaBlock.LAVA;
-		if(block == VanillaBlock.STATIONARY_WATER) return VanillaBlock.WATER;
-		return block;
-	}
-
 	public void addToTickNextTick(int x, int y, int z, int block) {
 		if(!this.networkMode) {
 			DelayedTick next = new DelayedTick(x, y, z, block);
@@ -655,9 +561,9 @@ public class Level {
 		return this.preventsRendering(x - distance, y - distance, z - distance) || this.preventsRendering(x - distance, y - distance, z + distance) || this.preventsRendering(x - distance, y + distance, z - distance) || this.preventsRendering(x - distance, y + distance, z + distance) || this.preventsRendering(x + distance, y - distance, z - distance) || this.preventsRendering(x + distance, y - distance, z + distance) || this.preventsRendering(x + distance, y + distance, z - distance) || this.preventsRendering(x + distance, y + distance, z + distance);
 	}
 
-	private boolean preventsRendering(float x, float y, float z) {
-		int tile = this.getTile((int) x, (int) y, (int) z);
-		return tile > 0 && Blocks.fromId(tile) != null && Blocks.fromId(tile).getPreventsRendering();
+	public boolean preventsRendering(float x, float y, float z) {
+		BlockType type = Blocks.fromId(this.getTile((int) x, (int) y, (int) z));
+		return type != null && type.getPreventsRendering();
 	}
 
 	public int getHighestTile(int x, int z) {
@@ -684,10 +590,6 @@ public class Level {
 		BlockType block = this.openclassic.getBlockTypeAt(x, y, z);
 		float mod = OpenClassic.getClient().getSettings().getBooleanSetting("options.night").getValue() ? 0.4F : 0;
 		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 - mod : 0.6F - mod;
-	}
-
-	public byte[] copyBlocks() {
-		return Arrays.copyOf(this.blocks, this.blocks.length);
 	}
 
 	public void setNetworkMode(boolean network) {
@@ -851,30 +753,6 @@ public class Level {
 		}
 	}
 
-	public void playSound(String name, Entity entity, float volume, float pitch) {
-		if(this.minecraft != null) {
-			Minecraft mc = this.minecraft;
-			if(!mc.settings.getBooleanSetting("options.sound").getValue()) {
-				return;
-			}
-
-			if(entity.distanceToSqr(mc.player) < 1024) {
-				mc.audio.playSound(name, entity.x, entity.y, entity.z, volume, pitch);
-			}
-		}
-	}
-
-	public void playSound(String name, float x, float y, float z, float volume, float pitch) {
-		if(this.minecraft != null) {
-			Minecraft mc = this.minecraft;
-			if(!mc.settings.getBooleanSetting("options.sound").getValue()) {
-				return;
-			}
-
-			mc.audio.playSound(name, x, y, z, volume, pitch);
-		}
-	}
-
 	public boolean maybeGrowTree(int x, int y, int z) {
 		int height = this.random.nextInt(3) + 4;
 		boolean spaceFree = true;
@@ -890,7 +768,7 @@ public class Level {
 
 			for(int bx = x - radius; bx <= x + radius && spaceFree; bx++) {
 				for(int bz = z - radius; bz <= z + radius && spaceFree; bz++) {
-					if(bx >= 0 && by >= 0 && bz >= 0 && bx < this.width && by < this.height && bz < this.depth) {
+					if(this.isInBounds(bx, by, bz)) {
 						if(this.getTile(bx, by, bz) != 0) {
 							spaceFree = false;
 						}
@@ -929,10 +807,6 @@ public class Level {
 		}
 	}
 
-	public Entity getPlayer() {
-		return this.minecraft.player;
-	}
-
 	public void addEntity(Entity entity) {
 		this.blockMap.insert(entity);
 		entity.setLevel(this);
@@ -956,7 +830,7 @@ public class Level {
 					float dy = by + 0.5F - y;
 					float dz = bz + 0.5F - z;
 					int tile = this.getTile(bx, by, bz);
-					if(bx >= 0 && by >= 0 && bz >= 0 && bx < this.width && by < this.height && bz < this.depth && dx * dx + dy * dy + dz * dz < power * power && tile > 0 && BlockUtils.canExplode(Blocks.fromId(tile))) {
+					if(this.isInBounds(bx, by, bz) && dx * dx + dy * dy + dz * dz < power * power && tile > 0 && BlockUtils.canExplode(Blocks.fromId(tile))) {
 						BlockUtils.dropItems(tile, this, bx, by, bz, 0.3F);
 						this.setTile(bx, by, bz, 0);
 						if(Blocks.fromId(tile) == VanillaBlock.TNT && !this.creativeMode) {
@@ -977,17 +851,6 @@ public class Level {
 				e.hurt(entity, (int) ((1.0F - pow) * 15.0F + 1.0F));
 			}
 		}
-
-	}
-
-	public Entity findSubclassOf(Class<? extends Entity> clazz) {
-		for(Entity entity : this.blockMap.all) {
-			if(clazz.isAssignableFrom(entity.getClass())) {
-				return entity;
-			}
-		}
-
-		return null;
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -6,7 +6,6 @@ public final class Timer {
 	public double lastHR;
 	public int elapsedTicks;
 	public float delta;
-	public float speed = 1;
 	public float elapsedPartialTicks = 0;
 	public long lastSysClock;
 	public long lastHRClock;
@@ -45,7 +44,7 @@ public final class Timer {
 			add = 1;
 		}
 
-		this.elapsedPartialTicks = (float) (this.elapsedPartialTicks + add * this.speed * this.tps);
+		this.elapsedPartialTicks = (float) (this.elapsedPartialTicks + add * this.tps);
 		this.elapsedTicks = (int) this.elapsedPartialTicks;
 		if(this.elapsedTicks > 100) {
 			this.elapsedTicks = 100;
