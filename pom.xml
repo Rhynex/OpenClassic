@@ -35,22 +35,28 @@
     		</developer>
   	</developers>
 
-       <distributionManagement>        
-                <repository>            
-                        <id>dropbox</id>                        
-                        <url>file://C:\Users\Steven\Dropbox\Public\maven</url>                      
-                </repository>           
-        </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>Spacebase Artifactory</id>
+			<name>Spacebase Artifactory-releases</name>
+			<url>http://repo.spacebase.ch/artifactory/main</url>
+		</repository>
+		<snapshotRepository>
+			<id>Spacebase Artifactory</id>
+			<name>Spacebase Artifactory-snapshots</name>
+			<url>http://repo.spacebase.ch/artifactory/main</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<repositories>
     		<repository>
         		<id>maven-central</id>
         		<url>http://central.maven.org/maven2</url>
     		</repository>
-              	<repository>
-                    	<id>spacebase</id>
-                    	<url>http://repo.spacebase.ch</url>
-              	</repository>
+			<repository>
+				<id>Spacebase Artifactory</id>
+				<url>http://repo.spacebase.ch/artifactory/main</url>
+			</repository>
 	</repositories>
 
 	<!--  Dependencies -->

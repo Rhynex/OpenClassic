@@ -616,10 +616,10 @@ public class Minecraft implements Runnable {
 			ByteBuffer buffer = BufferUtils.createByteBuffer(animation.textureData.length);
 			buffer.put(animation.textureData);
 			buffer.flip();
-			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, animation.textureId % 16 << 4, animation.textureId / 16 << 4, 16, 16, 6408, 5121, buffer);
+			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, animation.textureId % 16 << 4, animation.textureId / 16 << 4, 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 			if(animation instanceof WaterTexture) {
 				RenderHelper.getHelper().bindTexture("/water.png", true);
-				GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 16, 16, 6408, 5121, buffer);
+				GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 				RenderHelper.getHelper().bindTexture("/terrain.png", true);
 			}
 		}
