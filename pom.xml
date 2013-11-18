@@ -18,7 +18,7 @@
 	</licenses>
 
 	<scm>
-    		<connection>scm:git:git@github.com:Steveice10/OpenClassic.git</connection>
+    	<connection>scm:git:git@github.com:Steveice10/OpenClassic.git</connection>
 		<developerConnection>scm:git:git@github.com:Steveice10/OpenClassic.git</developerConnection>
 		<url>git@github.com:Steveice10/OpenClassic/</url>
 	</scm>
@@ -27,44 +27,44 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-  	<developers>
-    		<developer>
-      			<id>steveice10</id>
-      			<name>Steveice10</name>
-      			<email>Steveice10@gmail.com</email>
-    		</developer>
-  	</developers>
-
 	<distributionManagement>
 		<repository>
-			<id>Spacebase Artifactory</id>
-			<name>Spacebase Artifactory-releases</name>
-			<url>http://repo.spacebase.ch/artifactory/main</url>
+			<id>spacebase</id>
+			<name>spacebase-releases</name>
+			<url>http://repo.spacebase.ch/content/repositories/release/</url>
 		</repository>
 		<snapshotRepository>
-			<id>Spacebase Artifactory</id>
-			<name>Spacebase Artifactory-snapshots</name>
-			<url>http://repo.spacebase.ch/artifactory/main</url>
+			<id>spacebase</id>
+			<name>spacebase-snapshots</name>
+			<url>http://repo.spacebase.ch/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
-	<repositories>
-    		<repository>
-        		<id>maven-central</id>
-        		<url>http://central.maven.org/maven2</url>
-    		</repository>
-			<repository>
-				<id>Spacebase Artifactory</id>
-				<url>http://repo.spacebase.ch/artifactory/main</url>
-			</repository>
-	</repositories>
+  	<developers>
+    	<developer>
+      		<id>steveice10</id>
+      		<name>Steveice10</name>
+      		<email>Steveice10@gmail.com</email>
+    	</developer>
+  	</developers>
+
+    <repositories>
+		<repository>
+			<id>spacebase-releases</id>
+			<url>http://repo.spacebase.ch/content/repositories/release/</url>
+		</repository>
+		<repository>
+			<id>spacebase-snapshots</id>
+			<url>http://repo.spacebase.ch/content/repositories/snapshots/</url>
+		</repository>
+    </repositories>
 
 	<!--  Dependencies -->
 	<dependencies>
   		<dependency>
-    			<groupId>ch.spacebase</groupId>
-    			<artifactId>openclassicapi</artifactId>
-    			<version>1.3.11-SNAPSHOT</version>
+    		<groupId>ch.spacebase</groupId>
+    		<artifactId>openclassicapi</artifactId>
+    		<version>1.3.11-SNAPSHOT</version>
   		</dependency>
 		<dependency>
  		   	<groupId>org.lwjgl.lwjgl</groupId>
