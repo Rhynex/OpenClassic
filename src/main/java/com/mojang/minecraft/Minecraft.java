@@ -288,8 +288,11 @@ public class Minecraft implements Runnable {
 		this.particleManager = new ParticleManager(this.textureManager);
 		this.hud = new HUDScreen();
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
-		this.mode.apply(this.level);
-		this.mode.apply(this.player);
+		if(this.level != null) {
+			this.mode.apply(this.level);
+			this.mode.apply(this.player);
+		}
+		
 		this.ingame = true;
 	}
 

@@ -186,9 +186,11 @@ public class Level {
 				for(int z = z0; z < z1; z++) {
 					if(this.isInBounds(x, y, z)) {
 						BlockType type = Blocks.fromId(this.getTile(x, y, z));
-						BoundingBox bb2 = type.getModel().getCollisionBox(x, y, z);
-						if(type != null && bb2 != null && bb.intersectsInner(bb2)) {
-							ret.add(bb2);
+						if(type != null) {
+							BoundingBox bb2 = type.getModel().getCollisionBox(x, y, z);
+							if(type != null && bb2 != null && bb.intersectsInner(bb2)) {
+								ret.add(bb2);
+							}
 						}
 					} else if(x < 0 || y < 0 || z < 0 || x >= this.width || z >= this.depth) {
 						BoundingBox bb2 = VanillaBlock.BEDROCK.getModel().getCollisionBox(x, y, z);

@@ -13,7 +13,7 @@ import com.mojang.minecraft.entity.mob.Skeleton;
 import com.mojang.minecraft.entity.mob.Spider;
 import com.mojang.minecraft.entity.mob.Zombie;
 
-public final class MobSpawner {
+public class MobSpawner {
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends Mob> ANIMALS[] = new Class[] { Pig.class, Sheep.class };
@@ -26,7 +26,7 @@ public final class MobSpawner {
 		this.level = level;
 	}
 
-	public final int spawn(int max, Entity player, ClientProgressBar progress) {
+	public int spawn(int max, Entity player, ClientProgressBar progress) {
 		if(progress != null) {
 			progress.setText("Spawning...");
 		}
@@ -96,4 +96,5 @@ public final class MobSpawner {
 
 		return count;
 	}
+	
 }

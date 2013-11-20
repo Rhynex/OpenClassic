@@ -17,8 +17,6 @@ public class ClassicDecoder extends ReplayingDecoder<VoidEnum> {
 	protected Object decode(ChannelHandlerContext context, Channel channel, ChannelBuffer buffer, VoidEnum state) throws Exception {
 		int opcode = buffer.readUnsignedByte();
 		MessageCodec<?> codec = CodecLookup.find(opcode);
-		System.out.println(opcode + ", " + (codec != null ? codec.getClass().getSimpleName() : "null"));
-
 		if(codec == null) {
 			OpenClassic.getLogger().warning("Invalid packet ID " + opcode + "! (previous ID = " + this.previousOpcode + ") Disconnecting user...");
 			if(context.getAttachment() instanceof ServerSession) {
