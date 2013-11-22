@@ -80,6 +80,7 @@ public class ServerListScreen extends GuiScreen {
 			this.title = OpenClassic.getGame().getTranslator().translate("gui.favorites.select");
 			this.select = false;
 			ServerDataStore.addFavorite(server.name, server.getUrl());
+			ServerDataStore.saveFavorites();
 		} else {
 			OpenClassic.getClient().joinServer(server.getUrl());
 		}
