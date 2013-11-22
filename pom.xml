@@ -87,11 +87,11 @@
    			<version>2.9.0</version>
     			<type>pom</type>
 		</dependency>
-        	<dependency>
-            		<groupId>jline</groupId>
-            		<artifactId>jline</artifactId>
-            		<version>1.0</version>
-        	</dependency>
+        <dependency>
+			<groupId>jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>1.0</version>
+        </dependency>
   		<dependency>
     			<groupId>io.netty</groupId>
     			<artifactId>netty</artifactId>

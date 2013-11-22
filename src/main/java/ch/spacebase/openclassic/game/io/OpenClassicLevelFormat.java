@@ -3,7 +3,6 @@ package ch.spacebase.openclassic.game.io;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
@@ -15,9 +14,7 @@ import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
-import ch.spacebase.opennbt.TagBuilder;
-import ch.spacebase.opennbt.stream.NBTInputStream;
-import ch.spacebase.opennbt.stream.NBTOutputStream;
+import ch.spacebase.opennbt.NBTFileIO;
 import ch.spacebase.opennbt.tag.ByteArrayTag;
 import ch.spacebase.opennbt.tag.ByteTag;
 import ch.spacebase.opennbt.tag.CompoundTag;
@@ -78,9 +75,7 @@ public class OpenClassicLevelFormat {
 			}
 		}
 
-		FileInputStream in = new FileInputStream(levelFile);
-		NBTInputStream nbt = new NBTInputStream(in);
-		CompoundTag root = (CompoundTag) nbt.readTag();
+		CompoundTag root = NBTFileIO.readFile(levelFile);
 		CompoundTag info = (CompoundTag) root.get("Info");
 		if(info.get("Version") == null) {
 			readOldNbt(level, root, info);
@@ -107,12 +102,10 @@ public class OpenClassicLevelFormat {
 				byte blocks[] = ((ByteArrayTag) map.get("Blocks")).getValue();
 				level.setData(width, height, depth, blocks);
 			} else {
-				IOUtils.closeQuietly(nbt);
 				throw new IOException("Unknown OpenClassic map version: " + version);
 			}
 		}
 
-		IOUtils.closeQuietly(nbt);
 		return level;
 	}
 
@@ -175,35 +168,32 @@ public class OpenClassicLevelFormat {
 	}
 
 	public static void save(Level level) throws IOException {
-		FileOutputStream out = new FileOutputStream(new File(OpenClassic.getGame().getDirectory(), "levels/" + level.getName() + ".map"));
-		NBTOutputStream nbt = new NBTOutputStream(out);
+		File file = new File(OpenClassic.getGame().getDirectory(), "levels/" + level.getName() + ".map");
+		CompoundTag root = new CompoundTag("Level");
 
-		TagBuilder root = new TagBuilder("Level");
+		CompoundTag info = new CompoundTag("Info");
+		info.put(new IntTag("Version", 1));
+		info.put(new StringTag("Name", level.getName()));
+		info.put(new StringTag("Author", level.getAuthor()));
+		info.put(new LongTag("CreationTime", level.getCreationTime()));
+		root.put(info);
 
-		TagBuilder info = new TagBuilder("Info");
-		info.append("Version", 1);
-		info.append("Name", level.getName());
-		info.append("Author", level.getAuthor());
-		info.append("CreationTime", level.getCreationTime());
-		root.append(info);
+		CompoundTag spawn = new CompoundTag("Spawn");
+		spawn.put(new FloatTag("x", level.getSpawn().getX()));
+		spawn.put(new FloatTag("y", level.getSpawn().getY()));
+		spawn.put(new FloatTag("z", level.getSpawn().getZ()));
+		spawn.put(new FloatTag("yaw", level.getSpawn().getYaw()));
+		spawn.put(new FloatTag("pitch", level.getSpawn().getPitch()));
+		root.put(spawn);
 
-		TagBuilder spawn = new TagBuilder("Spawn");
-		spawn.append("x", level.getSpawn().getX());
-		spawn.append("y", level.getSpawn().getY());
-		spawn.append("z", level.getSpawn().getZ());
-		spawn.append("yaw", level.getSpawn().getYaw());
-		spawn.append("pitch", level.getSpawn().getPitch());
-		root.append(spawn);
+		CompoundTag map = new CompoundTag("Map");
+		map.put(new ShortTag("Width", level.getWidth()));
+		map.put(new ShortTag("Height", level.getHeight()));
+		map.put(new ShortTag("Depth", level.getDepth()));
+		map.put(new ByteArrayTag("Blocks", level.getBlocks()));
+		root.put(map);
 
-		TagBuilder map = new TagBuilder("Map");
-		map.append("Width", level.getWidth());
-		map.append("Height", level.getHeight());
-		map.append("Depth", level.getDepth());
-		map.append("Blocks", level.getBlocks());
-		root.append(map);
-
-		nbt.writeTag(root.toCompoundTag());
-		IOUtils.closeQuietly(nbt);
+		NBTFileIO.writeFile(root, file);
 	}
 
 	private static String readString(DataInputStream in) throws IOException {

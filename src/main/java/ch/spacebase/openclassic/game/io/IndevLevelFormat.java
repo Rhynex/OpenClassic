@@ -1,16 +1,13 @@
 package ch.spacebase.openclassic.game.io;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-
-import org.apache.commons.io.IOUtils;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
-import ch.spacebase.opennbt.stream.NBTInputStream;
+import ch.spacebase.opennbt.NBTFileIO;
 import ch.spacebase.opennbt.tag.ByteArrayTag;
 import ch.spacebase.opennbt.tag.CompoundTag;
 import ch.spacebase.opennbt.tag.ListTag;
@@ -23,8 +20,7 @@ public class IndevLevelFormat {
 	@SuppressWarnings("unchecked")
 	public static Level read(ClassicLevel level, String file) throws IOException {
 		File f = new File(OpenClassic.getGame().getDirectory(), file);
-		NBTInputStream in = new NBTInputStream(new FileInputStream(f));
-		CompoundTag data = (CompoundTag) in.readTag();
+		CompoundTag data = NBTFileIO.readFile(f);
 		CompoundTag map = (CompoundTag) data.get("Map");
 		ListTag<ShortTag> spawn = (ListTag<ShortTag>) map.get("Spawn");
 		CompoundTag about = (CompoundTag) data.get("About");
@@ -52,8 +48,6 @@ public class IndevLevelFormat {
 		level.setData(width, height, depth, blocks);
 
 		level.setSpawn(new Position(level, (float) x, (float) y, (float) z));
-		IOUtils.closeQuietly(in);
-
 		try {
 			f.delete();
 		} catch(SecurityException e) {
