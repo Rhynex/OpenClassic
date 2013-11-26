@@ -61,6 +61,7 @@ import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.gui.IngameMenuScreen;
 import ch.spacebase.openclassic.client.network.ClientSession;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 import ch.spacebase.openclassic.client.settings.MusicSetting;
@@ -120,7 +121,6 @@ public class Minecraft implements Runnable {
 	public LevelRenderer levelRenderer;
 	public LocalPlayer player;
 	public ParticleManager particleManager;
-	public String username = null;
 	public Canvas canvas;
 	public TextureManager textureManager;
 	public FontRenderer fontRenderer;
@@ -160,6 +160,7 @@ public class Minecraft implements Runnable {
 	public Bindings bindings;
 	public boolean hacks = true;
 	public String tempKey = null;
+	public ClientPlayer ocPlayer = new ClientPlayer();
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -208,7 +209,7 @@ public class Minecraft implements Runnable {
 
 			Mouse.setGrabbed(false);
 			screen.setSize(this.width, this.height);
-			screen.onOpen();
+			screen.onOpen(this.ocPlayer);
 		} else {
 			this.grabMouse();
 		}
@@ -242,7 +243,7 @@ public class Minecraft implements Runnable {
 		}
 
 		if(this.player == null) {
-			this.player = new LocalPlayer(level, this.username != null ? this.username : "Player");
+			this.player = new LocalPlayer(level, this.ocPlayer);
 			this.player.resetPos();
 			this.mode.preparePlayer(this.player);
 		}
@@ -283,7 +284,7 @@ public class Minecraft implements Runnable {
 		}
 		
 		if(this.server != null) {
-			this.session = new ClientSession(this.player.openclassic, this.tempKey, this.server, this.port);
+			this.session = new ClientSession(this.ocPlayer, this.tempKey, this.server, this.port);
 			this.tempKey = null;
 		}
 
@@ -305,8 +306,8 @@ public class Minecraft implements Runnable {
 		this.level = null;
 		this.particleManager = null;
 		this.mainScreen = null;
-		if(this.player != null && this.player.openclassic.getData() != null && !this.isInMultiplayer()) {
-			this.player.openclassic.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
+		if(this.player != null && this.ocPlayer.getData() != null && !this.isInMultiplayer()) {
+			this.ocPlayer.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 		}
 
 		if(this.isInMultiplayer()) {
@@ -330,6 +331,7 @@ public class Minecraft implements Runnable {
 		this.port = 0;
 		this.ingame = false;
 		this.player = null;
+		this.ocPlayer.setHandle(null);
 		this.hideGui = false;
 		this.hacks = true;
 	}
@@ -1187,7 +1189,7 @@ public class Minecraft implements Runnable {
 					}
 
 					if(button == 0) {
-						if(this.level != null && (Blocks.fromId(this.level.getTile(x, y, z)) != VanillaBlock.BEDROCK || this.player.openclassic.canBreakBedrock())) {
+						if(this.level != null && (Blocks.fromId(this.level.getTile(x, y, z)) != VanillaBlock.BEDROCK || this.ocPlayer.canBreakBedrock())) {
 							this.mode.hitBlock(x, y, z);
 							return;
 						}
@@ -1197,8 +1199,8 @@ public class Minecraft implements Runnable {
 							return;
 						}
 
-						if(this.player.openclassic.getPlaceMode() > 0) {
-							id = this.player.openclassic.getPlaceMode();
+						if(this.ocPlayer.getPlaceMode() > 0) {
+							id = this.ocPlayer.getPlaceMode();
 						}
 
 						BlockType block = this.level.openclassic.getBlockTypeAt(x, y, z);
@@ -1372,10 +1374,10 @@ public class Minecraft implements Runnable {
 
 						try {
 							ImageIO.write(image, "PNG", file);
-							if(this.mainScreen != null) this.player.openclassic.sendMessage("screenshot.saved", file.getName());
+							if(this.mainScreen != null) this.ocPlayer.sendMessage("screenshot.saved", file.getName());
 						} catch(IOException e) {
 							e.printStackTrace();
-							if(this.mainScreen != null) this.player.openclassic.sendMessage("screenshot.error", file.getName());
+							if(this.mainScreen != null) this.ocPlayer.sendMessage("screenshot.error", file.getName());
 						}
 					}
 
@@ -1528,7 +1530,7 @@ public class Minecraft implements Runnable {
 				block = Blocks.fromId(id);
 			}
 
-			block = this.player.openclassic != null && this.player.openclassic.getPlaceMode() != 0 ? Blocks.fromId(this.player.openclassic.getPlaceMode()) : block;
+			block = this.ocPlayer != null && this.ocPlayer.getPlaceMode() != 0 ? Blocks.fromId(this.ocPlayer.getPlaceMode()) : block;
 
 			float position = (block == this.heldBlock.block ? 1 : 0) - this.heldBlock.heldPosition;
 			if(position < -0.4F) {

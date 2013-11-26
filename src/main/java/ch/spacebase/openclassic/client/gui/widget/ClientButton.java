@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.gui.widget;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.gui.Screen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
@@ -14,6 +15,18 @@ public class ClientButton extends Button {
 	
 	public ClientButton(int id, int x, int y, int width, int height, Screen parent, String text) {
 		super(id, x, y, width, height, parent, text);
+	}
+	
+	@Override
+	public void onMouseClick(int x, int y, int button) {
+		if(button != 0 || !this.isActive()) {
+			return;
+		}
+		
+		OpenClassic.getGame().getAudioManager().playSound("random.click", 1, 1);
+		if(this.getCallback() != null) {
+			this.getCallback().onButtonClick(this);
+		}
 	}
 
 	@Override

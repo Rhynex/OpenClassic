@@ -21,7 +21,8 @@ import ch.spacebase.openclassic.api.gui.widget.Label;
 import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
@@ -31,7 +32,8 @@ import ch.spacebase.openclassic.game.util.InternalConstants;
 
 public class LoginScreen extends GuiScreen {
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.login")).setCallback(new ButtonCallback() {
@@ -120,6 +122,7 @@ public class LoginScreen extends GuiScreen {
 		}
 	}
 
+	@Override
 	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
 		this.getWidget(1, Button.class).setActive(this.getWidget(3, TextBox.class).getText().length() > 0 && this.getWidget(4, TextBox.class).getText().length() > 0);
@@ -157,7 +160,7 @@ public class LoginScreen extends GuiScreen {
 		if(cookie != null) result = HTTPUtil.fetchUrl(InternalConstants.MINECRAFT_URL_HTTPS, "", InternalConstants.MINECRAFT_URL_HTTPS + "login");
 
 		if(result.contains("Logged in as")) {
-			GeneralUtils.getMinecraft().username = result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | "));
+			((ClientPlayer) OpenClassic.getClient().getPlayer()).setName(result.substring(result.indexOf("Logged in as ") + 13, result.indexOf(" | ")));
 			parseServers(HTTPUtil.rawFetchUrl(InternalConstants.MINECRAFT_URL_HTTPS + "classic/list", "", InternalConstants.MINECRAFT_URL_HTTPS));
 			return true;
 		}

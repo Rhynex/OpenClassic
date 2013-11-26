@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
@@ -23,11 +24,9 @@ public class LocalPlayer extends Player {
 	public float oBob;
 	public float bob;
 	public boolean speedHack = false;
-	private String name;
 
-	public LocalPlayer(Level level, String name) {
-		super(level, 0, 0, 0);
-		this.name = name;
+	public LocalPlayer(Level level, ClientPlayer openclassic) {
+		super(level, 0, 0, 0, openclassic);
 		if(level != null) {
 			level.removeEntity(this);
 			level.addEntity(this);
@@ -175,11 +174,6 @@ public class LocalPlayer extends Player {
 		}
 
 		super.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
-	}
-	
-	@Override
-	public String getName() {
-		return this.name;
 	}
 
 	public static class PlayerAI extends BasicAI {

@@ -1,6 +1,6 @@
 package ch.spacebase.openclassic.client.gui;
 
-public final class ChatLine {
+public class ChatLine {
 
 	private String message;
 	private int time;

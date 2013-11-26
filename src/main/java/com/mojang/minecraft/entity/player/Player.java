@@ -20,16 +20,19 @@ public abstract class Player extends HumanoidMob {
 	public int score = 0;
 	public int arrows = 20;
 	
-	public ClientPlayer openclassic = new ClientPlayer(this);
+	public ClientPlayer openclassic;
 
-	public Player(Level level, float x, float y, float z) {
+	public Player(Level level, float x, float y, float z, ClientPlayer openclassic) {
 		super(level, x, y, z);
 		this.armor = false;
 		this.helmet = false;
+		this.openclassic = openclassic;
 		OpenClassic.getGame().getScheduler().scheduleAsyncTask(this, new SkinDownloadTask(this));
 	}
 	
-	public abstract String getName();
+	public String getName() {
+		return this.openclassic.getName() != null ? this.openclassic.getName() : "Player";
+	}
 
 	public void bindTexture(TextureManager textures) {
 		this.textures = textures;

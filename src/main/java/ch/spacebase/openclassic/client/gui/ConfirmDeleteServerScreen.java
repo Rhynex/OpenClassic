@@ -5,6 +5,7 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
 
 public class ConfirmDeleteServerScreen extends GuiScreen {
@@ -17,7 +18,8 @@ public class ConfirmDeleteServerScreen extends GuiScreen {
 		this.name = name;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 102, this.getHeight() / 6 + 132, 100, 20, this, "Yes").setCallback(new ButtonCallback() {

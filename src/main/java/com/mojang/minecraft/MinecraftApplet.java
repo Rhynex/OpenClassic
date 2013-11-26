@@ -14,7 +14,7 @@ public class MinecraftApplet extends Applet {
 		this.minecraft = new Minecraft(this.canvas, this.getWidth(), this.getHeight());
 		this.canvas.setMinecraft(this.minecraft);
 		if(this.getParameter("username") != null) {
-			this.minecraft.username = this.getParameter("username");
+			this.minecraft.ocPlayer.setName(this.getParameter("username"));
 			if(this.getParameter("mppass") != null && !this.getParameter("mppass").equals("")) {
 				this.minecraft.tempKey = this.getParameter("mppass");
 			}

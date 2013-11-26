@@ -11,6 +11,7 @@ import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.InputHelper;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.settings.bindings.Bindings;
 import ch.spacebase.openclassic.api.settings.bindings.KeyBinding;
 
@@ -26,7 +27,7 @@ public class ControlsScreen extends GuiScreen {
 	}
 
 	@Override
-	public void onOpen() {
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		if(OpenClassic.getClient().isInGame()) {
 			this.attachWidget(WidgetFactory.getFactory().newTranslucentBackground(0, this));

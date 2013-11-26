@@ -11,6 +11,7 @@ import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.Label;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
 
 public class FavoriteServersScreen extends GuiScreen {
@@ -22,7 +23,8 @@ public class FavoriteServersScreen extends GuiScreen {
 		this.parent = parent;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		ButtonList list = new ButtonList(1, this);
@@ -71,23 +73,6 @@ public class FavoriteServersScreen extends GuiScreen {
 		this.attachWidget(WidgetFactory.getFactory().newLabel(5, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
 	
 		this.getWidget(1, ButtonList.class).setContents(new ArrayList<String>(ServerDataStore.getFavorites().keySet()));
-	}
-
-	public final void onButtonClick(Button button) {
-		if(button.getId() == 2) {
-			OpenClassic.getClient().setCurrentScreen(new AddFavoriteScreen(this));
-		}
-
-		if(button.getId() == 3) {
-			Label label = this.getWidget(5, Label.class);
-			if(this.delete) {
-				label.setText(OpenClassic.getGame().getTranslator().translate("gui.favorites.select"));
-				this.delete = false;
-			} else {
-				label.setText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.favorites.delete"));
-				this.delete = true;
-			}
-		}
 	}
 	
 }

@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.api.gui.widget.StateButton;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.level.LevelInfo;
+import ch.spacebase.openclassic.api.player.Player;
 
 public class LevelCreateScreen extends GuiScreen {
 
@@ -18,7 +19,8 @@ public class LevelCreateScreen extends GuiScreen {
 		this.parent = parent;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newStateButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 48, this, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")).setCallback(new ButtonCallback() {
@@ -71,6 +73,7 @@ public class LevelCreateScreen extends GuiScreen {
 		this.getWidget(4, Button.class).setActive(false);
 	}
 
+	@Override
 	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
 		TextBox text = this.getWidget(6, TextBox.class);

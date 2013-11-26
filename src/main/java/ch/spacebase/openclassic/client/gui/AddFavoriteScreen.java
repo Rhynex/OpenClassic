@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
 
 public class AddFavoriteScreen extends GuiScreen {
@@ -16,7 +17,8 @@ public class AddFavoriteScreen extends GuiScreen {
 		this.parent = parent;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")).setCallback(new ButtonCallback() {
@@ -45,6 +47,7 @@ public class AddFavoriteScreen extends GuiScreen {
 		this.getWidget(1, Button.class).setActive(false);
 	}
 
+	@Override
 	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
 		this.getWidget(1, Button.class).setActive(this.getWidget(3, TextBox.class).getText().length() > 0 && this.getWidget(4, TextBox.class).getText().length() > 0);

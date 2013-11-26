@@ -15,6 +15,7 @@ import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.FadingBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.Mouse;
+import ch.spacebase.openclassic.api.player.Player;
 
 public class BlockSelectScreen extends GuiScreen {
 
@@ -22,7 +23,7 @@ public class BlockSelectScreen extends GuiScreen {
 	private int page = 0;
 
 	@Override
-	public void onOpen() {
+	public void onOpen(Player viewer) {
 		int count = 0;
 		for(BlockType block : Blocks.getBlocks()) {
 			if(block != null && block.isSelectable()) {

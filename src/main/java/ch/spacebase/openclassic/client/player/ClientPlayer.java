@@ -23,15 +23,19 @@ import com.zachsthings.onevent.EventManager;
 
 public class ClientPlayer implements Player {
 
+	private String name;
 	private com.mojang.minecraft.entity.player.Player handle;
 	private byte placeMode = 0;
 	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
 	private boolean breakBedrock = false;
 
-	public ClientPlayer(com.mojang.minecraft.entity.player.Player handle) {
-		this.handle = handle;
-		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
+	public ClientPlayer() {
+		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/" + name + ".nbt");
+	}
+	
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override
@@ -76,7 +80,7 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public String getName() {
-		return this.handle.getName();
+		return this.name;
 	}
 
 	@Override
@@ -159,6 +163,12 @@ public class ClientPlayer implements Player {
 
 	public com.mojang.minecraft.entity.player.Player getHandle() {
 		return this.handle;
+	}
+	
+	public void setHandle(com.mojang.minecraft.entity.player.Player handle) {
+		this.handle = handle;
+		this.placeMode = 0;
+		this.breakBedrock = false;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.Keyboard;
+import ch.spacebase.openclassic.api.player.Player;
 
 public class ErrorScreen extends GuiScreen {
 
@@ -17,7 +18,8 @@ public class ErrorScreen extends GuiScreen {
 		this.message = message;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 6 + 120 + 12, this, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")).setCallback(new ButtonCallback() {
@@ -31,6 +33,7 @@ public class ErrorScreen extends GuiScreen {
 		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 110, this, this.message, true));
 	}
 
+	@Override
 	public void onKeyPress(char c, int key) {
 		if(key != Keyboard.KEY_ESCAPE) {
 			super.onKeyPress(c, key);

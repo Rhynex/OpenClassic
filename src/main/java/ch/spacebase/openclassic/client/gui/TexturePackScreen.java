@@ -11,6 +11,7 @@ import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.Label;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class TexturePackScreen extends GuiScreen {
@@ -22,7 +23,8 @@ public class TexturePackScreen extends GuiScreen {
 		this.parent = parent;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		ButtonList list = new ButtonList(1, this);

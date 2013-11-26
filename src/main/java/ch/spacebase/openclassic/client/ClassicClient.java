@@ -115,7 +115,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		
 		com.mojang.minecraft.level.Level level = new com.mojang.minecraft.level.Level();
 		level.name = info.getName();
-		level.creator = this.mc.username != null ? this.mc.username : "unknown";
+		level.creator = this.getPlayer().getName() != null ? this.getPlayer().getName() : "unknown";
 		level.createTime = System.currentTimeMillis();
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);

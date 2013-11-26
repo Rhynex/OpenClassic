@@ -11,9 +11,9 @@ public class MusicStopMessageHandler extends MessageHandler<MusicStopMessage> {
 	@Override
 	public void handle(ClassicSession session, Player player, MusicStopMessage message) {
 		if(message.getIdentifier().equals("all_music")) {
-			OpenClassic.getClient().getAudioManager().stopMusic();
+			OpenClassic.getGame().getAudioManager().stopMusic();
 		} else {
-			OpenClassic.getClient().getAudioManager().stop(message.getIdentifier());
+			OpenClassic.getGame().getAudioManager().stop(message.getIdentifier());
 		}
 	}
 

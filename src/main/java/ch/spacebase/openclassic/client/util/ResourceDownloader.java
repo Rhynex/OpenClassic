@@ -76,13 +76,13 @@ public final class ResourceDownloader extends Thread {
 				} else {
 					int index = split[0].indexOf("/");
 					if(split[0].substring(0, index).equalsIgnoreCase("sound")) {
-						OpenClassic.getClient().getAudioManager().registerSound(split[0].substring(index + 1, split[0].length() - 4).replaceAll("[1-9]", "").replaceAll("/", "."), file.toURI().toURL(), true);
+						OpenClassic.getGame().getAudioManager().registerSound(split[0].substring(index + 1, split[0].length() - 4).replaceAll("[1-9]", "").replaceAll("/", "."), file.toURI().toURL(), true);
 					} else if(split[0].substring(0, index).equalsIgnoreCase("music")) {
 						if(split[0].contains("sweden")) {
-							OpenClassic.getClient().getAudioManager().registerMusic("menu", file.toURI().toURL(), true);
+							OpenClassic.getGame().getAudioManager().registerMusic("menu", file.toURI().toURL(), true);
 						}
 
-						OpenClassic.getClient().getAudioManager().registerMusic("bg", file.toURI().toURL(), true);
+						OpenClassic.getGame().getAudioManager().registerMusic("bg", file.toURI().toURL(), true);
 					}
 				}
 			} catch(Exception e) {

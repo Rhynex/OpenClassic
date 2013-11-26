@@ -10,7 +10,8 @@ import ch.spacebase.openclassic.api.util.Constants;
 
 public class GameOverScreen extends GuiScreen {
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newTranslucentBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 72, this, OpenClassic.getGame().getTranslator().translate("gui.game-over.respawn")).setCallback(new ButtonCallback() {

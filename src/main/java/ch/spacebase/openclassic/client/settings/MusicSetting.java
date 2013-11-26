@@ -13,7 +13,7 @@ public class MusicSetting extends BooleanSetting {
 	public void toggle() {
 		super.toggle();
 		if(!this.getValue()) {
-			OpenClassic.getClient().getAudioManager().stopMusic();
+			OpenClassic.getGame().getAudioManager().stopMusic();
 		}
 	}
 

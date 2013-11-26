@@ -11,9 +11,9 @@ public class AudioPlayMessageHandler extends MessageHandler<AudioPlayMessage> {
 	@Override
 	public void handle(ClassicSession session, Player player, AudioPlayMessage message) {
 		if(message.isMusic()) {
-			OpenClassic.getClient().getAudioManager().playMusic(message.getIdentifier(), message.isLooping());
+			OpenClassic.getGame().getAudioManager().playMusic(message.getIdentifier(), message.isLooping());
 		} else {
-			OpenClassic.getClient().getAudioManager().playSound(message.getIdentifier(), message.getX(), message.getY(), message.getZ(), message.getVolume(), message.getPitch());
+			OpenClassic.getGame().getAudioManager().playSound(message.getIdentifier(), message.getX(), message.getY(), message.getZ(), message.getVolume(), message.getPitch());
 		}
 	}
 

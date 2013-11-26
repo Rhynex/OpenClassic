@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 
 public class LevelDumpScreen extends GuiScreen {
 
@@ -15,7 +16,8 @@ public class LevelDumpScreen extends GuiScreen {
 		this.parent = parent;
 	}
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newTextBox(1, this.getWidth() / 2 - 100, this.getHeight() / 2 - 30, this, 30));
@@ -39,6 +41,7 @@ public class LevelDumpScreen extends GuiScreen {
 		this.getWidget(2, Button.class).setActive(false);
 	}
 
+	@Override
 	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
 		this.getWidget(2, Button.class).setActive(this.getWidget(1, TextBox.class).getText().trim().length() > 0);

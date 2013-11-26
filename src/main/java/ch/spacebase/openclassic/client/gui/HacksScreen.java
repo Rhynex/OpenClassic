@@ -10,6 +10,7 @@ import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.settings.Settings;
 
 public class HacksScreen extends GuiScreen {
@@ -23,7 +24,7 @@ public class HacksScreen extends GuiScreen {
 	}
 
 	@Override
-	public void onOpen() {
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		if(OpenClassic.getClient().isInGame()) {
 			this.attachWidget(WidgetFactory.getFactory().newTranslucentBackground(0, this));

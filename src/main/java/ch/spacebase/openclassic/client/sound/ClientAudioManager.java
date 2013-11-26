@@ -190,7 +190,10 @@ public class ClientAudioManager implements AudioManager {
 		List<URL> files = this.music.get(music);
 		if(files != null) {
 			URL file = files.get(rand.nextInt(files.size()));
-			if(this.isPlaying(music)) return true;
+			if(this.isPlaying(music)) {
+				return true;
+			}
+			
 			if(this.isPlayingMusic()) {
 				this.stopMusic();
 			}
@@ -205,7 +208,9 @@ public class ClientAudioManager implements AudioManager {
 
 	public boolean isPlayingMusic() {
 		for(String music : this.music.keySet()) {
-			if(this.isPlaying(music)) return true;
+			if(this.isPlaying(music)) {
+				return true;
+			}
 		}
 
 		return false;

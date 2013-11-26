@@ -31,6 +31,7 @@ public class ClientMainScreen extends MainScreen {
 		this.height = RenderHelper.getHelper().getGuiHeight();
 	}
 	
+	@Override
 	public void update(int mouseX, int mouseY) {
 		this.ticks++;
 		for(int index = 0; index < this.chatHistory.size(); index++) {

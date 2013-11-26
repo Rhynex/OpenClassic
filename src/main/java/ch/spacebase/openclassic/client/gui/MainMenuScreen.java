@@ -5,12 +5,13 @@ import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.render.GuiTextures;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class MainMenuScreen extends GuiScreen {
 
-	public void onOpen() {
+	@Override
+	public void onOpen(Player viewer) {
 		this.clearWidgets();
 		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
 		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 16, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.singleplayer")).setCallback(new ButtonCallback() {
@@ -63,12 +64,8 @@ public class MainMenuScreen extends GuiScreen {
 		}));
 		
 		this.attachWidget(WidgetFactory.getFactory().newImage(8, this.getWidth() / 2 - GuiTextures.LOGO.getWidth() / 2, 20, this, GuiTextures.LOGO.getSubTexture(0, 0, GuiTextures.LOGO.getWidth(), GuiTextures.LOGO.getHeight())));
-		
-		if(!OpenClassic.getClient().getAudioManager().isPlaying("menu")) {
-			OpenClassic.getClient().getAudioManager().playMusic("menu", true);
-		}
-
-		if(GeneralUtils.getMinecraft().username == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
+		OpenClassic.getGame().getAudioManager().playMusic(viewer, "menu", true);
+		if(OpenClassic.getClient().getPlayer().getName() == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
 			this.getWidget(2, Button.class).setActive(false);
 		}
 	}

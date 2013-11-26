@@ -124,7 +124,7 @@ public class ServerAudioManager implements AudioManager {
 
 	@Override
 	public boolean isPlaying(String music) {
-		return true;
+		return false;
 	}
 
 	@Override

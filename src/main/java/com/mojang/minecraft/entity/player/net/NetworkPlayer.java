@@ -6,6 +6,7 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.Color;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.Player;
@@ -23,8 +24,8 @@ public class NetworkPlayer extends Player {
 	private String name;
 	public String displayName;
 
-	public NetworkPlayer(Minecraft mc, int playerId, String name, float x, float y, float z, float yaw, float pitch) {
-		super(mc.level, x, y, z);
+	public NetworkPlayer(Minecraft mc, int playerId, ClientPlayer openclassic, float x, float y, float z, float yaw, float pitch) {
+		super(mc.level, x, y, z, openclassic);
 		this.minecraft = mc;
 		this.playerId = playerId;
 		this.displayName = name;
@@ -181,11 +182,6 @@ public class NetworkPlayer extends Player {
 			this.textures.textureBuffer.flip();
 			GL11.glDeleteTextures(this.textures.textureBuffer);
 		}
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
 	}
 
 }
