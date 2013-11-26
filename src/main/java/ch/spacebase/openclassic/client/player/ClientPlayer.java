@@ -7,12 +7,14 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.data.NBTData;
+import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.gui.ClientMainScreen;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
@@ -31,7 +33,7 @@ public class ClientPlayer implements Player {
 	private boolean breakBedrock = false;
 
 	public ClientPlayer() {
-		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/" + name + ".nbt");
+		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 	}
 	
 	public void setName(String name) {
@@ -75,6 +77,10 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public Position getPosition() {
+		if(this.handle == null) {
+			return new Position(null, 0, 0, 0);
+		}
+		
 		return new Position(this.handle.level.openclassic, this.handle.x, this.handle.y, this.handle.z, (byte) this.handle.yaw, (byte) this.handle.pitch);
 	}
 
@@ -124,6 +130,10 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void moveTo(Level level, float x, float y, float z, float yaw, float pitch) {
+		if(this.handle == null) {
+			return;
+		}
+		
 		PlayerTeleportEvent event = EventManager.callEvent(new PlayerTeleportEvent(this, this.getPosition(), new Position(level, x, y, z, yaw, pitch)));
 		if(event.isCancelled()) {
 			return;
@@ -193,7 +203,17 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void chat(String message) {
-		this.getSession().send(new PlayerChatMessage((byte) -1, message));
+		if(this.getSession() == this.dummySession) {
+			((ClientMainScreen) OpenClassic.getClient().getMainScreen()).addChat(message);
+			return;
+		}
+		
+		PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
+		if(event.isCancelled()) {
+			return;
+		}
+		
+		this.getSession().send(new PlayerChatMessage((byte) -1, event.getMessage()));
 	}
 
 	@Override
@@ -216,21 +236,37 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public int getInvulnerableTime() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.invulnerableTime;
 	}
 
 	@Override
 	public boolean isUnderwater() {
+		if(this.handle == null) {
+			return false;
+		}
+		
 		return this.handle.isUnderWater();
 	}
 
 	@Override
 	public int getHealth() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.health;
 	}
 
 	@Override
 	public void setHealth(int health) {
+		if(this.handle == null) {
+			return;
+		}
+		
 		if(health < 0) {
 			health = 0;
 		}
@@ -244,21 +280,37 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public boolean isDead() {
+		if(this.handle == null) {
+			return false;
+		}
+		
 		return this.handle.dead;
 	}
 
 	@Override
 	public int getPreviousHealth() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.lastHealth;
 	}
 
 	@Override
 	public int getAir() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.airSupply;
 	}
 
 	@Override
 	public void setAir(int air) {
+		if(this.handle == null) {
+			return;
+		}
+		
 		if(air < 0) {
 			air = 0;
 		}
@@ -272,21 +324,37 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public int getScore() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.getScore();
 	}
 
 	@Override
 	public void setScore(int score) {
+		if(this.handle == null) {
+			return;
+		}
+		
 		this.handle.score = score;
 	}
 
 	@Override
 	public int getArrows() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.arrows;
 	}
 
 	@Override
 	public void setArrows(int arrows) {
+		if(this.handle == null) {
+			return;
+		}
+		
 		if(arrows < 0) {
 			arrows = 0;
 		}
@@ -300,31 +368,55 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public int getSelectedSlot() {
+		if(this.handle == null) {
+			return 0;
+		}
+		
 		return this.handle.inventory.selected;
 	}
 
 	@Override
 	public int[] getInventoryContents() {
+		if(this.handle == null) {
+			return new int[0];
+		}
+		
 		return this.handle.inventory.slots;
 	}
 
 	@Override
 	public int[] getInventoryAmounts() {
+		if(this.handle == null) {
+			return new int[0];
+		}
+		
 		return this.handle.inventory.count;
 	}
 
 	@Override
 	public int[] getInventoryPopTimes() {
+		if(this.handle == null) {
+			return new int[0];
+		}
+		
 		return this.handle.inventory.popTime;
 	}
 	
 	@Override
 	public void replaceSelected(BlockType block) {
+		if(this.handle == null) {
+			return;
+		}
+		
 		this.handle.inventory.replaceSlot(block);
 	}
 
 	@Override
 	public void respawn() {
+		if(this.handle == null) {
+			return;
+		}
+		
 		this.handle.resetPos();
 	}
 

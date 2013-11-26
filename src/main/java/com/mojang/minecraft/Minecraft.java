@@ -160,7 +160,7 @@ public class Minecraft implements Runnable {
 	public Bindings bindings;
 	public boolean hacks = true;
 	public String tempKey = null;
-	public ClientPlayer ocPlayer = new ClientPlayer();
+	public ClientPlayer ocPlayer;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -362,7 +362,7 @@ public class Minecraft implements Runnable {
 			return;
 		} 
 
-		if(this.started && !(e instanceof LWJGLException) && !(e instanceof RuntimeException)) {
+		if(this.started && !(e instanceof LWJGLException)) {
 			this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
 		} else {
 			String msg = "Exception occured";
@@ -371,7 +371,7 @@ public class Minecraft implements Runnable {
 			}
 
 			JOptionPane.showMessageDialog(null, "See .minecraft_classic/client.log for more details.\n" + e.toString(), msg, 0);
-			this.running = false;
+			System.exit(0);
 		}
 	}
 
@@ -441,6 +441,7 @@ public class Minecraft implements Runnable {
 			}
 		}
 
+		this.ocPlayer = new ClientPlayer();
 		this.audio = new ClientAudioManager(this);
 		this.bindings = new Bindings();
 		this.bindings.registerBinding(new KeyBinding("options.keys.forward", Keyboard.KEY_W));
@@ -472,7 +473,6 @@ public class Minecraft implements Runnable {
 		this.settings.registerSetting(new NightSetting("options.night"));
 		this.settings.registerSetting(new IntSetting("options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
 		this.settings.getIntSetting("options.sensitivity").setDefault(1);
-		this.settings.registerSetting(new IntSetting("options.blockChooser", new String[] { "DEFAULT", "MODIFIED", "FANCY" } ));
 		this.settings.registerSetting(new BooleanSetting("options.minimap"));
 		
 		this.hackSettings = new Settings();

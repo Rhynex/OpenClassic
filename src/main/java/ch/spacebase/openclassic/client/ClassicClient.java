@@ -143,7 +143,7 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public Player getPlayer() {
-		return this.mc.player.openclassic;
+		return this.mc.ocPlayer;
 	}
 
 	@Override

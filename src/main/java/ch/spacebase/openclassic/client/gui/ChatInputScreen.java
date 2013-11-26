@@ -1,14 +1,11 @@
 package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.Keyboard;
 import ch.spacebase.openclassic.api.player.Player;
-
-import com.zachsthings.onevent.EventManager;
 
 public class ChatInputScreen extends GuiScreen {
 
@@ -25,12 +22,7 @@ public class ChatInputScreen extends GuiScreen {
 			String message = this.getWidget(0, TextBox.class).getText().trim();
 			if(message.length() > 0) {
 				if(OpenClassic.getClient().isInMultiplayer()) {
-					PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
-					if(event.isCancelled()) {
-						return;
-					}
-					
-					OpenClassic.getClient().getPlayer().chat(event.getMessage());
+					OpenClassic.getClient().getPlayer().chat(message);
 				} else if(message.startsWith("/")) {
 					OpenClassic.getClient().processCommand(OpenClassic.getClient().getPlayer(), message.substring(1));
 				}
