@@ -40,6 +40,7 @@ import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
+import ch.spacebase.openclassic.api.gui.widget.Widget;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.plugin.Plugin;
@@ -55,10 +56,10 @@ import ch.spacebase.openclassic.client.ClientProgressBar;
 import ch.spacebase.openclassic.client.gui.ChatInputScreen;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.gui.GameOverScreen;
-import ch.spacebase.openclassic.client.gui.HUDScreen;
+import ch.spacebase.openclassic.client.gui.ClientMainScreen;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
-import ch.spacebase.openclassic.client.gui.MenuScreen;
+import ch.spacebase.openclassic.client.gui.IngameMenuScreen;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
@@ -130,7 +131,7 @@ public class Minecraft implements Runnable {
 	public ResourceDownloader resourceThread;
 	private int ticks;
 	private int blockHitTime;
-	public HUDScreen hud;
+	public ClientMainScreen mainScreen;
 	public Intersection selected;
 	public String server;
 	public int port;
@@ -206,7 +207,8 @@ public class Minecraft implements Runnable {
 			}
 
 			Mouse.setGrabbed(false);
-			screen.open(this.width, this.height);
+			screen.setSize(this.width, this.height);
+			screen.onOpen();
 		} else {
 			this.grabMouse();
 		}
@@ -216,9 +218,9 @@ public class Minecraft implements Runnable {
 		this.width = Display.getWidth();
 		this.height = Display.getHeight();
 
-		if(this.hud != null) {
-			this.hud.width = RenderHelper.getHelper().getGuiWidth();
-			this.hud.height = RenderHelper.getHelper().getGuiHeight();
+		if(this.mainScreen != null) {
+			this.mainScreen.width = RenderHelper.getHelper().getGuiWidth();
+			this.mainScreen.height = RenderHelper.getHelper().getGuiHeight();
 		}
 
 		if(this.currentScreen != null) {
@@ -286,7 +288,7 @@ public class Minecraft implements Runnable {
 		}
 
 		this.particleManager = new ParticleManager(this.textureManager);
-		this.hud = new HUDScreen();
+		this.mainScreen = new ClientMainScreen();
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		if(this.level != null) {
 			this.mode.apply(this.level);
@@ -302,7 +304,7 @@ public class Minecraft implements Runnable {
 		if(menu) this.setCurrentScreen(new MainMenuScreen());
 		this.level = null;
 		this.particleManager = null;
-		this.hud = null;
+		this.mainScreen = null;
 		if(this.player != null && this.player.openclassic.getData() != null && !this.isInMultiplayer()) {
 			this.player.openclassic.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 		}
@@ -1076,7 +1078,7 @@ public class Minecraft implements Runnable {
 			}
 
 			RenderHelper.getHelper().ortho();
-			this.hud.render(this.timer.delta);
+			this.mainScreen.render(this.timer.delta);
 		} else {
 			GL11.glViewport(0, 0, this.width, this.height);
 			GL11.glClearColor(0, 0, 0, 0);
@@ -1085,7 +1087,11 @@ public class Minecraft implements Runnable {
 		}
 
 		if(this.currentScreen != null) {
-			this.currentScreen.render();
+			for(Widget widget : this.currentScreen.getWidgets()) {
+				if(widget.isVisible()) {
+					widget.render();
+				}
+			}
 		}
 
 		if(this.progressBar.isVisible()) {
@@ -1103,8 +1109,8 @@ public class Minecraft implements Runnable {
 
 		this.fps++;
 		while(System.currentTimeMillis() >= this.lastUpdate + 1000) {
-			if(this.hud != null) {
-				this.hud.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
+			if(this.mainScreen != null) {
+				this.mainScreen.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
 			}
 			
 			Chunk.chunkUpdates = 0;
@@ -1125,7 +1131,7 @@ public class Minecraft implements Runnable {
 
 	public void displayMenu() {
 		if(this.currentScreen == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
-			this.setCurrentScreen(new MenuScreen());
+			this.setCurrentScreen(new IngameMenuScreen());
 		}
 	}
 
@@ -1263,9 +1269,9 @@ public class Minecraft implements Runnable {
 		}
 
 		this.mode.spawnMobs();
-		int mouseX = Mouse.getX() * this.hud.getWidth() / this.width;
-		int mouseY = this.hud.getHeight() - Mouse.getY() * this.hud.getHeight() / this.height - 1;
-		this.hud.update(mouseX, mouseY);
+		int mouseX = Mouse.getX() * this.mainScreen.getWidth() / this.width;
+		int mouseY = this.mainScreen.getHeight() - Mouse.getY() * this.mainScreen.getHeight() / this.height - 1;
+		this.mainScreen.update(mouseX, mouseY);
 		
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);
@@ -1366,14 +1372,14 @@ public class Minecraft implements Runnable {
 
 						try {
 							ImageIO.write(image, "PNG", file);
-							if(this.hud != null) this.player.openclassic.sendMessage("screenshot.saved", file.getName());
+							if(this.mainScreen != null) this.player.openclassic.sendMessage("screenshot.saved", file.getName());
 						} catch(IOException e) {
 							e.printStackTrace();
-							if(this.hud != null) this.player.openclassic.sendMessage("screenshot.error", file.getName());
+							if(this.mainScreen != null) this.player.openclassic.sendMessage("screenshot.error", file.getName());
 						}
 					}
 
-					if(this.currentScreen == null || !this.currentScreen.grabsInput()) {
+					if(this.currentScreen == null) {
 						if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 							this.displayMenu();
 						}
@@ -1430,7 +1436,7 @@ public class Minecraft implements Runnable {
 			}
 		}
 
-		if(this.currentScreen == null || !this.currentScreen.grabsInput()) {
+		if(this.currentScreen == null) {
 			while(Mouse.next()) {
 				if(Mouse.getEventDWheel() != 0) {
 					this.player.inventory.scrollSelection(Mouse.getEventDWheel());

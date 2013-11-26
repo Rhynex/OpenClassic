@@ -264,7 +264,7 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	@Override
 	public MainScreen getMainScreen() {
-		return this.mc.hud;
+		return this.mc.mainScreen;
 	}
 	
 	@Override

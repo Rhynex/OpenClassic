@@ -41,7 +41,7 @@ public class ChatInputScreen extends GuiScreen {
 
 	public void onMouseClick(int x, int y, int button) {
 		TextBox text = this.getWidget(0, TextBox.class);
-		String clickedPlayer = OpenClassic.getClient().getMainScreen().getClickedPlayer();
+		String clickedPlayer = OpenClassic.getClient().getMainScreen().getHoveredPlayer();
 		if(button == 0 && clickedPlayer != null) {
 			if(text.getText().length() > 0 && !text.getText().endsWith(" ")) {
 				text.setText(text.getText() + " ");

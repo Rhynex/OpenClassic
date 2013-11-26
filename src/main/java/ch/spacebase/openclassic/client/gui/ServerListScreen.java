@@ -7,6 +7,7 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.Label;
@@ -58,38 +59,43 @@ public class ServerListScreen extends GuiScreen {
 		});
 		
 		this.attachWidget(list);
-		this.getWidget(1, ButtonList.class).setContents(contents);
-
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 206, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 102, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(4, this.getWidth() / 2 + 2, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.enter-url")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(5, this.getWidth() / 2 + 106, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
-		this.attachWidget(WidgetFactory.getFactory().newLabel(6, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
-	}
-
-	public void onButtonClick(Button button) {
-		if(button.getId() == 2) {
-			OpenClassic.getClient().setCurrentScreen(new FavoriteServersScreen(this));
-		}
-
-		if(button.getId() == 3) {
-			Label label = this.getWidget(6, Label.class);
-			if(this.select) {
-				label.setText(OpenClassic.getGame().getTranslator().translate("gui.favorites.select"));
-				this.select = false;
-			} else {
-				label.setText(Color.GREEN + OpenClassic.getGame().getTranslator().translate("gui.servers.select-fav"));
-				this.select = true;
+		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 206, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(new FavoriteServersScreen(ServerListScreen.this));
 			}
-		}
-
-		if(button.getId() == 4) {
-			OpenClassic.getClient().setCurrentScreen(new ServerURLScreen(this));
-		}
-
-		if(button.getId() == 5) {
-			OpenClassic.getClient().setCurrentScreen(this.parent);
-		}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 102, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				Label label = getWidget(6, Label.class);
+				if(select) {
+					label.setText(OpenClassic.getGame().getTranslator().translate("gui.favorites.select"));
+					select = false;
+				} else {
+					label.setText(Color.GREEN + OpenClassic.getGame().getTranslator().translate("gui.servers.select-fav"));
+					select = true;
+				}
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(4, this.getWidth() / 2 + 2, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.servers.enter-url")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(new ServerURLScreen(ServerListScreen.this));
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(5, this.getWidth() / 2 + 106, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(parent);
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newLabel(6, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
+		this.getWidget(1, ButtonList.class).setContents(contents);
 	}
 
 }

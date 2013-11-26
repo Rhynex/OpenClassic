@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.MainScreen;
+import ch.spacebase.openclassic.api.gui.widget.Widget;
 import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.input.Keyboard;
 import ch.spacebase.openclassic.api.math.MathHelper;
@@ -15,17 +16,17 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
-public class HUDScreen extends MainScreen {
+public class ClientMainScreen extends MainScreen {
 
 	public List<ChatLine> chatHistory = new ArrayList<ChatLine>();
 	private Random rand = new Random();
 	public int width;
 	public int height;
-	public String clickedPlayer = null;
+	public String hoveredPlayer = null;
 	public int ticks = 0;
 	public String debugInfo = "";
 
-	public HUDScreen() {
+	public ClientMainScreen() {
 		this.width = RenderHelper.getHelper().getGuiWidth();
 		this.height = RenderHelper.getHelper().getGuiHeight();
 	}
@@ -166,7 +167,7 @@ public class HUDScreen extends MainScreen {
 			}
 		}
 
-		this.clickedPlayer = null;
+		this.hoveredPlayer = null;
 		if(InputHelper.getHelper().isKeyDown(Keyboard.KEY_TAB) && OpenClassic.getClient().isInMultiplayer()) {
 			List<Player> players = OpenClassic.getClient().getLevel().getPlayers();
 			RenderHelper.getHelper().enableBlend();
@@ -178,7 +179,7 @@ public class HUDScreen extends MainScreen {
 				int x = this.width / 2 + count % 2 * 120 - 120;
 				int y = this.height / 2 - 64 + (count / 2 << 3);
 				if(OpenClassic.getClient().getCurrentScreen() != null && mouseX >= x && mouseY >= y && mouseX < x + 120 && mouseY < y + 8) {
-					this.clickedPlayer = players.get(count).getName();
+					this.hoveredPlayer = players.get(count).getName();
 					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x + 2, y, false);
 				} else {
 					RenderHelper.getHelper().renderTextNoShadow(players.get(count).getName(), x, y, 15658734, false);
@@ -186,7 +187,11 @@ public class HUDScreen extends MainScreen {
 			}
 		}
 
-		super.render();
+		for(Widget widget : this.getWidgets()) {
+			if (widget.isVisible()) {
+				widget.render();
+			}
+		}
 	}
 
 	public void addChat(String message) {
@@ -198,8 +203,8 @@ public class HUDScreen extends MainScreen {
 	}
 
 	@Override
-	public String getClickedPlayer() {
-		return this.clickedPlayer;
+	public String getHoveredPlayer() {
+		return this.hoveredPlayer;
 	}
 
 	@Override

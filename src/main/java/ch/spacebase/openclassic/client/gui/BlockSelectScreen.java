@@ -11,6 +11,7 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.BlockPreview;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.FadingBox;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.Mouse;
@@ -39,8 +40,28 @@ public class BlockSelectScreen extends GuiScreen {
 		}
 		
 		this.attachWidget(WidgetFactory.getFactory().newFadingBox(0, this.getWidth() / 2 - 120, 30, 240, 150, this, -1878719232, -1070583712));
-		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 115, 155, 25, 20, this, "<<"));
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>"));
+		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 115, 155, 25, 20, this, "<<").setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				if(page > 0) {
+					page--;
+				}
+				
+				updateWidgets();
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>").setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				if(page < blocks.size() - 1) {
+					page++;
+				}
+				
+				updateWidgets();
+			}
+		}));
+		
 		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 40, this, OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), true));
 		this.attachWidget(WidgetFactory.getFactory().newFadingBox(200, -30, -30, 26, 26, this, -1862270977, -1056964609));
 		if(this.blocks.size() == 0) {
@@ -48,23 +69,6 @@ public class BlockSelectScreen extends GuiScreen {
 		}
 		
 		this.updateWidgets();
-	}
-	
-	@Override
-	public void onButtonClick(Button button) {
-		if(button.getId() == 1) {
-			if(this.page > 0) {
-				this.page--;
-			}
-			
-			this.updateWidgets();
-		} else if(button.getId() == 2) {
-			if(this.page < this.blocks.size() - 1) {
-				this.page++;
-			}
-			
-			this.updateWidgets();
-		}
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import java.util.List;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.Label;
@@ -35,7 +36,13 @@ public class LanguageScreen extends GuiScreen {
 		});
 		
 		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(parent);
+			}
+		}));
+		
 		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.language.select"), true));
 		
 		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("options.language"));
@@ -47,12 +54,6 @@ public class LanguageScreen extends GuiScreen {
 		}
 
 		this.getWidget(1, ButtonList.class).setContents(languages);
-	}
-
-	public void onButtonClick(Button button) {
-		if(button.getId() == 2) {
-			OpenClassic.getClient().setCurrentScreen(this.parent);
-		}
 	}
 	
 	@Override

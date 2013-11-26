@@ -6,6 +6,7 @@ import java.util.List;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
@@ -43,9 +44,27 @@ public class OptionsScreen extends GuiScreen {
 		});
 		
 		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(75, this.getWidth() / 2 - 100, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.hacks")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(100, this.getWidth() / 2 + 2, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
+		this.attachWidget(WidgetFactory.getFactory().newButton(75, this.getWidth() / 2 - 100, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.hacks")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(new HacksScreen(OptionsScreen.this, OpenClassic.getClient().getHackSettings()));
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(100, this.getWidth() / 2 + 2, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(new ControlsScreen(OptionsScreen.this, OpenClassic.getClient().getBindings()));
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(parent);
+			}
+		}));
+		
 		this.attachWidget(WidgetFactory.getFactory().newLabel(300, this.getWidth() / 2, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.title"), true));
 	
 		this.getWidget(1, ButtonList.class).setContents(this.buildContents());
@@ -61,21 +80,6 @@ public class OptionsScreen extends GuiScreen {
 		}
 		
 		return contents;
-	}
-
-	@Override
-	public void onButtonClick(Button button) {
-		if(button.getId() == 75) {
-			OpenClassic.getClient().setCurrentScreen(new HacksScreen(this, OpenClassic.getClient().getHackSettings()));
-		}
-
-		if(button.getId() == 100) {
-			OpenClassic.getClient().setCurrentScreen(new ControlsScreen(this, OpenClassic.getClient().getBindings()));
-		}
-
-		if(button.getId() == 200) {
-			OpenClassic.getClient().setCurrentScreen(this.parent);
-		}
 	}
 	
 }

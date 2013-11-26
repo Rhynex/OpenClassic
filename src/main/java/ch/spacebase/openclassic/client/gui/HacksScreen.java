@@ -6,6 +6,7 @@ import java.util.List;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
@@ -42,7 +43,12 @@ public class HacksScreen extends GuiScreen {
 		});
 		
 		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(100, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")));
+		this.attachWidget(WidgetFactory.getFactory().newButton(100, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(parent);
+			}
+		}));
 		this.attachWidget(WidgetFactory.getFactory().newLabel(2, this.getWidth() / 2, 20, this, OpenClassic.getGame().getTranslator().translate("gui.hacks"), true));
 	
 		this.getWidget(1, ButtonList.class).setContents(this.buildContents());
@@ -55,13 +61,6 @@ public class HacksScreen extends GuiScreen {
 		}
 		
 		return contents;
-	}
-
-	@Override
-	public void onButtonClick(Button button) {
-		if(button.getId() == 100) {
-			OpenClassic.getClient().setCurrentScreen(this.parent);
-		}
 	}
 	
 }

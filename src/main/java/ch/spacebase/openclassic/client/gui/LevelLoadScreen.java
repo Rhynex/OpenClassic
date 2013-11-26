@@ -7,19 +7,20 @@ import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
 import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.widget.Label;
 import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 
-public class LoadLevelScreen extends GuiScreen {
+public class LevelLoadScreen extends GuiScreen {
 
 	private GuiScreen parent;
 	private String[] levels = null;
 
 	private boolean delete = false;
 
-	public LoadLevelScreen(GuiScreen parent) {
+	public LevelLoadScreen(GuiScreen parent) {
 		this.parent = parent;
 	}
 
@@ -41,7 +42,7 @@ public class LoadLevelScreen extends GuiScreen {
 
 					if(file == null) return;
 
-					OpenClassic.getClient().setCurrentScreen(new ConfirmDeleteScreen(LoadLevelScreen.this, button.getText(), file));
+					OpenClassic.getClient().setCurrentScreen(new ConfirmDeleteScreen(LevelLoadScreen.this, button.getText(), file));
 					delete = false;
 					getWidget(5, Label.class).setText(OpenClassic.getGame().getTranslator().translate("gui.load-level.title"));
 				} else {
@@ -51,9 +52,33 @@ public class LoadLevelScreen extends GuiScreen {
 		});
 		
 		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 156, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.new")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 52, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.delete")));
-		this.attachWidget(WidgetFactory.getFactory().newButton(4, this.getWidth() / 2 + 52, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 156, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.new")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(new LevelCreateScreen(LevelLoadScreen.this));
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 52, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.delete")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				if(delete) {
+					getWidget(5, Label.class).setText(OpenClassic.getGame().getTranslator().translate("gui.load-level.title"));
+					delete = false;
+				} else {
+					getWidget(5, Label.class).setText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.load-level.title-delete"));
+					delete = true;
+				}
+			}
+		}));
+		
+		this.attachWidget(WidgetFactory.getFactory().newButton(4, this.getWidth() / 2 + 52, this.getHeight() / 6 + 156, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setCurrentScreen(parent);
+			}
+		}));
+		
 		this.attachWidget(WidgetFactory.getFactory().newLabel(5, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.load-level.title"), true));
 		
 		StringBuilder levels = new StringBuilder();
@@ -65,26 +90,6 @@ public class LoadLevelScreen extends GuiScreen {
 
 		this.levels = levels.toString().split(";");
 		this.getWidget(1, ButtonList.class).setContents(Arrays.asList(this.levels));
-	}
-
-	public void onButtonClick(Button button) {
-		if(button.getId() == 2) {
-			OpenClassic.getClient().setCurrentScreen(new LevelCreateScreen(this));
-		}
-
-		if(button.getId() == 3) {
-			if(this.delete) {
-				this.getWidget(5, Label.class).setText(OpenClassic.getGame().getTranslator().translate("gui.load-level.title"));
-				this.delete = false;
-			} else {
-				this.getWidget(5, Label.class).setText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.load-level.title-delete"));
-				this.delete = true;
-			}
-		}
-
-		if(button.getId() == 4) {
-			OpenClassic.getClient().setCurrentScreen(this.parent);
-		}
 	}
 	
 }
