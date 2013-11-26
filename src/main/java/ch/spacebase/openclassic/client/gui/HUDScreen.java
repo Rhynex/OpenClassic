@@ -12,8 +12,8 @@ import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.input.Keyboard;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 public class HUDScreen extends MainScreen {
 
@@ -30,13 +30,13 @@ public class HUDScreen extends MainScreen {
 		this.height = RenderHelper.getHelper().getGuiHeight();
 	}
 	
-	public void update() {
+	public void update(int mouseX, int mouseY) {
 		this.ticks++;
 		for(int index = 0; index < this.chatHistory.size(); index++) {
 			this.chatHistory.get(index).incrementTime();
 		}
 		
-		super.update();
+		super.update(mouseX, mouseY);
 	}
 
 	public void render(float dt) {

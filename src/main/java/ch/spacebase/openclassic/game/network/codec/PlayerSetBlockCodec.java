@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.game.network.MessageCodec;
+import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
 
 public class PlayerSetBlockCodec extends MessageCodec<PlayerSetBlockMessage> {
 

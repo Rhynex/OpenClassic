@@ -3,15 +3,16 @@ package ch.spacebase.openclassic.client.player;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session;
+import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.msg.Message;
 
-public class DummySession implements Session {
+public class DummySession extends ClassicSession {
 
 	private ClientPlayer player;
 
 	public DummySession(ClientPlayer player) {
+		super(null);
 		this.player = player;
 	}
 
@@ -36,6 +37,11 @@ public class DummySession implements Session {
 	@Override
 	public SocketAddress getAddress() {
 		return InetSocketAddress.createUnresolved("localhost", 25565);
+	}
+
+	@Override
+	public boolean sendCustomMessages() {
+		return false;
 	}
 
 }

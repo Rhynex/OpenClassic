@@ -5,8 +5,8 @@ import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
-import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
+import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.LocalPlayer;
@@ -62,7 +62,7 @@ public class GameMode {
 				}
 			}
 
-			ClientRenderHelper.getHelper().spawnDestructionParticles(old, this.mc.level, x, y, z, this.mc.particleManager);
+			RenderHelper.getHelper().spawnDestructionParticles(old, this.mc.level, x, y, z, this.mc.particleManager);
 		}
 	}
 

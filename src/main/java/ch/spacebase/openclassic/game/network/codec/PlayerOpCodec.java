@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import ch.spacebase.openclassic.api.network.msg.PlayerOpMessage;
 import ch.spacebase.openclassic.game.network.MessageCodec;
+import ch.spacebase.openclassic.game.network.msg.PlayerOpMessage;
 
 public class PlayerOpCodec extends MessageCodec<PlayerOpMessage> {
 

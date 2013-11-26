@@ -1,10 +1,10 @@
 package ch.spacebase.openclassic.client.network.handler;
 
 import ch.spacebase.openclassic.api.Color;
-import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.network.msg.PlayerChatMessage;
 
 public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> {
 

@@ -26,15 +26,15 @@ import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.block.BlockPhysicsEvent;
 import ch.spacebase.openclassic.api.event.level.SpawnChangeEvent;
 import ch.spacebase.openclassic.api.level.LevelInfo;
-import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
-import ch.spacebase.openclassic.api.network.msg.Message;
-import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.api.util.CoordUtil;
 import ch.spacebase.openclassic.api.util.set.TripleIntHashMap;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
+import ch.spacebase.openclassic.game.network.msg.BlockChangeMessage;
+import ch.spacebase.openclassic.game.network.msg.Message;
+import ch.spacebase.openclassic.game.network.msg.PlayerDespawnMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.LevelColorMessage;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 
 import com.zachsthings.onevent.EventManager;
@@ -74,7 +74,7 @@ public class ServerLevel implements ClassicLevel {
 					e.printStackTrace();
 				}
 			}
-		}, 0, 1000 / Constants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
+		}, 0, 1000 / InternalConstants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
 	}
 
 	public ServerLevel(LevelInfo info) {
@@ -102,7 +102,7 @@ public class ServerLevel implements ClassicLevel {
 					e.printStackTrace();
 				}
 			}
-		}, 0, 1000 / Constants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
+		}, 0, 1000 / InternalConstants.PHYSICS_PER_SECOND, TimeUnit.MILLISECONDS);
 	}
 
 	public boolean getPhysicsEnabled() {
@@ -410,7 +410,7 @@ public class ServerLevel implements ClassicLevel {
 
 	public void sendToAll(Message message) {
 		for(Player player : this.getPlayers()) {
-			player.getSession().send(message);
+			((ServerPlayer) player).getSession().send(message);
 		}
 	}
 
@@ -418,7 +418,7 @@ public class ServerLevel implements ClassicLevel {
 		for(Player player : this.getPlayers()) {
 			if(player.getPlayerId() == skip.getPlayerId()) continue;
 
-			player.getSession().send(message);
+			((ServerPlayer) player).getSession().send(message);
 		}
 	}
 
@@ -554,6 +554,12 @@ public class ServerLevel implements ClassicLevel {
 	public void setCloudColor(int color) {
 		this.cloudColor = color;
 		this.sendToAll(new LevelColorMessage("cloud", color));
+	}
+
+	@Override
+	public float getBrightness(int x, int y, int z) {
+		BlockType block = this.getBlockTypeAt(x, y, z);
+		return block != null && block.getBrightness() > 0 ? block.getBrightness() : this.isLit(x, y, z) ? 1 : 0.6f;
 	}
 
 }

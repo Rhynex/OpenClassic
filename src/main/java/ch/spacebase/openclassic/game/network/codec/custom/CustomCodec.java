@@ -6,8 +6,8 @@ import java.util.Arrays;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import ch.spacebase.openclassic.api.network.msg.custom.CustomMessage;
 import ch.spacebase.openclassic.game.network.MessageCodec;
+import ch.spacebase.openclassic.game.network.msg.custom.CustomMessage;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
 public class CustomCodec extends MessageCodec<CustomMessage> {

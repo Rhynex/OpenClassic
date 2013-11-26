@@ -3,7 +3,6 @@ package ch.spacebase.openclassic.game.network;
 import java.util.HashMap;
 import java.util.Map;
 
-import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.game.network.codec.BlockChangeCodec;
 import ch.spacebase.openclassic.game.network.codec.IdentificationCodec;
 import ch.spacebase.openclassic.game.network.codec.LevelDataCodec;
@@ -29,6 +28,7 @@ import ch.spacebase.openclassic.game.network.codec.custom.KeyChangeCodec;
 import ch.spacebase.openclassic.game.network.codec.custom.LevelColorCodec;
 import ch.spacebase.openclassic.game.network.codec.custom.MusicStopCodec;
 import ch.spacebase.openclassic.game.network.codec.custom.PluginCodec;
+import ch.spacebase.openclassic.game.network.msg.Message;
 
 public final class CodecLookup {
 

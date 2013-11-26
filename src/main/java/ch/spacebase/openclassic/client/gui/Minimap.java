@@ -9,7 +9,7 @@ import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.gui.Screen;
 import ch.spacebase.openclassic.api.gui.widget.Widget;
-import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class Minimap extends Widget {

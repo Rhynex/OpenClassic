@@ -3,13 +3,13 @@ package ch.spacebase.openclassic.client.gui;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
+import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.Keyboard;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 
 public class ErrorScreen extends GuiScreen {
 
-	private String title;
-	private String message;
+	private final String title;
+	private final String message;
 
 	public ErrorScreen(String title, String message) {
 		this.title = title;
@@ -18,20 +18,16 @@ public class ErrorScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 100, this.getHeight() / 6 + 120 + 12, this, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")));
+		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
+		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 6 + 120 + 12, this, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")));
+		this.attachWidget(WidgetFactory.getFactory().newLabel(2, this.getWidth() / 2, 90, this, this.title, true));
+		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 110, this, this.message, true));
 	}
-
+	
 	public void onButtonClick(Button button) {
-		if(button.getId() == 0) {
+		if(button.getId() == 1) {
 			OpenClassic.getClient().exitGameSession();
 		}
-	}
-
-	public void render() {
-		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(this.title, this.getWidth() / 2, 90);
-		RenderHelper.getHelper().renderText(this.message, this.getWidth() / 2, 110);
-		super.render();
 	}
 
 	public void onKeyPress(char c, int key) {

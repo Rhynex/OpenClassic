@@ -6,8 +6,8 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
@@ -138,8 +138,8 @@ public class LocalPlayer extends Player {
 	public void turn(float yaw, float pitch) {
 		float oldPitch = this.pitch;
 		float oldYaw = this.yaw;
-		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
-		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
+		this.yaw = (float) (this.yaw + yaw * InternalConstants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * InternalConstants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
 		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}
@@ -154,8 +154,8 @@ public class LocalPlayer extends Player {
 
 	@Override
 	public void interpolateTurn(float yaw, float pitch) {
-		this.yaw = (float) (this.yaw + yaw * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
-		this.pitch = (float) (this.pitch - pitch * Constants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
+		this.yaw = (float) (this.yaw + yaw * InternalConstants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
+		this.pitch = (float) (this.pitch - pitch * InternalConstants.SENSITIVITY_VALUE[OpenClassic.getClient().getSettings().getIntSetting("options.sensitivity").getValue()]);
 		if(this.pitch < -90.0F) {
 			this.pitch = -90.0F;
 		}

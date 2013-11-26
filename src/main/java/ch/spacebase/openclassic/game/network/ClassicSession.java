@@ -8,11 +8,10 @@ import java.util.Queue;
 
 import org.jboss.netty.channel.Channel;
 
-import ch.spacebase.openclassic.api.network.msg.*;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session;
+import ch.spacebase.openclassic.game.network.msg.*;
 
-public abstract class ClassicSession implements Session {
+public abstract class ClassicSession {
 
 	private static final List<Class<? extends Message>> VANILLA = new ArrayList<Class<? extends Message>>();
 	
@@ -117,6 +116,12 @@ public abstract class ClassicSession implements Session {
 		if(this.player != null) {
 			this.player = null;
 		}
+	}
+	
+	public enum State {
+		IDENTIFYING,
+		PREPARING,
+		GAME;
 	}
 
 }

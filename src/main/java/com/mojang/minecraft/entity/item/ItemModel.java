@@ -9,7 +9,7 @@ public class ItemModel {
 
 	private BlockType block;
 
-	public ItemModel(int block, int tex) {
+	public ItemModel(int block) {
 		this.block = Blocks.fromId(block);
 	}
 

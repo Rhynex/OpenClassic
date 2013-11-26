@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import ch.spacebase.openclassic.api.network.msg.PlayerRotationMessage;
 import ch.spacebase.openclassic.game.network.MessageCodec;
+import ch.spacebase.openclassic.game.network.msg.PlayerRotationMessage;
 
 public class PlayerRotationCodec extends MessageCodec<PlayerRotationMessage> {
 

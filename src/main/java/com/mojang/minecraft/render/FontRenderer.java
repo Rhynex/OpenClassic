@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 public final class FontRenderer {

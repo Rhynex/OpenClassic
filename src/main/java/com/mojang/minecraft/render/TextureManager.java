@@ -21,9 +21,9 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL30;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.render.MipmapMode;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
+import ch.spacebase.openclassic.client.render.MipmapMode;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.render.animation.AnimatedTexture;
 

@@ -8,10 +8,12 @@ import com.mojang.minecraft.level.Level;
 
 public class TerrainParticle extends Particle {
 
+	private Quad quad;
+	
 	public TerrainParticle(Level level, float x, float y, float z, float xd, float yd, float zd, BlockType block) {
 		super(level, x, y, z, xd, yd, zd);
-		Quad quad = block.getModel().getQuads().size() >= 3 ? block.getModel().getQuad(2) : block.getModel().getQuad(block.getModel().getQuads().size() - 1);
-		this.tex = quad.getTexture().getId();
+		this.quad = block.getModel().getQuads().size() >= 3 ? block.getModel().getQuad(2) : block.getModel().getQuad(block.getModel().getQuads().size() - 1);
+		this.tex = 0;
 		this.gravity = 1;
 		this.rCol = 0.6F;
 		this.gCol = 0.6F;
@@ -23,9 +25,9 @@ public class TerrainParticle extends Particle {
 	}
 
 	public void render(float dt, float xmod, float ymod, float zmod, float xdir, float zdir) {
-		float tminX = (this.tex % 16 + this.uo / 4f) / 16f;
+		float tminX = (this.quad.getTexture().getX1() / this.quad.getTexture().getParent().getWidth()) + this.uo / 64f;
 		float tmaxX = tminX + 0.015609375F;
-		float tminY = (this.tex / 16 + this.vo / 4f) / 16f;
+		float tminY = (this.quad.getTexture().getY1() / this.quad.getTexture().getParent().getHeight()) + this.vo / 64f;
 		float tmaxY = tminY + 0.015609375F;
 		float size = 0.1F * this.size;
 		float x = this.xo + (this.x - this.xo) * dt;

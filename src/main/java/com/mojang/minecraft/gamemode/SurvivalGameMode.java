@@ -3,7 +3,7 @@ package com.mojang.minecraft.gamemode;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 
 import com.mojang.minecraft.Minecraft;
@@ -60,7 +60,7 @@ public class SurvivalGameMode extends GameMode {
 			int type = this.mc.level.getTile(x, y, z);
 			if(type != 0) {
 				this.blockHardness = BlockUtils.getHardness(Blocks.fromId(type));
-				ClientRenderHelper.getHelper().spawnBlockParticles(this.mc.level, x, y, z, side, this.mc.particleManager);
+				RenderHelper.getHelper().spawnBlockParticles(this.mc.level, x, y, z, side, this.mc.particleManager);
 				this.hits++;
 				if(this.hits == this.blockHardness + 1) {
 					this.breakBlock(x, y, z);

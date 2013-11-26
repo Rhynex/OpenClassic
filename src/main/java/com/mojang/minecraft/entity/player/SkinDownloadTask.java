@@ -6,7 +6,7 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 
 import ch.spacebase.openclassic.api.Color;
-import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 
 public final class SkinDownloadTask implements Runnable {
 
@@ -26,7 +26,7 @@ public final class SkinDownloadTask implements Runnable {
 				name = name.substring(0, name.indexOf('@'));
 			}
 
-			conn = (HttpURLConnection) new URL(Constants.MINECRAFT_URL_HTTP + "skin/" + Color.stripColor(name) + ".png").openConnection();
+			conn = (HttpURLConnection) new URL(InternalConstants.MINECRAFT_URL_HTTP + "skin/" + Color.stripColor(name) + ".png").openConnection();
 			conn.setDoInput(true);
 			conn.setDoOutput(false);
 			conn.connect();

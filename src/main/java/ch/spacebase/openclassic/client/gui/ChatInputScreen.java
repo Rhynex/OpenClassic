@@ -4,8 +4,8 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.TextBox;
+import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.Keyboard;
-import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -13,7 +13,7 @@ public class ChatInputScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new TextBox(0, 2, this.getHeight() - 14, this.getWidth() - 4, 12, this, true));
+		this.attachWidget(WidgetFactory.getFactory().newTextBox(0, 2, this.getHeight() - 14, this.getWidth() - 4, 12, this, true));
 		this.getWidget(0, TextBox.class).setFocus(true);
 	}
 
@@ -23,9 +23,11 @@ public class ChatInputScreen extends GuiScreen {
 			if(message.length() > 0) {
 				if(OpenClassic.getClient().isInMultiplayer()) {
 					PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(OpenClassic.getClient().getPlayer(), message));
-					if(event.isCancelled()) return;
-
-					OpenClassic.getClient().getPlayer().getSession().send(new PlayerChatMessage((byte) -1, event.getMessage()));
+					if(event.isCancelled()) {
+						return;
+					}
+					
+					OpenClassic.getClient().getPlayer().chat(event.getMessage());
 				} else if(message.startsWith("/")) {
 					OpenClassic.getClient().processCommand(OpenClassic.getClient().getPlayer(), message.substring(1));
 				}

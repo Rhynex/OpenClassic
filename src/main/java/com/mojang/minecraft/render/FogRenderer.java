@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.Minecraft;
 
@@ -53,13 +53,13 @@ public class FogRenderer {
 					b = (r * 30 + b * 70) / 100;
 				}
 
-				GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(r, g, b, 1));
+				GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, RenderHelper.getHelper().getParamBuffer(r, g, b, 1));
 			}
 		} else {
 			GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_LINEAR);
 			GL11.glFogf(GL11.GL_FOG_START, 0);
 			GL11.glFogf(GL11.GL_FOG_END, this.fogEnd);
-			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(1, 1, 1, 1));
+			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, RenderHelper.getHelper().getParamBuffer(1, 1, 1, 1));
 		}
 		
 		if(this.mc.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
@@ -72,7 +72,7 @@ public class FogRenderer {
 		}
 		
 		GL11.glClearColor(fogRed, fogGreen, fogBlue, 0);
-		GL11.glFog(GL11.GL_FOG_COLOR, ClientRenderHelper.getHelper().getParamBuffer(fogRed, fogGreen, fogBlue, 1));
+		GL11.glFog(GL11.GL_FOG_COLOR, RenderHelper.getHelper().getParamBuffer(fogRed, fogGreen, fogBlue, 1));
 		GL11.glNormal3f(0, -1, 0);
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);

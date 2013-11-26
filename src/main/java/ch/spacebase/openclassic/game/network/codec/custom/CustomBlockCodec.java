@@ -14,11 +14,13 @@ import ch.spacebase.openclassic.api.block.model.LiquidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.PlantModel;
 import ch.spacebase.openclassic.api.block.model.Quad;
+import ch.spacebase.openclassic.api.block.model.QuadFactory;
+import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
 import ch.spacebase.openclassic.api.math.BoundingBox;
-import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.game.network.MessageCodec;
+import ch.spacebase.openclassic.game.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
 
 public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
@@ -85,7 +87,10 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			buffer.writeInt(quad.getTexture().getParent().getHeight());
 			buffer.writeInt(quad.getTexture().getParent().getSubTextureWidth());
 			buffer.writeInt(quad.getTexture().getParent().getSubTextureHeight());
-			buffer.writeInt(quad.getTexture().getId());
+			buffer.writeFloat(quad.getTexture().getX1());
+			buffer.writeFloat(quad.getTexture().getY1());
+			buffer.writeFloat(quad.getTexture().getWidth());
+			buffer.writeFloat(quad.getTexture().getHeight());
 		}
 
 		return buffer;
@@ -153,9 +158,15 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			int height = buffer.readInt();
 			int swidth = buffer.readInt();
 			int sheight = buffer.readInt();
-
 			Texture t = new Texture(texture, jar, width, height, swidth, sheight);
-			model.addQuad(new Quad(qid, t.getSubTexture(buffer.readInt()), vertices[0], vertices[1], vertices[2], vertices[3]));
+			
+			float subx = buffer.readFloat();
+			float suby = buffer.readFloat();
+			float subwidth = buffer.readFloat();
+			float subheight = buffer.readFloat();
+			SubTexture sub = new SubTexture(t, subx, suby, subwidth, subheight);
+			
+			model.addQuad(QuadFactory.getFactory().newQuad(qid, sub, vertices[0], vertices[1], vertices[2], vertices[3]));
 		}
 
 		BlockType block = new BlockType(id, sound, model);

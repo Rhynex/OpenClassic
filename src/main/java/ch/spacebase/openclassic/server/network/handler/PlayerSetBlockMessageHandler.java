@@ -6,11 +6,11 @@ import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
-import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.ClassicSession.State;
+import ch.spacebase.openclassic.game.network.msg.BlockChangeMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 

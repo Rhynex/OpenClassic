@@ -7,7 +7,9 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.widget.Button;
 import ch.spacebase.openclassic.api.gui.widget.ButtonList;
-import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
+import ch.spacebase.openclassic.api.gui.widget.Label;
+import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class TexturePackScreen extends GuiScreen {
@@ -21,9 +23,30 @@ public class TexturePackScreen extends GuiScreen {
 
 	public void onOpen() {
 		this.clearWidgets();
-		this.attachWidget(new ButtonList(0, this.getWidth(), this.getHeight(), this));
-		this.attachWidget(new Button(1, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
+		ButtonList list = new ButtonList(1, this);
+		list.setCallback(new ButtonListCallback() {
+			@Override
+			public void onButtonListClick(ButtonList list, Button button) {
+				if(button.getText().equals("Default")) {
+					OpenClassic.getClient().getConfig().setValue("options.texture-pack", "none");
+				} else {
+					OpenClassic.getClient().getConfig().setValue("options.texture-pack", button.getText() + ".zip");
+				}
 
+				OpenClassic.getClient().getConfig().save();
+				GeneralUtils.getMinecraft().textureManager.clear();
+			}
+		});
+		
+		this.attachWidget(list);
+		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")));
+		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), true));
+		
+		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
+		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
+		this.attachWidget(WidgetFactory.getFactory().newLabel(4, this.getWidth() / 2, this.getHeight() / 2 + 48, this, text, true));
+		
 		StringBuilder textures = new StringBuilder("Default");
 		for(String file : (new File(OpenClassic.getClient().getDirectory(), "texturepacks").list())) {
 			if(!file.endsWith(".zip")) continue;
@@ -31,36 +54,23 @@ public class TexturePackScreen extends GuiScreen {
 		}
 
 		this.textures = textures.toString().split(";");
-		this.getWidget(0, ButtonList.class).setContents(Arrays.asList(this.textures));
+		this.getWidget(1, ButtonList.class).setContents(Arrays.asList(this.textures));
 	}
 
-	public final void onButtonClick(Button button) {
-		if(button.isActive()) {
-			if(button.getId() == 1) {
-				OpenClassic.getClient().setCurrentScreen(this.parent);
-			}
+	public void onButtonClick(Button button) {
+		if(button.getId() == 2) {
+			OpenClassic.getClient().setCurrentScreen(this.parent);
 		}
 	}
-
+	
 	@Override
-	public void onButtonListClick(ButtonList list, Button button) {
-		if(button.isActive()) {
-			if(button.getText().equals("Default")) {
-				OpenClassic.getClient().getConfig().setValue("options.texture-pack", "none");
-			} else {
-				OpenClassic.getClient().getConfig().setValue("options.texture-pack", button.getText() + ".zip");
-			}
-
-			OpenClassic.getClient().getConfig().save();
-			GeneralUtils.getMinecraft().textureManager.clear();
+	public void update(int mouseX, int mouseY) {
+		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
+		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
+		Label label = this.getWidget(4, Label.class);
+		if(!label.getText().equals(text)) {
+			label.setText(text);
 		}
 	}
-
-	public void render() {
-		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
-		RenderHelper.getHelper().drawDefaultBG();
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), this.getWidth() / 2, 15, 16777215);
-		RenderHelper.getHelper().renderText(String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default")), this.getWidth() / 2, this.getHeight() / 2 + 48, 16777215);
-		super.render();
-	}
+	
 }

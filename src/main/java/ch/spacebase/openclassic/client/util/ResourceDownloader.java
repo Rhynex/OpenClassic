@@ -42,7 +42,7 @@ public final class ResourceDownloader extends Thread {
 
 		URL base = null;
 		try {
-			base = new URL("https://dl.dropboxusercontent.com/u/40737374/minecraft_resources/");
+			base = new URL("https://dl.dropboxusercontent.com/u/40737374/openclassic/resources/");
 			URL url = new URL(base, "resources/");
 
 			URLConnection con = url.openConnection();

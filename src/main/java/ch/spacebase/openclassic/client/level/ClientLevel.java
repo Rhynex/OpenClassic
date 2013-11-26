@@ -8,9 +8,10 @@ import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.data.NBTData;
-import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
+import ch.spacebase.openclassic.game.network.msg.Message;
 
 public class ClientLevel implements ClassicLevel {
 
@@ -209,15 +210,13 @@ public class ClientLevel implements ClassicLevel {
 	public void setGenerating(boolean generating) {
 	}
 
-	@Override
 	public void sendToAll(Message message) {
-		this.getPlayers().get(0).getSession().send(message);
+		((ClientPlayer) this.getPlayers().get(0)).getSession().send(message);
 	}
 
-	@Override
 	public void sendToAllExcept(Player skip, Message message) {
 		if(skip.getPlayerId() != this.getPlayers().get(0).getPlayerId()) {
-			this.getPlayers().get(0).getSession().send(message);
+			((ClientPlayer) this.getPlayers().get(0)).getSession().send(message);
 		}
 	}
 
@@ -288,6 +287,11 @@ public class ClientLevel implements ClassicLevel {
 	@Override
 	public void setCreationTime(long time) {
 		this.handle.createTime = time;
+	}
+
+	@Override
+	public float getBrightness(int x, int y, int z) {
+		return this.handle.getBrightness(x, y, z);
 	}
 
 }

@@ -2,10 +2,10 @@ package ch.spacebase.openclassic.server.network.handler;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerChatEvent;
-import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.ClassicSession.State;
+import ch.spacebase.openclassic.game.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.ClassicServer;
 
@@ -35,7 +35,7 @@ public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> 
 			PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(player, chat));
 			if(event.isCancelled()) return;
 
-			OpenClassic.getServer().sendToAll(new PlayerChatMessage(player.getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));
+			((ClassicServer) OpenClassic.getServer()).sendToAll(new PlayerChatMessage(player.getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));
 			OpenClassic.getLogger().info(String.format(event.getFormat(), player.getDisplayName(), event.getMessage()));
 		}
 	}

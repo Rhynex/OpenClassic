@@ -2,7 +2,7 @@ package com.mojang.minecraft.entity.mob;
 
 import org.lwjgl.opengl.GL11;
 
-import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.model.HumanoidModel;
 import com.mojang.minecraft.level.Level;

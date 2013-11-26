@@ -42,13 +42,8 @@ import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.network.msg.PlayerSetBlockMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.KeyChangeMessage;
-import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
 import ch.spacebase.openclassic.api.settings.IntSetting;
 import ch.spacebase.openclassic.api.settings.Settings;
@@ -65,7 +60,7 @@ import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.gui.MenuScreen;
 import ch.spacebase.openclassic.client.network.ClientSession;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 import ch.spacebase.openclassic.client.settings.MusicSetting;
 import ch.spacebase.openclassic.client.settings.NightSetting;
@@ -77,7 +72,12 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.LWJGLNatives;
 import ch.spacebase.openclassic.client.util.ResourceDownloader;
 import ch.spacebase.openclassic.client.util.ShaderManager;
+import ch.spacebase.openclassic.game.network.ClassicSession.State;
+import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.KeyChangeMessage;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
@@ -114,7 +114,7 @@ public class Minecraft implements Runnable {
 	public GameMode mode;
 	public int width;
 	public int height;
-	private Timer timer = new Timer(Constants.TICKS_PER_SECOND);
+	private Timer timer = new Timer(InternalConstants.TICKS_PER_SECOND);
 	public Level level;
 	public LevelRenderer levelRenderer;
 	public LocalPlayer player;
@@ -217,8 +217,8 @@ public class Minecraft implements Runnable {
 		this.height = Display.getHeight();
 
 		if(this.hud != null) {
-			this.hud.width = ClientRenderHelper.getHelper().getGuiWidth();
-			this.hud.height = ClientRenderHelper.getHelper().getGuiHeight();
+			this.hud.width = RenderHelper.getHelper().getGuiWidth();
+			this.hud.height = RenderHelper.getHelper().getGuiHeight();
 		}
 
 		if(this.currentScreen != null) {
@@ -570,7 +570,7 @@ public class Minecraft implements Runnable {
 		GL11.glLoadIdentity();
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
-		ClientRenderHelper.getHelper().init();
+		RenderHelper.getHelper().init();
 		this.textureManager = new TextureManager(this.settings);
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.LavaTexture()));
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.WaterTexture()));
@@ -630,7 +630,7 @@ public class Minecraft implements Runnable {
 		if(this.level != null) {
 			float pitch = this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta;
 			float yaw = this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta;
-			Vector pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
+			Vector pVec = RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
 			float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
 			float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
 			float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
@@ -640,10 +640,10 @@ public class Minecraft implements Runnable {
 			float reach = this.mode.getReachDistance();
 			this.selected = this.level.clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach), true);
 			if(this.selected != null) {
-				reach = this.selected.pos.distance(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta));
+				reach = this.selected.pos.distance(RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta));
 			}
 
-			pVec = ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
+			pVec = RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
 			if(this.mode instanceof CreativeGameMode) {
 				reach = 32;
 			}
@@ -714,9 +714,9 @@ public class Minecraft implements Runnable {
 					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0, 0);
 				}
 
-				ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
+				RenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
 				if(this.settings.getBooleanSetting("options.view-bobbing").getValue()) {
-					ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
+					RenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
 				}
 
 				GL11.glTranslatef(0, 0, -0.1F);
@@ -770,9 +770,9 @@ public class Minecraft implements Runnable {
 					}
 				}
 
-				ClientRenderHelper.getHelper().setLighting(true);
-				this.levelRenderer.level.blockMap.render(ClientRenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.textureManager, this.timer.delta);
-				ClientRenderHelper.getHelper().setLighting(false);
+				RenderHelper.getHelper().setLighting(true);
+				this.levelRenderer.level.blockMap.render(RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.textureManager, this.timer.delta);
+				RenderHelper.getHelper().setLighting(false);
 				this.fogRenderer.updateFog();
 				float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);
 				float zmod = -MathHelper.sin(this.player.yaw * MathHelper.DEG_TO_RAD);
@@ -881,7 +881,7 @@ public class Minecraft implements Runnable {
 						}
 
 						for(int count = 0; count < btype.getModel().getQuads().size(); count++) {
-							ClientRenderHelper.getHelper().drawCracks(btype.getModel().getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10));
+							RenderHelper.getHelper().drawCracks(btype.getModel().getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10));
 						}
 
 						GL11.glDepthMask(true);
@@ -1015,16 +1015,16 @@ public class Minecraft implements Runnable {
 					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0, 0);
 				}
 
-				ClientRenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
+				RenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
 				if(this.settings.getBooleanSetting("options.view-bobbing").getValue()) {
-					ClientRenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
+					RenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
 				}
 
 				float heldPos = this.heldBlock.lastPosition + (this.heldBlock.heldPosition - this.heldBlock.lastPosition) * this.timer.delta;
 				GL11.glPushMatrix();
 				GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1, 0, 0);
 				GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0, 1, 0);
-				ClientRenderHelper.getHelper().setLighting(true);
+				RenderHelper.getHelper().setLighting(true);
 				GL11.glPopMatrix();
 				GL11.glPushMatrix();
 				if(this.heldBlock.moving) {
@@ -1067,7 +1067,7 @@ public class Minecraft implements Runnable {
 
 				GL11.glDisable(GL11.GL_NORMALIZE);
 				GL11.glPopMatrix();
-				ClientRenderHelper.getHelper().setLighting(false);
+				RenderHelper.getHelper().setLighting(false);
 				if(!this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					break;
 				}
@@ -1075,13 +1075,13 @@ public class Minecraft implements Runnable {
 				pass++;
 			}
 
-			ClientRenderHelper.getHelper().ortho();
+			RenderHelper.getHelper().ortho();
 			this.hud.render(this.timer.delta);
 		} else {
 			GL11.glViewport(0, 0, this.width, this.height);
 			GL11.glClearColor(0, 0, 0, 0);
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			ClientRenderHelper.getHelper().ortho();
+			RenderHelper.getHelper().ortho();
 		}
 
 		if(this.currentScreen != null) {
@@ -1250,7 +1250,9 @@ public class Minecraft implements Runnable {
 				}
 
 				if(this.currentScreen != null) {
-					this.currentScreen.update();
+					int x = Mouse.getX() * this.currentScreen.getWidth() / this.width;
+					int y = this.currentScreen.getHeight() - Mouse.getY() * this.currentScreen.getHeight() / this.height - 1;
+					this.currentScreen.update(x, y);
 				}
 			}
 		}
@@ -1261,7 +1263,9 @@ public class Minecraft implements Runnable {
 		}
 
 		this.mode.spawnMobs();
-		this.hud.update();
+		int mouseX = Mouse.getX() * this.hud.getWidth() / this.width;
+		int mouseY = this.hud.getHeight() - Mouse.getY() * this.hud.getHeight() / this.height - 1;
+		this.hud.update(mouseX, mouseY);
 		
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
 			AnimatedTexture animation = this.textureManager.animations.get(index);

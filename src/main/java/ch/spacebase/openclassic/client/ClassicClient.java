@@ -12,12 +12,14 @@ import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.model.QuadFactory;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
 import ch.spacebase.openclassic.api.gui.MainScreen;
+import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
 import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
@@ -26,7 +28,6 @@ import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.Settings;
 import ch.spacebase.openclassic.api.settings.bindings.Bindings;
 import ch.spacebase.openclassic.api.sound.AudioManager;
@@ -34,9 +35,10 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.block.physics.TNTPhysics;
 import ch.spacebase.openclassic.client.command.ClientCommands;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
+import ch.spacebase.openclassic.client.gui.widget.ClientWidgetFactory;
 import ch.spacebase.openclassic.client.input.ClientInputHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.ClientQuadFactory;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
@@ -44,6 +46,7 @@ import ch.spacebase.openclassic.game.ClassicGame;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.game.util.LoggerOutputStream;
 
 import com.mojang.minecraft.Minecraft;
@@ -56,8 +59,9 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	public ClassicClient(Minecraft mc) {
 		super(GeneralUtils.getMinecraftDirectory());
-		RenderHelper.setHelper(new ClientRenderHelper());
 		InputHelper.setHelper(new ClientInputHelper());
+		QuadFactory.setFactory(new ClientQuadFactory());
+		WidgetFactory.setFactory(new ClientWidgetFactory());
 		this.mc = mc;
 
 		// Init logger
@@ -315,7 +319,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("connecting.getting-info"));
 		this.getProgressBar().setProgress(-1);
 		this.getProgressBar().render();
-		String play = HTTPUtil.fetchUrl(url, "", Constants.MINECRAFT_URL_HTTPS + "classic/list");
+		String play = HTTPUtil.fetchUrl(url, "", InternalConstants.MINECRAFT_URL_HTTPS + "classic/list");
 		String mppass = HTTPUtil.getParameterOffPage(play, "mppass");
 
 		if(mppass.length() > 0) {

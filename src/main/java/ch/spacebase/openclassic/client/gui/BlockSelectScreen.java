@@ -9,24 +9,19 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
+import ch.spacebase.openclassic.api.gui.widget.BlockPreview;
 import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.api.gui.widget.FadingBox;
+import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.input.Mouse;
 
-public final class BlockSelectScreen extends GuiScreen {
+public class BlockSelectScreen extends GuiScreen {
 
-	private float yawAngle = 0;
-	private float pitchAngle = 0;
-	private float localSine = 0;
-	private float localSineModifier = 0;
-	private boolean fancy;
-	
 	private Map<Integer, List<ScreenBlock>> blocks = new LinkedHashMap<Integer, List<ScreenBlock>>();
 	private int page = 0;
 
 	@Override
 	public void onOpen() {
-		this.setGrabsInput(false);
 		int count = 0;
 		for(BlockType block : Blocks.getBlocks()) {
 			if(block != null && block.isSelectable()) {
@@ -43,30 +38,38 @@ public final class BlockSelectScreen extends GuiScreen {
 			}
 		}
 		
-		this.attachWidget(new Button(0, this.getWidth() / 2 - 115, 155, 25, 20, this, "<<"));
-		this.attachWidget(new Button(1, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>"));
-		
+		this.attachWidget(WidgetFactory.getFactory().newFadingBox(0, this.getWidth() / 2 - 120, 30, 240, 150, this, -1878719232, -1070583712));
+		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 115, 155, 25, 20, this, "<<"));
+		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>"));
+		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 40, this, OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), true));
+		this.attachWidget(WidgetFactory.getFactory().newFadingBox(200, -30, -30, 26, 26, this, -1862270977, -1056964609));
 		if(this.blocks.size() == 0) {
 			OpenClassic.getClient().setCurrentScreen(null);
 		}
+		
+		this.updateWidgets();
 	}
 	
 	@Override
 	public void onButtonClick(Button button) {
-		if(button.getId() == 0) {
+		if(button.getId() == 1) {
 			if(this.page > 0) {
 				this.page--;
 			}
-		} else if(button.getId() == 1) {
+			
+			this.updateWidgets();
+		} else if(button.getId() == 2) {
 			if(this.page < this.blocks.size() - 1) {
 				this.page++;
 			}
+			
+			this.updateWidgets();
 		}
 	}
 
 	@Override
 	public void onMouseClick(int x, int y, int button) {
-		if(button == 0) {
+		if(button == Mouse.LEFT_BUTTON) {
 			ScreenBlock block = this.getBlockOnScreen(x, y);
 			if(block != null) {
 				OpenClassic.getClient().getPlayer().replaceSelected(block.getBlock());
@@ -79,73 +82,39 @@ public final class BlockSelectScreen extends GuiScreen {
 	}
 	
 	@Override
-	public void render() {
-		int mouseX = RenderHelper.getHelper().getScaledMouseX();
-		int mouseY = RenderHelper.getHelper().getScaledMouseY();
-
+	public void update(int mouseX, int mouseY) {
 		ScreenBlock block = this.getBlockOnScreen(mouseX, mouseY);
-		RenderHelper.getHelper().color(this.getWidth() / 2 - 120, 30, this.getWidth() / 2 + 120, 180, -1878719232, -1070583712);
 		if(block != null) {
-			RenderHelper.getHelper().color(block.getX() - 3, block.getY() - 8, block.getX() + 23, block.getY() + 18, -1862270977, -1056964609);
+			this.getWidget(200, FadingBox.class).setPos(block.getX() - 3, block.getY() - 8);
+		} else {
+			this.getWidget(200, FadingBox.class).setPos(-30, -30);
 		}
-
-		RenderHelper.getHelper().renderText(OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), this.getWidth() / 2, 40);
-		switch(OpenClassic.getClient().getSettings().getIntSetting("options.blockChooser").getValue()) {
-			case 0: {
-				this.yawAngle = -45.0F;
-				this.pitchAngle = -30.0F;
-				this.fancy = false;
-				break;
-			}
-			case 1: {
-				this.yawAngle = -30.0F;
-				this.pitchAngle = -20.0F;
-				this.fancy = false;
-				break;
-			}
-			case 2: {
-				this.pitchAngle = -25.0F;
-				this.fancy = true;
-				break;
-			}
-		}
-
-		if(this.fancy) {
-			if(this.yawAngle >= 360.0F) {
-				this.yawAngle = 0.0F;
+	}
+	
+	private void updateWidgets() {
+		for(int id = 4; id < 40; id++) {
+			BlockPreview block = this.getWidget(id, BlockPreview.class);
+			if(block == null) {
+				int ind = id - 4;
+				int blockX = this.getWidth() / 2 + ind % 9 * 24 + -108 - 3;
+				int blockY = this.getHeight() / 2 + ind / 9 * 24 + -60 + 6;
+				block = WidgetFactory.getFactory().newBlockPreview(id, blockX, blockY, this, null);
+				this.attachWidget(block);
 			}
 			
-			if(this.localSineModifier >= 360.0F) {
-				this.localSineModifier = 0.0F;
+			boolean filled = false;
+			if(this.blocks.get(this.page).size() > id - 4) {
+				ScreenBlock b = this.blocks.get(this.page).get(id - 4);
+				if(b != null) {
+					block.setBlock(b.getBlock());
+					filled = true;
+				}
 			}
 			
-			this.yawAngle += 0.6F;
-			this.localSineModifier += 6F;
-			this.localSine = MathHelper.sin(this.localSineModifier * MathHelper.DEG_TO_RAD);
-		}
-		
-		for(ScreenBlock b : this.blocks.get(this.page)) {
-			RenderHelper.getHelper().pushMatrix();
-			RenderHelper.getHelper().translate(b.getX(), b.getY(), 0);
-			RenderHelper.getHelper().scale(10.0F, 10.0F, 10.0F);
-			RenderHelper.getHelper().translate(1.0F, 0.5F, 8.0F);
-			RenderHelper.getHelper().rotate(this.pitchAngle, 1.0F, 0.0F, 0.0F);
-			if(this.fancy && block != null && b.getBlock() == block.getBlock()) {
-				RenderHelper.getHelper().translate(0.0F, 0.15F * this.localSine, 0.0F);
+			if(!filled) {
+				block.setBlock(null);
 			}
-			
-			RenderHelper.getHelper().rotate(this.yawAngle, 0.0F, 1.0F, 0.0F);
-			if(block != null && b.getBlock() == block.getBlock()) {
-				RenderHelper.getHelper().scale(1.55F, 1.55F, 1.55F);
-			}
-
-			RenderHelper.getHelper().translate(-1.5F, 0.5F, 0.5F);
-			RenderHelper.getHelper().scale(-1.0F, -1.0F, -1.0F);
-			b.getBlock().getModel().renderAll(-2, 0, 0, 1);
-			RenderHelper.getHelper().popMatrix();
 		}
-		
-		super.render();
 	}
 	
 	private ScreenBlock getBlockOnScreen(int x, int y) {

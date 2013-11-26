@@ -13,7 +13,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
-import ch.spacebase.openclassic.api.network.msg.Message;
+import ch.spacebase.openclassic.game.network.msg.Message;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 

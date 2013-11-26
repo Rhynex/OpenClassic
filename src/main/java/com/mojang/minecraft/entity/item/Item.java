@@ -3,9 +3,8 @@ package com.mojang.minecraft.entity.item;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
@@ -28,8 +27,7 @@ public class Item extends Entity {
 	public static void initModels() {
 		for(int id = 1; id < 256; id++) {
 			if(Blocks.fromId(id) != null) {
-				Quad quad = Blocks.fromId(id).getModel().getQuads().size() >= 3 ? Blocks.fromId(id).getModel().getQuad(2) : Blocks.fromId(id).getModel().getQuad(Blocks.fromId(id).getModel().getQuads().size() - 1);
-				models[id] = new ItemModel(id, quad.getTexture().getId());
+				models[id] = new ItemModel(id);
 			}
 		}
 	}
@@ -84,8 +82,7 @@ public class Item extends Entity {
 		GL11.glRotatef(rot, 0, 1, 0);
 
 		if(models[this.resource] == null && Blocks.fromId(this.resource) != null) {
-			Quad quad = Blocks.fromId(this.resource).getModel().getQuads().size() >= 3 ? Blocks.fromId(this.resource).getModel().getQuad(2) : Blocks.fromId(this.resource).getModel().getQuad(Blocks.fromId(this.resource).getModel().getQuads().size() - 1);
-			models[this.resource] = new ItemModel(this.resource, quad.getTexture().getId());
+			models[this.resource] = new ItemModel(this.resource);
 		}
 
 		models[this.resource].render();

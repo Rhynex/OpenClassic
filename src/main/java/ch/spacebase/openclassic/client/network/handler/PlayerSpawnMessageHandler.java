@@ -2,11 +2,11 @@ package ch.spacebase.openclassic.client.network.handler;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
-import ch.spacebase.openclassic.api.network.msg.PlayerSpawnMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.network.msg.PlayerSpawnMessage;
 
 import com.mojang.minecraft.entity.player.net.NetworkPlayer;
 

@@ -4,9 +4,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.ProgressBar;
-import ch.spacebase.openclassic.api.render.RenderHelper;
-import ch.spacebase.openclassic.api.util.GuiTextures;
-import ch.spacebase.openclassic.client.render.ClientRenderHelper;
+import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 public final class ClientProgressBar implements ProgressBar {
@@ -85,8 +84,8 @@ public final class ClientProgressBar implements ProgressBar {
 		}
 
 		if(this.isVisible()) {
-			int x = ClientRenderHelper.getHelper().getGuiWidth();
-			int sy = ClientRenderHelper.getHelper().getGuiHeight();
+			int x = RenderHelper.getHelper().getGuiWidth();
+			int sy = RenderHelper.getHelper().getGuiHeight();
 			if(fresh) {
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 				GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -97,15 +96,15 @@ public final class ClientProgressBar implements ProgressBar {
 				GL11.glTranslatef(0, 0, -200);
 			}
 
-			ClientRenderHelper.getHelper().drawDefaultBG();
+			RenderHelper.getHelper().drawDefaultBG();
 			int width = RenderHelper.getHelper().getGuiWidth();
 			int height = RenderHelper.getHelper().getGuiHeight();
 			this.renderBar(false);
-			ClientRenderHelper.getHelper().drawBlackBG(0, height - 28, width, height - (height - 28));
+			RenderHelper.getHelper().drawBlackBG(0, height - 28, width, height - (height - 28));
 			GL11.glEnable(GL11.GL_BLEND);
 			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0), 10, 10, 0, 0.5625f, 1);
 			GL11.glDisable(GL11.GL_BLEND);
-			RenderHelper.getHelper().renderScaledText(this.title, width - 10 - ClientRenderHelper.getHelper().getStringWidth(this.title), 10);
+			RenderHelper.getHelper().renderScaledText(this.title, width - 10 - RenderHelper.getHelper().getStringWidth(this.title), 10);
 			if(this.isSubtitleScaled()) {
 				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 32);
 			} else {

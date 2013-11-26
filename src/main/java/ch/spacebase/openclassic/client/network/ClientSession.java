@@ -20,11 +20,11 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerConnectEvent.Result;
-import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
-import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.msg.IdentificationMessage;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -61,7 +61,7 @@ public class ClientSession extends ClassicSession {
 							return;
 						}
 
-						send(new IdentificationMessage(Constants.PROTOCOL_VERSION, player.getName(), sessionId, Constants.OPENCLASSIC_PROTOCOL_VERSION));
+						send(new IdentificationMessage(InternalConstants.PROTOCOL_VERSION, player.getName(), sessionId, InternalConstants.OPENCLASSIC_PROTOCOL_VERSION));
 						successful = true;
 					} else {
 						OpenClassic.getClient().getProgressBar().setVisible(false);

@@ -221,7 +221,9 @@ public class GuiConsoleManager implements ConsoleManager {
 	private class ServerShutdownHandler implements Runnable {
 		@Override
 		public void run() {
-			OpenClassic.getGame().shutdown();
+			if(OpenClassic.getGame() != null) {
+				OpenClassic.getGame().shutdown();
+			}
 		}
 	}
 

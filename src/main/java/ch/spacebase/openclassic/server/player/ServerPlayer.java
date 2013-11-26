@@ -18,22 +18,24 @@ import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
-import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelDataMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelFinalizeMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelInitializeMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerOpMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerSpawnMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
-import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.msg.IdentificationMessage;
+import ch.spacebase.openclassic.game.network.msg.LevelDataMessage;
+import ch.spacebase.openclassic.game.network.msg.LevelFinalizeMessage;
+import ch.spacebase.openclassic.game.network.msg.LevelInitializeMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerChatMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerDespawnMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerOpMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerSpawnMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.CustomMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.LevelColorMessage;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.server.ClassicServer;
+import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ServerSession;
 
 import com.zachsthings.onevent.EventManager;
@@ -67,7 +69,7 @@ public class ServerPlayer implements Player {
 		this.playerId = (byte) (((ClassicServer) OpenClassic.getGame()).getSessionRegistry().size());
 	}
 
-	public Session getSession() {
+	public ClassicSession getSession() {
 		return this.session;
 	}
 
@@ -130,12 +132,12 @@ public class ServerPlayer implements Player {
 		if(!old.getName().equals(this.pos.getLevel().getName())) {
 			this.pos.getLevel().addPlayer(this);
 			old.removePlayer(this.getName());
-			old.sendToAllExcept(this, new PlayerDespawnMessage(this.getPlayerId()));
-			this.session.send(new IdentificationMessage(Constants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.getGroup().hasPermission("openclassic.commands.solid") ? Constants.OP : Constants.NOT_OP));
+			((ServerLevel) old).sendToAllExcept(this, new PlayerDespawnMessage(this.getPlayerId()));
+			this.session.send(new IdentificationMessage(InternalConstants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.canBreakBedrock() ? InternalConstants.OP : InternalConstants.NOT_OP));
 			this.sendLevel(this.pos.getLevel());
 		} else {
 			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
-			this.getPosition().getLevel().sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375f, this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
+			((ServerLevel) this.getPosition().getLevel()).sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375f, this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
 		}
 	}
 
@@ -266,7 +268,7 @@ public class ServerPlayer implements Player {
 					session.send(new LevelFinalizeMessage(level.getWidth(), level.getHeight(), level.getDepth()));
 					moveTo(level.getSpawn());
 
-					level.sendToAllExcept(player, new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
+					((ServerLevel) level).sendToAllExcept(player, new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
 					for(Player p : level.getPlayers()) {
 						if(p.getPlayerId() == getPlayerId()) continue;
 
@@ -433,7 +435,12 @@ public class ServerPlayer implements Player {
 	@Override
 	public void setCanBreakBedrock(boolean canBreak) {
 		this.breakBedrock = canBreak;
-		this.getSession().send(new PlayerOpMessage(canBreak ? Constants.OP : Constants.NOT_OP));
+		this.getSession().send(new PlayerOpMessage(canBreak ? InternalConstants.OP : InternalConstants.NOT_OP));
+	}
+
+	@Override
+	public void sendCustomMessage(String id, byte[] data) {
+		this.session.send(new CustomMessage(id, data));
 	}
 
 }

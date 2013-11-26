@@ -4,10 +4,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.network.msg.custom.audio.AudioRegisterMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.network.msg.custom.audio.AudioRegisterMessage;
 
 public class AudioRegisterMessageHandler extends MessageHandler<AudioRegisterMessage> {
 

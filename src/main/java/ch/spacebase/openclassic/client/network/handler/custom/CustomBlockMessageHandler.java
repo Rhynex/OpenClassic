@@ -12,11 +12,11 @@ import org.apache.commons.io.IOUtils;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.model.Quad;
-import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.network.msg.custom.block.CustomBlockMessage;
 
 public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage> {
 

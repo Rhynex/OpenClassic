@@ -1,9 +1,21 @@
 package ch.spacebase.openclassic.server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.SocketAddress;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.DefaultListModel;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelException;
 import org.jboss.netty.channel.ChannelFactory;
@@ -23,7 +36,7 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import ch.spacebase.openclassic.api.HeartbeatManager;
+import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Server;
 import ch.spacebase.openclassic.api.block.BlockType;
@@ -39,8 +52,6 @@ import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.level.generator.FlatLandGenerator;
 import ch.spacebase.openclassic.api.level.generator.Generator;
 import ch.spacebase.openclassic.api.level.generator.NormalGenerator;
-import ch.spacebase.openclassic.api.network.msg.Message;
-import ch.spacebase.openclassic.api.network.msg.PlayerDisconnectMessage;
 import ch.spacebase.openclassic.api.permissions.PermissionManager;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.Plugin;
@@ -50,7 +61,10 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.ClassicGame;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.msg.Message;
+import ch.spacebase.openclassic.game.network.msg.PlayerDisconnectMessage;
 import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ServerPipelineFactory;
@@ -133,6 +147,16 @@ public class ClassicServer extends ClassicGame implements Server {
 	 * The server's tick count.
 	 */
 	private int ticks = 0;
+	
+	/**
+	 * The server's connection URL.
+	 */
+	private String url = "";
+	
+	/**
+	 * The server's unique salt.
+	 */
+	private long salt = new SecureRandom().nextLong();
 
 	public ClassicServer() {
 		this(new File("."));
@@ -199,16 +223,113 @@ public class ClassicServer extends ClassicGame implements Server {
 					e.printStackTrace();
 				}
 			}
-		}, 0, 1000 / Constants.TICKS_PER_SECOND, TimeUnit.MILLISECONDS);
-
-		this.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
+		}, 0, 1000 / InternalConstants.TICKS_PER_SECOND, TimeUnit.MILLISECONDS);
+		Runnable heartbeat = new Runnable() {
 			@Override
 			public void run() {
-				HeartbeatManager.beat();
+				this.mineBeat();
+				this.womBeat();
 			}
-		}, 450, 450);
-		HeartbeatManager.beat();
-
+			
+			private void mineBeat() {
+				URL url = null;
+				
+				try {
+					url = new URL("https://minecraft.net/heartbeat.jsp?port=" + OpenClassic.getServer().getPort() + "&max=" + OpenClassic.getServer().getMaxPlayers() + "&name=" + URLEncoder.encode(Color.stripColor(OpenClassic.getServer().getServerName()), "UTF-8") + "&public=" + OpenClassic.getServer().isPublic() + "&version=" + InternalConstants.PROTOCOL_VERSION + "&salt=" + salt + "&users=" + OpenClassic.getServer().getPlayers().size());
+				} catch(MalformedURLException e) {
+					OpenClassic.getLogger().severe("Malformed URL while attempting minecraft.net heartbeat?");
+					return;
+				} catch(UnsupportedEncodingException e) {
+					OpenClassic.getLogger().severe("UTF-8 URL encoding is unsupported on your system.");
+					return;
+				}
+				
+				HttpURLConnection conn = null;
+				
+				try {
+					conn = (HttpURLConnection) url.openConnection();
+					
+					try {
+						conn.setRequestMethod("GET");
+					} catch (ProtocolException e) {
+						OpenClassic.getLogger().severe("Exception while performing minecraft.net heartbeat: Connection doesn't support GET...?");
+						return;
+					}
+					
+					conn.setDoOutput(false);
+					conn.setDoInput(true);
+					conn.setUseCaches(false);
+					conn.setAllowUserInteraction(false);
+					conn.setRequestProperty("Content-type", "text/xml; charset=" + "UTF-8");
+					
+					InputStream input = conn.getInputStream();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+					String result = reader.readLine();
+					
+					IOUtils.closeQuietly(reader);
+					IOUtils.closeQuietly(input);
+					
+					if(!ClassicServer.this.url.equals(result)) {
+						ClassicServer.this.url = result;
+						OpenClassic.getLogger().info(Color.GREEN + "The server's URL is now \"" + ClassicServer.this.url + "\".");
+						
+						if(OpenClassic.getGame() != null) {
+							try {
+								File file = new File(OpenClassic.getGame().getDirectory(), "server-address.txt");
+								if(!file.exists()) file.createNewFile();
+								
+								BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+								writer.write(result);
+								IOUtils.closeQuietly(writer);
+							} catch(IOException e) {
+								OpenClassic.getLogger().severe("Failed to save server address!");
+								e.printStackTrace();
+							}
+						}
+					}
+				} catch (IOException e) {
+					OpenClassic.getLogger().severe("Exception while performing minecraft.net heartbeat!");
+					e.printStackTrace();
+				} finally {
+					if (conn != null) conn.disconnect();
+				}
+			}
+			
+			private void womBeat() {
+				URL url = null;
+				
+				try {
+					url = new URL("http://direct.worldofminecraft.com/hb.php?port=" + OpenClassic.getServer().getPort() + "&max=" + OpenClassic.getServer().getMaxPlayers() + "&name=" + URLEncoder.encode(Color.stripColor(OpenClassic.getServer().getServerName()), "UTF-8") + "&public=" + OpenClassic.getServer().isPublic() + "&version=" + InternalConstants.PROTOCOL_VERSION + "&salt=" + salt + "&users=" + OpenClassic.getServer().getPlayers().size() + "&noforward=1");
+				} catch(MalformedURLException e) {
+					OpenClassic.getLogger().severe("Malformed URL while attempting WOM heartbeat?");
+					return;
+				} catch(UnsupportedEncodingException e) {
+					OpenClassic.getLogger().severe("UTF-8 URL encoding is unsupported on your system.");
+					return;
+				}
+				
+				HttpURLConnection conn = null;
+				
+				try {
+					conn = (HttpURLConnection) url.openConnection();
+					
+					conn.setDoOutput(false);
+					conn.setDoInput(false);
+					conn.setUseCaches(false);
+					conn.setAllowUserInteraction(false);
+					conn.setRequestProperty("Content-type", "text/xml; charset=" + "UTF-8");
+				} catch (IOException e) {
+					OpenClassic.getLogger().severe("Exception while performing WOM heartbeat!");
+					e.printStackTrace();
+				} finally {
+					if (conn != null) conn.disconnect();
+				}
+			}
+		};
+		
+		this.getScheduler().scheduleAsyncRepeatingTask(this, heartbeat, 450, 450);
+		heartbeat.run();
+		
 		this.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
@@ -245,9 +366,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.getPluginManager().disablePlugins();
 		this.getPluginManager().clearPlugins();
 		this.unregisterExecutors(this);
-		HeartbeatManager.clearBeats();
-		HeartbeatManager.setURL("");
-
+		this.url = "";
 		this.sendToAll(new PlayerDisconnectMessage("Server shutting down."));
 
 		OpenClassic.getLogger().info("Saving levels...");
@@ -338,7 +457,7 @@ public class ClassicServer extends ClassicGame implements Server {
 	}
 
 	public long getURLSalt() {
-		return HeartbeatManager.getSalt();
+		return this.salt;
 	}
 
 	public String getMotd() {
@@ -387,6 +506,10 @@ public class ClassicServer extends ClassicGame implements Server {
 
 	public void setOnlineMode(boolean online) {
 		getConfig().setValue("options.online-mode", online);
+	}
+	
+	public String getURL() {
+		return this.url;
 	}
 
 	public boolean doesUseWhitelist() {
@@ -627,13 +750,13 @@ public class ClassicServer extends ClassicGame implements Server {
 
 	public void sendToAll(Message msg) {
 		for(Level level : this.levels) {
-			level.sendToAll(msg);
+			((ServerLevel) level).sendToAll(msg);
 		}
 	}
 
 	public void sendToAllExcept(Player player, Message msg) {
 		for(Level level : this.levels) {
-			level.sendToAllExcept(player, msg);
+			((ServerLevel) level).sendToAllExcept(player, msg);
 		}
 	}
 

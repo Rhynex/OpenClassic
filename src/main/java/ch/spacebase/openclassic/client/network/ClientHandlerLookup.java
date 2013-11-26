@@ -1,28 +1,6 @@
 package ch.spacebase.openclassic.client.network;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.network.msg.BlockChangeMessage;
-import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelDataMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelFinalizeMessage;
-import ch.spacebase.openclassic.api.network.msg.LevelInitializeMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerDespawnMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerDisconnectMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerOpMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerPositionMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerPositionRotationMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerRotationMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerSpawnMessage;
-import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.CustomMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.GameInfoMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.PluginMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.audio.AudioPlayMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.audio.AudioRegisterMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.audio.MusicStopMessage;
-import ch.spacebase.openclassic.api.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.client.network.handler.BlockChangeMessageHandler;
 import ch.spacebase.openclassic.client.network.handler.IdentificationMessageHandler;
 import ch.spacebase.openclassic.client.network.handler.LevelDataMessageHandler;
@@ -46,6 +24,28 @@ import ch.spacebase.openclassic.client.network.handler.custom.LevelColorMessageH
 import ch.spacebase.openclassic.client.network.handler.custom.MusicStopMessageHandler;
 import ch.spacebase.openclassic.client.network.handler.custom.PluginMessageHandler;
 import ch.spacebase.openclassic.game.network.HandlerLookup;
+import ch.spacebase.openclassic.game.network.msg.BlockChangeMessage;
+import ch.spacebase.openclassic.game.network.msg.IdentificationMessage;
+import ch.spacebase.openclassic.game.network.msg.LevelDataMessage;
+import ch.spacebase.openclassic.game.network.msg.LevelFinalizeMessage;
+import ch.spacebase.openclassic.game.network.msg.LevelInitializeMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerChatMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerDespawnMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerDisconnectMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerOpMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerPositionMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerPositionRotationMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerRotationMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerSpawnMessage;
+import ch.spacebase.openclassic.game.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.CustomMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.GameInfoMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.LevelColorMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.PluginMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.audio.AudioPlayMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.audio.AudioRegisterMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.audio.MusicStopMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.block.CustomBlockMessage;
 
 public class ClientHandlerLookup extends HandlerLookup {
 

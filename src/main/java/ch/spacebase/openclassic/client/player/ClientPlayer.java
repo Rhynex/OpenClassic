@@ -9,14 +9,15 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.player.PlayerTeleportEvent;
 import ch.spacebase.openclassic.api.level.Level;
-import ch.spacebase.openclassic.api.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.msg.PlayerChatMessage;
+import ch.spacebase.openclassic.game.network.msg.custom.CustomMessage;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -59,8 +60,7 @@ public class ClientPlayer implements Player {
 		return "/";
 	}
 
-	@Override
-	public Session getSession() {
+	public ClassicSession getSession() {
 		return GeneralUtils.getMinecraft().isInMultiplayer() ? GeneralUtils.getMinecraft().session : this.dummySession;
 	}
 
@@ -326,6 +326,11 @@ public class ClientPlayer implements Player {
 	@Override
 	public void setCanBreakBedrock(boolean canBreak) {
 		this.breakBedrock = canBreak;
+	}
+
+	@Override
+	public void sendCustomMessage(String id, byte[] data) {
+		this.getSession().send(new CustomMessage(id, data));
 	}
 
 }

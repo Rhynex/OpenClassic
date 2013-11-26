@@ -197,7 +197,7 @@ public class ServerCommands extends CommandExecutor {
 
 		if(args.length < 2) {
 			OpenClassic.getServer().banPlayer(player != null ? player.getName() : args[0]);
-			if(player != null) player.getSession().disconnect("You have been banned from this server.");
+			if(player != null) player.disconnect("You have been banned from this server.");
 		} else {
 			StringBuilder build = new StringBuilder();
 			for(int index = 1; index < args.length; index++) {
@@ -205,7 +205,7 @@ public class ServerCommands extends CommandExecutor {
 			}
 
 			OpenClassic.getServer().banPlayer((player != null ? player.getName() : args[0]), build.toString().trim());
-			if(player != null) player.getSession().disconnect(build.toString().trim());
+			if(player != null) player.disconnect(build.toString().trim());
 		}
 
 		sender.sendMessage("ban.banned", (player != null ? player.getName() : args[0]));
@@ -223,7 +223,7 @@ public class ServerCommands extends CommandExecutor {
 			OpenClassic.getServer().banIp(args[0]);
 
 			for(Player player : OpenClassic.getServer().getPlayers()) {
-				if(player.getIp().equals(args[0])) player.getSession().disconnect("You have been IP banned from this server.");
+				if(player.getIp().equals(args[0])) player.disconnect("You have been IP banned from this server.");
 			}
 		} else {
 			StringBuilder build = new StringBuilder();
@@ -234,7 +234,7 @@ public class ServerCommands extends CommandExecutor {
 			OpenClassic.getServer().banIp(args[0], build.toString().trim());
 
 			for(Player player : OpenClassic.getServer().getPlayers()) {
-				if(player.getIp().equals(args[0])) player.getSession().disconnect(build.toString());
+				if(player.getIp().equals(args[0])) player.disconnect(build.toString());
 			}
 		}
 

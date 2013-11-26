@@ -2,11 +2,12 @@ package ch.spacebase.openclassic.server.network.handler;
 
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
-import ch.spacebase.openclassic.api.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session.State;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.ClassicSession.State;
+import ch.spacebase.openclassic.game.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.server.level.ServerLevel;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -50,7 +51,7 @@ public class PlayerTeleportMessageHandler extends MessageHandler<PlayerTeleportM
 		player.getPosition().setYaw(to.getYaw());
 		player.getPosition().setPitch(to.getPitch());
 
-		player.getPosition().getLevel().sendToAllExcept(player, new PlayerTeleportMessage(player.getPlayerId(), to.getX(), to.getY() + 0.59375f, to.getZ(), (byte) to.getYaw(), (byte) to.getPitch()));
+		((ServerLevel) player.getPosition().getLevel()).sendToAllExcept(player, new PlayerTeleportMessage(player.getPlayerId(), to.getX(), to.getY() + 0.59375f, to.getZ(), (byte) to.getYaw(), (byte) to.getPitch()));
 	}
 
 }

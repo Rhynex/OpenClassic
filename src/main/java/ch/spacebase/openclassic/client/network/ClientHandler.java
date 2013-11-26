@@ -12,8 +12,8 @@ import org.jboss.netty.handler.timeout.ReadTimeoutException;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.network.msg.Message;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
+import ch.spacebase.openclassic.game.network.msg.Message;
 
 public class ClientHandler extends SimpleChannelUpstreamHandler {
 

@@ -1,6 +1,6 @@
 package ch.spacebase.openclassic.client.util;
 
-import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 
 public class Server {
 
@@ -17,7 +17,7 @@ public class Server {
 	}
 
 	public String getUrl() {
-		return Constants.MINECRAFT_URL_HTTPS + "classic/play/" + this.serverId;
+		return InternalConstants.MINECRAFT_URL_HTTPS + "classic/play/" + this.serverId;
 	}
 
 }

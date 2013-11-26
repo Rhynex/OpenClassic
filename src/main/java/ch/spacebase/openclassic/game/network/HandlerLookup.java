@@ -3,7 +3,7 @@ package ch.spacebase.openclassic.game.network;
 import java.util.HashMap;
 import java.util.Map;
 
-import ch.spacebase.openclassic.api.network.msg.Message;
+import ch.spacebase.openclassic.game.network.msg.Message;
 
 public abstract class HandlerLookup {
 

@@ -16,15 +16,16 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.model.CubeModel;
 import ch.spacebase.openclassic.api.block.model.CuboidModel;
+import ch.spacebase.openclassic.api.block.model.LiquidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Texture;
+import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.api.render.MipmapMode;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.model.Vector;
@@ -34,15 +35,17 @@ import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.FontRenderer;
 
-/**
- * @author Steveice10 <Steveice10@gmail.com>
- */
-public class ClientRenderHelper extends RenderHelper {
+public class RenderHelper {
 
 	private static final Random rand = new Random();
-
-	public static ClientRenderHelper getHelper() {
-		return (ClientRenderHelper) helper;
+	private static final RenderHelper helper = new RenderHelper();
+	
+	/**
+	 * Gets the RenderHelper instance.
+	 * @return The RenderHelper instance.
+	 */
+	public static RenderHelper getHelper() {
+		return helper;
 	}
 
 	private int binded = -1;
@@ -207,41 +210,41 @@ public class ClientRenderHelper extends RenderHelper {
 		Renderer.get().end();
 	}
 
-	@Override
 	public int bindTexture(String file, boolean jar) {
 		int id = GeneralUtils.getMinecraft().textureManager.bindTexture(file, jar);
 		this.bindTexture(id);
 		return id;
 	}
 
-	@Override
 	public void bindTexture(int id) {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
 		this.binded = id;
 	}
 
-	@Override
 	public void glColor(float red, float green, float blue, float alpha) {
 		GL11.glColor4f(red, green, blue, alpha);
 	}
 
-	@Override
 	public int getDisplayWidth() {
 		return Display.getWidth();
 	}
 
-	@Override
 	public int getDisplayHeight() {
 		return Display.getHeight();
 	}
 
-	@Override
 	public void drawQuad(Quad quad, float x, float y, float z) {
 		this.drawQuad(quad, x, y, z, 1, false);
 	}
-
-	@Override
+	
 	public void drawQuad(Quad quad, float x, float y, float z, float brightness, boolean batch) {
+		this.drawQuad(quad, x, y, z, brightness, batch, true);
+	}
+
+	public void drawQuad(Quad quad, float x, float y, float z, float brightness, boolean batch, boolean cull) {
+		if(!cull) {
+			this.setCulling(false);
+		}
 		if(!batch) Renderer.get().begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
 		if(id == null || id.intValue() != this.binded) {
@@ -250,6 +253,12 @@ public class ClientRenderHelper extends RenderHelper {
 
 		if(brightness >= 0) {
 			Renderer.get().color(brightness, brightness, brightness);
+		}
+		
+		if(batch && (quad.getParent() instanceof CuboidModel || quad.getParent() instanceof LiquidModel)) {
+			if(!this.canRenderSide(OpenClassic.getClient().getLevel().getBlockTypeAt((int) x, (int) y, (int) z), (int) x, (int) y, (int) z, CuboidModel.quadToFace(quad.getId()))) {
+				return;
+			}
 		}
 
 		float ox1 = quad.getTexture().getX1();
@@ -260,7 +269,7 @@ public class ClientRenderHelper extends RenderHelper {
 		float y2 = quad.getTexture().getY2();
 
 		if(quad.getParent() instanceof CuboidModel && !((CuboidModel) quad.getParent()).isFullCube()) {
-			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			BlockFace face = CuboidModel.quadToFace(quad.getId());
 			switch(face) {
 				case UP:
 					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
@@ -315,9 +324,11 @@ public class ClientRenderHelper extends RenderHelper {
 		Renderer.get().vertexuv(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 
 		if(!batch) Renderer.get().end();
+		if(!cull) {
+			this.setCulling(true);
+		}
 	}
 
-	@Override
 	public void drawScaledQuad(Quad quad, float x, float y, float z, float scale, float brightness) {
 		Renderer.get().begin();
 		int id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
@@ -337,7 +348,7 @@ public class ClientRenderHelper extends RenderHelper {
 		float y2 = quad.getTexture().getY2();
 
 		if(quad.getParent() instanceof CuboidModel && !((CuboidModel) quad.getParent()).isFullCube()) {
-			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			BlockFace face = CuboidModel.quadToFace(quad.getId());
 			switch(face) {
 				case UP:
 					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
@@ -408,7 +419,7 @@ public class ClientRenderHelper extends RenderHelper {
 		float y2 = texture.getY2();
 
 		if(quad.getParent() instanceof CuboidModel && !((CuboidModel) quad.getParent()).isFullCube()) {
-			BlockFace face = CuboidModel.quadToFace((CuboidModel) quad.getParent(), quad.getId());
+			BlockFace face = CuboidModel.quadToFace(quad.getId());
 			switch(face) {
 				case UP:
 					x1 = (int) (ox1 + quad.getVertex(0).getX() * quad.getTexture().getParent().getSubTextureWidth());
@@ -465,12 +476,10 @@ public class ClientRenderHelper extends RenderHelper {
 		Renderer.get().end();
 	}
 
-	@Override
 	public void drawTexture(Texture texture, float x, float y, float brightness) {
 		this.drawTexture(texture, x, y, 0, brightness);
 	}
 
-	@Override
 	public void drawTexture(Texture texture, float x, float y, float z, float brightness) {
 		Renderer.get().begin();
 		if(GeneralUtils.getMinecraft().textureManager.textures.get(texture.getTexture()) == null || GeneralUtils.getMinecraft().textureManager.textures.get(texture.getTexture()) != GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D)) {
@@ -486,22 +495,18 @@ public class ClientRenderHelper extends RenderHelper {
 		Renderer.get().end();
 	}
 
-	@Override
 	public void drawSubTex(SubTexture texture, float x, float y, float brightness) {
 		this.drawSubTex(texture, x, y, 0, brightness);
 	}
 
-	@Override
 	public void drawSubTex(SubTexture texture, float x, float y, float z, float brightness) {
 		this.drawSubTex(texture, x, y, z, 1, brightness, brightness, brightness);
 	}
 
-	@Override
 	public void drawSubTex(SubTexture texture, float x, float y, float z, float scale, float brightness) {
 		this.drawSubTex(texture, x, y, z, scale, brightness, brightness, brightness);
 	}
 
-	@Override
 	public void drawSubTex(SubTexture texture, float x, float y, float z, float scale, float r, float g, float b) {
 		Renderer.get().begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture());
@@ -521,7 +526,6 @@ public class ClientRenderHelper extends RenderHelper {
 		Renderer.get().end();
 	}
 
-	@Override
 	public boolean canRenderSide(BlockType block, int x, int y, int z, BlockFace face) {
 		if(block == null) return false;
 		BlockType relative = OpenClassic.getClient().getLevel().getBlockTypeAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
@@ -573,7 +577,6 @@ public class ClientRenderHelper extends RenderHelper {
 		return relative == null || !relative.getPreventsRendering();
 	}
 
-	@Override
 	public float getBrightness(BlockType main, int x, int y, int z) {
 		return ((ClientLevel) OpenClassic.getClient().getLevel()).getHandle().getBrightness(x, y, z);
 	}
@@ -624,17 +627,14 @@ public class ClientRenderHelper extends RenderHelper {
 		particles.spawnParticle((new TerrainParticle(level, particleX, particleY, particleZ, 0.0F, 0.0F, 0.0F, Blocks.fromId(level.getTile(x, y, z)))).setPower(0.2F).scale(0.6F));
 	}
 
-	@Override
 	public float getStringWidth(String string) {
 		return GeneralUtils.getMinecraft().fontRenderer.getWidth(string);
 	}
 
-	@Override
 	public void drawRotatedBlock(int x, int y, BlockType block) {
 		this.drawRotatedBlock(x, y, block, 0);
 	}
 
-	@Override
 	public void drawRotatedBlock(int x, int y, BlockType block, float scale) {
 		if(block != null && block.getModel() != null) {
 			GL11.glPushMatrix();
@@ -654,12 +654,10 @@ public class ClientRenderHelper extends RenderHelper {
 		}
 	}
 
-	@Override
 	public void drawImage(BufferedImage image, int x, int y) {
 		this.drawImage(image, x, y, 0);
 	}
 
-	@Override
 	public void drawImage(BufferedImage image, int x, int y, int z) {
 		GeneralUtils.getMinecraft().textureManager.bindTexture(image);
 
@@ -672,7 +670,6 @@ public class ClientRenderHelper extends RenderHelper {
 		Renderer.get().end();
 	}
 
-	@Override
 	public void setCulling(boolean enabled) {
 		if(enabled) {
 			GL11.glEnable(GL11.GL_CULL_FACE);
@@ -689,8 +686,8 @@ public class ClientRenderHelper extends RenderHelper {
 	}
 
 	public void ortho() {
-		int width = ClientRenderHelper.getHelper().getGuiWidth();
-		int height = ClientRenderHelper.getHelper().getGuiHeight();
+		int width = this.getGuiWidth();
+		int height = this.getGuiHeight();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
@@ -710,10 +707,10 @@ public class ClientRenderHelper extends RenderHelper {
 			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 			GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
 			Vector vec = new Vector(0.0F, -1.0F, 0.5F).normalize();
-			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_POSITION, ClientRenderHelper.getHelper().getParamBuffer(vec.x, vec.y, vec.z, 0));
-			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_DIFFUSE, ClientRenderHelper.getHelper().getParamBuffer(0.3F, 0.3F, 0.3F, 1));
-			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(0, 0, 0, 1));
-			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, ClientRenderHelper.getHelper().getParamBuffer(0.7F, 0.7F, 0.7F, 1));
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_POSITION, this.getParamBuffer(vec.x, vec.y, vec.z, 0));
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_DIFFUSE, this.getParamBuffer(0.3F, 0.3F, 0.3F, 1));
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_AMBIENT, this.getParamBuffer(0, 0, 0, 1));
+			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, this.getParamBuffer(0.7F, 0.7F, 0.7F, 1));
 		}
 	}
 
@@ -796,6 +793,23 @@ public class ClientRenderHelper extends RenderHelper {
 	
 	public MipmapMode getMipmapMode() {
 		return this.mipmap;
+	}
+	
+	public int getGuiWidth() {
+		return this.getDisplayWidth() * 240 / this.getDisplayHeight();
+	}
+	
+	public int getGuiHeight() {
+		return this.getDisplayHeight() * 240 / this.getDisplayHeight();
+	}
+	
+	public int getScaledMouseX() {
+		return InputHelper.getHelper().getMouseX() * (this.getDisplayWidth() * 240 / this.getDisplayHeight()) / this.getDisplayWidth();
+	}
+	
+	public int getScaledMouseY() {
+		int height = this.getDisplayHeight() * 240 / this.getDisplayHeight();
+		return height - InputHelper.getHelper().getMouseY() * height / this.getDisplayHeight() - 1;
 	}
 
 }

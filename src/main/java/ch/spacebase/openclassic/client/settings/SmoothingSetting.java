@@ -1,8 +1,8 @@
 package ch.spacebase.openclassic.client.settings;
 
-import ch.spacebase.openclassic.api.render.MipmapMode;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
+import ch.spacebase.openclassic.client.render.MipmapMode;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 public class SmoothingSetting extends BooleanSetting {
 

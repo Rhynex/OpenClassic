@@ -4,14 +4,14 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerJoinEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerLoginEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerLoginEvent.Result;
-import ch.spacebase.openclassic.api.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.api.player.Session.State;
-import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
+import ch.spacebase.openclassic.game.network.ClassicSession.State;
+import ch.spacebase.openclassic.game.network.msg.IdentificationMessage;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -38,9 +38,9 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		OpenClassic.getClient().getProgressBar().setSubtitle(message.getUsernameOrServerName());
 		OpenClassic.getClient().getProgressBar().setText(message.getVerificationKeyOrMotd());
 		byte op = message.getOpOrCustomClient();
-		if(op == Constants.OP) {
+		if(op == InternalConstants.OP) {
 			player.setCanBreakBedrock(true);	
-		} else if(op == Constants.NOT_OP) {
+		} else if(op == InternalConstants.NOT_OP) {
 			player.setCanBreakBedrock(false);
 		}
 		

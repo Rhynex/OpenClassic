@@ -1,10 +1,10 @@
 package ch.spacebase.openclassic.client.network.handler.custom;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.network.msg.custom.LevelColorMessage;
 
 public class LevelColorMessageHandler extends MessageHandler<LevelColorMessage> {
 

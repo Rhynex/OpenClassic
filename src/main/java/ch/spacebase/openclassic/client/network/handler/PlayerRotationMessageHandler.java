@@ -1,10 +1,10 @@
 package ch.spacebase.openclassic.client.network.handler;
 
-import ch.spacebase.openclassic.api.network.msg.PlayerRotationMessage;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
+import ch.spacebase.openclassic.game.network.msg.PlayerRotationMessage;
 
 import com.mojang.minecraft.entity.player.net.NetworkPlayer;
 

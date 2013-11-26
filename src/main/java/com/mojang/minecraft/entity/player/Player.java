@@ -3,8 +3,8 @@ package com.mojang.minecraft.entity.player;
 import java.awt.image.BufferedImage;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.render.RenderHelper;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.HumanoidMob;
