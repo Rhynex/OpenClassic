@@ -1,5 +1,0 @@
-default:
-    inherits: ''
-    default: true
-    players: []
-    permissions: []
