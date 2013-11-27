@@ -1,5 +1,6 @@
 package com.mojang.minecraft.gamemode;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.gui.BlockSelectScreen;
@@ -16,7 +17,7 @@ public class CreativeGameMode extends GameMode {
 	}
 
 	public void openInventory() {
-		this.mc.setCurrentScreen(new BlockSelectScreen());
+		OpenClassic.getClient().setActiveComponent(new BlockSelectScreen());
 	}
 
 	public void apply(Level level) {

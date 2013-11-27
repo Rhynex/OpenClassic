@@ -4,67 +4,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.ButtonList;
-import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
-import ch.spacebase.openclassic.api.gui.widget.Label;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.ButtonList;
+import ch.spacebase.openclassic.api.gui.base.ButtonListCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
 import ch.spacebase.openclassic.api.translate.Language;
 
-public class LanguageScreen extends GuiScreen {
+public class LanguageScreen extends GuiComponent {
 
-	private GuiScreen parent;
+	private GuiComponent parent;
 
-	public LanguageScreen(GuiScreen parent) {
+	public LanguageScreen(GuiComponent parent) {
+		super("languagescreen");
 		this.parent = parent;
 	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
-		ButtonList list = new ButtonList(1, this);
+	public void onAttached(GuiComponent oparent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new DefaultBackground("bg"));
+		ButtonList list = new ButtonList("languages", 0, 0, this.getWidth(), this.getHeight());
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
 				String code = button.getText().substring(button.getText().indexOf('(') + 1, button.getText().indexOf(')'));
 				OpenClassic.getGame().getConfig().setValue("options.language", code);
-				OpenClassic.getClient().setCurrentScreen(new LanguageScreen(parent));
+				OpenClassic.getClient().setActiveComponent(new LanguageScreen(parent));
 				OpenClassic.getGame().getConfig().save();
 			}
 		});
 		
-		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+		this.attachComponent(list);
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 150, this.getHeight() / 6 + 312, 300, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.language.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, 30, OpenClassic.getGame().getTranslator().translate("gui.language.select"), true));
 		
 		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("options.language"));
-		this.attachWidget(WidgetFactory.getFactory().newLabel(4, this.getWidth() / 2, this.getHeight() / 2 + 48, this, text, true));
+		this.attachComponent(new Label("current", this.getWidth() / 2, this.getHeight() / 2 + 96, text, true));
 		
 		List<String> languages = new ArrayList<String>();
 		for (Language language : OpenClassic.getGame().getTranslator().getLanguages()) {
 			languages.add(language.getName() + " (" + language.getLangCode() + ")");
 		}
 
-		this.getWidget(1, ButtonList.class).setContents(languages);
+		this.getComponent("languages", ButtonList.class).setContents(languages);
 	}
 	
 	@Override
 	public void update(int mouseX, int mouseY) {
 		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.language.current"), OpenClassic.getGame().getConfig().getString("options.language"));
-		Label label = this.getWidget(4, Label.class);
+		Label label = this.getComponent("current", Label.class);
 		if(!label.getText().equals(text)) {
 			label.setText(text);
 		}
+		
+		super.update(mouseX, mouseY);
 	}
 	
 }

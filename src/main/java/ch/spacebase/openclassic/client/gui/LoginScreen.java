@@ -14,14 +14,14 @@ import org.apache.commons.io.IOUtils;
 
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.Label;
-import ch.spacebase.openclassic.api.gui.widget.StateButton;
-import ch.spacebase.openclassic.api.gui.widget.TextBox;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
+import ch.spacebase.openclassic.api.gui.base.PasswordTextBox;
+import ch.spacebase.openclassic.api.gui.base.StateButton;
+import ch.spacebase.openclassic.api.gui.base.TextBox;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.Server;
@@ -30,19 +30,23 @@ import ch.spacebase.openclassic.client.util.cookie.Cookie;
 import ch.spacebase.openclassic.client.util.cookie.CookieList;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
-public class LoginScreen extends GuiScreen {
+public class LoginScreen extends GuiComponent {
+
+	public LoginScreen() {
+		super("loginscreen");
+	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
-		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.login")).setCallback(new ButtonCallback() {
+	public void onAttached(GuiComponent parent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new DefaultBackground("bg"));
+		this.attachComponent(new Button("login", this.getWidth() / 2 - 200, this.getHeight() / 4 + this.getHeight() / 2, 196, 40, OpenClassic.getGame().getTranslator().translate("gui.login.login")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				String user = getWidget(3, TextBox.class).getText();
-				String pass = getWidget(4, TextBox.class).getText();
+				String user = getComponent("username", TextBox.class).getText();
+				String pass = getComponent("password", TextBox.class).getText();
 
-				if(getWidget(2, StateButton.class).getState().equals(OpenClassic.getGame().getTranslator().translate("gui.yes"))) {
+				if(getComponent("remember", StateButton.class).getState().equals(OpenClassic.getGame().getTranslator().translate("gui.yes"))) {
 					BufferedWriter writer = null;
 					try {
 						writer = new BufferedWriter(new FileWriter(getLoginFile(true)));
@@ -65,49 +69,47 @@ public class LoginScreen extends GuiScreen {
 				OpenClassic.getClient().getProgressBar().setProgress(-1);
 				OpenClassic.getClient().getProgressBar().render();
 				if(!auth(user, pass)) {
-					getWidget(6, Label.class).setText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.login.failed"));
+					getComponent("title", Label.class).setText(Color.RED + OpenClassic.getGame().getTranslator().translate("gui.login.failed"));
 					OpenClassic.getClient().getProgressBar().setVisible(false);
 					return;
 				}
 
 				OpenClassic.getClient().getProgressBar().setVisible(false);
-				OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
+				OpenClassic.getClient().setActiveComponent(new MainMenuScreen());
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newStateButton(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.login.remember")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("playoffline", this.getWidth() / 2 + 4, this.getHeight() / 4 + this.getHeight() / 2, 196, 40, OpenClassic.getGame().getTranslator().translate("gui.login.play-offline")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				((StateButton) button).setState(((StateButton) button).getState() == OpenClassic.getGame().getTranslator().translate("gui.yes") ? OpenClassic.getGame().getTranslator().translate("gui.no") : OpenClassic.getGame().getTranslator().translate("gui.yes"));
+				OpenClassic.getClient().setActiveComponent(new MainMenuScreen());
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newTextBox(3, this.getWidth() / 2 - 100, this.getHeight() / 2 - 10, this, 64));
-		this.attachWidget(WidgetFactory.getFactory().newPasswordTextBox(4, this.getWidth() / 2 - 100, this.getHeight() / 2 + 16, this, 64));
-		this.attachWidget(WidgetFactory.getFactory().newButton(5, this.getWidth() / 2 + 2, this.getHeight() / 4 + 120, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.play-offline")).setCallback(new ButtonCallback() {
+		this.attachComponent(new StateButton("remember", this.getWidth() / 2 - 200, this.getHeight() / 4 + this.getHeight() / 2 + 48, OpenClassic.getGame().getTranslator().translate("gui.login.remember")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new MainMenuScreen());
+				((StateButton) button).setState(((StateButton) button).getState().equals(OpenClassic.getGame().getTranslator().translate("gui.yes")) ? OpenClassic.getGame().getTranslator().translate("gui.no") : OpenClassic.getGame().getTranslator().translate("gui.yes"));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(6, this.getWidth() / 2, 40, this, OpenClassic.getGame().getTranslator().translate("gui.login.enter"), true));
-		this.attachWidget(WidgetFactory.getFactory().newLabel(7, this.getWidth() / 2 - 152, this.getHeight() / 2 - 6, this, OpenClassic.getGame().getTranslator().translate("gui.login.user"), true));
-		this.attachWidget(WidgetFactory.getFactory().newLabel(8, this.getWidth() / 2 - 152, this.getHeight() / 2 + 20, this, OpenClassic.getGame().getTranslator().translate("gui.login.pass"), true));
+		this.attachComponent(new TextBox("username", this.getWidth() / 2 - 200, this.getHeight() / 2 - 20, 64));
+		this.attachComponent(new PasswordTextBox("password", this.getWidth() / 2 - 200, this.getHeight() / 2 + 32, 64));
+		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.login.enter"), true));
+		this.attachComponent(new Label("enteruser", this.getWidth() / 2 - 304, this.getHeight() / 2 - 12, OpenClassic.getGame().getTranslator().translate("gui.login.user"), true));
+		this.attachComponent(new Label("enterpass", this.getWidth() / 2 - 304, this.getHeight() / 2 + 40, OpenClassic.getGame().getTranslator().translate("gui.login.pass"), true));
 		
-		this.getWidget(2, StateButton.class).setState(this.getLoginFile(false).exists() ? OpenClassic.getGame().getTranslator().translate("gui.yes") : OpenClassic.getGame().getTranslator().translate("gui.no"));
-		this.getWidget(3, TextBox.class).setFocus(true);
-
+		this.getComponent("remember", StateButton.class).setState(this.getLoginFile(false).exists() ? OpenClassic.getGame().getTranslator().translate("gui.yes") : OpenClassic.getGame().getTranslator().translate("gui.no"));
 		if(this.getLoginFile(false).exists()) {
 			BufferedReader reader = null;
 			try {
 				reader = new BufferedReader(new FileReader(this.getLoginFile(true)));
 				String line = "";
 				while((line = reader.readLine()) != null) {
-					if(this.getWidget(3, TextBox.class).getText().equals("")) {
-						this.getWidget(3, TextBox.class).setText(line);
-					} else if(this.getWidget(4, TextBox.class).getText().equals("")) {
-						this.getWidget(4, TextBox.class).setText(line);
+					if(this.getComponent("username", TextBox.class).getText().equals("")) {
+						this.getComponent("username", TextBox.class).setText(line);
+					} else if(this.getComponent("password", TextBox.class).getText().equals("")) {
+						this.getComponent("password", TextBox.class).setText(line);
 						break;
 					}
 				}
@@ -118,14 +120,14 @@ public class LoginScreen extends GuiScreen {
 				IOUtils.closeQuietly(reader);
 			}
 		} else {
-			this.getWidget(1, Button.class).setActive(false);
+			this.getComponent("login", Button.class).setActive(false);
 		}
 	}
 
 	@Override
 	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
-		this.getWidget(1, Button.class).setActive(this.getWidget(3, TextBox.class).getText().length() > 0 && this.getWidget(4, TextBox.class).getText().length() > 0);
+		this.getComponent("login", Button.class).setActive(this.getComponent("username", TextBox.class).getText().length() > 0 && this.getComponent("password", TextBox.class).getText().length() > 0);
 	}
 
 	private File getLoginFile(boolean create) {

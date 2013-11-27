@@ -4,30 +4,30 @@ import java.io.File;
 import java.util.Arrays;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.ButtonList;
-import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
-import ch.spacebase.openclassic.api.gui.widget.Label;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.ButtonList;
+import ch.spacebase.openclassic.api.gui.base.ButtonListCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-public class TexturePackScreen extends GuiScreen {
+public class TexturePackScreen extends GuiComponent {
 
-	private GuiScreen parent;
+	private GuiComponent parent;
 	private String[] textures = null;
 
-	public TexturePackScreen(GuiScreen parent) {
+	public TexturePackScreen(GuiComponent parent) {
+		super("texturepackscreen");
 		this.parent = parent;
 	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
-		ButtonList list = new ButtonList(1, this);
+	public void onAttached(GuiComponent oparent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new DefaultBackground("bg"));
+		ButtonList list = new ButtonList("packs", 0, 0, this.getWidth(), this.getHeight());
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
@@ -42,19 +42,19 @@ public class TexturePackScreen extends GuiScreen {
 			}
 		});
 		
-		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 75, this.getHeight() / 6 + 156, 150, 20, this, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+		this.attachComponent(list);
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 150, this.getHeight() / 6 + 312, 300, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 15, this, OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, 30, OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), true));
 		
 		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
 		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
-		this.attachWidget(WidgetFactory.getFactory().newLabel(4, this.getWidth() / 2, this.getHeight() / 2 + 48, this, text, true));
+		this.attachComponent(new Label("current", this.getWidth() / 2, this.getHeight() / 2 + 96, text, true));
 		
 		StringBuilder textures = new StringBuilder("Default");
 		for(String file : (new File(OpenClassic.getClient().getDirectory(), "texturepacks").list())) {
@@ -63,17 +63,19 @@ public class TexturePackScreen extends GuiScreen {
 		}
 
 		this.textures = textures.toString().split(";");
-		this.getWidget(1, ButtonList.class).setContents(Arrays.asList(this.textures));
+		this.getComponent("packs", ButtonList.class).setContents(Arrays.asList(this.textures));
 	}
 	
 	@Override
 	public void update(int mouseX, int mouseY) {
 		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
 		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
-		Label label = this.getWidget(4, Label.class);
+		Label label = this.getComponent("current", Label.class);
 		if(!label.getText().equals(text)) {
 			label.setText(text);
 		}
+		
+		super.update(mouseX, mouseY);
 	}
 	
 }

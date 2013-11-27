@@ -14,7 +14,7 @@ import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.gui.ClientMainScreen;
+import ch.spacebase.openclassic.client.gui.ClientHUDScreen;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
@@ -52,7 +52,7 @@ public class ClientPlayer implements Player {
 	
 	private void sendInternal(String message) {
 		for(String msg : message.split("\n")) {
-			OpenClassic.getClient().getMainScreen().addChat(msg);
+			OpenClassic.getClient().getHUD().addChat(msg);
 		}
 	}
 
@@ -204,7 +204,7 @@ public class ClientPlayer implements Player {
 	@Override
 	public void chat(String message) {
 		if(this.getSession() == this.dummySession) {
-			((ClientMainScreen) OpenClassic.getClient().getMainScreen()).addChat(message);
+			((ClientHUDScreen) OpenClassic.getClient().getHUD()).addChat(message);
 			return;
 		}
 		

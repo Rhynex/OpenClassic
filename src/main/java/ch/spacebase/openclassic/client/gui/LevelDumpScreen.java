@@ -1,50 +1,50 @@
 package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.TextBox;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
+import ch.spacebase.openclassic.api.gui.base.TextBox;
 
-public class LevelDumpScreen extends GuiScreen {
+public class LevelDumpScreen extends GuiComponent {
 
-	private GuiScreen parent;
+	private GuiComponent parent;
 
-	public LevelDumpScreen(GuiScreen parent) {
+	public LevelDumpScreen(GuiComponent parent) {
+		super("leveldumpscreen");
 		this.parent = parent;
 	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
-		this.attachWidget(WidgetFactory.getFactory().newTextBox(1, this.getWidth() / 2 - 100, this.getHeight() / 2 - 30, this, 30));
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 120, this, OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")).setCallback(new ButtonCallback() {
+	public void onAttached(GuiComponent oparent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new TranslucentBackground("bg"));
+		this.attachComponent(new TextBox("name", this.getWidth() / 2 - 200, this.getHeight() / 2 - 60, 30));
+		this.attachComponent(new Button("save", this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().saveLevel(getWidget(1, TextBox.class).getText());
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().saveLevel(getComponent("name", TextBox.class).getText());
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 100, this.getHeight() / 4 + 144, this, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(4, this.getWidth() / 2, 40, this, OpenClassic.getGame().getTranslator().translate("gui.level-dump.name"), true));
-		
-		this.getWidget(2, Button.class).setActive(false);
+		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.level-dump.name"), true));
+		this.getComponent("save", Button.class).setActive(false);
 	}
 
 	@Override
 	public void onKeyPress(char c, int key) {
 		super.onKeyPress(c, key);
-		this.getWidget(2, Button.class).setActive(this.getWidget(1, TextBox.class).getText().trim().length() > 0);
+		this.getComponent("save", Button.class).setActive(this.getComponent("name", TextBox.class).getText().trim().length() > 0);
 	}
 	
 }

@@ -4,55 +4,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.ButtonList;
-import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.ButtonList;
+import ch.spacebase.openclassic.api.gui.base.ButtonListCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
+import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
 import ch.spacebase.openclassic.api.settings.Settings;
 
-public class HacksScreen extends GuiScreen {
+public class HacksScreen extends GuiComponent {
 
-	private GuiScreen parent;
+	private GuiComponent parent;
 	private Settings settings;
 
-	public HacksScreen(GuiScreen parent, Settings settings) {
+	public HacksScreen(GuiComponent parent, Settings settings) {
+		super("hacksscreen");
 		this.parent = parent;
 		this.settings = settings;
 	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
+	public void onAttached(GuiComponent oparent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
 		if(OpenClassic.getClient().isInGame()) {
-			this.attachWidget(WidgetFactory.getFactory().newTranslucentBackground(0, this));
+			this.attachComponent(new TranslucentBackground("bg"));
 		} else {
-			this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
+			this.attachComponent(new DefaultBackground("bg"));
 		}
 		
-		ButtonList list = new ButtonList(1, this);
+		ButtonList list = new ButtonList("hacks", 0, 0, this.getWidth(), this.getHeight());
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
 				int page = list.getCurrentPage();
-				settings.getSetting((list.getCurrentPage() * 5) + button.getId()).toggle();
-				getWidget(1, ButtonList.class).setContents(buildContents());
+				settings.getSetting((list.getCurrentPage() * 5) + Integer.parseInt(button.getName().replace("button", ""))).toggle();
+				getComponent("hacks", ButtonList.class).setContents(buildContents());
 				list.setCurrentPage(page);
 			}
 		});
 		
-		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(100, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")).setCallback(new ButtonCallback() {
+		this.attachComponent(list);
+		this.attachComponent(new Button("done", this.getWidth() / 2 - 200, this.getHeight() / 6 + 344, OpenClassic.getGame().getTranslator().translate("gui.done")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
-		this.attachWidget(WidgetFactory.getFactory().newLabel(2, this.getWidth() / 2, 20, this, OpenClassic.getGame().getTranslator().translate("gui.hacks"), true));
-	
-		this.getWidget(1, ButtonList.class).setContents(this.buildContents());
+		
+		this.attachComponent(new Label("title", this.getWidth() / 2, 40, OpenClassic.getGame().getTranslator().translate("gui.hacks"), true));
+		this.getComponent("hacks", ButtonList.class).setContents(this.buildContents());
 	}
 	
 	private List<String> buildContents() {

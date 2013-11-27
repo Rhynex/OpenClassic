@@ -63,17 +63,28 @@ public class RenderHelper {
 	}
 
 	public void drawDefaultBG() {
-		this.bindTexture("/dirt.png", true);
+		this.bindTexture("/gui/dirt.png", true);
 
-		int width = this.getGuiWidth();
-		int height = this.getGuiHeight();
+		int width = Display.getWidth();
+		int height = Display.getHeight();
 
 		Renderer.get().begin();
 		Renderer.get().color(4210752);
-		Renderer.get().vertexuv(0, height, 0, 0, height / 32);
-		Renderer.get().vertexuv(width, height, 0, width / 32, height / 32);
-		Renderer.get().vertexuv(width, 0, 0, width / 32, 0);
+		Renderer.get().vertexuv(0, height, 0, 0, height / 64);
+		Renderer.get().vertexuv(width, height, 0, width / 64, height / 64);
+		Renderer.get().vertexuv(width, 0, 0, width / 64, 0);
 		Renderer.get().vertexuv(0, 0, 0, 0, 0);
+		Renderer.get().end();
+	}
+	
+	public void drawDefaultBG(int x, int y, int width, int height) {
+		this.bindTexture("/gui/dirt.png", true);
+		Renderer.get().begin();
+		Renderer.get().color(4210752);
+		Renderer.get().vertexuv(x, y + height, 0, 0, height / 64);
+		Renderer.get().vertexuv(x + width, y + height, 0, width / 64, height / 64);
+		Renderer.get().vertexuv(x + width, y, 0, width / 64, 0);
+		Renderer.get().vertexuv(x, y, 0, 0, 0);
 		Renderer.get().end();
 	}
 
@@ -81,9 +92,9 @@ public class RenderHelper {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		Renderer.get().begin();
 		Renderer.get().color(0);
-		Renderer.get().vertexuv(x, y + height, 0, 0, height / 32);
-		Renderer.get().vertexuv(x + width, y + height, 0, width / 32, height / 32);
-		Renderer.get().vertexuv(x + width, y, 0, width / 32, 0);
+		Renderer.get().vertexuv(x, y + height, 0, 0, 0);
+		Renderer.get().vertexuv(x + width, y + height, 0, 0, 0);
+		Renderer.get().vertexuv(x + width, y, 0, 0, 0);
 		Renderer.get().vertexuv(x, y, 0, 0, 0);
 		Renderer.get().end();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -638,11 +649,12 @@ public class RenderHelper {
 	public void drawRotatedBlock(int x, int y, BlockType block, float scale) {
 		if(block != null && block.getModel() != null) {
 			GL11.glPushMatrix();
-			GL11.glTranslatef(x, y, 0);
+			GL11.glTranslatef(x, y, -50);
 			GL11.glScalef(10, 10, 10);
 			GL11.glTranslatef(1, 0, 8);
 			GL11.glRotatef(-30, 1, 0, 0);
 			GL11.glRotatef(45, 0, 1, 0);
+			GL11.glScalef(2, 2, 2);
 			if(scale > 0) {
 				GL11.glScalef(scale, scale, scale);
 			}
@@ -686,15 +698,15 @@ public class RenderHelper {
 	}
 
 	public void ortho() {
-		int width = this.getGuiWidth();
-		int height = this.getGuiHeight();
+		int width = Display.getWidth();//this.getGuiWidth();
+		int height = Display.getHeight();//this.getGuiHeight();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		GL11.glOrtho(0.0D, width, height, 0.0D, 100.0D, 300.0D);
+		GL11.glOrtho(0, width, height, 0, 100, 300);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
-		GL11.glTranslatef(0.0F, 0.0F, -200.0F);
+		GL11.glTranslatef(0, 0, -200);
 	}
 
 	public void setLighting(boolean lighting) {

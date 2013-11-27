@@ -8,6 +8,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
+import org.lwjgl.input.Mouse;
+
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
@@ -17,9 +19,9 @@ import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.MainScreen;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.HUDComponent;
+import ch.spacebase.openclassic.api.gui.base.ComponentHelper;
 import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.level.LevelInfo;
@@ -35,7 +37,8 @@ import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.block.physics.TNTPhysics;
 import ch.spacebase.openclassic.client.command.ClientCommands;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
-import ch.spacebase.openclassic.client.gui.widget.ClientWidgetFactory;
+import ch.spacebase.openclassic.client.gui.GameOverScreen;
+import ch.spacebase.openclassic.client.gui.base.ClientComponentHelper;
 import ch.spacebase.openclassic.client.input.ClientInputHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.ClientQuadFactory;
@@ -56,12 +59,16 @@ import com.zachsthings.onevent.EventManager;
 public class ClassicClient extends ClassicGame implements Client {
 
 	private final Minecraft mc;
+	
+	public static void start(String[] args) {
+		new Thread(new Minecraft(null, 854, 480), "Client-Main").start();
+	}
 
 	public ClassicClient(Minecraft mc) {
 		super(GeneralUtils.getMinecraftDirectory());
 		InputHelper.setHelper(new ClientInputHelper());
 		QuadFactory.setFactory(new ClientQuadFactory());
-		WidgetFactory.setFactory(new ClientWidgetFactory());
+		ComponentHelper.setHelper(new ClientComponentHelper());
 		this.mc = mc;
 
 		// Init logger
@@ -199,7 +206,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		VanillaBlock.registerAll();
 		this.mc.setLevel(level);
 		this.mc.initGame();
-		this.mc.setCurrentScreen(null);
+		this.setActiveComponent(null);
 	}
 
 	@Override
@@ -248,13 +255,32 @@ public class ClassicClient extends ClassicGame implements Client {
 	}
 
 	@Override
-	public void setCurrentScreen(GuiScreen screen) {
-		this.mc.setCurrentScreen(screen);
+	public GuiComponent getActiveComponent() {
+		if(this.mc.baseGUI.getComponents().isEmpty()) {
+			return null;
+		}
+		
+		return this.mc.baseGUI.getComponents().get(0);
 	}
-
+	
 	@Override
-	public GuiScreen getCurrentScreen() {
-		return this.mc.currentScreen;
+	public void setActiveComponent(GuiComponent component) {
+		this.mc.baseGUI.clearComponents();
+		if(component == null && this.mc.player != null && this.mc.mode instanceof SurvivalGameMode && this.mc.player.health <= 0) {
+			component = new GameOverScreen();
+		}
+		
+		if(component != null) {
+			this.mc.baseGUI.attachComponent(component);
+			component.setFocused(true);
+			if(this.mc.player != null) {
+                this.mc.player.input.resetKeys();
+			}
+			
+			Mouse.setGrabbed(false);
+		} else {
+			this.mc.grabMouse();
+		}
 	}
 
 	@Override
@@ -263,8 +289,8 @@ public class ClassicClient extends ClassicGame implements Client {
 	}
 
 	@Override
-	public MainScreen getMainScreen() {
-		return this.mc.mainScreen;
+	public HUDComponent getHUD() {
+		return this.mc.hud;
 	}
 	
 	@Override
@@ -328,14 +354,14 @@ public class ClassicClient extends ClassicGame implements Client {
 			try {
 				this.mc.port = Integer.parseInt(HTTPUtil.getParameterOffPage(play, "port"));
 			} catch(NumberFormatException e) {
-				this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
+				this.setActiveComponent(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.invalid-page")));
 				this.mc.server = null;
 				this.getProgressBar().setVisible(false);
 				this.getProgressBar().setSubtitleScaled(true);
 				return;
 			}
 		} else {
-			this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
+			this.setActiveComponent(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.check")));
 			this.getProgressBar().setVisible(false);
 			this.getProgressBar().setSubtitleScaled(true);
 			return;
@@ -343,7 +369,7 @@ public class ClassicClient extends ClassicGame implements Client {
 
 		this.getProgressBar().setVisible(false);
 		this.mc.initGame();
-		this.setCurrentScreen(null);
+		this.setActiveComponent(null);
 	}
 
 	@Override

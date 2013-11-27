@@ -23,7 +23,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			PlayerLoginEvent event = EventManager.callEvent(new PlayerLoginEvent(OpenClassic.getClient().getPlayer(), session.getAddress()));
 			if(event.getResult() != Result.ALLOWED) {
 				OpenClassic.getClient().exitGameSession();
-				OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
+				OpenClassic.getClient().setActiveComponent(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.plugin-disallow"), event.getKickMessage()));
 				return;
 			}
 		}

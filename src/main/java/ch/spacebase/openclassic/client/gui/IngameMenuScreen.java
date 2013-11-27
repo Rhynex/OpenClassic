@@ -3,35 +3,39 @@ package ch.spacebase.openclassic.client.gui;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.event.level.LevelUnloadEvent;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.Label;
+import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
 
 import com.zachsthings.onevent.EventManager;
 
-public class IngameMenuScreen extends GuiScreen {
+public class IngameMenuScreen extends GuiComponent {
 
+	public IngameMenuScreen() {
+		super("ingamemenuscreen");
+	}
+	
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newTranslucentBackground(0, this));
-		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 2 - 48, this, OpenClassic.getGame().getTranslator().translate("gui.menu.options")).setCallback(new ButtonCallback() {
+	public void onAttached(GuiComponent parent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new TranslucentBackground("bg"));
+		this.attachComponent(new Button("options", this.getWidth() / 2 - 200, this.getHeight() / 2 - 96, OpenClassic.getGame().getTranslator().translate("gui.menu.options")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new OptionsScreen(IngameMenuScreen.this, OpenClassic.getClient().getSettings()));
+				OpenClassic.getClient().setActiveComponent(new OptionsScreen(IngameMenuScreen.this, OpenClassic.getClient().getSettings()));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 100, this.getHeight() / 2 - 24, this, OpenClassic.getGame().getTranslator().translate("gui.menu.dump")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("dumplevel", this.getWidth() / 2 - 200, this.getHeight() / 2 - 48, OpenClassic.getGame().getTranslator().translate("gui.menu.dump")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new LevelDumpScreen(IngameMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new LevelDumpScreen(IngameMenuScreen.this));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 100, this.getHeight() / 2, this, OpenClassic.getGame().getTranslator().translate("gui.menu.main-menu")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 2, OpenClassic.getGame().getTranslator().translate("gui.menu.main-menu")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				if(!OpenClassic.getClient().isInMultiplayer()) {
@@ -61,16 +65,16 @@ public class IngameMenuScreen extends GuiScreen {
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(4, this.getWidth() / 2 - 100, this.getHeight() / 2 + 60, this, OpenClassic.getGame().getTranslator().translate("gui.menu.back")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 2 + 120, OpenClassic.getGame().getTranslator().translate("gui.menu.back")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(null);
+				OpenClassic.getClient().setActiveComponent(null);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(5, this.getWidth() / 2, 40, this, OpenClassic.getGame().getTranslator().translate("gui.menu.title"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.menu.title"), true));
 		if(!OpenClassic.getClient().isInMultiplayer()) {
-			this.getWidget(2, Button.class).setActive(false);
+			this.getComponent("dumplevel", Button.class).setActive(false);
 		}
 	}
 	

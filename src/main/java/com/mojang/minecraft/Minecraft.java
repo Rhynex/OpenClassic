@@ -39,8 +39,7 @@ import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Widget;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.plugin.Plugin;
@@ -56,7 +55,7 @@ import ch.spacebase.openclassic.client.ClientProgressBar;
 import ch.spacebase.openclassic.client.gui.ChatInputScreen;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.gui.GameOverScreen;
-import ch.spacebase.openclassic.client.gui.ClientMainScreen;
+import ch.spacebase.openclassic.client.gui.ClientHUDScreen;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.gui.IngameMenuScreen;
@@ -116,7 +115,7 @@ public class Minecraft implements Runnable {
 	public GameMode mode;
 	public int width;
 	public int height;
-	private Timer timer = new Timer(InternalConstants.TICKS_PER_SECOND);
+	public Timer timer = new Timer(InternalConstants.TICKS_PER_SECOND);
 	public Level level;
 	public LevelRenderer levelRenderer;
 	public LocalPlayer player;
@@ -124,14 +123,13 @@ public class Minecraft implements Runnable {
 	public Canvas canvas;
 	public TextureManager textureManager;
 	public FontRenderer fontRenderer;
-	public GuiScreen currentScreen = null;
 	public ClientProgressBar progressBar = new ClientProgressBar();
 	public FogRenderer fogRenderer = new FogRenderer(this);
 	public ClientAudioManager audio;
 	public ResourceDownloader resourceThread;
 	private int ticks;
 	private int blockHitTime;
-	public ClientMainScreen mainScreen;
+	public ClientHUDScreen hud;
 	public Intersection selected;
 	public String server;
 	public int port;
@@ -161,6 +159,8 @@ public class Minecraft implements Runnable {
 	public boolean hacks = true;
 	public String tempKey = null;
 	public ClientPlayer ocPlayer;
+	public GuiComponent baseGUI;
+	private boolean init = false;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -191,41 +191,22 @@ public class Minecraft implements Runnable {
 	public boolean isInMultiplayer() {
 		return this.session != null;
 	}
-
-	public final void setCurrentScreen(GuiScreen screen) {
-		if(this.currentScreen != null) {
-			this.currentScreen.onClose();
-		}
-
-		if(screen == null && this.player != null && this.mode instanceof SurvivalGameMode && this.player.health <= 0) {
-			screen = new GameOverScreen();
-		}
-
-		this.currentScreen = screen;
-		if(screen != null) {
-			if(this.player != null) {
-				this.player.input.resetKeys();
-			}
-
-			Mouse.setGrabbed(false);
-			screen.setSize(this.width, this.height);
-			screen.onOpen(this.ocPlayer);
-		} else {
-			this.grabMouse();
-		}
-	}
 	
 	private void resize() {
 		this.width = Display.getWidth();
 		this.height = Display.getHeight();
 
-		if(this.mainScreen != null) {
-			this.mainScreen.width = RenderHelper.getHelper().getGuiWidth();
-			this.mainScreen.height = RenderHelper.getHelper().getGuiHeight();
+		if(this.hud != null) {
+			this.hud.setSize(RenderHelper.getHelper().getGuiWidth(), RenderHelper.getHelper().getGuiHeight());
+			this.hud.clearComponents();
+			this.hud.onAttached(this.hud.getParent());
 		}
-
-		if(this.currentScreen != null) {
-			this.currentScreen.setSize(this.width, this.height);
+		
+		this.baseGUI.setSize(this.width, this.height);
+		GuiComponent component = OpenClassic.getClient().getActiveComponent();
+		if(component != null) {
+			component.clearComponents();
+			component.onAttached(component.getParent());
 		}
 	}
 
@@ -244,6 +225,7 @@ public class Minecraft implements Runnable {
 
 		if(this.player == null) {
 			this.player = new LocalPlayer(level, this.ocPlayer);
+			this.ocPlayer.setHandle(this.player);
 			this.player.resetPos();
 			this.mode.preparePlayer(this.player);
 		}
@@ -289,7 +271,7 @@ public class Minecraft implements Runnable {
 		}
 
 		this.particleManager = new ParticleManager(this.textureManager);
-		this.mainScreen = new ClientMainScreen();
+		this.hud = new ClientHUDScreen();
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		if(this.level != null) {
 			this.mode.apply(this.level);
@@ -302,10 +284,10 @@ public class Minecraft implements Runnable {
 	public void stopGame(boolean menu) {
 		this.audio.stopMusic();
 		this.serverPlugins.clear();
-		if(menu) this.setCurrentScreen(new MainMenuScreen());
+		if(menu) OpenClassic.getClient().setActiveComponent(new MainMenuScreen());
 		this.level = null;
 		this.particleManager = null;
-		this.mainScreen = null;
+		this.hud = null;
 		if(this.player != null && this.ocPlayer.getData() != null && !this.isInMultiplayer()) {
 			this.ocPlayer.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
 		}
@@ -362,8 +344,9 @@ public class Minecraft implements Runnable {
 			return;
 		} 
 
-		if(this.started && !(e instanceof LWJGLException)) {
-			this.setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
+		if(this.init && !(e instanceof LWJGLException) && !(e instanceof RuntimeException)) {
+			this.progressBar.setVisible(false);
+			OpenClassic.getClient().setActiveComponent(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("core.client-error"), String.format(OpenClassic.getGame().getTranslator().translate("core.game-broke"), e)));
 		} else {
 			String msg = "Exception occured";
 			if(OpenClassic.getGame() != null && OpenClassic.getGame().getTranslator() != null) {
@@ -486,6 +469,9 @@ public class Minecraft implements Runnable {
 		this.initRender();
 
 		((ClassicClient) OpenClassic.getClient()).init();
+		this.baseGUI = new GuiComponent("base", 0, 0, Display.getWidth(), Display.getHeight());
+		this.baseGUI.setFocused(true);
+		this.init = true;
 		this.resourceThread = new ResourceDownloader();
 		this.resourceThread.start();
 
@@ -505,7 +491,7 @@ public class Minecraft implements Runnable {
 					}
 
 					if(this.server == null || this.server.equals("") || this.port == 0) {
-						this.setCurrentScreen(new LoginScreen());
+						OpenClassic.getClient().setActiveComponent(new LoginScreen());
 					} else {
 						this.initGame();
 					}
@@ -1080,7 +1066,9 @@ public class Minecraft implements Runnable {
 			}
 
 			RenderHelper.getHelper().ortho();
-			this.mainScreen.render(this.timer.delta);
+			int mox = Mouse.getEventX();
+			int moy = Display.getHeight() - Mouse.getEventY();
+			this.hud.render(mox, moy);
 		} else {
 			GL11.glViewport(0, 0, this.width, this.height);
 			GL11.glClearColor(0, 0, 0, 0);
@@ -1088,14 +1076,9 @@ public class Minecraft implements Runnable {
 			RenderHelper.getHelper().ortho();
 		}
 
-		if(this.currentScreen != null) {
-			for(Widget widget : this.currentScreen.getWidgets()) {
-				if(widget.isVisible()) {
-					widget.render();
-				}
-			}
-		}
-
+		int mx = Mouse.getEventX();
+		int my = Display.getHeight() - Mouse.getEventY();
+		this.baseGUI.render(mx, my);
 		if(this.progressBar.isVisible()) {
 			this.progressBar.render(false);
 		}
@@ -1111,8 +1094,8 @@ public class Minecraft implements Runnable {
 
 		this.fps++;
 		while(System.currentTimeMillis() >= this.lastUpdate + 1000) {
-			if(this.mainScreen != null) {
-				this.mainScreen.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
+			if(this.hud != null) {
+				this.hud.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
 			}
 			
 			Chunk.chunkUpdates = 0;
@@ -1126,14 +1109,17 @@ public class Minecraft implements Runnable {
 	public void grabMouse() {
 		if(!Mouse.isGrabbed()) {
 			Mouse.setGrabbed(true);
-			this.setCurrentScreen(null);
+			if(OpenClassic.getClient().getActiveComponent() != null) {
+				OpenClassic.getClient().setActiveComponent(null);
+			}
+			
 			this.lastClick = this.ticks + 10000;
 		}
 	}
 
 	public void displayMenu() {
-		if(this.currentScreen == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
-			this.setCurrentScreen(new IngameMenuScreen());
+		if(OpenClassic.getClient().getActiveComponent() == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
+			OpenClassic.getClient().setActiveComponent(new IngameMenuScreen());
 		}
 	}
 
@@ -1238,150 +1224,118 @@ public class Minecraft implements Runnable {
 	private void tick() {
 		this.audio.update(this.player);
 		((ClassicScheduler) OpenClassic.getGame().getScheduler()).tick(this.schedTicks);
-		if(this.currentScreen != null) {
+		if(OpenClassic.getClient().getActiveComponent() != null) {
 			this.lastClick = this.ticks + 10000;
-			while(Mouse.next()) {
-				if(this.currentScreen != null && Mouse.getEventButtonState()) {
-					int x = Mouse.getEventX() * this.currentScreen.getWidth() / this.width;
-					int y = this.currentScreen.getHeight() - Mouse.getEventY() * this.currentScreen.getHeight() / this.height - 1;
-					this.currentScreen.onMouseClick(x, y, Mouse.getEventButton());
-				}
-			}
-
-			if(this.currentScreen != null) {
-				while(Keyboard.next()) {
-					if(Keyboard.getEventKeyState()) {
-						if(this.currentScreen != null) {
-							this.currentScreen.onKeyPress(Keyboard.getEventCharacter(), Keyboard.getEventKey());
-						}
-					}
-				}
-
-				if(this.currentScreen != null) {
-					int x = Mouse.getX() * this.currentScreen.getWidth() / this.width;
-					int y = this.currentScreen.getHeight() - Mouse.getY() * this.currentScreen.getHeight() / this.height - 1;
-					this.currentScreen.update(x, y);
-				}
-			}
 		}
-
-		if(!this.ingame) return;
-		if(System.currentTimeMillis() > this.audio.getMusicTime() && this.audio.playMusic("bg")) {
-			this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000) + 300000L);
-		}
-
-		this.mode.spawnMobs();
-		int mouseX = Mouse.getX() * this.mainScreen.getWidth() / this.width;
-		int mouseY = this.mainScreen.getHeight() - Mouse.getY() * this.mainScreen.getHeight() / this.height - 1;
-		this.mainScreen.update(mouseX, mouseY);
 		
-		for(int index = 0; index < this.textureManager.animations.size(); index++) {
-			AnimatedTexture animation = this.textureManager.animations.get(index);
-			animation.anaglyph = this.textureManager.settings.getBooleanSetting("options.3d-anaglyph").getValue();
-			animation.animate();
-		}
+		while(Mouse.next()) {
+			if(this.ingame && OpenClassic.getClient().getActiveComponent() == null) {
+				if(Mouse.getEventDWheel() != 0) {
+					this.player.inventory.scrollSelection(Mouse.getEventDWheel());
+				}
 
-		if(this.isInMultiplayer()) {
-			if(this.currentScreen instanceof ErrorScreen) {
-				this.progressBar.setVisible(false);
-			} else {
-				if(!this.session.isConnected()) {
-					this.progressBar.setVisible(true);
-					this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
-					this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
-					this.progressBar.setProgress(-1);
-					this.progressBar.render();
+				if(!Mouse.isGrabbed() && Mouse.getEventButtonState()) {
+					this.grabMouse();
 				} else {
-					if(this.session.connectSuccess()) {
-						try {
-							this.session.tick();
-						} catch(Exception e) {
-							e.printStackTrace();
-							this.session.disconnect(e.toString());
-							this.session = null;
+					if(Mouse.getEventButtonState()) {
+						if(Mouse.getEventButton() == 0) {
+							this.onMouseClick(0);
+							this.lastClick = this.ticks;
+						}
+
+						if(Mouse.getEventButton() == 1) {
+							this.onMouseClick(1);
+							this.lastClick = this.ticks;
+						}
+
+						if(Mouse.getEventButton() == 2 && this.selected != null) {
+							int block = this.level.getTile(this.selected.x, this.selected.y, this.selected.z);
+							if(block == VanillaBlock.GRASS.getId()) {
+								block = VanillaBlock.DIRT.getId();
+							}
+
+							if(block == VanillaBlock.DOUBLE_SLAB.getId()) {
+								block = VanillaBlock.SLAB.getId();
+							}
+
+							if(block == VanillaBlock.BEDROCK.getId()) {
+								block = VanillaBlock.STONE.getId();
+							}
+
+							this.player.inventory.selectBlock(block, this.mode instanceof CreativeGameMode);
 						}
 					}
-
-					if(this.isInMultiplayer() && this.session.getState() == State.GAME) {
-						this.session.send(new PlayerTeleportMessage((byte) -1, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch));
-					}
 				}
+			} else if(Mouse.getEventButtonState()) {
+				int x = Mouse.getEventX();
+				int y = Display.getHeight() - Mouse.getEventY();
+				this.baseGUI.onMouseClick(x, y, Mouse.getEventButton());
 			}
-		}
-
-		if(this.currentScreen == null && this.player != null && this.mode instanceof SurvivalGameMode && this.player.health <= 0) {
-			this.setCurrentScreen(new GameOverScreen());
 		}
 
 		while(Keyboard.next()) {
-			this.player.input.setKeyState(Keyboard.getEventKey(), Keyboard.getEventKeyState());
-			if(Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
-				this.player.input.keyPress(Keyboard.getEventKey());
-			}
-			
-			if(Keyboard.getEventKeyState()) {
-				if(this.currentScreen != null) {
-					if(Keyboard.getEventKeyState()) {
-						this.currentScreen.onKeyPress(Keyboard.getEventCharacter(), Keyboard.getEventKey());
-					}
+			if(this.ingame && OpenClassic.getClient().getActiveComponent() == null) {
+				this.player.input.setKeyState(Keyboard.getEventKey(), Keyboard.getEventKeyState());
+				if(Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
+					this.player.input.keyPress(Keyboard.getEventKey());
 				}
-
-				if(Keyboard.getEventKey() == Keyboard.KEY_F6) {
-					if(Display.isFullscreen()) {
-						try {
-							Display.setFullscreen(false);
-							Display.setDisplayMode(new DisplayMode(854, 480));
-						} catch(LWJGLException e) {
-							e.printStackTrace();
-						}
-					} else {
-						try {
-							Display.setDisplayMode(Display.getDesktopDisplayMode());
-							Display.setFullscreen(true);
-						} catch(LWJGLException e) {
-							e.printStackTrace();
-						}
-					}
-
-					this.resize();
-				}
-
-				if(Keyboard.getEventKey() == Keyboard.KEY_F1) {
-					this.hideGui = !this.hideGui;
-				}
-
-				if(this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
-					if(Keyboard.getEventKey() == Keyboard.KEY_F2) {
-						GL11.glReadBuffer(GL11.GL_FRONT);
-
-						int width = Display.getWidth();
-						int height = Display.getHeight();
-						ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
-						GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-
-						File file = new File(this.dir, "screenshots/" + (new Date(System.currentTimeMillis()).toString().replaceAll(" ", "-").replaceAll(":", "-")) + ".png");
-						BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-						for(int x = 0; x < width; x++) {
-							for(int y = 0; y < height; y++) {
-								int i = (x + (width * y)) * 4;
-								int r = buffer.get(i) & 0xFF;
-								int g = buffer.get(i + 1) & 0xFF;
-								int b = buffer.get(i + 2) & 0xFF;
-								image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
+				
+				if(Keyboard.getEventKeyState()) {
+					if(Keyboard.getEventKey() == Keyboard.KEY_F6) {
+						if(Display.isFullscreen()) {
+							try {
+								Display.setFullscreen(false);
+								Display.setDisplayMode(new DisplayMode(854, 480));
+							} catch(LWJGLException e) {
+								e.printStackTrace();
+							}
+						} else {
+							try {
+								Display.setDisplayMode(Display.getDesktopDisplayMode());
+								Display.setFullscreen(true);
+							} catch(LWJGLException e) {
+								e.printStackTrace();
 							}
 						}
 
-						try {
-							ImageIO.write(image, "PNG", file);
-							if(this.mainScreen != null) this.ocPlayer.sendMessage("screenshot.saved", file.getName());
-						} catch(IOException e) {
-							e.printStackTrace();
-							if(this.mainScreen != null) this.ocPlayer.sendMessage("screenshot.error", file.getName());
-						}
+						this.resize();
 					}
 
-					if(this.currentScreen == null) {
+					if(Keyboard.getEventKey() == Keyboard.KEY_F1) {
+						this.hideGui = !this.hideGui;
+					}
+
+					if(!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME) {
+						if(Keyboard.getEventKey() == Keyboard.KEY_F2) {
+							GL11.glReadBuffer(GL11.GL_FRONT);
+
+							int width = Display.getWidth();
+							int height = Display.getHeight();
+							ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
+							GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+
+							File file = new File(this.dir, "screenshots/" + (new Date(System.currentTimeMillis()).toString().replaceAll(" ", "-").replaceAll(":", "-")) + ".png");
+							BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+							for(int x = 0; x < width; x++) {
+								for(int y = 0; y < height; y++) {
+									int i = (x + (width * y)) * 4;
+									int r = buffer.get(i) & 0xFF;
+									int g = buffer.get(i + 1) & 0xFF;
+									int b = buffer.get(i + 2) & 0xFF;
+									image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
+								}
+							}
+
+							try {
+								ImageIO.write(image, "PNG", file);
+								if(this.hud != null) this.ocPlayer.sendMessage("screenshot.saved", file.getName());
+							} catch(IOException e) {
+								e.printStackTrace();
+								if(this.hud != null) this.ocPlayer.sendMessage("screenshot.error", file.getName());
+							}
+						}
+
 						if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 							this.displayMenu();
 						}
@@ -1416,83 +1370,93 @@ public class Minecraft implements Runnable {
 
 						if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.chat").getKey()) {
 							this.player.input.resetKeys();
-							this.setCurrentScreen(new ChatInputScreen());
+							OpenClassic.getClient().setActiveComponent(new ChatInputScreen());
 						}
 					}
-				}
+					
+					for(int selection = 0; selection < 9; selection++) {
+						if(Keyboard.getEventKey() == selection + 2) {
+							this.player.inventory.selected = selection;
+						}
+					}
 
-				for(int selection = 0; selection < 9; selection++) {
-					if(Keyboard.getEventKey() == selection + 2) {
-						this.player.inventory.selected = selection;
+					if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.toggle-fog").getKey()) {
+						this.settings.getSetting("options.render-distance").toggle();
 					}
 				}
 
-				if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.toggle-fog").getKey()) {
-					this.settings.getSetting("options.render-distance").toggle();
+				EventManager.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), Keyboard.getEventKey(), Keyboard.getEventKeyState()));
+				if(this.isInMultiplayer() && this.session.isConnected() && this.openclassicServer) {
+					this.session.send(new KeyChangeMessage(Keyboard.getEventKey(), Keyboard.getEventKeyState()));
 				}
-			}
-
-			EventManager.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), Keyboard.getEventKey(), Keyboard.getEventKeyState()));
-			if(this.isInMultiplayer() && this.session.isConnected() && this.openclassicServer) {
-				this.session.send(new KeyChangeMessage(Keyboard.getEventKey(), Keyboard.getEventKeyState()));
+			} else if(Keyboard.getEventKeyState()) {
+				if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE && this.ingame) {
+					OpenClassic.getClient().setActiveComponent(null);
+					return;
+				}
+				
+				this.baseGUI.onKeyPress(Keyboard.getEventCharacter(), Keyboard.getEventKey());
 			}
 		}
 
-		if(this.currentScreen == null) {
-			while(Mouse.next()) {
-				if(Mouse.getEventDWheel() != 0) {
-					this.player.inventory.scrollSelection(Mouse.getEventDWheel());
-				}
+		int mx = Mouse.getX();
+		int my = Display.getHeight() - Mouse.getY();
+		this.baseGUI.update(mx, my);
+		
+		if(!this.ingame) return;
+		if(System.currentTimeMillis() > this.audio.getMusicTime() && this.audio.playMusic("bg")) {
+			this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000) + 300000L);
+		}
 
-				if(this.currentScreen == null) {
-					if(!Mouse.isGrabbed() && Mouse.getEventButtonState()) {
-						this.grabMouse();
-					} else {
-						if(Mouse.getEventButtonState()) {
-							if(Mouse.getEventButton() == 0) {
-								this.onMouseClick(0);
-								this.lastClick = this.ticks;
-							}
+		this.mode.spawnMobs();
+		int mouseX = Mouse.getX() * this.hud.getWidth() / this.width;
+		int mouseY = this.hud.getHeight() - Mouse.getY() * this.hud.getHeight() / this.height - 1;
+		this.hud.update(mouseX, mouseY);
+		
+		for(int index = 0; index < this.textureManager.animations.size(); index++) {
+			AnimatedTexture animation = this.textureManager.animations.get(index);
+			animation.anaglyph = this.textureManager.settings.getBooleanSetting("options.3d-anaglyph").getValue();
+			animation.animate();
+		}
 
-							if(Mouse.getEventButton() == 1) {
-								this.onMouseClick(1);
-								this.lastClick = this.ticks;
-							}
-
-							if(Mouse.getEventButton() == 2 && this.selected != null) {
-								int block = this.level.getTile(this.selected.x, this.selected.y, this.selected.z);
-								if(block == VanillaBlock.GRASS.getId()) {
-									block = VanillaBlock.DIRT.getId();
-								}
-
-								if(block == VanillaBlock.DOUBLE_SLAB.getId()) {
-									block = VanillaBlock.SLAB.getId();
-								}
-
-								if(block == VanillaBlock.BEDROCK.getId()) {
-									block = VanillaBlock.STONE.getId();
-								}
-
-								this.player.inventory.selectBlock(block, this.mode instanceof CreativeGameMode);
-							}
+		if(this.isInMultiplayer()) {
+			if(OpenClassic.getClient().getActiveComponent() instanceof ErrorScreen) {
+				this.progressBar.setVisible(false);
+			} else {
+				if(!this.session.isConnected()) {
+					this.progressBar.setVisible(true);
+					this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.multiplayer"));
+					this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("connecting.connect"));
+					this.progressBar.setProgress(-1);
+					this.progressBar.render();
+				} else {
+					if(this.session.connectSuccess()) {
+						try {
+							this.session.tick();
+						} catch(Exception e) {
+							e.printStackTrace();
+							this.session.disconnect(e.toString());
+							this.session = null;
 						}
 					}
-				}
 
-				if(this.currentScreen != null) {
-					if(Mouse.getEventButtonState()) {
-						int x = Mouse.getEventX() * this.currentScreen.getWidth() / this.width;
-						int y = this.currentScreen.getHeight() - Mouse.getEventY() * this.currentScreen.getHeight() / this.height - 1;
-						this.currentScreen.onMouseClick(x, y, Mouse.getEventButton());
+					if(this.isInMultiplayer() && this.session.getState() == State.GAME) {
+						this.session.send(new PlayerTeleportMessage((byte) -1, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch));
 					}
 				}
 			}
+		}
 
+		if(OpenClassic.getClient().getActiveComponent() == null && this.player != null && this.mode instanceof SurvivalGameMode && this.player.health <= 0) {
+			OpenClassic.getClient().setActiveComponent(new GameOverScreen());
+		}
+
+		if(OpenClassic.getClient().getActiveComponent() == null) {
 			if(this.blockHitTime > 0) {
 				this.blockHitTime--;
 			}
 
-			if(this.currentScreen == null) {
+			if(OpenClassic.getClient().getActiveComponent() == null) {
 				if(Mouse.isButtonDown(0) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && Mouse.isGrabbed()) {
 					this.onMouseClick(0);
 					this.lastClick = this.ticks;
@@ -1505,7 +1469,7 @@ public class Minecraft implements Runnable {
 			}
 
 			if(!this.mode.creative && this.blockHitTime <= 0) {
-				if(this.currentScreen == null && Mouse.isButtonDown(0) && Mouse.isGrabbed() && this.selected != null && !this.selected.hasEntity) {
+				if(OpenClassic.getClient().getActiveComponent() == null && Mouse.isButtonDown(0) && Mouse.isGrabbed() && this.selected != null && !this.selected.hasEntity) {
 					this.mode.hitBlock(this.selected.x, this.selected.y, this.selected.z, this.selected.side);
 				} else {
 					this.mode.resetHits();

@@ -4,71 +4,72 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.ButtonList;
-import ch.spacebase.openclassic.api.gui.widget.ButtonListCallback;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.ButtonList;
+import ch.spacebase.openclassic.api.gui.base.ButtonListCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
+import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
 import ch.spacebase.openclassic.api.settings.Setting;
 import ch.spacebase.openclassic.api.settings.Settings;
 
-public class OptionsScreen extends GuiScreen {
+public class OptionsScreen extends GuiComponent {
 
-	private GuiScreen parent;
+	private GuiComponent parent;
 	private Settings settings;
 
-	public OptionsScreen(GuiScreen parent, Settings settings) {
+	public OptionsScreen(GuiComponent parent, Settings settings) {
+		super("optionsscreen");
 		this.parent = parent;
 		this.settings = settings;
 	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
+	public void onAttached(GuiComponent oparent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
 		if(OpenClassic.getClient().isInGame()) {
-			this.attachWidget(WidgetFactory.getFactory().newTranslucentBackground(0, this));
+			this.attachComponent(new TranslucentBackground("bg"));
 		} else {
-			this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
+			this.attachComponent(new DefaultBackground("bg"));
 		}
 		
-		ButtonList list = new ButtonList(1, this);
+		ButtonList list = new ButtonList("options", 0, 0, this.getWidth(), this.getHeight());
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
 				int page = list.getCurrentPage();
-				settings.getSetting((list.getCurrentPage() * 5) + button.getId()).toggle();
-				getWidget(1, ButtonList.class).setContents(buildContents());
+				settings.getSetting((list.getCurrentPage() * 5) + Integer.parseInt(button.getName().replace("button", ""))).toggle();
+				getComponent("options", ButtonList.class).setContents(buildContents());
 				list.setCurrentPage(page);
 			}
 		});
 		
-		this.attachWidget(list);
-		this.attachWidget(WidgetFactory.getFactory().newButton(75, this.getWidth() / 2 - 100, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.hacks")).setCallback(new ButtonCallback() {
+		this.attachComponent(list);
+		this.attachComponent(new Button("hacks", this.getWidth() / 2 - 200, this.getHeight() / 6 + 296, 196, 40, OpenClassic.getGame().getTranslator().translate("gui.options.hacks")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new HacksScreen(OptionsScreen.this, OpenClassic.getClient().getHackSettings()));
+				OpenClassic.getClient().setActiveComponent(new HacksScreen(OptionsScreen.this, OpenClassic.getClient().getHackSettings()));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(100, this.getWidth() / 2 + 2, this.getHeight() / 6 + 148, 98, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.controls")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("controls", this.getWidth() / 2 + 4, this.getHeight() / 6 + 296, 196, 40, OpenClassic.getGame().getTranslator().translate("gui.options.controls")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new ControlsScreen(OptionsScreen.this, OpenClassic.getClient().getBindings()));
+				OpenClassic.getClient().setActiveComponent(new ControlsScreen(OptionsScreen.this, OpenClassic.getClient().getBindings()));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(200, this.getWidth() / 2 - 100, this.getHeight() / 6 + 172, this, OpenClassic.getGame().getTranslator().translate("gui.done")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 6 + 344, OpenClassic.getGame().getTranslator().translate("gui.done")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(300, this.getWidth() / 2, 20, this, OpenClassic.getGame().getTranslator().translate("gui.options.title"), true));
-	
-		this.getWidget(1, ButtonList.class).setContents(this.buildContents());
+		this.attachComponent(new Label("title", this.getWidth() / 2, 40, OpenClassic.getGame().getTranslator().translate("gui.options.title"), true));
+		this.getComponent("options", ButtonList.class).setContents(this.buildContents());
 	}
 	
 	private List<String> buildContents() {

@@ -70,7 +70,7 @@ public class ClientSession extends ClassicSession {
 				} catch(Exception e) {
 					OpenClassic.getClient().getProgressBar().setVisible(false);
 					OpenClassic.getClient().getProgressBar().setSubtitleScaled(true);
-					OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.probably-down")));
+					OpenClassic.getClient().setActiveComponent(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("connecting.fail-connect"), OpenClassic.getGame().getTranslator().translate("connecting.probably-down")));
 					e.printStackTrace();
 					successful = false;
 				}
@@ -88,7 +88,7 @@ public class ClientSession extends ClassicSession {
 		this.disconnected = true;
 		if(reason != null) {
 			OpenClassic.getLogger().severe("Disconnected: " + reason);
-			OpenClassic.getClient().setCurrentScreen(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.generic"), reason));
+			OpenClassic.getClient().setActiveComponent(new ErrorScreen(OpenClassic.getGame().getTranslator().translate("disconnect.generic"), reason));
 		}
 
 		if(this.isConnected()) {

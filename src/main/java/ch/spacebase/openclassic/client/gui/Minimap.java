@@ -7,22 +7,21 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
-import ch.spacebase.openclassic.api.gui.Screen;
-import ch.spacebase.openclassic.api.gui.widget.Widget;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-public class Minimap extends Widget {
+public class Minimap extends GuiComponent {
 
 	private BufferedImage texture;
 
-	public Minimap(int id, int x, int y, int width, int height, Screen parent) {
-		super(id, x, y, width, height, parent);
+	public Minimap(String name, int x, int y, int width, int height) {
+		super(name, x, y, width, height);
 		this.texture = new BufferedImage(width - 2, height - 2, BufferedImage.TYPE_INT_ARGB);
 	}
 
 	@Override
-	public void render() {
+	public void render(int mouseX, int mouseY) {
 		if(OpenClassic.getClient().getLevel() == null) return;
 		this.updateTexture();
 		RenderHelper.getHelper().drawBox(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), Color.black.getRGB());

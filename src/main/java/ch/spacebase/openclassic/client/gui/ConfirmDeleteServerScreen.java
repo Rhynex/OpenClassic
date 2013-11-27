@@ -1,43 +1,45 @@
 package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Label;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
 
-public class ConfirmDeleteServerScreen extends GuiScreen {
+public class ConfirmDeleteServerScreen extends GuiComponent {
 
-	private GuiScreen parent;
+	private GuiComponent parent;
 	private String name;
 
-	public ConfirmDeleteServerScreen(GuiScreen parent, String name) {
+	public ConfirmDeleteServerScreen(GuiComponent parent, String name) {
+		super("confirmdeleteserverscreen");
 		this.parent = parent;
 		this.name = name;
 	}
-
+	
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
-		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 102, this.getHeight() / 6 + 132, 100, 20, this, "Yes").setCallback(new ButtonCallback() {
+	public void onAttached(GuiComponent oparent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new DefaultBackground("bg"));
+		this.attachComponent(new Button("yes", this.getWidth() / 2 - 204, this.getHeight() / 6 + 264, 200, 40, "Yes").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				ServerDataStore.removeFavorite(name);
 				ServerDataStore.saveFavorites();
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 + 2, this.getHeight() / 6 + 132, 100, 20, this, "No").setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("no", this.getWidth() / 2 + 4, this.getHeight() / 6 + 264, 200, 40, "No").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(parent);
+				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, (this.getHeight() / 2) - 32, this, String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, (this.getHeight() / 2) - 64, String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), true));
 	}
 	
 }

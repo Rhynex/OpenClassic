@@ -18,7 +18,7 @@ public class LevelInitializeMessageHandler extends MessageHandler<LevelInitializ
 		}
 
 		GeneralUtils.getMinecraft().setLevel(null);
-		OpenClassic.getClient().setCurrentScreen(null);
+		OpenClassic.getClient().setActiveComponent(null);
 		((ClientSession) session).prepareForLevel();
 	}
 

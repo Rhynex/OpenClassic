@@ -8,7 +8,7 @@ import ch.spacebase.openclassic.client.render.GuiTextures;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
-public final class ClientProgressBar implements ProgressBar {
+public class ClientProgressBar implements ProgressBar {
 
 	private String text = "";
 	private String subtitle = "";
@@ -84,33 +84,26 @@ public final class ClientProgressBar implements ProgressBar {
 		}
 
 		if(this.isVisible()) {
-			int x = RenderHelper.getHelper().getGuiWidth();
-			int sy = RenderHelper.getHelper().getGuiHeight();
+			int width = Display.getWidth();
+			int height = Display.getHeight();
 			if(fresh) {
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-				GL11.glMatrixMode(GL11.GL_PROJECTION);
-				GL11.glLoadIdentity();
-				GL11.glOrtho(0, x, sy, 0, 100, 300);
-				GL11.glMatrixMode(GL11.GL_MODELVIEW);
-				GL11.glLoadIdentity();
-				GL11.glTranslatef(0, 0, -200);
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+				RenderHelper.getHelper().ortho();
 			}
 
 			RenderHelper.getHelper().drawDefaultBG();
-			int width = RenderHelper.getHelper().getGuiWidth();
-			int height = RenderHelper.getHelper().getGuiHeight();
 			this.renderBar(false);
-			RenderHelper.getHelper().drawBlackBG(0, height - 28, width, height - (height - 28));
+			RenderHelper.getHelper().drawBlackBG(0, height - 56, width, height - (height - 56));
 			GL11.glEnable(GL11.GL_BLEND);
-			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0), 10, 10, 0, 0.5625f, 1);
+			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0), 20, 20, 0, 0.5625f, 1);
 			GL11.glDisable(GL11.GL_BLEND);
-			RenderHelper.getHelper().renderScaledText(this.title, width - 10 - RenderHelper.getHelper().getStringWidth(this.title), 10);
+			RenderHelper.getHelper().renderScaledText(this.title, width - 20 - RenderHelper.getHelper().getStringWidth(this.title), 20);
 			if(this.isSubtitleScaled()) {
-				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 32);
+				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 64);
 			} else {
-				RenderHelper.getHelper().renderText(this.subtitle, width / 2, height / 2 - 32);
+				RenderHelper.getHelper().renderText(this.subtitle, width / 2, height / 2 - 64);
 			}
-			RenderHelper.getHelper().renderText(this.text, width / 2, height - 19);
+			RenderHelper.getHelper().renderText(this.text, width / 2, height - 38);
 			if(fresh) {
 				Display.update();
 			}
@@ -123,22 +116,22 @@ public final class ClientProgressBar implements ProgressBar {
 	}
 
 	public void renderBar(boolean fresh) {
-		int width = RenderHelper.getHelper().getGuiWidth();
-		int height = RenderHelper.getHelper().getGuiHeight();
-		int y = height - 30;
+		int width = Display.getWidth();
+		int height = Display.getHeight();
+		int y = height - 60;
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		Renderer.get().begin();
 		Renderer.get().color(8421504);
 		Renderer.get().vertex(0, y, 0);
-		Renderer.get().vertex(0, y + 2, 0);
-		Renderer.get().vertex(width, y + 2, 0);
+		Renderer.get().vertex(0, y + 4, 0);
+		Renderer.get().vertex(width, y + 4, 0);
 		Renderer.get().vertex(width, y, 0);
 		if(this.getProgress() >= 0) {
 			Renderer.get().color(8454016);
 			Renderer.get().vertex(0, y, 0);
-			Renderer.get().vertex(0, y + 2, 0);
-			Renderer.get().vertex(this.progress * 4.27f, y + 2, 0);
-			Renderer.get().vertex(this.progress * 4.27f, y, 0);
+			Renderer.get().vertex(0, y + 4, 0);
+			Renderer.get().vertex(this.progress * 8.54f, y + 4, 0);
+			Renderer.get().vertex(this.progress * 8.54f, y, 0);
 		}
 
 		Renderer.get().end();

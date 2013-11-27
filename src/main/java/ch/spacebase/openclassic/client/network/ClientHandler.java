@@ -11,7 +11,7 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.handler.timeout.ReadTimeoutException;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.game.network.msg.Message;
 
@@ -34,12 +34,12 @@ public class ClientHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelDisconnected(ChannelHandlerContext context, ChannelStateEvent event) {
 		Channel channel = event.getChannel();
-		GuiScreen screen = OpenClassic.getClient().getCurrentScreen();
+		GuiComponent component = OpenClassic.getClient().getActiveComponent();
 		if(!this.session.isDisconnected()) {
-			if(screen instanceof ErrorScreen) {
-				OpenClassic.getClient().setCurrentScreen(screen);
+			if(component instanceof ErrorScreen) {
+				OpenClassic.getClient().setActiveComponent(component);
 			} else {
-				OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", "You lost connection!"));
+				OpenClassic.getClient().setActiveComponent(new ErrorScreen("Disconnected!", "You lost connection!"));
 			}
 		}
 
@@ -58,12 +58,12 @@ public class ClientHandler extends SimpleChannelUpstreamHandler {
 		Channel channel = event.getChannel();
 		if(event.getCause() instanceof ReadTimeoutException) {
 			if(!this.session.isDisconnected()) {
-				OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", "Connection timed out."));
+				OpenClassic.getClient().setActiveComponent(new ErrorScreen("Disconnected!", "Connection timed out."));
 			}
 		} else if(channel.isOpen()) {
 			if(!(event.getCause().getMessage() != null && (event.getCause().getMessage().equals("Connection reset by peer") || event.getCause().getMessage().equals("Connection timed out")))) {
 				OpenClassic.getLogger().log(Level.WARNING, "Exception caught, closing channel: " + channel + "...", event.getCause());
-				OpenClassic.getClient().setCurrentScreen(new ErrorScreen("Disconnected!", event.getCause().getMessage()));
+				OpenClassic.getClient().setActiveComponent(new ErrorScreen("Disconnected!", event.getCause().getMessage()));
 			}
 
 			channel.close();

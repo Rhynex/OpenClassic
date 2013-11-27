@@ -8,22 +8,26 @@ import java.util.Map;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.BlockPreview;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.FadingBox;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.BlockPreview;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.FadingBox;
+import ch.spacebase.openclassic.api.gui.base.Label;
 import ch.spacebase.openclassic.api.input.Mouse;
-import ch.spacebase.openclassic.api.player.Player;
 
-public class BlockSelectScreen extends GuiScreen {
+public class BlockSelectScreen extends GuiComponent {
 
 	private Map<Integer, List<ScreenBlock>> blocks = new LinkedHashMap<Integer, List<ScreenBlock>>();
 	private int page = 0;
+	
+	public BlockSelectScreen() {
+		super("blockselectscreen");
+	}
 
 	@Override
-	public void onOpen(Player viewer) {
+	public void onAttached(GuiComponent parent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
 		int count = 0;
 		for(BlockType block : Blocks.getBlocks()) {
 			if(block != null && block.isSelectable()) {
@@ -33,15 +37,15 @@ public class BlockSelectScreen extends GuiScreen {
 				}
 				
 				int ind = count - (page * 36);
-				int blockX = this.getWidth() / 2 + ind % 9 * 24 + -108 - 3;
-				int blockY = this.getHeight() / 2 + ind / 9 * 24 + -60 + 3;
+				int blockX = this.getWidth() / 2 + ind % 9 * 48 - 202;
+				int blockY = this.getHeight() / 2 + ind / 9 * 48 - 108;
 				this.blocks.get(page).add(new ScreenBlock(block, blockX, blockY));
 				count++;
 			}
 		}
 		
-		this.attachWidget(WidgetFactory.getFactory().newFadingBox(0, this.getWidth() / 2 - 120, 30, 240, 150, this, -1878719232, -1070583712));
-		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 115, 155, 25, 20, this, "<<").setCallback(new ButtonCallback() {
+		this.attachComponent(new FadingBox("bg", this.getWidth() / 2 - 240, 60, 480, 300, -1878719232, -1070583712));
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 230, 310, 50, 40, "<<").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				if(page > 0) {
@@ -52,7 +56,7 @@ public class BlockSelectScreen extends GuiScreen {
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 + 91, 155, 25, 20, this, ">>").setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("next", this.getWidth() / 2 + 182, 310, 50, 40, ">>").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				if(page < blocks.size() - 1) {
@@ -63,10 +67,10 @@ public class BlockSelectScreen extends GuiScreen {
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newLabel(3, this.getWidth() / 2, 40, this, OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), true));
-		this.attachWidget(WidgetFactory.getFactory().newFadingBox(200, -30, -30, 26, 26, this, -1862270977, -1056964609));
+		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), true));
+		this.attachComponent(new FadingBox("selector", -60, -60, 52, 52, -1862270977, -1056964609));
 		if(this.blocks.size() == 0) {
-			OpenClassic.getClient().setCurrentScreen(null);
+			OpenClassic.getClient().setActiveComponent(null);
 		}
 		
 		this.updateWidgets();
@@ -78,7 +82,7 @@ public class BlockSelectScreen extends GuiScreen {
 			ScreenBlock block = this.getBlockOnScreen(x, y);
 			if(block != null) {
 				OpenClassic.getClient().getPlayer().replaceSelected(block.getBlock());
-				OpenClassic.getClient().setCurrentScreen(null);
+				OpenClassic.getClient().setActiveComponent(null);
 				return;
 			}
 		}
@@ -90,33 +94,32 @@ public class BlockSelectScreen extends GuiScreen {
 	public void update(int mouseX, int mouseY) {
 		ScreenBlock block = this.getBlockOnScreen(mouseX, mouseY);
 		if(block != null) {
-			this.getWidget(200, FadingBox.class).setPos(block.getX() - 3, block.getY() - 8);
+			this.getComponent("selector", FadingBox.class).setPos(block.getX() - 15, block.getY() - 24);
 		} else {
-			this.getWidget(200, FadingBox.class).setPos(-30, -30);
+			this.getComponent("selector", FadingBox.class).setPos(-60, -60);
 		}
+		
+		super.update(mouseX, mouseY);
 	}
 	
 	private void updateWidgets() {
-		for(int id = 4; id < 40; id++) {
-			BlockPreview block = this.getWidget(id, BlockPreview.class);
-			if(block == null) {
-				int ind = id - 4;
-				int blockX = this.getWidth() / 2 + ind % 9 * 24 + -108 - 3;
-				int blockY = this.getHeight() / 2 + ind / 9 * 24 + -60 + 6;
-				block = WidgetFactory.getFactory().newBlockPreview(id, blockX, blockY, this, null);
-				this.attachWidget(block);
-			}
-			
+		for(int count = 0; count < 36; count++) {
+			BlockPreview block = this.getComponent("block" + count, BlockPreview.class);
 			boolean filled = false;
-			if(this.blocks.get(this.page).size() > id - 4) {
-				ScreenBlock b = this.blocks.get(this.page).get(id - 4);
+			if(this.blocks.get(this.page).size() > count) {
+				ScreenBlock b = this.blocks.get(this.page).get(count);
 				if(b != null) {
+					if(block == null) {
+						block = new BlockPreview("block" + count, b.getX(), b.getY(), null);
+						this.attachComponent(block);
+					}
+					
 					block.setBlock(b.getBlock());
 					filled = true;
 				}
 			}
 			
-			if(!filled) {
+			if(!filled && block != null) {
 				block.setBlock(null);
 			}
 		}
@@ -124,7 +127,7 @@ public class BlockSelectScreen extends GuiScreen {
 	
 	private ScreenBlock getBlockOnScreen(int x, int y) {
 		for(ScreenBlock block : this.blocks.get(this.page)) {
-			if(x >= block.getX() && x <= block.getX() + 24 && y >= block.getY() - 12 && y <= block.getY() + 12) {
+			if(x >= block.getX() && x <= block.getX() + 48 && y >= block.getY() - 24 && y <= block.getY() + 24) {
 				return block;
 			}
 		}

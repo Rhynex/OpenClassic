@@ -1,72 +1,76 @@
 package ch.spacebase.openclassic.client.gui;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.api.gui.GuiScreen;
-import ch.spacebase.openclassic.api.gui.widget.Button;
-import ch.spacebase.openclassic.api.gui.widget.ButtonCallback;
-import ch.spacebase.openclassic.api.gui.widget.WidgetFactory;
-import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.gui.base.Button;
+import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
+import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
+import ch.spacebase.openclassic.api.gui.base.Image;
 import ch.spacebase.openclassic.client.render.GuiTextures;
 
-public class MainMenuScreen extends GuiScreen {
+public class MainMenuScreen extends GuiComponent {
+
+	public MainMenuScreen() {
+		super("mainmenuscreen");
+	}
 
 	@Override
-	public void onOpen(Player viewer) {
-		this.clearWidgets();
-		this.attachWidget(WidgetFactory.getFactory().newDefaultBackground(0, this));
-		this.attachWidget(WidgetFactory.getFactory().newButton(1, this.getWidth() / 2 - 100, this.getHeight() / 4 + 16, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.singleplayer")).setCallback(new ButtonCallback() {
+	public void onAttached(GuiComponent parent) {
+		this.setSize(parent.getWidth(), parent.getHeight());
+		this.attachComponent(new DefaultBackground("bg"));
+		this.attachComponent(new Button("singleplayer", this.getWidth() / 2 - 200, this.getHeight() / 4 + 32, OpenClassic.getGame().getTranslator().translate("gui.main-menu.singleplayer")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new LevelLoadScreen(MainMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new LevelLoadScreen(MainMenuScreen.this));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(2, this.getWidth() / 2 - 100, this.getHeight() / 4 + 40, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.multiplayer")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("multiplayer", this.getWidth() / 2 - 200, this.getHeight() / 4 + 80, OpenClassic.getGame().getTranslator().translate("gui.main-menu.multiplayer")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new ServerListScreen(MainMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new ServerListScreen(MainMenuScreen.this));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(3, this.getWidth() / 2 - 100, this.getHeight() / 4 + 64, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.options")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("options", this.getWidth() / 2 - 200, this.getHeight() / 4 + 128, OpenClassic.getGame().getTranslator().translate("gui.main-menu.options")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new OptionsScreen(MainMenuScreen.this, OpenClassic.getClient().getSettings()));
+				OpenClassic.getClient().setActiveComponent(new OptionsScreen(MainMenuScreen.this, OpenClassic.getClient().getSettings()));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(4, this.getWidth() / 2 - 100, this.getHeight() / 4 + 88, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.texture-packs")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("texturepacks", this.getWidth() / 2 - 200, this.getHeight() / 4 + 176, OpenClassic.getGame().getTranslator().translate("gui.main-menu.texture-packs")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new TexturePackScreen(MainMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new TexturePackScreen(MainMenuScreen.this));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(5, this.getWidth() / 2 - 100, this.getHeight() / 4 + 112, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.language")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("languages", this.getWidth() / 2 - 200, this.getHeight() / 4 + 224, OpenClassic.getGame().getTranslator().translate("gui.main-menu.language")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new LanguageScreen(MainMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new LanguageScreen(MainMenuScreen.this));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(6, this.getWidth() / 2 - 102, this.getHeight() / 4 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.about")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("about", this.getWidth() / 2 - 204, this.getHeight() / 4 + 288, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.main-menu.about")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setCurrentScreen(new AboutScreen(MainMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new AboutScreen(MainMenuScreen.this));
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newButton(7, this.getWidth() / 2 + 2, this.getHeight() / 4 + 144, 100, 20, this, OpenClassic.getGame().getTranslator().translate("gui.main-menu.quit")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("quit", this.getWidth() / 2 + 4, this.getHeight() / 4 + 288, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.main-menu.quit")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().shutdown();
 			}
 		}));
 		
-		this.attachWidget(WidgetFactory.getFactory().newImage(8, this.getWidth() / 2 - GuiTextures.LOGO.getWidth() / 2, 20, this, GuiTextures.LOGO.getSubTexture(0, 0, GuiTextures.LOGO.getWidth(), GuiTextures.LOGO.getHeight())));
-		OpenClassic.getGame().getAudioManager().playMusic(viewer, "menu", true);
+		this.attachComponent(new Image("logo", this.getWidth() / 2 - GuiTextures.LOGO.getWidth() / 2, 40, GuiTextures.LOGO.getSubTexture(0, 0, GuiTextures.LOGO.getWidth(), GuiTextures.LOGO.getHeight())));
+		OpenClassic.getGame().getAudioManager().playMusic("menu", true);
 		if(OpenClassic.getClient().getPlayer().getName() == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
-			this.getWidget(2, Button.class).setActive(false);
+			this.getComponent("multiplayer", Button.class).setActive(false);
 		}
 	}
 	

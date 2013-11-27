@@ -50,7 +50,7 @@ public final class FontRenderer {
 				chWidth = 4;
 			}
 
-			this.font[character] = chWidth;
+			this.font[character] = chWidth * 2;
 		}
 
 		this.fontId = textures.bindTexture(fontImage);
@@ -61,7 +61,7 @@ public final class FontRenderer {
 	}
 
 	public final void renderWithShadow(String text, int x, int y, int color, boolean scaled) {
-		this.render(text, x + 1, y + 1, color, true, scaled);
+		this.render(text, x + 2, y + 2, color, true, scaled);
 		this.renderNoShadow(text, x, y, color, scaled);
 	}
 
@@ -110,9 +110,9 @@ public final class FontRenderer {
 
 				int tx = chars[count] % 16 << 3;
 				int ty = chars[count] / 16 << 3;
-				Renderer.get().vertexuv((x + width), y + 7.99F, 0, tx / 128F, (ty + 7.99F) / 128F);
-				Renderer.get().vertexuv((x + width) + 7.99F, y + 7.99F, 0, (tx + 7.99F) / 128F, (ty + 7.99F) / 128F);
-				Renderer.get().vertexuv((x + width) + 7.99F, y, 0, (tx + 7.99F) / 128F, ty / 128F);
+				Renderer.get().vertexuv((x + width), y + 16, 0, tx / 128F, (ty + 7.99F) / 128F);
+				Renderer.get().vertexuv((x + width) + 16, y + 16, 0, (tx + 7.99F) / 128F, (ty + 7.99F) / 128F);
+				Renderer.get().vertexuv((x + width) + 16, y, 0, (tx + 7.99F) / 128F, ty / 128F);
 				Renderer.get().vertexuv((x + width), y, 0, tx / 128F, ty / 128F);
 				if(chars[count] < this.font.length) {
 					width += this.font[chars[count]];
