@@ -22,9 +22,9 @@ public class LevelCreateScreen extends GuiComponent {
 
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		this.attachComponent(new DefaultBackground("bg"));
-		this.attachComponent(new StateButton("type", this.getWidth() / 2 - 200, this.getHeight() / 4 + 96, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")).setCallback(new ButtonCallback() {
+		this.attachComponent(new StateButton("type", this.getWidth() / 2 - 200, this.getHeight() / 2 - 24, OpenClassic.getGame().getTranslator().translate("gui.level-create.type")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				type++;
@@ -38,28 +38,28 @@ public class LevelCreateScreen extends GuiComponent {
 		}));
 		
 		this.getComponent("type", StateButton.class).setState("normal");
-		this.attachComponent(new Button("small", this.getWidth() / 2 - 200, this.getHeight() / 4 + 144, OpenClassic.getGame().getTranslator().translate("gui.level-create.small")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("small", this.getWidth() / 2 - 200, this.getHeight() / 2 + 24, OpenClassic.getGame().getTranslator().translate("gui.level-create.small")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				generate(getComponent("name", TextBox.class).getText(), (short) 0);
 			}
 		}));
 		
-		this.attachComponent(new Button("medium", this.getWidth() / 2 - 200, this.getHeight() / 4 + 192, OpenClassic.getGame().getTranslator().translate("gui.level-create.normal")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("medium", this.getWidth() / 2 - 200, this.getHeight() / 2 + 72, OpenClassic.getGame().getTranslator().translate("gui.level-create.normal")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				generate(getComponent("name", TextBox.class).getText(), (short) 1);
 			}
 		}));
 		
-		this.attachComponent(new Button("large", this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, OpenClassic.getGame().getTranslator().translate("gui.level-create.huge")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("large", this.getWidth() / 2 - 200, this.getHeight() / 2 + 120, OpenClassic.getGame().getTranslator().translate("gui.level-create.huge")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				generate(getComponent("name", TextBox.class).getText(), (short) 2);
 			}
 		}));
 		
-		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 2 + 168, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
@@ -67,7 +67,7 @@ public class LevelCreateScreen extends GuiComponent {
 		}));
 		
 		this.attachComponent(new TextBox("name", this.getWidth() / 2 - 200, this.getHeight() / 2 - 90, 30));
-		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.level-create.name"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 60, OpenClassic.getGame().getTranslator().translate("gui.level-create.name"), true));
 		
 		this.getComponent("small", Button.class).setActive(false);
 		this.getComponent("medium", Button.class).setActive(false);

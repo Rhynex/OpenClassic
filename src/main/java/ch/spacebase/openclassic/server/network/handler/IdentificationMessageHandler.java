@@ -27,6 +27,7 @@ import ch.spacebase.openclassic.game.network.msg.custom.block.CustomBlockMessage
 import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.server.ClassicServer;
+import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ServerSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
@@ -169,7 +170,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			}
 		}
 
-		player.sendLevel(player.getPosition().getLevel());
+		player.sendLevel((ServerLevel) player.getPosition().getLevel());
 		session.send(new PlayerTeleportMessage((byte) -1, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), player.getPosition().getYaw(), player.getPosition().getPitch()));
 
 		session.setState(State.GAME);

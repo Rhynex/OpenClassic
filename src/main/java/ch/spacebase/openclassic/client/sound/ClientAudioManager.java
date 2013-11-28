@@ -24,10 +24,12 @@ import paulscode.sound.codecs.CodecWav;
 import paulscode.sound.libraries.LibraryJavaSound;
 import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.math.Vector;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.sound.AudioManager;
+import ch.spacebase.openclassic.game.Main;
 
 import com.mojang.minecraft.Minecraft;
 
@@ -64,6 +66,52 @@ public class ClientAudioManager implements AudioManager {
 		} catch(SoundSystemException e) {
 			e.printStackTrace();
 		}
+		
+		this.registerMusic("menu", Main.class.getResource("/audio/music/sweden.ogg"), true);
+		
+		this.registerMusic("bg", Main.class.getResource("/audio/music/clark.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/minecraft.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/sweden.ogg"), true);
+		
+		this.registerSound("random.click", Main.class.getResource("/audio/sound/random/click.ogg"), true);
+		this.registerSound("random.explode", Main.class.getResource("/audio/sound/random/explode.ogg"), true);
+		this.registerSound("random.hurt", Main.class.getResource("/audio/sound/random/hurt.ogg"), true);
+		this.registerSound("random.pop", Main.class.getResource("/audio/sound/random/pop.ogg"), true);
+		this.registerSound("random.splash", Main.class.getResource("/audio/sound/random/splash.ogg"), true);
+		this.registerSound("random.water", Main.class.getResource("/audio/sound/random/water.ogg"), true);
+		this.registerSound("random.bow", Main.class.getResource("/audio/sound/random/bow.ogg"), true);
+		this.registerSound("random.drr", Main.class.getResource("/audio/sound/random/drr.ogg"), true);
+		this.registerSound("random.fizz", Main.class.getResource("/audio/sound/random/fizz.ogg"), true);
+		
+		this.registerSound("step.cloth", Main.class.getResource("/audio/sound/step/cloth1.ogg"), true);
+		this.registerSound("step.cloth", Main.class.getResource("/audio/sound/step/cloth2.ogg"), true);
+		this.registerSound("step.cloth", Main.class.getResource("/audio/sound/step/cloth3.ogg"), true);
+		this.registerSound("step.cloth", Main.class.getResource("/audio/sound/step/cloth4.ogg"), true);
+		
+		this.registerSound("step.grass", Main.class.getResource("/audio/sound/step/grass1.ogg"), true);
+		this.registerSound("step.grass", Main.class.getResource("/audio/sound/step/grass2.ogg"), true);
+		this.registerSound("step.grass", Main.class.getResource("/audio/sound/step/grass3.ogg"), true);
+		this.registerSound("step.grass", Main.class.getResource("/audio/sound/step/grass4.ogg"), true);
+		
+		this.registerSound("step.gravel", Main.class.getResource("/audio/sound/step/gravel1.ogg"), true);
+		this.registerSound("step.gravel", Main.class.getResource("/audio/sound/step/gravel2.ogg"), true);
+		this.registerSound("step.gravel", Main.class.getResource("/audio/sound/step/gravel3.ogg"), true);
+		this.registerSound("step.gravel", Main.class.getResource("/audio/sound/step/gravel4.ogg"), true);
+		
+		this.registerSound("step.sand", Main.class.getResource("/audio/sound/step/sand1.ogg"), true);
+		this.registerSound("step.sand", Main.class.getResource("/audio/sound/step/sand2.ogg"), true);
+		this.registerSound("step.sand", Main.class.getResource("/audio/sound/step/sand3.ogg"), true);
+		this.registerSound("step.sand", Main.class.getResource("/audio/sound/step/sand4.ogg"), true);
+		
+		this.registerSound("step.stone", Main.class.getResource("/audio/sound/step/stone1.ogg"), true);
+		this.registerSound("step.stone", Main.class.getResource("/audio/sound/step/stone2.ogg"), true);
+		this.registerSound("step.stone", Main.class.getResource("/audio/sound/step/stone3.ogg"), true);
+		this.registerSound("step.stone", Main.class.getResource("/audio/sound/step/stone4.ogg"), true);
+		
+		this.registerSound("step.wood", Main.class.getResource("/audio/sound/step/wood1.ogg"), true);
+		this.registerSound("step.wood", Main.class.getResource("/audio/sound/step/wood2.ogg"), true);
+		this.registerSound("step.wood", Main.class.getResource("/audio/sound/step/wood3.ogg"), true);
+		this.registerSound("step.wood", Main.class.getResource("/audio/sound/step/wood4.ogg"), true);
 	}
 
 	public void update(com.mojang.minecraft.entity.player.LocalPlayer player) {
@@ -247,6 +295,26 @@ public class ClientAudioManager implements AudioManager {
 
 	@Override
 	public boolean playMusic(Player player, String music, boolean loop) {
+		return this.playMusic(music, loop);
+	}
+	
+	@Override
+	public boolean playSound(Level level, String sound, float volume, float pitch) {
+		return this.playSound(sound, volume, pitch);
+	}
+
+	@Override
+	public boolean playSound(Level level, String sound, float x, float y, float z, float volume, float pitch) {
+		return this.playSound(sound, x, y, z, volume, pitch);
+	}
+
+	@Override
+	public boolean playMusic(Level level, String music) {
+		return this.playMusic(music);
+	}
+
+	@Override
+	public boolean playMusic(Level level, String music, boolean loop) {
 		return this.playMusic(music, loop);
 	}
 

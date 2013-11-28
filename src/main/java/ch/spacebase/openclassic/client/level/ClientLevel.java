@@ -9,9 +9,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.game.level.ClassicLevel;
-import ch.spacebase.openclassic.game.network.msg.Message;
 
 public class ClientLevel implements ClassicLevel {
 
@@ -208,16 +206,6 @@ public class ClientLevel implements ClassicLevel {
 
 	@Override
 	public void setGenerating(boolean generating) {
-	}
-
-	public void sendToAll(Message message) {
-		((ClientPlayer) this.getPlayers().get(0)).getSession().send(message);
-	}
-
-	public void sendToAllExcept(Player skip, Message message) {
-		if(skip.getPlayerId() != this.getPlayers().get(0).getPlayerId()) {
-			((ClientPlayer) this.getPlayers().get(0)).getSession().send(message);
-		}
 	}
 
 	public com.mojang.minecraft.level.Level getHandle() {

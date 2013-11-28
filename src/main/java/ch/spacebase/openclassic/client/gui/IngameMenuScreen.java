@@ -72,7 +72,7 @@ public class IngameMenuScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.menu.title"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 60, OpenClassic.getGame().getTranslator().translate("gui.menu.title"), true));
 		if(!OpenClassic.getClient().isInMultiplayer()) {
 			this.getComponent("dumplevel", Button.class).setActive(false);
 		}

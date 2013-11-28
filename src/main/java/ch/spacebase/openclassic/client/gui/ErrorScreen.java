@@ -23,15 +23,15 @@ public class ErrorScreen extends GuiComponent {
 	public void onAttached(GuiComponent parent) {
 		this.setSize(parent.getWidth(), parent.getHeight());
 		this.attachComponent(new DefaultBackground("bg"));
-		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 6 + 264, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 2 + 104, OpenClassic.getGame().getTranslator().translate("gui.error.main-menu")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().exitGameSession();
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 180, this.title, true));
-		this.attachComponent(new Label("message", this.getWidth() / 2, 220, this.message, true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 60, this.title, true));
+		this.attachComponent(new Label("message", this.getWidth() / 2, this.getHeight() / 2 - 20, this.message, true));
 	}
 
 	@Override

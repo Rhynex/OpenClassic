@@ -134,7 +134,7 @@ public class ServerPlayer implements Player {
 			old.removePlayer(this.getName());
 			((ServerLevel) old).sendToAllExcept(this, new PlayerDespawnMessage(this.getPlayerId()));
 			this.session.send(new IdentificationMessage(InternalConstants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.canBreakBedrock() ? InternalConstants.OP : InternalConstants.NOT_OP));
-			this.sendLevel(this.pos.getLevel());
+			this.sendLevel((ServerLevel) this.pos.getLevel());
 		} else {
 			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
 			((ServerLevel) this.getPosition().getLevel()).sendToAllExcept(this, new PlayerTeleportMessage(this.getPlayerId(), this.getPosition().getX(), this.getPosition().getY() + 0.59375f, this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
@@ -212,8 +212,7 @@ public class ServerPlayer implements Player {
 		}
 	}
 
-	public void sendLevel(final Level level) {
-		final Player player = this;
+	public void sendLevel(final ServerLevel level) {
 		OpenClassic.getGame().getScheduler().scheduleAsyncTask(OpenClassic.getGame(), new Runnable() {
 			@Override
 			public void run() {
@@ -268,11 +267,13 @@ public class ServerPlayer implements Player {
 					session.send(new LevelFinalizeMessage(level.getWidth(), level.getHeight(), level.getDepth()));
 					moveTo(level.getSpawn());
 
-					((ServerLevel) level).sendToAllExcept(player, new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
+					level.sendToAllExcept(ServerPlayer.this, new PlayerSpawnMessage(ServerPlayer.this.getPlayerId(), ServerPlayer.this.getName(), ServerPlayer.this.getPosition().getX(), ServerPlayer.this.getPosition().getY(), ServerPlayer.this.getPosition().getZ(), (byte) ServerPlayer.this.getPosition().getYaw(), (byte) ServerPlayer.this.getPosition().getPitch()));
 					for(Player p : level.getPlayers()) {
-						if(p.getPlayerId() == getPlayerId()) continue;
+						if(((ServerPlayer) p).getPlayerId() == getPlayerId()) {
+							continue;
+						}
 
-						session.send(new PlayerSpawnMessage(p.getPlayerId(), p.getName(), p.getPosition().getX(), p.getPosition().getY(), p.getPosition().getZ(), (byte) p.getPosition().getYaw(), (byte) p.getPosition().getPitch()));
+						session.send(new PlayerSpawnMessage(((ServerPlayer) p).getPlayerId(), p.getName(), p.getPosition().getX(), p.getPosition().getY(), p.getPosition().getZ(), (byte) p.getPosition().getYaw(), (byte) p.getPosition().getPitch()));
 					}
 
 					if(hasCustomClient()) {
@@ -322,14 +323,14 @@ public class ServerPlayer implements Player {
 
 	@Override
 	public void hidePlayer(Player player) {
-		this.getSession().send(new PlayerDespawnMessage(player.getPlayerId()));
+		this.getSession().send(new PlayerDespawnMessage(((ServerPlayer) player).getPlayerId()));
 		this.hidden.add(player.getName());
 	}
 
 	@Override
 	public void showPlayer(Player player) {
 		this.hidden.remove(player.getName());
-		this.getSession().send(new PlayerSpawnMessage(player.getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
+		this.getSession().send(new PlayerSpawnMessage(((ServerPlayer) player).getPlayerId(), player.getName(), player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ(), (byte) player.getPosition().getYaw(), (byte) player.getPosition().getPitch()));
 	}
 
 	@Override
@@ -410,11 +411,6 @@ public class ServerPlayer implements Player {
 
 	@Override
 	public int[] getInventoryAmounts() {
-		return new int[0];
-	}
-
-	@Override
-	public int[] getInventoryPopTimes() {
 		return new int[0];
 	}
 	

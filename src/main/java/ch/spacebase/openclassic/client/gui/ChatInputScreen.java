@@ -46,7 +46,7 @@ public class ChatInputScreen extends GuiComponent {
 			}
 
 			text.setText(text.getText() + clickedPlayer);
-			int length = OpenClassic.getClient().getPlayer().getName().length();
+			int length = clickedPlayer.length();
 			if(text.getText().length() > 62 - length) {
 				text.setText(text.getText().substring(0, 62 - length));
 			}

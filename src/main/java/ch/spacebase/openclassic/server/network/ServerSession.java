@@ -17,6 +17,7 @@ import ch.spacebase.openclassic.game.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerDisconnectMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerSpawnMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerTeleportMessage;
+import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
 
 import com.zachsthings.onevent.EventManager;
@@ -57,11 +58,11 @@ public class ServerSession extends ClassicSession {
 	}
 
 	private boolean canSendPlayerMessage(Message message, Player player) {
-		if(message instanceof PlayerDespawnMessage && ((PlayerDespawnMessage) message).getPlayerId() != -1 && !player.canSee(OpenClassic.getServer().getPlayer(((PlayerDespawnMessage) message).getPlayerId()))) {
+		if(message instanceof PlayerDespawnMessage && ((PlayerDespawnMessage) message).getPlayerId() != -1 && !player.canSee(((ClassicServer) OpenClassic.getServer()).getPlayer(((PlayerDespawnMessage) message).getPlayerId()))) {
 			return false;
-		} else if(message instanceof PlayerTeleportMessage && ((PlayerTeleportMessage) message).getPlayerId() != -1 && !player.canSee(OpenClassic.getServer().getPlayer(((PlayerTeleportMessage) message).getPlayerId()))) {
+		} else if(message instanceof PlayerTeleportMessage && ((PlayerTeleportMessage) message).getPlayerId() != -1 && !player.canSee(((ClassicServer) OpenClassic.getServer()).getPlayer(((PlayerTeleportMessage) message).getPlayerId()))) {
 			return false;
-		} else if(message instanceof PlayerSpawnMessage && ((PlayerSpawnMessage) message).getPlayerId() != -1 && !player.canSee(OpenClassic.getServer().getPlayer(((PlayerSpawnMessage) message).getPlayerId()))) {
+		} else if(message instanceof PlayerSpawnMessage && ((PlayerSpawnMessage) message).getPlayerId() != -1 && !player.canSee(((ClassicServer) OpenClassic.getServer()).getPlayer(((PlayerSpawnMessage) message).getPlayerId()))) {
 			return false;
 		}
 

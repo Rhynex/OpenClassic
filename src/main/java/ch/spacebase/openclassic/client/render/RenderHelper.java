@@ -21,7 +21,6 @@ import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Texture;
-import ch.spacebase.openclassic.api.input.InputHelper;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
@@ -536,6 +535,22 @@ public class RenderHelper {
 
 		Renderer.get().end();
 	}
+	
+	public void drawStretchedSubTex(SubTexture texture, float x, float y, float width, float height) {
+		Renderer.get().begin();
+		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture());
+		if(id == null || id.intValue() != this.binded) {
+			this.bindTexture(texture.getParent().getTexture(), texture.getParent().isInJar());
+		}
+		
+		Renderer.get().color((float) 1, (float) 1, (float) 1);
+		Renderer.get().vertexuv(x, y, 0, texture.getX1() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x, y + height, 0, texture.getX1() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x + width, y + height, 0, texture.getX2() / texture.getParent().getWidth(), texture.getY2() / texture.getParent().getHeight());
+		Renderer.get().vertexuv(x + width, y, 0, texture.getX2() / texture.getParent().getWidth(), texture.getY1() / texture.getParent().getHeight());
+
+		Renderer.get().end();
+	}
 
 	public boolean canRenderSide(BlockType block, int x, int y, int z, BlockFace face) {
 		if(block == null) return false;
@@ -647,9 +662,21 @@ public class RenderHelper {
 	}
 
 	public void drawRotatedBlock(int x, int y, BlockType block, float scale) {
+		this.drawRotatedBlock(x, y, block, scale, 0);
+	}
+	
+	public void drawRotatedBlock(int x, int y, BlockType block, float scale, int popTime) {
 		if(block != null && block.getModel() != null) {
 			GL11.glPushMatrix();
 			GL11.glTranslatef(x, y, -50);
+
+			if(popTime > 0) {
+				float off = (popTime - GeneralUtils.getMinecraft().timer.delta) / 5;
+				RenderHelper.getHelper().translate(10, (-MathHelper.sin(off * off * MathHelper.PI) * 8) + 10, 0);
+				RenderHelper.getHelper().scale(MathHelper.sin(off * off * MathHelper.PI) + 1, MathHelper.sin(off * MathHelper.PI) + 1, 1);
+				RenderHelper.getHelper().translate(-10, -10, 0);
+			}
+
 			GL11.glScalef(10, 10, 10);
 			GL11.glTranslatef(1, 0, 8);
 			GL11.glRotatef(-30, 1, 0, 0);
@@ -805,23 +832,6 @@ public class RenderHelper {
 	
 	public MipmapMode getMipmapMode() {
 		return this.mipmap;
-	}
-	
-	public int getGuiWidth() {
-		return this.getDisplayWidth() * 240 / this.getDisplayHeight();
-	}
-	
-	public int getGuiHeight() {
-		return this.getDisplayHeight() * 240 / this.getDisplayHeight();
-	}
-	
-	public int getScaledMouseX() {
-		return InputHelper.getHelper().getMouseX() * (this.getDisplayWidth() * 240 / this.getDisplayHeight()) / this.getDisplayWidth();
-	}
-	
-	public int getScaledMouseY() {
-		int height = this.getDisplayHeight() * 240 / this.getDisplayHeight();
-		return height - InputHelper.getHelper().getMouseY() * height / this.getDisplayHeight() - 1;
 	}
 
 }

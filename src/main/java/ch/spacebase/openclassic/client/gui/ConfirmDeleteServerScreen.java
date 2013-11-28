@@ -21,9 +21,9 @@ public class ConfirmDeleteServerScreen extends GuiComponent {
 	
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		this.attachComponent(new DefaultBackground("bg"));
-		this.attachComponent(new Button("yes", this.getWidth() / 2 - 204, this.getHeight() / 6 + 264, 200, 40, "Yes").setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("yes", this.getWidth() / 2 - 204, this.getHeight() / 2 + 104, 200, 40, "Yes").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				ServerDataStore.removeFavorite(name);
@@ -32,14 +32,14 @@ public class ConfirmDeleteServerScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("no", this.getWidth() / 2 + 4, this.getHeight() / 6 + 264, 200, 40, "No").setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("no", this.getWidth() / 2 + 4, this.getHeight() / 2 + 104, 200, 40, "No").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, (this.getHeight() / 2) - 64, String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 60, String.format(OpenClassic.getGame().getTranslator().translate("gui.delete.server"), this.name), true));
 	}
 	
 }

@@ -153,7 +153,6 @@ public class Level {
 				}
 			}
 		}
-
 	}
 
 	public boolean isLightBlocker(int x, int y, int z) {
@@ -825,6 +824,7 @@ public class Level {
 		int maxy = (int) (y + power + 1.0F);
 		int minz = (int) (z - power - 1.0F);
 		int maxz = (int) (z + power + 1.0F);
+		OpenClassic.getGame().getAudioManager().playSound("random.explode", x, y, z, 1, 1);
 		for(int bx = minx; bx < maxx; bx++) {
 			for(int by = maxy - 1; by >= miny; by--) {
 				for(int bz = minz; bz < maxz; bz++) {

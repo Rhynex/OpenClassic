@@ -121,16 +121,16 @@ public class ServerLevel implements ClassicLevel {
 		for(Player player : this.getPlayers()) {
 			if(player.getName().equalsIgnoreCase(name)) {
 				this.players.remove(player);
-				this.sendToAllExcept(player, new PlayerDespawnMessage(player.getPlayerId()));
+				this.sendToAllExcept(player, new PlayerDespawnMessage(((ServerPlayer) player).getPlayerId()));
 			}
 		}
 	}
 
 	public void removePlayer(byte id) {
 		for(Player player : this.getPlayers()) {
-			if(player.getPlayerId() == id) {
+			if(((ServerPlayer) player).getPlayerId() == id) {
 				this.players.remove(player);
-				this.sendToAllExcept(player, new PlayerDespawnMessage(player.getPlayerId()));
+				this.sendToAllExcept(player, new PlayerDespawnMessage(((ServerPlayer) player).getPlayerId()));
 			}
 		}
 	}
@@ -416,7 +416,9 @@ public class ServerLevel implements ClassicLevel {
 
 	public void sendToAllExcept(Player skip, Message message) {
 		for(Player player : this.getPlayers()) {
-			if(player.getPlayerId() == skip.getPlayerId()) continue;
+			if(((ServerPlayer) player).getPlayerId() == ((ServerPlayer) player).getPlayerId()) {
+				continue;
+			}
 
 			((ServerPlayer) player).getSession().send(message);
 		}

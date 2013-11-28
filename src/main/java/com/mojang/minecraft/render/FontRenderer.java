@@ -105,9 +105,10 @@ public final class FontRenderer {
 					}
 
 					Renderer.get().color(c);
-					count += 2;
+					count++;
+					continue;
 				}
-
+				
 				int tx = chars[count] % 16 << 3;
 				int ty = chars[count] / 16 << 3;
 				Renderer.get().vertexuv((x + width), y + 16, 0, tx / 128F, (ty + 7.99F) / 128F);

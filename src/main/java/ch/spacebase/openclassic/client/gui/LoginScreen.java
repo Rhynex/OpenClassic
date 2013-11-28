@@ -95,7 +95,7 @@ public class LoginScreen extends GuiComponent {
 		
 		this.attachComponent(new TextBox("username", this.getWidth() / 2 - 200, this.getHeight() / 2 - 20, 64));
 		this.attachComponent(new PasswordTextBox("password", this.getWidth() / 2 - 200, this.getHeight() / 2 + 32, 64));
-		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.login.enter"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 60, OpenClassic.getGame().getTranslator().translate("gui.login.enter"), true));
 		this.attachComponent(new Label("enteruser", this.getWidth() / 2 - 304, this.getHeight() / 2 - 12, OpenClassic.getGame().getTranslator().translate("gui.login.user"), true));
 		this.attachComponent(new Label("enterpass", this.getWidth() / 2 - 304, this.getHeight() / 2 + 40, OpenClassic.getGame().getTranslator().translate("gui.login.pass"), true));
 		

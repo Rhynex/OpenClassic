@@ -2,6 +2,7 @@ package com.mojang.minecraft.entity;
 
 import java.util.ArrayList;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
@@ -58,6 +59,7 @@ public abstract class Entity {
 	public boolean noPhysics = false;
 	public float pushthrough = 0;
 	public boolean hovered = false;
+	private boolean waterSplashed = false;
 
 	public Entity(Level level) {
 		this.level = level;
@@ -175,6 +177,17 @@ public abstract class Entity {
 		this.zo = this.z;
 		this.oPitch = this.pitch;
 		this.oYaw = this.yaw;
+		BlockType block = this.getLiquid();
+		if(block == VanillaBlock.WATER || block == VanillaBlock.STATIONARY_WATER) {
+			if(!this.waterSplashed) {
+				this.waterSplashed = true;
+				float volume = (float) Math.sqrt(this.xd * this.xd * 0.2D + this.yd * this.yd + this.zd * this.zd * 0.2D) * 0.2f;
+				if(volume > 1) volume = 1;
+				OpenClassic.getGame().getAudioManager().playSound("random.splash", this.x, this.y, this.z, volume, 1 + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.4f);
+			}
+		} else {
+			this.waterSplashed = false;
+		}
 	}
 
 	public boolean isFree(float x, float y, float z, float radius) {

@@ -25,9 +25,9 @@ public class FavoriteServersScreen extends GuiComponent {
 
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		this.attachComponent(new DefaultBackground("bg"));
-		ButtonList list = new ButtonList("favorites", 0, 0, this.getWidth(), this.getHeight());
+		ButtonList list = new ButtonList("favorites", 0, 0, this.getWidth(), (int) (this.getHeight() * 0.8f));
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
@@ -42,14 +42,14 @@ public class FavoriteServersScreen extends GuiComponent {
 		});
 		
 		this.attachComponent(list);
-		this.attachComponent(new Button("add", this.getWidth() / 2 - 312, this.getHeight() / 6 + 288, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("add", this.getWidth() / 2 - 312, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(new AddFavoriteScreen(FavoriteServersScreen.this));
 			}
 		}));
 		
-		this.attachComponent(new Button("delete", this.getWidth() / 2 - 104, this.getHeight() / 6 + 288, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.remove")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("delete", this.getWidth() / 2 - 104, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.remove")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				Label label = getComponent("title", Label.class);
@@ -63,14 +63,14 @@ public class FavoriteServersScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("back", this.getWidth() / 2 + 104, this.getHeight() / 6 + 288, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 + 104, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 30, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 80, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
 		this.getComponent("favorites", ButtonList.class).setContents(new ArrayList<String>(ServerDataStore.getFavorites().keySet()));
 	}
 	

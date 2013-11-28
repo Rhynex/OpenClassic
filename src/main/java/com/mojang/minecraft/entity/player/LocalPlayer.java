@@ -12,7 +12,6 @@ import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
-import com.mojang.minecraft.entity.mob.ai.BasicAI;
 import com.mojang.minecraft.entity.model.HumanoidModel;
 import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
@@ -36,7 +35,7 @@ public class LocalPlayer extends Player {
 		this.health = 20;
 		this.modelName = "humanoid";
 		this.rotOffs = 180.0F;
-		this.ai = new PlayerAI(this);
+		this.ai = new LocalPlayerAI(this);
 	}
 
 	public void resetPos() {
@@ -52,7 +51,6 @@ public class LocalPlayer extends Player {
 	}
 
 	public void aiStep() {
-		this.inventory.tick();
 		this.oBob = this.bob;
 		this.input.updateMovement();
 		super.aiStep();
@@ -117,6 +115,7 @@ public class LocalPlayer extends Player {
 
 	public void hurt(Entity entity, int damage) {
 		if(!this.level.creativeMode) {
+			OpenClassic.getGame().getAudioManager().playSound("random.hurt", this.x, this.y, this.z, 1, (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F + 1.0F);
 			super.hurt(entity, damage);
 		}
 	}
@@ -176,31 +175,28 @@ public class LocalPlayer extends Player {
 		super.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
 	}
 
-	public static class PlayerAI extends BasicAI {
-		private LocalPlayer parent;
-
-		public PlayerAI(LocalPlayer parent) {
-			this.parent = parent;
-		}
-
-		public void update() {
-			this.jumping = this.parent.input.jumping;
-			this.flyDown = this.parent.input.flyDown;
-			this.parent.speedHack = this.parent.input.speed;
-			this.xxa = this.parent.input.xxa;
-			this.yya = this.parent.input.yya;
-			if(GeneralUtils.getMinecraft().hacks && this.parent.input.toggleFly && OpenClassic.getClient().getHackSettings().getBooleanSetting("hacks.flying").getValue()) {
-				this.flying = !this.flying;
-				if(this.flying) {
-					this.mob.yd = 0;
-				}
+	public void dropHeldItem() {
+		int id = this.inventory.slots[this.inventory.selected];
+		int amount = this.inventory.count[this.inventory.selected];
+		if(id > 0 && amount > 0) {
+			if(amount > 1) {
+				this.inventory.count[this.inventory.selected]--;
+			} else {
+				this.inventory.slots[this.inventory.selected] = -1;
+				this.inventory.count[this.inventory.selected] = 0;
 			}
-
-			if(!GeneralUtils.getMinecraft().hacks || !OpenClassic.getClient().getHackSettings().getBooleanSetting("hacks.flying").getValue()) {
-				this.flying = false;
-			}
-
-			this.parent.input.toggleFly = false;
+			
+			Item item = new Item(this.level, this.x, this.y, this.z, id, 1);
+			item.delay = 40;
+			item.xd = MathHelper.sin((this.yaw / 180) * (float) Math.PI) * MathHelper.cos((this.pitch / 180) * (float) Math.PI) * 0.3f;
+			item.zd = -MathHelper.cos((this.yaw / 180) * (float) Math.PI) * MathHelper.cos((this.pitch / 180) * (float) Math.PI) * 0.3f;
+			item.yd = -MathHelper.sin((this.pitch / 180) * (float) Math.PI) * 0.3f + 0.1f;
+			float mod = this.level.random.nextFloat() * (float) Math.PI * 2;
+			float off = 0.02f * this.level.random.nextFloat();
+			item.xd += Math.cos(mod) * off;
+			item.yd += (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.1f;
+			item.zd += Math.sin(mod) * off;
+			this.level.addEntity(item);
 		}
 	}
 

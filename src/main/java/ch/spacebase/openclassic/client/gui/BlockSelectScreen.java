@@ -28,6 +28,7 @@ public class BlockSelectScreen extends GuiComponent {
 	@Override
 	public void onAttached(GuiComponent parent) {
 		this.setSize(parent.getWidth(), parent.getHeight());
+		this.blocks.clear();
 		int count = 0;
 		for(BlockType block : Blocks.getBlocks()) {
 			if(block != null && block.isSelectable()) {
@@ -44,8 +45,8 @@ public class BlockSelectScreen extends GuiComponent {
 			}
 		}
 		
-		this.attachComponent(new FadingBox("bg", this.getWidth() / 2 - 240, 60, 480, 300, -1878719232, -1070583712));
-		this.attachComponent(new Button("back", this.getWidth() / 2 - 230, 310, 50, 40, "<<").setCallback(new ButtonCallback() {
+		this.attachComponent(new FadingBox("bg", this.getWidth() / 2 - 240, this.getHeight() / 2 - 180, 480, 300, -1878719232, -1070583712));
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 230, this.getHeight() / 2 + 70, 50, 40, "<<").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				if(page > 0) {
@@ -56,7 +57,7 @@ public class BlockSelectScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("next", this.getWidth() / 2 + 182, 310, 50, 40, ">>").setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("next", this.getWidth() / 2 + 182, this.getHeight() / 2 + 70, 50, 40, ">>").setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				if(page < blocks.size() - 1) {
@@ -67,7 +68,7 @@ public class BlockSelectScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 2 - 160, OpenClassic.getGame().getTranslator().translate("gui.blocks.select"), true));
 		this.attachComponent(new FadingBox("selector", -60, -60, 52, 52, -1862270977, -1056964609));
 		if(this.blocks.size() == 0) {
 			OpenClassic.getClient().setActiveComponent(null);
@@ -127,7 +128,7 @@ public class BlockSelectScreen extends GuiComponent {
 	
 	private ScreenBlock getBlockOnScreen(int x, int y) {
 		for(ScreenBlock block : this.blocks.get(this.page)) {
-			if(x >= block.getX() && x <= block.getX() + 48 && y >= block.getY() - 24 && y <= block.getY() + 24) {
+			if(x >= block.getX() - 24 && x <= block.getX() + 24 && y >= block.getY() - 24 && y <= block.getY() + 24) {
 				return block;
 			}
 		}

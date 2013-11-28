@@ -1,5 +1,6 @@
 package ch.spacebase.openclassic.client.network.handler;
 
+import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.player.Player;
@@ -17,8 +18,8 @@ public class PlayerSpawnMessageHandler extends MessageHandler<PlayerSpawnMessage
 	public void handle(ClassicSession session, Player player, PlayerSpawnMessage message) {
 		if(message.getPlayerId() >= 0) {
 			ClientPlayer ocplayer = new ClientPlayer();
-			ocplayer.setName(message.getName());
-			NetworkPlayer p = new NetworkPlayer(GeneralUtils.getMinecraft(), message.getPlayerId(), ocplayer, message.getX(), message.getY() - 0.6875f, message.getZ(), message.getYaw(), message.getPitch());
+			ocplayer.setName(Color.stripColor(message.getName()));
+			NetworkPlayer p = new NetworkPlayer(GeneralUtils.getMinecraft(), message.getPlayerId(), message.getName(), ocplayer, message.getX(), message.getY() - 0.6875f, message.getZ(), message.getYaw(), message.getPitch());
 			ocplayer.setHandle(p);
 			GeneralUtils.getMinecraft().netPlayers.put(message.getPlayerId(), p);
 			GeneralUtils.getMinecraft().level.addEntity(p);

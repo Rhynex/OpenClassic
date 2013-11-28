@@ -19,7 +19,7 @@ public class GameOverScreen extends GuiComponent {
 	public void onAttached(GuiComponent parent) {
 		this.setSize(parent.getWidth(), parent.getHeight());
 		this.attachComponent(new TranslucentBackground("bg"));
-		this.attachComponent(new Button("respawn", this.getWidth() / 2 - 200, this.getHeight() / 4 + 144, OpenClassic.getGame().getTranslator().translate("gui.game-over.respawn")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("respawn", this.getWidth() / 2 - 200, this.getHeight() / 2 + 24, OpenClassic.getGame().getTranslator().translate("gui.game-over.respawn")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				Player player = OpenClassic.getClient().getPlayer();
@@ -37,17 +37,17 @@ public class GameOverScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 4 + 192, OpenClassic.getGame().getTranslator().translate("gui.game-over.main-menu")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 2 + 72, OpenClassic.getGame().getTranslator().translate("gui.game-over.main-menu")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().exitGameSession();
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 120, OpenClassic.getGame().getTranslator().translate("gui.game-over.game-over"), true, true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4, OpenClassic.getGame().getTranslator().translate("gui.game-over.game-over"), true, true));
 		
 		Player player = OpenClassic.getClient().getPlayer();
-		this.attachComponent(new Label("score", this.getWidth() / 2, 200, String.format(OpenClassic.getGame().getTranslator().translate("gui.game-over.score"), player.getScore()), true));
+		this.attachComponent(new Label("score", this.getWidth() / 2, this.getHeight() / 2 - 40, String.format(OpenClassic.getGame().getTranslator().translate("gui.game-over.score"), player.getScore()), true));
 	}
 	
 }

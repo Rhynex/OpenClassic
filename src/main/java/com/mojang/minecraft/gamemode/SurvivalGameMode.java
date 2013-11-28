@@ -1,7 +1,9 @@
 package com.mojang.minecraft.gamemode;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.BlockUtils;
@@ -20,6 +22,7 @@ public class SurvivalGameMode extends GameMode {
 	private int hits;
 	private int blockHardness;
 	private int hitDelay;
+	private int soundCounter;
 	private MobSpawner spawner;
 
 	public SurvivalGameMode(Minecraft mc) {
@@ -50,6 +53,7 @@ public class SurvivalGameMode extends GameMode {
 
 	public void resetHits() {
 		this.hits = 0;
+		this.soundCounter = 0;
 		this.hitDelay = 0;
 	}
 
@@ -62,6 +66,12 @@ public class SurvivalGameMode extends GameMode {
 				this.blockHardness = BlockUtils.getHardness(Blocks.fromId(type));
 				RenderHelper.getHelper().spawnBlockParticles(this.mc.level, x, y, z, side, this.mc.particleManager);
 				this.hits++;
+				if(this.soundCounter % 4 == 0) {
+					StepSound sound = Blocks.fromId(type).getStepSound();
+					OpenClassic.getClient().getAudioManager().playSound(sound.getSound(), x, y, z, (sound.getVolume() + 1.0F) / 8F, sound.getPitch() * 0.5F);
+				}
+
+				this.soundCounter++;
 				if(this.hits == this.blockHardness + 1) {
 					this.breakBlock(x, y, z);
 					this.hits = 0;
@@ -71,6 +81,7 @@ public class SurvivalGameMode extends GameMode {
 			}
 		} else {
 			this.hits = 0;
+			this.soundCounter = 0;
 			this.hitX = x;
 			this.hitY = y;
 			this.hitZ = z;

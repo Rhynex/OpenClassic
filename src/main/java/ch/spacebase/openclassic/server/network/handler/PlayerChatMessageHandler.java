@@ -8,6 +8,7 @@ import ch.spacebase.openclassic.game.network.ClassicSession.State;
 import ch.spacebase.openclassic.game.network.msg.PlayerChatMessage;
 import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.server.ClassicServer;
+import ch.spacebase.openclassic.server.player.ServerPlayer;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -35,7 +36,7 @@ public class PlayerChatMessageHandler extends MessageHandler<PlayerChatMessage> 
 			PlayerChatEvent event = EventManager.callEvent(new PlayerChatEvent(player, chat));
 			if(event.isCancelled()) return;
 
-			((ClassicServer) OpenClassic.getServer()).sendToAll(new PlayerChatMessage(player.getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));
+			((ClassicServer) OpenClassic.getServer()).sendToAll(new PlayerChatMessage(((ServerPlayer) player).getPlayerId(), String.format(event.getFormat(), player.getDisplayName(), event.getMessage())));
 			OpenClassic.getLogger().info(String.format(event.getFormat(), player.getDisplayName(), event.getMessage()));
 		}
 	}

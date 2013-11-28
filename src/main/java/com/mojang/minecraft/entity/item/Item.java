@@ -2,7 +2,9 @@ package com.mojang.minecraft.entity.item;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
@@ -15,14 +17,15 @@ public class Item extends Entity {
 
 	private static ItemModel[] models = new ItemModel[256];
 	
-	private float xd;
-	private float yd;
-	private float zd;
-	private float rot;
+	public float xd;
+	public float yd;
+	public float zd;
+	public float rot;
 	private int resource;
 	private int tickCount;
 	private int age = 0;
 	private int count = 0;
+	public int delay = 10;
 
 	public static void initModels() {
 		for(int id = 1; id < 256; id++) {
@@ -67,7 +70,13 @@ public class Item extends Entity {
 
 		this.tickCount++;
 		this.age++;
+		this.delay--;
 		if(this.age >= 6000) {
+			this.remove();
+		}
+		
+		if(this.getLiquid() == VanillaBlock.LAVA || this.getLiquid() == VanillaBlock.STATIONARY_LAVA) {
+			OpenClassic.getGame().getAudioManager().playSound("random.fizz", this.x, this.y, this.z, 0.4f, 2 + this.level.random.nextFloat() * 0.4f);
 			this.remove();
 		}
 	}
@@ -91,7 +100,8 @@ public class Item extends Entity {
 	}
 
 	public void playerTouch(LocalPlayer player) {
-		if(player.inventory.addResource(this.resource, this.count)) {
+		if(this.delay <= 0 && player.inventory.addResource(this.resource, this.count)) {
+			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.7f + 1) * 2);
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			this.remove();
 		}

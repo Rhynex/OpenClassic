@@ -55,14 +55,15 @@ import ch.spacebase.openclassic.client.ClientProgressBar;
 import ch.spacebase.openclassic.client.gui.ChatInputScreen;
 import ch.spacebase.openclassic.client.gui.ErrorScreen;
 import ch.spacebase.openclassic.client.gui.GameOverScreen;
-import ch.spacebase.openclassic.client.gui.ClientHUDScreen;
 import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.gui.IngameMenuScreen;
+import ch.spacebase.openclassic.client.gui.hud.ClientHUDScreen;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
+import ch.spacebase.openclassic.client.settings.MinimapSetting;
 import ch.spacebase.openclassic.client.settings.MusicSetting;
 import ch.spacebase.openclassic.client.settings.NightSetting;
 import ch.spacebase.openclassic.client.settings.SurvivalSetting;
@@ -71,7 +72,6 @@ import ch.spacebase.openclassic.client.sound.ClientAudioManager;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.LWJGLNatives;
-import ch.spacebase.openclassic.client.util.ResourceDownloader;
 import ch.spacebase.openclassic.client.util.ShaderManager;
 import ch.spacebase.openclassic.game.network.ClassicSession.State;
 import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
@@ -126,7 +126,6 @@ public class Minecraft implements Runnable {
 	public ClientProgressBar progressBar = new ClientProgressBar();
 	public FogRenderer fogRenderer = new FogRenderer(this);
 	public ClientAudioManager audio;
-	public ResourceDownloader resourceThread;
 	private int ticks;
 	private int blockHitTime;
 	public ClientHUDScreen hud;
@@ -138,10 +137,8 @@ public class Minecraft implements Runnable {
 	public boolean raining;
 	public File dir;
 	public boolean ingame;
-	private boolean started;
 	private boolean shutdown = false;
 
-	public boolean hideGui = false;
 	public boolean openclassicServer = false;
 	public String openclassicVersion = "";
 	public List<RemotePluginInfo> serverPlugins = new ArrayList<RemotePluginInfo>();
@@ -197,7 +194,7 @@ public class Minecraft implements Runnable {
 		this.height = Display.getHeight();
 
 		if(this.hud != null) {
-			this.hud.setSize(RenderHelper.getHelper().getGuiWidth(), RenderHelper.getHelper().getGuiHeight());
+			this.hud.setSize(this.width, this.height);
 			this.hud.clearComponents();
 			this.hud.onAttached(this.hud.getParent());
 		}
@@ -272,6 +269,7 @@ public class Minecraft implements Runnable {
 
 		this.particleManager = new ParticleManager(this.textureManager);
 		this.hud = new ClientHUDScreen();
+		this.hud.onAttached(null);
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
 		if(this.level != null) {
 			this.mode.apply(this.level);
@@ -314,7 +312,6 @@ public class Minecraft implements Runnable {
 		this.ingame = false;
 		this.player = null;
 		this.ocPlayer.setHandle(null);
-		this.hideGui = false;
 		this.hacks = true;
 	}
 	
@@ -326,10 +323,6 @@ public class Minecraft implements Runnable {
 		this.shutdown = true;
 		this.running = false;
 		if(this.ingame) this.stopGame(false);
-		if(this.resourceThread != null && this.resourceThread.isRunning()) {
-			this.resourceThread.stopThread();
-		}
-
 		OpenClassic.getClient().unregisterExecutors(OpenClassic.getClient());
 		((ClassicScheduler) OpenClassic.getClient().getScheduler()).shutdown();
 		this.audio.cleanup();
@@ -456,7 +449,7 @@ public class Minecraft implements Runnable {
 		this.settings.registerSetting(new NightSetting("options.night"));
 		this.settings.registerSetting(new IntSetting("options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
 		this.settings.getIntSetting("options.sensitivity").setDefault(1);
-		this.settings.registerSetting(new BooleanSetting("options.minimap"));
+		this.settings.registerSetting(new MinimapSetting("options.minimap"));
 		
 		this.hackSettings = new Settings();
 		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed"));
@@ -472,34 +465,15 @@ public class Minecraft implements Runnable {
 		this.baseGUI = new GuiComponent("base", 0, 0, Display.getWidth(), Display.getHeight());
 		this.baseGUI.setFocused(true);
 		this.init = true;
-		this.resourceThread = new ResourceDownloader();
-		this.resourceThread.start();
-
-		this.progressBar.setVisible(true);
-		this.progressBar.setTitle(OpenClassic.getGame().getTranslator().translate("progress-bar.loading"));
-		this.progressBar.setSubtitle(OpenClassic.getGame().getTranslator().translate("http.downloading-resources"));
-		this.progressBar.setProgress(-1);
 		this.lastUpdate = System.currentTimeMillis();
 		this.fps = 0;
+		if(this.server == null || this.server.equals("") || this.port == 0) {
+			OpenClassic.getClient().setActiveComponent(new LoginScreen());
+		} else {
+			this.initGame();
+		}
+		
 		while(this.running) {
-			if(!this.started) {
-				if(!this.resourceThread.isRunning()) {
-					this.progressBar.setVisible(false);
-					try {
-						Thread.sleep(1000);
-					} catch(InterruptedException e) {
-					}
-
-					if(this.server == null || this.server.equals("") || this.port == 0) {
-						OpenClassic.getClient().setActiveComponent(new LoginScreen());
-					} else {
-						this.initGame();
-					}
-
-					this.started = true;
-				}
-			}
-
 			this.timer.update();
 			for(int tick = 0; tick < this.timer.elapsedTicks; tick++) {
 				this.ticks++;
@@ -1035,7 +1009,7 @@ public class Minecraft implements Runnable {
 
 				float brightness = this.level.getBrightness((int) this.player.x, (int) this.player.y, (int) this.player.z);
 				GL11.glColor4f(brightness, brightness, brightness, 1);
-				if(!this.hideGui) {
+				if(this.hud.isVisible()) {
 					if(this.heldBlock.block != null) {
 						GL11.glScalef(0.4F, 0.4F, 0.4F);
 						GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
@@ -1302,7 +1276,7 @@ public class Minecraft implements Runnable {
 					}
 
 					if(Keyboard.getEventKey() == Keyboard.KEY_F1) {
-						this.hideGui = !this.hideGui;
+						this.hud.setVisible(!this.hud.isVisible());
 					}
 
 					if(!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME) {
@@ -1360,8 +1334,13 @@ public class Minecraft implements Runnable {
 						}
 
 						if(Keyboard.getEventKey() == Keyboard.KEY_TAB && this.mode instanceof SurvivalGameMode && this.player.arrows > 0) {
+							OpenClassic.getGame().getAudioManager().playSound("random.bow", this.player.x, this.player.y, this.player.z, 1, 1 / (rand.nextFloat() * 0.4f + 0.8f));
 							this.level.addEntity(new Arrow(this.level, this.player, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch, 1.2F));
 							this.player.arrows--;
+						}
+						
+						if(Keyboard.getEventKey() == Keyboard.KEY_Q && this.mode instanceof SurvivalGameMode) {
+							this.player.dropHeldItem();
 						}
 
 						if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.blocks").getKey()) {

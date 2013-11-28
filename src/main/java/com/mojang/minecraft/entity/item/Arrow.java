@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.render.RenderHelper;
@@ -104,6 +105,7 @@ public class Arrow extends Entity {
 				for(int count = 0; count < entities.size(); count++) {
 					Entity entity = entities.get(count);
 					if(entity.isShootable() && (entity != this.owner || this.time > 5)) {
+						OpenClassic.getGame().getAudioManager().playSound("random.drr", this.x, this.y, this.z, 1, 1.2f / (this.level.random.nextFloat() * 0.2f + 0.9f));
 						entity.hurt(this, this.damage);
 						this.collision = true;
 						this.remove();
@@ -121,6 +123,7 @@ public class Arrow extends Entity {
 			}
 
 			if(this.collision) {
+				OpenClassic.getGame().getAudioManager().playSound("random.drr", this.x, this.y, this.z, 1, 1.2f / (this.level.random.nextFloat() * 0.2f + 0.9f));
 				this.hasHit = true;
 				this.xd = 0;
 				this.yd = 0;
@@ -205,6 +208,7 @@ public class Arrow extends Entity {
 
 	public void playerTouch(LocalPlayer player) {
 		if(this.hasHit && this.owner == player && player.arrows < 99) {
+			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.7f + 1) * 2);
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			player.arrows++;
 			this.remove();

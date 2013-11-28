@@ -60,6 +60,8 @@ import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.block.physics.StationaryWaterPhysics;
+import ch.spacebase.openclassic.game.block.physics.WaterPhysics;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.msg.Message;
@@ -70,6 +72,7 @@ import ch.spacebase.openclassic.server.command.ServerCommands;
 import ch.spacebase.openclassic.server.level.ServerLevel;
 import ch.spacebase.openclassic.server.network.ServerPipelineFactory;
 import ch.spacebase.openclassic.server.network.SessionRegistry;
+import ch.spacebase.openclassic.server.player.ServerPlayer;
 import ch.spacebase.openclassic.server.sound.ServerAudioManager;
 import ch.spacebase.openclassic.server.ui.ConsoleManager;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
@@ -202,6 +205,9 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.registerGenerator("flat", new FlatLandGenerator());
 
 		VanillaBlock.registerAll();
+		VanillaBlock.WATER.setPhysics(new WaterPhysics(VanillaBlock.WATER, true, true));
+		VanillaBlock.STATIONARY_WATER.setPhysics(new StationaryWaterPhysics());
+		
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 
 		File file = new File(this.getDirectory(), "levels");
@@ -237,7 +243,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				URL url = null;
 				
 				try {
-					url = new URL("https://minecraft.net/heartbeat.jsp?port=" + OpenClassic.getServer().getPort() + "&max=" + OpenClassic.getServer().getMaxPlayers() + "&name=" + URLEncoder.encode(Color.stripColor(OpenClassic.getServer().getServerName()), "UTF-8") + "&public=" + OpenClassic.getServer().isPublic() + "&version=" + InternalConstants.PROTOCOL_VERSION + "&salt=" + salt + "&users=" + OpenClassic.getServer().getPlayers().size());
+					url = new URL("https://minecraft.net/heartbeat.jsp?port=" + getPort() + "&max=" + getMaxPlayers() + "&name=" + URLEncoder.encode(Color.stripColor(getServerName()), "UTF-8") + "&public=" + isPublic() + "&version=" + InternalConstants.PROTOCOL_VERSION + "&salt=" + salt + "&users=" + getPlayers().size());
 				} catch(MalformedURLException e) {
 					OpenClassic.getLogger().severe("Malformed URL while attempting minecraft.net heartbeat?");
 					return;
@@ -301,7 +307,7 @@ public class ClassicServer extends ClassicGame implements Server {
 				URL url = null;
 				
 				try {
-					url = new URL("http://direct.worldofminecraft.com/hb.php?port=" + OpenClassic.getServer().getPort() + "&max=" + OpenClassic.getServer().getMaxPlayers() + "&name=" + URLEncoder.encode(Color.stripColor(OpenClassic.getServer().getServerName()), "UTF-8") + "&public=" + OpenClassic.getServer().isPublic() + "&version=" + InternalConstants.PROTOCOL_VERSION + "&salt=" + salt + "&users=" + OpenClassic.getServer().getPlayers().size() + "&noforward=1");
+					url = new URL("http://direct.worldofminecraft.com/hb.php?port=" + getPort() + "&max=" + getMaxPlayers() + "&name=" + URLEncoder.encode(Color.stripColor(getServerName()), "UTF-8") + "&public=" + isPublic() + "&version=" + InternalConstants.PROTOCOL_VERSION + "&salt=" + salt + "&users=" + getPlayers().size() + "&noforward=1");
 				} catch(MalformedURLException e) {
 					OpenClassic.getLogger().severe("Malformed URL while attempting WOM heartbeat?");
 					return;
@@ -649,8 +655,8 @@ public class ClassicServer extends ClassicGame implements Server {
 			}
 
 			this.levels.add(level);
-			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
-				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().levels;
+			if(this.getConsoleManager() instanceof GuiConsoleManager) {
+				DefaultListModel model = ((GuiConsoleManager) this.getConsoleManager()).getFrame().levels;
 				model.add(model.size(), level.getName());
 				if(model.capacity() == model.size()) model.setSize(model.getSize() + 1);
 			}
@@ -692,8 +698,8 @@ public class ClassicServer extends ClassicGame implements Server {
 			((ServerLevel) level).dispose();
 			this.levels.remove(level);
 
-			if(((ClassicServer) OpenClassic.getServer()).getConsoleManager() instanceof GuiConsoleManager) {
-				DefaultListModel model = ((GuiConsoleManager) ((ClassicServer) OpenClassic.getServer()).getConsoleManager()).getFrame().levels;
+			if(this.getConsoleManager() instanceof GuiConsoleManager) {
+				DefaultListModel model = ((GuiConsoleManager) this.getConsoleManager()).getFrame().levels;
 				if(model.indexOf(level.getName()) != -1) {
 					model.remove(model.indexOf(level.getName()));
 				}
@@ -800,10 +806,9 @@ public class ClassicServer extends ClassicGame implements Server {
 		return TextConsoleManager.SENDER;
 	}
 
-	@Override
 	public Player getPlayer(byte id) {
 		for(Player player : this.getPlayers()) {
-			if(player.getPlayerId() == id) return player;
+			if(((ServerPlayer) player).getPlayerId() == id) return player;
 		}
 
 		return null;

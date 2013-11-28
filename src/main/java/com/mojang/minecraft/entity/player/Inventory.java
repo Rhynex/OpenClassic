@@ -9,7 +9,7 @@ public class Inventory {
 
 	public int[] slots = new int[9];
 	public int[] count = new int[9];
-	public int[] popTime = new int[9];
+	public boolean[] pop = new boolean[9];
 	public int selected = 0;
 
 	public Inventory() {
@@ -93,7 +93,7 @@ public class Inventory {
 		if(slot >= 0) {
 			this.slots[slot] = block;
 			this.count[slot]++;
-			this.popTime[slot] = 5;
+			this.pop[slot] = true;
 			return true;
 		}
 
@@ -109,14 +109,6 @@ public class Inventory {
 		}
 
 		return result;
-	}
-
-	public void tick() {
-		for(int slot = 0; slot < this.popTime.length; slot++) {
-			if(this.popTime[slot] > 0) {
-				this.popTime[slot]--;
-			}
-		}
 	}
 
 	public boolean removeSelected(int block) {

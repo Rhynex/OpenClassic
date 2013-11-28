@@ -14,7 +14,7 @@ import ch.spacebase.openclassic.api.permissions.Group;
 import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.util.Constants;
-import ch.spacebase.openclassic.client.gui.ClientHUDScreen;
+import ch.spacebase.openclassic.client.gui.hud.ClientHUDScreen;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
@@ -68,11 +68,6 @@ public class ClientPlayer implements Player {
 
 	public ClassicSession getSession() {
 		return GeneralUtils.getMinecraft().isInMultiplayer() ? GeneralUtils.getMinecraft().session : this.dummySession;
-	}
-
-	@Override
-	public byte getPlayerId() {
-		return -1;
 	}
 
 	@Override
@@ -391,15 +386,6 @@ public class ClientPlayer implements Player {
 		}
 		
 		return this.handle.inventory.count;
-	}
-
-	@Override
-	public int[] getInventoryPopTimes() {
-		if(this.handle == null) {
-			return new int[0];
-		}
-		
-		return this.handle.inventory.popTime;
 	}
 	
 	@Override

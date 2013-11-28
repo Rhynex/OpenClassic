@@ -19,16 +19,16 @@ public class ServerURLScreen extends GuiComponent {
 
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		this.attachComponent(new DefaultBackground("bg"));
-		this.attachComponent(new Button("connect", this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, OpenClassic.getGame().getTranslator().translate("gui.servers.connect")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("connect", this.getWidth() / 2 - 200, (int) (this.getHeight() * 0.75f), OpenClassic.getGame().getTranslator().translate("gui.servers.connect")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().joinServer(getComponent("url", TextBox.class).getText());
 			}
 		}));
 		
-		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, (int) (this.getHeight() * 0.75f) + 48, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
@@ -36,7 +36,7 @@ public class ServerURLScreen extends GuiComponent {
 		}));
 		
 		this.attachComponent(new TextBox("url", this.getWidth() / 2 - 200, this.getHeight() / 2 - 20));
-		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 2 - 160, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.enter-url"), true));
 		this.getComponent("connect", Button.class).setActive(false);
 	}
 

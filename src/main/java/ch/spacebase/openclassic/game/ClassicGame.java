@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
-import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.Game;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.command.Command;
@@ -245,21 +244,21 @@ public abstract class ClassicGame implements Game {
 
 					if(!match) {
 						if(cmd.getSenders().length == 1) {
-							sender.sendMessage(Color.RED + String.format(this.translator.translate("command.wrong-sender.single", sender.getLanguage()), cmd.getSenders()[0].getSimpleName().toLowerCase()));
+							sender.sendMessage(String.format(this.translator.translate("command.wrong-sender.single", sender.getLanguage()), cmd.getSenders()[0].getSimpleName().toLowerCase()));
 						} else {
-							sender.sendMessage(Color.RED + String.format(this.translator.translate("command.wrong-sender.multi", sender.getLanguage()), Arrays.toString(cmd.getSenders()).toLowerCase()));
+							sender.sendMessage(String.format(this.translator.translate("command.wrong-sender.multi", sender.getLanguage()), Arrays.toString(cmd.getSenders()).toLowerCase()));
 						}
 						return;
 					}
 				}
 
 				if(!sender.hasPermission(cmd.getPermission())) {
-					sender.sendMessage(Color.RED + this.translator.translate("command.no-perm", sender.getLanguage()));
+					sender.sendMessage(this.translator.translate("command.no-perm", sender.getLanguage()));
 					return;
 				}
 
 				if((split.length - 1) < cmd.getMinArgs() || (split.length - 1) > cmd.getMaxArgs()) {
-					sender.sendMessage(Color.RED + this.translator.translate("command.usage", sender.getLanguage()) + ": " + sender.getCommandPrefix() + split[0] + " " + cmd.getUsage());
+					sender.sendMessage(this.translator.translate("command.usage", sender.getLanguage()) + ": " + sender.getCommandPrefix() + split[0] + " " + cmd.getUsage());
 					return;
 				}
 
@@ -272,7 +271,7 @@ public abstract class ClassicGame implements Game {
 
 		CommandNotFoundEvent e = EventManager.callEvent(new CommandNotFoundEvent(sender, command));
 		if(e.showMessage()) {
-			sender.sendMessage(Color.RED + this.translator.translate("command.unknown", sender.getLanguage()));
+			sender.sendMessage(this.translator.translate("command.unknown", sender.getLanguage()));
 		}
 	}
 

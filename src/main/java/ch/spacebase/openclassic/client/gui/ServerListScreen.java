@@ -27,14 +27,14 @@ public class ServerListScreen extends GuiComponent {
 
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		List<String> contents = new ArrayList<String>();
 		for(Server server : ServerDataStore.getServers()) {
 			contents.add(server.name);
 		}
 		
 		this.attachComponent(new DefaultBackground("bg"));
-		ButtonList list = new ButtonList("servers", 0, 0, this.getWidth(), this.getHeight(), true);
+		ButtonList list = new ButtonList("servers", 0, 0, this.getWidth(), (int) (this.getHeight() * 0.8f), true);
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
@@ -61,14 +61,14 @@ public class ServerListScreen extends GuiComponent {
 		});
 		
 		this.attachComponent(list);
-		this.attachComponent(new Button("favorites", this.getWidth() / 2 - 412, this.getHeight() / 6 + 312, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("favorites", this.getWidth() / 2 - 412, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.servers.favorites")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(new FavoriteServersScreen(ServerListScreen.this));
 			}
 		}));
 		
-		this.attachComponent(new Button("addfavorite", this.getWidth() / 2 - 204, this.getHeight() / 6 + 312, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("addfavorite", this.getWidth() / 2 - 204, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.add-favorite.add")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				Label label = getComponent("title", Label.class);
@@ -82,21 +82,21 @@ public class ServerListScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("url", this.getWidth() / 2 + 4, this.getHeight() / 6 + 312, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.servers.enter-url")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("url", this.getWidth() / 2 + 4, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.servers.enter-url")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(new ServerURLScreen(ServerListScreen.this));
 			}
 		}));
 		
-		this.attachComponent(new Button("back", this.getWidth() / 2 + 212, this.getHeight() / 6 + 312, 200, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 + 212, (int) (this.getHeight() * 0.8f), 200, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 30, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 80, OpenClassic.getGame().getTranslator().translate("gui.favorites.select"), true));
 		this.getComponent("servers", ButtonList.class).setContents(contents);
 	}
 

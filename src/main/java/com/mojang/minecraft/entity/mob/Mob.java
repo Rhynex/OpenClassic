@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
@@ -52,6 +53,8 @@ public class Mob extends Entity {
 	public float tilt;
 	public boolean dead = false;
 	public AI ai;
+	private int drownTime = 20;
+	private int burnTime = 10;
 
 	public Mob(Level level) {
 		super(level);
@@ -101,18 +104,31 @@ public class Mob extends Entity {
 			if(this.airSupply > 0) {
 				this.airSupply--;
 			} else {
-				this.hurt(null, 2);
+				this.drownTime++;
+				if(this.drownTime > 20) {
+					this.hurt(null, 2);
+					this.drownTime = 0;
+				}
 			}
 		} else {
-			this.airSupply = 300;
+			this.drownTime = 20;
+			this.airSupply = Constants.MAX_AIR;
 		}
 
 		BlockType liquid = this.getLiquid();
 		if(liquid != null) {
 			this.fallDistance = 0;
 			if(liquid.getId() == VanillaBlock.LAVA.getId() || liquid.getId() == VanillaBlock.STATIONARY_LAVA.getId()) {
-				this.hurt(null, 10);
+				this.burnTime++;
+				if(this.burnTime > 10) {
+					this.hurt(null, 7);
+					this.burnTime = 0;
+				}
+			} else {
+				this.burnTime = 10;
 			}
+		} else {
+			this.burnTime = 10;
 		}
 
 		this.animStepO = this.animStep;

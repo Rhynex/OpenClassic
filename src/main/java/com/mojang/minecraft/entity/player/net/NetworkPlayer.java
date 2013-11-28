@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 
 import com.mojang.minecraft.Minecraft;
@@ -21,15 +20,13 @@ public class NetworkPlayer extends Player {
 	private int xp;
 	private int yp;
 	private int zp;
-	private String name;
 	public String displayName;
 
-	public NetworkPlayer(Minecraft mc, int playerId, ClientPlayer openclassic, float x, float y, float z, float yaw, float pitch) {
+	public NetworkPlayer(Minecraft mc, int playerId, String displayName, ClientPlayer openclassic, float x, float y, float z, float yaw, float pitch) {
 		super(mc.level, x, y, z, openclassic);
 		this.minecraft = mc;
 		this.playerId = playerId;
-		this.displayName = name;
-		this.name = Color.stripColor(name);
+		this.displayName = displayName;
 		this.xp = (int) (x * 32);
 		this.yp = (int) (y * 32);
 		this.zp = (int) (z * 32);
@@ -62,7 +59,7 @@ public class NetworkPlayer extends Player {
 		GL11.glNormal3f(1, -1, 1);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glDisable(GL11.GL_COLOR_BUFFER_BIT);
-		if(this.name.equalsIgnoreCase("Notch")) {
+		if(this.getName().equalsIgnoreCase("Notch")) {
 			fontRenderer.renderNoShadow(this.displayName, 0, 0, 16776960);
 		} else {
 			fontRenderer.renderNoShadow(this.displayName, 0, 0, 16777215);
@@ -78,7 +75,7 @@ public class NetworkPlayer extends Player {
 		GL11.glDepthMask(true);
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glTranslatef(1, 1, -0.05F);
-		fontRenderer.renderNoShadow(this.name, 0, 0, 5263440);
+		fontRenderer.renderNoShadow(this.getName(), 0, 0, 5263440);
 		GL11.glEnable(GL11.GL_COLOR_BUFFER_BIT);
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glPopMatrix();

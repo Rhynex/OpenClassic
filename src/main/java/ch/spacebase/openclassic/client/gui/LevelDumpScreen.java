@@ -19,10 +19,10 @@ public class LevelDumpScreen extends GuiComponent {
 
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		this.attachComponent(new TranslucentBackground("bg"));
 		this.attachComponent(new TextBox("name", this.getWidth() / 2 - 200, this.getHeight() / 2 - 60, 30));
-		this.attachComponent(new Button("save", this.getWidth() / 2 - 200, this.getHeight() / 4 + 240, OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("save", this.getWidth() / 2 - 200, (int) (this.getHeight() * 0.75f), OpenClassic.getGame().getTranslator().translate("gui.level-dump.dump")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().saveLevel(getComponent("name", TextBox.class).getText());
@@ -30,14 +30,14 @@ public class LevelDumpScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, this.getHeight() / 4 + 288, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 200, (int) (this.getHeight() * 0.75f) + 48, OpenClassic.getGame().getTranslator().translate("gui.cancel")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 80, OpenClassic.getGame().getTranslator().translate("gui.level-dump.name"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 60, OpenClassic.getGame().getTranslator().translate("gui.level-dump.name"), true));
 		this.getComponent("save", Button.class).setActive(false);
 	}
 

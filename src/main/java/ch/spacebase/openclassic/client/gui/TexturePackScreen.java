@@ -25,9 +25,9 @@ public class TexturePackScreen extends GuiComponent {
 
 	@Override
 	public void onAttached(GuiComponent oparent) {
-		this.setSize(parent.getWidth(), parent.getHeight());
+		this.setSize(oparent.getWidth(), oparent.getHeight());
 		this.attachComponent(new DefaultBackground("bg"));
-		ButtonList list = new ButtonList("packs", 0, 0, this.getWidth(), this.getHeight());
+		ButtonList list = new ButtonList("packs", 0, 0, this.getWidth(), (int) (this.getHeight() * 0.8f));
 		list.setCallback(new ButtonListCallback() {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
@@ -43,18 +43,18 @@ public class TexturePackScreen extends GuiComponent {
 		});
 		
 		this.attachComponent(list);
-		this.attachComponent(new Button("back", this.getWidth() / 2 - 150, this.getHeight() / 6 + 312, 300, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("back", this.getWidth() / 2 - 150, (int) (this.getHeight() * 0.8f), 300, 40, OpenClassic.getGame().getTranslator().translate("gui.back")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(parent);
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, 30, OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 80, OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), true));
 		
 		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
 		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
-		this.attachComponent(new Label("current", this.getWidth() / 2, this.getHeight() / 2 + 96, text, true));
+		this.attachComponent(new Label("current", this.getWidth() / 2, (int) (this.getHeight() * 0.8f) - 56, text, true));
 		
 		StringBuilder textures = new StringBuilder("Default");
 		for(String file : (new File(OpenClassic.getClient().getDirectory(), "texturepacks").list())) {

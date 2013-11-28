@@ -3,6 +3,8 @@ package ch.spacebase.openclassic.client;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -46,6 +48,8 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
 import ch.spacebase.openclassic.game.ClassicGame;
+import ch.spacebase.openclassic.game.block.physics.StationaryWaterPhysics;
+import ch.spacebase.openclassic.game.block.physics.WaterPhysics;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
@@ -104,6 +108,8 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.registerGenerator("flat", new FlatLandGenerator());
 
 		VanillaBlock.TNT.setPhysics(new TNTPhysics());
+		VanillaBlock.WATER.setPhysics(new WaterPhysics(VanillaBlock.WATER, true, true));
+		VanillaBlock.STATIONARY_WATER.setPhysics(new StationaryWaterPhysics());
 
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);
@@ -322,12 +328,7 @@ public class ClassicClient extends ClassicGame implements Client {
 	public Bindings getBindings() {
 		return this.mc.bindings;
 	}
-
-	@Override
-	public boolean isHUDHidden() {
-		return this.mc.hideGui;
-	}
-
+	
 	@Override
 	public boolean isInSurvival() {
 		return this.mc.mode instanceof SurvivalGameMode && !this.isInMultiplayer();
@@ -375,6 +376,34 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public Settings getHackSettings() {
 		return this.mc.hackSettings;
+	}
+
+	@Override
+	public List<Player> getPlayers() {
+		return this.getLevel().getPlayers();
+	}
+
+	@Override
+	public Player getPlayer(String name) {
+		for(Player player : this.getPlayers()) {
+			if(player.getName().equalsIgnoreCase(name)) {
+				return player;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public List<Player> matchPlayer(String name) {
+		List<Player> result = new ArrayList<Player>();
+		for(Player player : this.getPlayers()) {
+			if(player.getName().toLowerCase().contains(name.toLowerCase()) && !result.contains(player)) {
+				result.add(player);
+			}
+		}
+
+		return result;
 	}
 
 }
