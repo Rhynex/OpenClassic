@@ -60,8 +60,6 @@ import ch.spacebase.openclassic.api.plugin.PluginManager.LoadOrder;
 import ch.spacebase.openclassic.api.sound.AudioManager;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.game.ClassicGame;
-import ch.spacebase.openclassic.game.block.physics.StationaryWaterPhysics;
-import ch.spacebase.openclassic.game.block.physics.WaterPhysics;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.msg.Message;
@@ -205,8 +203,6 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.registerGenerator("flat", new FlatLandGenerator());
 
 		VanillaBlock.registerAll();
-		VanillaBlock.WATER.setPhysics(new WaterPhysics(VanillaBlock.WATER, true, true));
-		VanillaBlock.STATIONARY_WATER.setPhysics(new StationaryWaterPhysics());
 		
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 

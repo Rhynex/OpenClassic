@@ -47,8 +47,6 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
 import ch.spacebase.openclassic.game.ClassicGame;
-import ch.spacebase.openclassic.game.block.physics.StationaryWaterPhysics;
-import ch.spacebase.openclassic.game.block.physics.WaterPhysics;
 import ch.spacebase.openclassic.game.io.OpenClassicLevelFormat;
 import ch.spacebase.openclassic.game.util.DateOutputFormatter;
 import ch.spacebase.openclassic.game.util.EmptyMessageFormatter;
@@ -107,8 +105,6 @@ public class ClassicClient extends ClassicGame implements Client {
 		this.registerGenerator("flat", new FlatLandGenerator());
 
 		VanillaBlock.TNT.setPhysics(new TNTPhysics());
-		VanillaBlock.WATER.setPhysics(new WaterPhysics(VanillaBlock.WATER, true, true));
-		VanillaBlock.STATIONARY_WATER.setPhysics(new StationaryWaterPhysics());
 
 		this.getPluginManager().loadPlugins(LoadOrder.PREWORLD);
 		this.getPluginManager().loadPlugins(LoadOrder.POSTWORLD);

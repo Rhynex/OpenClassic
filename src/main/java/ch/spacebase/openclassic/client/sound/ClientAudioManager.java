@@ -70,8 +70,17 @@ public class ClientAudioManager implements AudioManager {
 		this.registerMusic("menu", Main.class.getResource("/audio/music/sweden.ogg"), true);
 		
 		this.registerMusic("bg", Main.class.getResource("/audio/music/clark.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/danny.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/dryhands.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/haggstrom.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/key.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/livingmice.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/miceonvenus.ogg"), true);
 		this.registerMusic("bg", Main.class.getResource("/audio/music/minecraft.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/oxygene.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/subwooferlullaby.ogg"), true);
 		this.registerMusic("bg", Main.class.getResource("/audio/music/sweden.ogg"), true);
+		this.registerMusic("bg", Main.class.getResource("/audio/music/wethands.ogg"), true);
 		
 		this.registerSound("random.click", Main.class.getResource("/audio/sound/random/click.ogg"), true);
 		this.registerSound("random.explode", Main.class.getResource("/audio/sound/random/explode.ogg"), true);

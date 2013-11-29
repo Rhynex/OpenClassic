@@ -31,6 +31,7 @@ import org.lwjgl.util.glu.GLU;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
+import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
@@ -159,6 +160,7 @@ public class Minecraft implements Runnable {
 	public ClientPlayer ocPlayer;
 	public GuiComponent baseGUI;
 	private boolean init = false;
+	private int waterDelay = 200;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -1380,6 +1382,31 @@ public class Minecraft implements Runnable {
 			this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000) + 300000L);
 		}
 
+		if(this.level != null) {
+			this.waterDelay++;
+			if(this.waterDelay > 200 && rand.nextInt(1000) < 250) {
+				this.waterDelay = 0;
+				Block block = null;
+				float dist = 10000;
+				for(int x = (int) this.player.x - 50; x < this.player.x + 50; x++) {
+					for(int y = (int) this.player.y - 20; y < this.player.y + 20; y++) {
+						for(int z = (int) this.player.z - 50; z < this.player.z + 50; z++) {
+							BlockType b = this.level.getBlockTypeAt(x, y, z);
+							float d = (float) Math.sqrt((this.player.x - x) * (this.player.x - x) + (this.player.y - y) * (this.player.y - y) + (this.player.z - z) * (this.player.z - z));
+							if(b != null && b.getLiquidName() != null && b.getLiquidName().equals("water") && d < dist) {
+								block = this.level.getBlockAt(x, y, z);
+								dist = d;
+							}
+						}
+					}
+				}
+				
+				if(block != null) {
+					OpenClassic.getGame().getAudioManager().playSound(block.getLevel(), "random.water", block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f, rand.nextFloat() * 0.25f + 0.75f, rand.nextFloat() + 0.5f);
+				}
+			}
+		}
+		
 		this.mode.spawnMobs();
 		int mouseX = Mouse.getX() * this.hud.getWidth() / this.width;
 		int mouseY = this.hud.getHeight() - Mouse.getY() * this.hud.getHeight() / this.height - 1;
