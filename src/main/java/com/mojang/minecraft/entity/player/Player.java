@@ -3,12 +3,12 @@ package com.mojang.minecraft.entity.player;
 import java.awt.image.BufferedImage;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.HumanoidMob;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public abstract class Player extends HumanoidMob {
@@ -22,7 +22,7 @@ public abstract class Player extends HumanoidMob {
 	
 	public ClientPlayer openclassic;
 
-	public Player(Level level, float x, float y, float z, ClientPlayer openclassic) {
+	public Player(ClientLevel level, float x, float y, float z, ClientPlayer openclassic) {
 		super(level, x, y, z);
 		this.armor = false;
 		this.helmet = false;
@@ -53,7 +53,7 @@ public abstract class Player extends HumanoidMob {
 		}
 
 		if(this.newTextureId < 0) {
-			RenderHelper.getHelper().bindTexture("/char.png", true);
+			RenderHelper.getHelper().bindTexture("/textures/entity/char.png", true);
 		} else {
 			RenderHelper.getHelper().bindTexture(this.newTextureId);
 		}

@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import com.mojang.minecraft.Minecraft;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
@@ -19,13 +20,13 @@ public class NightSetting extends BooleanSetting {
 		Minecraft mc = GeneralUtils.getMinecraft();
 		if(mc.level != null) {
 			if(this.getValue()) {
-				mc.level.skyColor = 0;
-				mc.level.fogColor = new Color(30, 30, 30, 70).getRGB();
-				mc.level.cloudColor = new Color(30, 30, 30, 70).getRGB();
+				OpenClassic.getClient().getLevel().setSkyColor(0);
+				OpenClassic.getClient().getLevel().setFogColor(new Color(30, 30, 30, 70).getRGB());
+				OpenClassic.getClient().getLevel().setCloudColor(new Color(30, 30, 30, 70).getRGB());
 			} else {
-				mc.level.skyColor = 10079487;
-				mc.level.fogColor = 16777215;
-				mc.level.cloudColor = 16777215;
+				OpenClassic.getClient().getLevel().setSkyColor(10079487);
+				OpenClassic.getClient().getLevel().setFogColor(16777215);
+				OpenClassic.getClient().getLevel().setCloudColor(16777215);
 			}
 
 			if(mc.ingame) {

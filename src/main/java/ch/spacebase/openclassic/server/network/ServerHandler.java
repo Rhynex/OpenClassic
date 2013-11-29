@@ -15,6 +15,8 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.game.network.msg.Message;
 import ch.spacebase.openclassic.server.ClassicServer;
+import ch.spacebase.openclassic.server.level.ServerLevel;
+import ch.spacebase.openclassic.server.player.ServerSession;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 
 import com.zachsthings.onevent.EventManager;
@@ -51,7 +53,7 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 				}
 			}
 
-			session.getPlayer().getPosition().getLevel().removePlayer(session.getPlayer().getName());
+			((ServerLevel) session.getPlayer().getPosition().getLevel()).removePlayer(session.getPlayer().getName());
 			if(!session.disconnectMsgSent) session.getPlayer().getData().save(OpenClassic.getServer().getDirectory().getPath() + "/players/" + session.getPlayer().getName() + ".nbt");
 		} else {
 			if(!session.disconnectMsgSent) OpenClassic.getLogger().info(channel.getRemoteAddress() + " disconnected.");

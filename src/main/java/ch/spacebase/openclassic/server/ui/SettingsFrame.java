@@ -28,7 +28,6 @@ public class SettingsFrame extends JFrame {
 
 	public JCheckBox chckbxVerifyUsers;
 	public JCheckBox chckbxShowOnServer;
-	public JCheckBox chckbxAllowFlying;
 	public JCheckBox chckbxUseWhitelist;
 
 	public JCheckBox chckbxEnabled;
@@ -82,13 +81,9 @@ public class SettingsFrame extends JFrame {
 		chckbxShowOnServer = new JCheckBox("Show on Server List");
 		chckbxShowOnServer.setBounds(12, 170, 175, 23);
 		contentPane.add(chckbxShowOnServer);
-
-		chckbxAllowFlying = new JCheckBox("Allow Flying");
-		chckbxAllowFlying.setBounds(12, 197, 129, 23);
-		contentPane.add(chckbxAllowFlying);
-
+		
 		chckbxUseWhitelist = new JCheckBox("Use Whitelist");
-		chckbxUseWhitelist.setBounds(12, 224, 129, 23);
+		chckbxUseWhitelist.setBounds(12, 197, 129, 23);
 		contentPane.add(chckbxUseWhitelist);
 
 		serverName = new JTextField();
@@ -186,7 +181,6 @@ public class SettingsFrame extends JFrame {
 
 				OpenClassic.getServer().getConfig().setValue("options.online-mode", chckbxVerifyUsers.isSelected());
 				OpenClassic.getServer().getConfig().setValue("options.whitelist", chckbxUseWhitelist.isSelected());
-				OpenClassic.getServer().getConfig().setValue("options.allow-flight", chckbxAllowFlying.isSelected());
 				OpenClassic.getServer().getConfig().setValue("options.default-level", defaultLevel.getText());
 				OpenClassic.getServer().getConfig().setValue("physics.enabled", chckbxEnabled.isSelected());
 				OpenClassic.getServer().getConfig().setValue("physics.falling", chckbxGrass.isSelected());

@@ -1,16 +1,17 @@
 package com.mojang.minecraft.entity.mob;
 
+import ch.spacebase.openclassic.client.level.ClientLevel;
+
 import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.mob.ai.BasicAttackAI;
 import com.mojang.minecraft.entity.mob.ai.SkeletonAI;
-import com.mojang.minecraft.level.Level;
 
 public class Skeleton extends Zombie {
 
-	public Skeleton(Level level, float x, float y, float z) {
+	public Skeleton(ClientLevel level, float x, float y, float z) {
 		super(level, x, y, z);
 		this.modelName = "skeleton";
-		this.textureName = "/mob/skeleton.png";
+		this.textureName = "/textures/entity/mob/skeleton.png";
 		this.deathScore = 120;
 		BasicAttackAI ai = new SkeletonAI(this);
 		ai.runSpeed = 0.3F;
@@ -18,7 +19,7 @@ public class Skeleton extends Zombie {
 		this.ai = ai;
 	}
 
-	public void shootArrow(Level level) {
+	public void shootArrow(ClientLevel level) {
 		level.addEntity(new Arrow(level, this, this.x, this.y, this.z, this.yaw + 180 + (float) (Math.random() * 45 - 22.5), this.pitch - (float) (Math.random() * 45 - 10), 1));
 	}
 

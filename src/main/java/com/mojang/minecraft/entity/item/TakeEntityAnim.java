@@ -1,7 +1,8 @@
 package com.mojang.minecraft.entity.item;
 
+import ch.spacebase.openclassic.client.level.ClientLevel;
+
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class TakeEntityAnim extends Entity {
@@ -13,7 +14,7 @@ public class TakeEntityAnim extends Entity {
 	private float yorg;
 	private float zorg;
 
-	public TakeEntityAnim(Level level, Entity item, Entity player) {
+	public TakeEntityAnim(ClientLevel level, Entity item, Entity player) {
 		super(level);
 		this.taking = item;
 		this.player = player;

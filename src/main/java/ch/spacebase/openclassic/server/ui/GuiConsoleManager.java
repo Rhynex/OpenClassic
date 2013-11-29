@@ -25,7 +25,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 
 public class GuiConsoleManager implements ConsoleManager {
 
-	private ServerFrame frame = new ServerFrame();
+	private ServerFrame frame = new ServerFrame(this);
 	private FileHandler fileHandler;
 
 	public GuiConsoleManager() {
@@ -67,8 +67,8 @@ public class GuiConsoleManager implements ConsoleManager {
 		}
 
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		frame.setLocation((gd.getDisplayMode().getWidth() - frame.getWidth()) / 2, (gd.getDisplayMode().getHeight() - frame.getHeight()) / 2);
-		frame.setVisible(true);
+		this.frame.setLocation((gd.getDisplayMode().getWidth() - this.frame.getWidth()) / 2, (gd.getDisplayMode().getHeight() - this.frame.getHeight()) / 2);
+		this.frame.setVisible(true);
 	}
 
 	public void stop() {
@@ -100,34 +100,9 @@ public class GuiConsoleManager implements ConsoleManager {
 		message = message.replaceAll("&amp;f", "<font color='#000000'>");
 
 		int colorCount = message.split("&amp;[0-9a-f]").length - 1;
-		for(int i = 0; i < colorCount; i++)
+		for(int i = 0; i < colorCount; i++) {
 			message += "</font>";
-		/*
-		 * int index = 0; while ((index = message.indexOf('&', index + 1)) !=
-		 * -1) { String code = message.substring(index+1, index+2);
-		 * if(!code.matches("[0-9a-f]")) continue; int color = -1; try { color =
-		 * Integer.parseInt(code, 16); } catch (NumberFormatException nfe) { }
-		 * if (color != -1) { String replace = ""; switch (color) { case 0:
-		 * replace = "<font color=000000>"; break; case 1: replace =
-		 * "<font color=0000bf>"; break; case 2: replace =
-		 * "<font color=00bf00>"; break; case 3: replace =
-		 * "<font color=00bfbf>"; break; case 4: replace =
-		 * "<font color=bf0000>"; break; case 5: replace =
-		 * "<font color=bf00bf>"; break; case 6: replace =
-		 * "<font color=bfbf00>"; break; case 7: replace =
-		 * "<font color=bfbfbf>"; break; case 8: replace =
-		 * "<font color=404040>"; break; case 9: replace =
-		 * "<font color=4040ff>"; break; case 10: replace =
-		 * "<font color=40ff40>"; break; case 11: replace =
-		 * "<font color=40ffff>"; break; case 12: replace =
-		 * "<font color=ff4040>"; break; case 13: replace =
-		 * "<font color=ff40ff>"; break; case 14: replace =
-		 * "<font color=ffff40>"; break; case 15: replace =
-		 * "<font color=ffffff>"; break; case -1: break; } message =
-		 * message.replaceFirst(message.substring(index, index+2), replace); }
-		 * else { message = message.replaceFirst(message.substring(index,
-		 * index), ""); } }
-		 */
+		}
 
 		return message;
 	}

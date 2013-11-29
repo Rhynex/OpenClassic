@@ -6,11 +6,14 @@ import java.util.Random;
 
 import org.lwjgl.opengl.Display;
 
+import com.zachsthings.onevent.EventManager;
+
 import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
+import ch.spacebase.openclassic.api.event.game.ChatDisplayEvent;
 import ch.spacebase.openclassic.api.gui.GuiComponent;
 import ch.spacebase.openclassic.api.gui.HUDComponent;
 import ch.spacebase.openclassic.api.gui.base.BlockPreview;
@@ -302,8 +305,12 @@ public class ClientHUDScreen extends HUDComponent {
 	}
 
 	public void addChat(String message) {
-		this.chatHistory.add(0, new ChatLine(message));
-
+		ChatDisplayEvent event = EventManager.callEvent(new ChatDisplayEvent(message));
+		if(event.isCancelled()) {
+			return;
+		}
+		
+		this.chatHistory.add(0, new ChatLine(event.getMessage()));
 		while(this.chatHistory.size() > 50) {
 			this.chatHistory.remove(this.chatHistory.size() - 1);
 		}

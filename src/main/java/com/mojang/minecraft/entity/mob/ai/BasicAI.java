@@ -3,9 +3,11 @@ package com.mojang.minecraft.entity.mob.ai;
 import java.util.List;
 import java.util.Random;
 
+import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
+
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.Mob;
-import com.mojang.minecraft.level.Level;
 
 public class BasicAI extends AI {
 
@@ -13,7 +15,7 @@ public class BasicAI extends AI {
 	public float xxa;
 	public float yya;
 	protected float yawA;
-	public Level level;
+	public ClientLevel level;
 	public Mob mob;
 	public boolean jumping = false;
 	protected int attackDelay = 0;
@@ -23,10 +25,10 @@ public class BasicAI extends AI {
 	public boolean flying = false;
 	public boolean flyDown = false;
 
-	public void tick(Level level, Mob mob) {
+	public void tick(ClientLevel level, Mob mob) {
 		this.noActionTime++;
 
-		Entity player = level.minecraft.player;
+		Entity player = GeneralUtils.getMinecraft().player;
 		if(this.noActionTime > 600 && this.random.nextInt(800) == 0 && player != null) {
 			float xDistance = player.x - mob.x;
 			float yDistance = player.y - mob.y;

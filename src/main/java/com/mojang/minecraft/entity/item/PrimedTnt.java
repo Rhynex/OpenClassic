@@ -6,12 +6,13 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.particle.SmokeParticle;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class PrimedTnt extends Entity {
@@ -22,7 +23,7 @@ public class PrimedTnt extends Entity {
 	public int life = 0;
 	private boolean defused;
 
-	public PrimedTnt(Level level, float x, float y, float z) {
+	public PrimedTnt(ClientLevel level, float x, float y, float z) {
 		super(level);
 		this.setSize(0.98F, 0.98F);
 		this.heightOffset = this.bbHeight / 2;
@@ -69,7 +70,7 @@ public class PrimedTnt extends Entity {
 
 		if(!this.defused) {
 			if(this.life-- > 0) {
-				this.level.minecraft.particleManager.spawnParticle(new SmokeParticle(this.level, this.x, this.y + 0.6F, this.z));
+				GeneralUtils.getMinecraft().particleManager.spawnParticle(new SmokeParticle(this.level, this.x, this.y + 0.6F, this.z));
 			} else {
 				this.remove();
 				Random rand = new Random();
@@ -82,7 +83,7 @@ public class PrimedTnt extends Entity {
 					float dx = ox / len / len;
 					float dy = oy / len / len;
 					float dz = oz / len / len;
-					this.level.minecraft.particleManager.spawnParticle(new TerrainParticle(this.level, this.x + ox, this.y + oy, this.z + oz, dx, dy, dz, VanillaBlock.TNT));
+					GeneralUtils.getMinecraft().particleManager.spawnParticle(new TerrainParticle(this.level, this.x + ox, this.y + oy, this.z + oz, dx, dy, dz, VanillaBlock.TNT));
 				}
 
 			}

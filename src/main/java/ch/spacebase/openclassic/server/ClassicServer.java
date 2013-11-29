@@ -600,7 +600,6 @@ public class ClassicServer extends ClassicGame implements Server {
 		this.getConfig().applyDefault("options.max-players", 20);
 		this.getConfig().applyDefault("options.online-mode", true);
 		this.getConfig().applyDefault("options.whitelist", false);
-		this.getConfig().applyDefault("options.allow-flight", false);
 		this.getConfig().applyDefault("options.default-level", "main");
 		this.getConfig().applyDefault("physics.enabled", true);
 		this.getConfig().applyDefault("physics.falling", true);
@@ -694,8 +693,6 @@ public class ClassicServer extends ClassicGame implements Server {
 			}
 
 			this.saveLevel(level);
-			((ServerLevel) level).clearPhysics();
-			((ServerLevel) level).dispose();
 			this.levels.remove(level);
 
 			if(this.getConsoleManager() instanceof GuiConsoleManager) {
@@ -789,16 +786,6 @@ public class ClassicServer extends ClassicGame implements Server {
 	@Override
 	public List<String> getWhitelistedPlayers() {
 		return this.persistenceManager.getWhitelistedPlayers();
-	}
-
-	@Override
-	public boolean isFlightAllowed() {
-		return this.getConfig().getBoolean("options.allow-flight", false);
-	}
-
-	@Override
-	public void setAllowFlight(boolean flight) {
-		this.getConfig().setValue("options.allow-flight", flight);
 	}
 
 	@Override

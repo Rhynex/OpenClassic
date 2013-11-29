@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -40,7 +42,7 @@ public class ServerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	@SuppressWarnings("unchecked")
-	public ServerFrame() {
+	public ServerFrame(final GuiConsoleManager manager) {
 		setResizable(false);
 		setTitle("OpenClassic");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -49,6 +51,12 @@ public class ServerFrame extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent event) {
+				OpenClassic.getServer().shutdown();
+			}
+		});
 
 		log = new JTextPane();
 		log.setFont(new Font("Dialog", Font.PLAIN, 12));
@@ -163,7 +171,6 @@ public class ServerFrame extends JFrame {
 				frame.maxPlayers.setText(String.valueOf(OpenClassic.getGame().getConfig().getInteger("options.max-players")));
 				frame.chckbxVerifyUsers.setSelected(OpenClassic.getGame().getConfig().getBoolean("options.online-mode"));
 				frame.chckbxUseWhitelist.setSelected(OpenClassic.getGame().getConfig().getBoolean("options.whitelist"));
-				frame.chckbxAllowFlying.setSelected(OpenClassic.getGame().getConfig().getBoolean("options.allow-flight"));
 				frame.defaultLevel.setText(OpenClassic.getGame().getConfig().getString("options.default-level"));
 				frame.chckbxEnabled.setSelected(OpenClassic.getGame().getConfig().getBoolean("physics.enabled"));
 				frame.chckbxFalling.setSelected(OpenClassic.getGame().getConfig().getBoolean("physics.falling"));

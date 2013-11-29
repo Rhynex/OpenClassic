@@ -3,7 +3,6 @@ package com.mojang.minecraft.render;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.Minecraft;
@@ -24,7 +23,7 @@ public class FogRenderer {
 		float fogRed = this.fogRed;
 		float fogGreen = this.fogGreen;
 		float fogBlue = this.fogBlue;
-		BlockType type = Blocks.fromId(this.mc.level.getTile((int) this.mc.player.x, (int) (this.mc.player.y + 0.12F), (int) this.mc.player.z));
+		BlockType type = this.mc.level.getBlockTypeAt((int) this.mc.player.x, (int) (this.mc.player.y + 0.12F), (int) this.mc.player.z);
 		if(type != null && (type.getFogDensity() != -1 || type.getFogRed() != -1 || type.getFogGreen() != -1 || type.getFogBlue() != -1 || type.isLiquid())) {
 			if(type.getFogDensity() != -1) {
 				GL11.glFogf(GL11.GL_FOG_DENSITY, type.getFogDensity());

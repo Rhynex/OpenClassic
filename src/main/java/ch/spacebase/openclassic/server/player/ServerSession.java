@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.server.network;
+package ch.spacebase.openclassic.server.player;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -13,12 +13,13 @@ import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.game.network.msg.Message;
+import ch.spacebase.openclassic.game.network.msg.PingMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerDespawnMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerDisconnectMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerSpawnMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerTeleportMessage;
 import ch.spacebase.openclassic.server.ClassicServer;
-import ch.spacebase.openclassic.server.player.ServerPlayer;
+import ch.spacebase.openclassic.server.network.ServerHandlerLookup;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -26,6 +27,7 @@ public class ServerSession extends ClassicSession {
 
 	private boolean pendingRemoval = false;
 	public boolean disconnectMsgSent = false;
+	private long lastPing = System.currentTimeMillis();
 
 	public ServerSession(Channel channel) {
 		super(new ServerHandlerLookup());
@@ -35,6 +37,11 @@ public class ServerSession extends ClassicSession {
 	public boolean tick() {
 		if(this.pendingRemoval) {
 			return false;
+		}
+		
+		if(System.currentTimeMillis() - this.lastPing > 1000) {
+			this.lastPing = System.currentTimeMillis();
+			this.send(new PingMessage());
 		}
 
 		return super.tick();

@@ -36,7 +36,6 @@ import ch.spacebase.openclassic.game.network.msg.custom.LevelColorMessage;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.level.ServerLevel;
-import ch.spacebase.openclassic.server.network.ServerSession;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -48,7 +47,6 @@ public class ServerPlayer implements Player {
 	private String displayName;
 	private ServerSession session;
 	private byte placeMode = 0;
-	// private int airTicks = 0;
 	private ClientInfo client = new ClientInfo(this);
 	private NBTData data;
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
@@ -130,10 +128,10 @@ public class ServerPlayer implements Player {
 
 		this.pos = event.getTo();
 		if(!old.getName().equals(this.pos.getLevel().getName())) {
-			this.pos.getLevel().addPlayer(this);
-			old.removePlayer(this.getName());
+			((ServerLevel) this.pos.getLevel()).addPlayer(this);
+			((ServerLevel) old).removePlayer(this.getName());
 			((ServerLevel) old).sendToAllExcept(this, new PlayerDespawnMessage(this.getPlayerId()));
-			this.session.send(new IdentificationMessage(InternalConstants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.canBreakBedrock() ? InternalConstants.OP : InternalConstants.NOT_OP));
+			this.session.send(new IdentificationMessage(InternalConstants.PROTOCOL_VERSION, "Sending to " + this.pos.getLevel().getName() + "...", "", this.canBreakUnbreakables() ? InternalConstants.OP : InternalConstants.NOT_OP));
 			this.sendLevel((ServerLevel) this.pos.getLevel());
 		} else {
 			this.getSession().send(new PlayerTeleportMessage((byte) -1, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), this.getPosition().getYaw(), this.getPosition().getPitch()));
@@ -171,21 +169,8 @@ public class ServerPlayer implements Player {
 		this.session.disconnect(reason);
 	}
 
-	public void tick() {
-		// Experimental
-		/*
-		 * if(!OpenClassic.getServer().getConfig().getBoolean("options.allow-flight"
-		 * , false)) {
-		 * if(this.pos.getLevel().getBlockTypeAt(this.pos.getBlockX(),
-		 * this.pos.getBlockY() - 2, this.pos.getBlockZ()) == BlockType.AIR) {
-		 * this.airTicks++; } else if(this.airTicks != 0) { this.airTicks = 0; }
-		 * if(this.airTicks > 300) {
-		 * this.session.disconnect("Flying is not allowed on this server."); } }
-		 */
-	}
-
 	public void destroy() {
-		this.getPosition().getLevel().removePlayer(this.getName());
+		((ServerLevel) this.getPosition().getLevel()).removePlayer(this.getName());
 		this.playerId = 0;
 		this.pos = null;
 		this.session = null;
@@ -424,12 +409,12 @@ public class ServerPlayer implements Player {
 	}
 
 	@Override
-	public boolean canBreakBedrock() {
+	public boolean canBreakUnbreakables() {
 		return this.breakBedrock;
 	}
 
 	@Override
-	public void setCanBreakBedrock(boolean canBreak) {
+	public void setCanBreakUnbreakables(boolean canBreak) {
 		this.breakBedrock = canBreak;
 		this.getSession().send(new PlayerOpMessage(canBreak ? InternalConstants.OP : InternalConstants.NOT_OP));
 	}

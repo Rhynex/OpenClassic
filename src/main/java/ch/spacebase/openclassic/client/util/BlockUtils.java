@@ -2,23 +2,25 @@ package ch.spacebase.openclassic.client.util;
 
 import java.util.Random;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Model;
+import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.math.BoundingBox;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.util.Intersection;
 
 public class BlockUtils {
 
 	private static Random rand = new Random();
 
-	public static final Intersection clipSelection(int id, int x, int y, int z, Vector point, Vector other) {
-		Model model = Blocks.fromId(id).getModel();
+	public static final Intersection clipSelection(int id, Level level, int x, int y, int z, Vector point, Vector other) {
+		Model model = Blocks.fromId(id).getModel(level, x, y, z);
 
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
@@ -111,8 +113,8 @@ public class BlockUtils {
 		}
 	}
 
-	public static final Intersection clip(int id, int x, int y, int z, Vector point, Vector other) {
-		Model model = Blocks.fromId(id).getModel();
+	public static final Intersection clip(int id, Level level, int x, int y, int z, Vector point, Vector other) {
+		Model model = Blocks.fromId(id).getModel(level, x, y, z);
 
 		point = point.add((-x), (-y), (-z));
 		other = other.add((-x), (-y), (-z));
@@ -391,24 +393,32 @@ public class BlockUtils {
 		return 1;
 	}
 
-	public static void dropItems(int block, Level level, int x, int y, int z) {
+	public static void dropItems(BlockType block, ClientLevel level, int x, int y, int z) {
 		dropItems(block, level, x, y, z, 1);
 	}
 
-	public static void dropItems(int block, Level level, int x, int y, int z, float chance) {
-		if(!level.creativeMode) {
-			int dropCount = getDropCount(Blocks.fromId(block));
+	public static void dropItems(BlockType block, ClientLevel level, int x, int y, int z, float chance) {
+		if(OpenClassic.getClient().isInSurvival()) {
+			int dropCount = getDropCount(block);
 
 			for(int count = 0; count < dropCount; count++) {
 				if(rand.nextFloat() <= chance) {
 					float xOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
 					float yOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
 					float zOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
-					level.addEntity(new Item(level, x + xOffset, y + yOffset, z + zOffset, getDrop(Blocks.fromId(block))));
+					level.addEntity(new Item(level, x + xOffset, y + yOffset, z + zOffset, getDrop(block)));
 				}
 			}
-
 		}
+	}
+	
+	public static boolean preventsRendering(ClientLevel level, float x, float y, float z, float distance) {
+		return preventsRendering(level, x - distance, y - distance, z - distance) || preventsRendering(level, x - distance, y - distance, z + distance) || preventsRendering(level, x - distance, y + distance, z - distance) || preventsRendering(level, x - distance, y + distance, z + distance) || preventsRendering(level, x + distance, y - distance, z - distance) || preventsRendering(level, x + distance, y - distance, z + distance) || preventsRendering(level, x + distance, y + distance, z - distance) || preventsRendering(level, x + distance, y + distance, z + distance);
+	}
+
+	public static boolean preventsRendering(ClientLevel level, float x, float y, float z) {
+		BlockType type = level.getBlockTypeAt((int) x, (int) y, (int) z);
+		return type != null && type.getPreventsRendering();
 	}
 
 }

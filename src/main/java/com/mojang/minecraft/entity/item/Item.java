@@ -4,13 +4,11 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.client.render.RenderHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Item extends Entity {
@@ -35,11 +33,11 @@ public class Item extends Entity {
 		}
 	}
 
-	public Item(Level level, float x, float y, float z, int block) {
+	public Item(ClientLevel level, float x, float y, float z, int block) {
 		this(level, x, y, z, block, 1);
 	}
 
-	public Item(Level level, float x, float y, float z, int block, int count) {
+	public Item(ClientLevel level, float x, float y, float z, int block, int count) {
 		super(level);
 		this.setSize(0.25F, 0.25F);
 		this.heightOffset = this.bbHeight / 2;
@@ -75,14 +73,13 @@ public class Item extends Entity {
 			this.remove();
 		}
 		
-		if(this.getLiquid() == VanillaBlock.LAVA || this.getLiquid() == VanillaBlock.STATIONARY_LAVA) {
-			OpenClassic.getGame().getAudioManager().playSound("random.fizz", this.x, this.y, this.z, 0.4f, 2 + this.level.random.nextFloat() * 0.4f);
+		if(this.getLiquid().getLiquidName().equals("lava")) {
+			OpenClassic.getGame().getAudioManager().playSound("random.fizz", this.x, this.y, this.z, 0.4f, 2 + this.level.getRandom().nextFloat() * 0.4f);
 			this.remove();
 		}
 	}
 
 	public void render(TextureManager textures, float dt) {
-		this.textureId = RenderHelper.getHelper().bindTexture("/terrain.png", true);
 		float rot = this.rot + (this.tickCount + dt) * 3;
 		GL11.glPushMatrix();
 		float rsin = MathHelper.sin(rot / 10);
@@ -101,7 +98,7 @@ public class Item extends Entity {
 
 	public void playerTouch(LocalPlayer player) {
 		if(this.delay <= 0 && player.inventory.addResource(this.resource, this.count)) {
-			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.7f + 1) * 2);
+			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.7f + 1) * 2);
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			this.remove();
 		}

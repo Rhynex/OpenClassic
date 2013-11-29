@@ -169,11 +169,11 @@ public class ClientCommands extends CommandExecutor {
 		Player player = (Player) sender;
 		if(player.getPlaceMode() != VanillaBlock.BEDROCK.getId()) {
 			player.setPlaceMode(VanillaBlock.BEDROCK.getId());
-			player.setCanBreakBedrock(true);
+			player.setCanBreakUnbreakables(true);
 			player.sendMessage("solid.enable");
 		} else {
 			player.setPlaceMode(0);
-			player.setCanBreakBedrock(false);
+			player.setCanBreakUnbreakables(false);
 			player.sendMessage("solid.disable");
 		}
 	}

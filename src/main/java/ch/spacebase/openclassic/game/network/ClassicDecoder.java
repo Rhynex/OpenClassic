@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.jboss.netty.handler.codec.replay.VoidEnum;
 
 import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.server.network.ServerSession;
+import ch.spacebase.openclassic.server.player.ServerSession;
 
 public class ClassicDecoder extends ReplayingDecoder<VoidEnum> {
 

@@ -5,23 +5,21 @@ import java.util.ArrayList;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.level.BlockMap;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.entity.player.net.PositionUpdate;
-import com.mojang.minecraft.level.BlockMap;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public abstract class Entity {
 
-	public Level level;
+	public ClientLevel level;
 	public float xo;
 	public float yo;
 	public float zo;
@@ -61,7 +59,7 @@ public abstract class Entity {
 	public boolean hovered = false;
 	private boolean waterSplashed = false;
 
-	public Entity(Level level) {
+	public Entity(ClientLevel level) {
 		this.level = level;
 		this.setPos(0, 0, 0);
 	}
@@ -73,7 +71,7 @@ public abstract class Entity {
 	public void resetPos(Position pos) {
 		if(pos != null) {
 			pos = pos.clone();
-			while(pos.getY() < this.level.height && this.level.getCubes(this.bb).size() != 0) {
+			while(pos.getY() < this.level.getHeight() && this.level.getCubes(this.bb).size() != 0) {
 				pos.setY(pos.getY() + 1);
 			}
 
@@ -83,11 +81,11 @@ public abstract class Entity {
 			this.zd = 0;
 			this.yaw = pos.getYaw();
 			this.pitch = pos.getPitch();
-		} else if(this.level != null) {
-			float x = this.level.xSpawn + 0.5F;
-			float y = this.level.ySpawn;
-			float z = this.level.zSpawn + 0.5F;
-			while(y < this.level.height) {
+		} else if(this.level != null && this.level.getSpawn() != null) {
+			float x = this.level.getSpawn().getX();
+			float y = this.level.getSpawn().getY();
+			float z = this.level.getSpawn().getZ();
+			while(y < this.level.getHeight()) {
 				this.setPos(x, y, z);
 				if(this.level.getCubes(this.bb).size() == 0) {
 					break;
@@ -99,8 +97,8 @@ public abstract class Entity {
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
-			this.yaw = this.level.yawSpawn;
-			this.pitch = this.level.pitchSpawn;
+			this.yaw = this.level.getSpawn().getYaw();
+			this.pitch = this.level.getSpawn().getPitch();
 		}
 	}
 
@@ -178,12 +176,12 @@ public abstract class Entity {
 		this.oPitch = this.pitch;
 		this.oYaw = this.yaw;
 		BlockType block = this.getLiquid();
-		if(block == VanillaBlock.WATER || block == VanillaBlock.STATIONARY_WATER) {
+		if(block != null && block.getLiquidName() != null && block.getLiquidName().equals("water")) {
 			if(!this.waterSplashed) {
 				this.waterSplashed = true;
 				float volume = (float) Math.sqrt(this.xd * this.xd * 0.2D + this.yd * this.yd + this.zd * this.zd * 0.2D) * 0.2f;
 				if(volume > 1) volume = 1;
-				OpenClassic.getGame().getAudioManager().playSound("random.splash", this.x, this.y, this.z, volume, 1 + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.4f);
+				OpenClassic.getGame().getAudioManager().playSound("random.splash", this.x, this.y, this.z, volume, 1 + (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.4f);
 			}
 		} else {
 			this.waterSplashed = false;
@@ -334,13 +332,13 @@ public abstract class Entity {
 			if(this.onGround) {
 				this.walkDist = (float) (this.walkDist + (float) Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
 				if(this.makeStepSound) {
-					int id = this.level.getTile((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
-					if(this.walkDist > this.nextStep && id > 0) {
+					BlockType type = this.level.getBlockTypeAt((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
+					if(this.walkDist > this.nextStep && type != null) {
 						this.nextStep++;
-						if(Blocks.fromId(id) != null) {
-							StepSound step = Blocks.fromId(id).getStepSound();
+						if(type != null) {
+							StepSound step = type.getStepSound();
 							if(step != StepSound.NONE) {
-								this.playSound(step.getSound(), step.getVolume() * 0.75F, step.getPitch());
+								OpenClassic.getGame().getAudioManager().playSound(step.getSound(), this.x, this.y, this.z, step.getVolume() * 0.75F, step.getPitch());
 							}
 						}
 					}
@@ -363,8 +361,8 @@ public abstract class Entity {
 	}
 
 	public boolean isUnderWater() {
-		int block = this.level.getTile((int) this.x, (int) (this.y + 0.12F), (int) this.z);
-		return block != 0 && (Blocks.fromId(block) == VanillaBlock.WATER || Blocks.fromId(block) == VanillaBlock.STATIONARY_WATER);
+		BlockType block = this.level.getBlockTypeAt((int) this.x, (int) (this.y + 0.12F), (int) this.z);
+		return block != null && (block.getLiquidName() != null && block.getLiquidName().equals("water"));
 	}
 
 	public void moveHeading(float forward, float strafe, float speed) {
@@ -396,14 +394,8 @@ public abstract class Entity {
 	public void render(TextureManager textures, float dt) {
 	}
 
-	public void setLevel(Level level) {
+	public void setLevel(ClientLevel level) {
 		this.level = level;
-	}
-
-	public void playSound(String sound, float volume, float pitch) {
-		if(this.distanceToSqr(this.level.minecraft.player) < 1024) {
-			this.level.minecraft.audio.playSound(sound, this.x, this.y, this.z, volume, pitch);
-		}
 	}
 
 	public void moveTo(float x, float y, float z, float yaw, float pitch) {

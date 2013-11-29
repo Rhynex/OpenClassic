@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.gui.GuiComponent;
 import ch.spacebase.openclassic.client.render.RenderHelper;
@@ -39,18 +38,18 @@ public class Minimap extends GuiComponent {
 			for(int z = OpenClassic.getClient().getPlayer().getPosition().getBlockZ() - zrad; z <= OpenClassic.getClient().getPlayer().getPosition().getBlockZ() + zrad; z++) {
 				int y = OpenClassic.getClient().getLevel().getHighestBlockY(x, z);
 				BlockType type = OpenClassic.getClient().getLevel().getBlockTypeAt(x, y, z);
-				while(type == VanillaBlock.GLASS) {
+				while(!type.isOpaque() && !type.getPreventsRendering()) {
 					int old = y;
 					y = OpenClassic.getClient().getLevel().getHighestBlockY(x, z, y - 1);
 					if(y == old || y < 0) {
-						type = VanillaBlock.AIR;
+						type = null;
 						break;
 					}
 
 					type = OpenClassic.getClient().getLevel().getBlockTypeAt(x, y, z);
 				}
 
-				int rgb = this.getRGB(type);
+				int rgb = type == null ? 0 : this.getRGB(type);
 				for(int w = 0; w < scale; w++) {
 					for(int h = 0; h < scale; h++) {
 						if(imgX + w < this.texture.getWidth() && imgY + h < this.texture.getHeight()) {
@@ -77,9 +76,12 @@ public class Minimap extends GuiComponent {
 		}
 	}
 
-	// TODO: Possible to base on block texture?
+	// TODO: Possible to base more on block texture?
 	private int getRGB(BlockType type) {
-		if(type == VanillaBlock.AIR || type == null || type.getModel() == null || type.getModel().getQuads().size() == 0) return 0;
+		if(type == null || type.getModel() == null || type.getModel().getQuads().size() == 0) {
+			return 0;
+		}
+		
 		int quad = 1;
 		if(type.getModel().getQuads().size() < 2) {
 			quad = 0;

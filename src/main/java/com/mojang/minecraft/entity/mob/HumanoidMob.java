@@ -2,10 +2,10 @@ package com.mojang.minecraft.entity.mob;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.model.HumanoidModel;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class HumanoidMob extends Mob {
@@ -13,7 +13,7 @@ public class HumanoidMob extends Mob {
 	public boolean helmet = Math.random() < 0.2D;
 	public boolean armor = Math.random() < 0.2D;
 
-	public HumanoidMob(Level level, float x, float y, float z) {
+	public HumanoidMob(ClientLevel level, float x, float y, float z) {
 		super(level);
 		this.modelName = "humanoid";
 		this.setPos(x, y, z);
@@ -36,7 +36,7 @@ public class HumanoidMob extends Mob {
 		}
 
 		if(this.armor || this.helmet) {
-			RenderHelper.getHelper().bindTexture("/armor/plate.png", true);
+			RenderHelper.getHelper().bindTexture("/textures/entity/armor/plate.png", true);
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			HumanoidModel armored = (HumanoidModel) modelCache.getModel("humanoid.armor");
 			armored.head.render = this.helmet;

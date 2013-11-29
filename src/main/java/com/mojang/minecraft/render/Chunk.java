@@ -5,18 +5,18 @@ import java.nio.IntBuffer;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 
-public final class Chunk {
+public class Chunk {
 
 	public static int chunkUpdates = 0;
 	
-	private Level level;
+	private ClientLevel level;
 	private int baseListId = -1;
 	private int x;
 	private int y;
@@ -28,7 +28,7 @@ public final class Chunk {
 	private boolean[] dirty = new boolean[2];
 	public boolean loaded;
 
-	public Chunk(Level level, int x, int y, int z, int size, int baseId) {
+	public Chunk(ClientLevel level, int x, int y, int z, int size, int baseId) {
 		this.level = level;
 		this.x = x;
 		this.y = y;
@@ -46,36 +46,37 @@ public final class Chunk {
 
 		for(int pass = 0; pass < 2; pass++) {
 			boolean continuing = false;
-			boolean cleaned = false;
 			GL11.glNewList(this.baseListId + pass, GL11.GL_COMPILE);
+			if(pass == 1) {
+				RenderHelper.getHelper().setCulling(false);
+			}
+			
 			Renderer.get().begin();
 			for(int x = this.x; x < this.x + this.width; x++) {
 				for(int y = this.y; y < this.y + this.height; y++) {
 					for(int z = this.z; z < this.z + this.depth; z++) {
-						int type = this.level.getTile(x, y, z);
-						if(type > 0) {
-							BlockType block = Blocks.fromId(type);
-							if(block == null) {
-								block = VanillaBlock.STONE;
-							}
+						BlockType block = this.level.getBlockTypeAt(x, y, z);
+						if(block == null) {
+							block = VanillaBlock.STONE;
+						}
 
-							int requiredPass = block.isLiquid() ? 1 : 0;
-							if(requiredPass != pass) {
-								continuing = true;
-							} else {
-								cleaned |= block.getModel().render(x, y, z, this.level.getBrightness(x, y, z), true);
-							}
+						int requiredPass = block.isLiquid() ? 1 : 0;
+						if(requiredPass != pass) {
+							continuing = true;
+						} else {
+							block.getModel(this.level, x, y, z).render(x, y, z, this.level.getBrightness(x, y, z), true);
 						}
 					}
 				}
 			}
 
 			Renderer.get().end();
-			GL11.glEndList();
-			if(cleaned) {
-				this.dirty[pass] = false;
+			if(pass == 1) {
+				RenderHelper.getHelper().setCulling(true);
 			}
-
+			
+			GL11.glEndList();
+			this.dirty[pass] = false;
 			if(!continuing) {
 				break;
 			}

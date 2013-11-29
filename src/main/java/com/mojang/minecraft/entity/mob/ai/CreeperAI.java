@@ -1,6 +1,7 @@
 package com.mojang.minecraft.entity.mob.ai;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
@@ -26,7 +27,7 @@ public class CreeperAI extends BasicAttackAI {
 			float xd = particleX / len / len;
 			float yd = particleY / len / len;
 			float zd = particleZ / len / len;
-			this.level.minecraft.particleManager.spawnParticle(new TerrainParticle(this.level, this.mob.x + particleX, this.mob.y + particleY, this.mob.z + particleZ, xd, yd, zd, VanillaBlock.LEAVES));
+			GeneralUtils.getMinecraft().particleManager.spawnParticle(new TerrainParticle(this.level, this.mob.x + particleX, this.mob.y + particleY, this.mob.z + particleZ, xd, yd, zd, VanillaBlock.LEAVES));
 		}
 	}
 	

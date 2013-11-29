@@ -4,10 +4,10 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.client.gui.BlockSelectScreen;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 
 public class CreativeGameMode extends GameMode {
 
@@ -20,11 +20,9 @@ public class CreativeGameMode extends GameMode {
 		OpenClassic.getClient().setActiveComponent(new BlockSelectScreen());
 	}
 
-	public void apply(Level level) {
+	public void apply(ClientLevel level) {
 		super.apply(level);
 		level.removeAllNonCreativeModeEntities();
-		level.creativeMode = true;
-		level.growTrees = false;
 	}
 
 	public void apply(LocalPlayer player) {

@@ -1,4 +1,4 @@
-package com.mojang.minecraft.level;
+package ch.spacebase.openclassic.client.level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,8 @@ public class BlockMap {
 	private int width;
 	private int height;
 	private int depth;
-	private Slot slot = new Slot();
-	private Slot slot2 = new Slot();
+	private BlockMapSlot slot = new BlockMapSlot();
+	private BlockMapSlot slot2 = new BlockMapSlot();
 	public List<Entity>[] entityGrid;
 	public List<Entity> all = new ArrayList<Entity>();
 	private List<Entity> tmp = new ArrayList<Entity>();
@@ -46,7 +46,18 @@ public class BlockMap {
 				}
 			}
 		}
-
+	}
+	
+	public int getWidth() {
+		return this.width;
+	}
+	
+	public int getHeight() {
+		return this.height;
+	}
+	
+	public int getDepth() {
+		return this.depth;
 	}
 
 	public void insert(Entity entity) {
@@ -64,8 +75,8 @@ public class BlockMap {
 	}
 
 	public void moved(Entity entity) {
-		Slot old = this.slot.init(this, entity.xOld, entity.yOld, entity.zOld);
-		Slot newSlot = this.slot2.init(this, entity.x, entity.y, entity.z);
+		BlockMapSlot old = this.slot.init(this, entity.xOld, entity.yOld, entity.zOld);
+		BlockMapSlot newSlot = this.slot2.init(this, entity.x, entity.y, entity.z);
 		if(!old.equals(newSlot)) {
 			old.remove(entity);
 			newSlot.add(entity);
@@ -81,11 +92,11 @@ public class BlockMap {
 	}
 
 	public List<Entity> getEntities(Entity exclude, float x, float y, float z, float x2, float y2, float z2, List<Entity> result) {
-		Slot slot = this.slot.init(this, x, y, z);
-		Slot slot2 = this.slot2.init(this, x2, y2, z2);
-		for(int ex = slot.xSlot - 1; ex <= slot2.xSlot + 1; ex++) {
-			for(int ey = slot.ySlot - 1; ey <= slot2.ySlot + 1; ey++) {
-				for(int ez = slot.zSlot - 1; ez <= slot2.zSlot + 1; ez++) {
+		BlockMapSlot slot = this.slot.init(this, x, y, z);
+		BlockMapSlot slot2 = this.slot2.init(this, x2, y2, z2);
+		for(int ex = slot.getX() - 1; ex <= slot2.getX() + 1; ex++) {
+			for(int ey = slot.getY() - 1; ey <= slot2.getY() + 1; ey++) {
+				for(int ez = slot.getZ() - 1; ez <= slot2.getZ() + 1; ez++) {
 					if(ex >= 0 && ey >= 0 && ez >= 0 && ex < this.width && ey < this.height && ez < this.depth) {
 						List<Entity> entities = this.entityGrid[(ez * this.height + ey) * this.width + ex];
 						for(Entity entity : entities) {
@@ -103,13 +114,11 @@ public class BlockMap {
 
 	public void removeAllNonCreativeModeEntities() {
 		List<Entity> cache = new ArrayList<Entity>();
-
 		for(int x = 0; x < this.width; x++) {
 			for(int y = 0; y < this.height; y++) {
 				for(int z = 0; z < this.depth; z++) {
 					List<Entity> entities = this.entityGrid[(z * this.height + y) * this.width + x];
 					cache.addAll(entities);
-
 					for(Entity entity : cache) {
 						if(!entity.isCreativeModeAllowed()) {
 							entities.remove(entity);
@@ -253,56 +262,5 @@ public class BlockMap {
 			}
 		}
 	}
-
-	public static class Slot {
-		private BlockMap parent;
-		private int xSlot;
-		private int ySlot;
-		private int zSlot;
-
-		public Slot init(BlockMap parent, float x, float y, float z) {
-			this.parent = parent;
-			this.xSlot = (int) (x / 16);
-			this.ySlot = (int) (y / 16);
-			this.zSlot = (int) (z / 16);
-			if(this.xSlot < 0) {
-				this.xSlot = 0;
-			}
-
-			if(this.ySlot < 0) {
-				this.ySlot = 0;
-			}
-
-			if(this.zSlot < 0) {
-				this.zSlot = 0;
-			}
-
-			if(this.xSlot >= parent.width) {
-				this.xSlot = parent.width - 1;
-			}
-
-			if(this.ySlot >= parent.height) {
-				this.ySlot = parent.height - 1;
-			}
-
-			if(this.zSlot >= parent.depth) {
-				this.zSlot = parent.depth - 1;
-			}
-
-			return this;
-		}
-
-		public void add(Entity entity) {
-			if(this.xSlot >= 0 && this.ySlot >= 0 && this.zSlot >= 0) {
-				this.parent.entityGrid[(this.zSlot * this.parent.height + this.ySlot) * this.parent.width + this.xSlot].add(entity);
-			}
-
-		}
-
-		public void remove(Entity entity) {
-			if(this.xSlot >= 0 && this.ySlot >= 0 && this.zSlot >= 0) {
-				this.parent.entityGrid[(this.zSlot * this.parent.height + this.ySlot) * this.parent.width + this.xSlot].remove(entity);
-			}
-		}
-	}
+	
 }

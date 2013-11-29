@@ -30,7 +30,7 @@ public class ClientPlayer implements Player {
 	private byte placeMode = 0;
 	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
-	private boolean breakBedrock = false;
+	private boolean breakUnbreakables = false;
 
 	public ClientPlayer() {
 		this.data.load(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
@@ -76,7 +76,7 @@ public class ClientPlayer implements Player {
 			return new Position(null, 0, 0, 0);
 		}
 		
-		return new Position(this.handle.level.openclassic, this.handle.x, this.handle.y, this.handle.z, (byte) this.handle.yaw, (byte) this.handle.pitch);
+		return new Position(this.handle.level, this.handle.x, this.handle.y, this.handle.z, (byte) this.handle.yaw, (byte) this.handle.pitch);
 	}
 
 	@Override
@@ -110,12 +110,12 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void moveTo(float x, float y, float z) {
-		this.moveTo(this.handle.level.openclassic, x, y, z, (byte) 0, (byte) 0);
+		this.moveTo(this.handle.level, x, y, z, (byte) 0, (byte) 0);
 	}
 
 	@Override
 	public void moveTo(float x, float y, float z, float yaw, float pitch) {
-		this.moveTo(this.handle.level.openclassic, x, y, z, yaw, pitch);
+		this.moveTo(this.handle.level, x, y, z, yaw, pitch);
 	}
 
 	@Override
@@ -134,9 +134,9 @@ public class ClientPlayer implements Player {
 			return;
 		}
 
-		if(event.getTo().getLevel() != null && this.handle.level != null && !this.handle.level.name.equals(event.getTo().getLevel().getName())) {
-			this.handle.setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
-			GeneralUtils.getMinecraft().setLevel(((ClientLevel) event.getTo().getLevel()).getHandle());
+		if(event.getTo().getLevel() != null && this.handle.level != null && !this.handle.level.getName().equals(event.getTo().getLevel().getName())) {
+			this.handle.setLevel((ClientLevel) event.getTo().getLevel());
+			GeneralUtils.getMinecraft().setLevel((ClientLevel) event.getTo().getLevel());
 		}
 
 		this.handle.moveTo(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ(), event.getTo().getYaw(), event.getTo().getPitch());
@@ -173,7 +173,7 @@ public class ClientPlayer implements Player {
 	public void setHandle(com.mojang.minecraft.entity.player.Player handle) {
 		this.handle = handle;
 		this.placeMode = 0;
-		this.breakBedrock = false;
+		this.breakUnbreakables = false;
 	}
 
 	@Override
@@ -407,13 +407,13 @@ public class ClientPlayer implements Player {
 	}
 
 	@Override
-	public boolean canBreakBedrock() {
-		return this.breakBedrock;
+	public boolean canBreakUnbreakables() {
+		return this.breakUnbreakables;
 	}
 
 	@Override
-	public void setCanBreakBedrock(boolean canBreak) {
-		this.breakBedrock = canBreak;
+	public void setCanBreakUnbreakables(boolean canBreak) {
+		this.breakUnbreakables = canBreak;
 	}
 
 	@Override

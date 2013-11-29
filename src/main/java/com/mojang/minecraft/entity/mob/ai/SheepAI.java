@@ -20,11 +20,11 @@ public class SheepAI extends BasicAI {
 		int y = (int) (this.mob.y - 2);
 		int z = (int) (this.mob.z + zDiff);
 		if(this.parent.grazing) {
-			if(this.level.getTile(x, y, z) != VanillaBlock.GRASS.getId()) {
+			if(this.level.getBlockTypeAt(x, y, z) != VanillaBlock.GRASS) {
 				this.parent.grazing = false;
 			} else {
 				if(this.parent.grazingTime++ == 60) {
-					this.level.setTile(x, y, z, VanillaBlock.DIRT.getId());
+					this.level.setBlockAt(x, y, z, VanillaBlock.DIRT);
 					if(this.random.nextInt(5) == 0) {
 						this.parent.hasFur = true;
 					}
@@ -35,7 +35,7 @@ public class SheepAI extends BasicAI {
 				this.mob.pitch = 40 + this.parent.grazingTime / 2 % 2 * 10;
 			}
 		} else {
-			if(this.level.getTile(x, y, z) == VanillaBlock.GRASS.getId()) {
+			if(this.level.getBlockTypeAt(x, y, z) == VanillaBlock.GRASS) {
 				this.parent.grazing = true;
 				this.parent.grazingTime = 0;
 			}

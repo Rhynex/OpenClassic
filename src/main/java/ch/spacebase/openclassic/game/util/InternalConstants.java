@@ -10,7 +10,7 @@ public class InternalConstants {
 	/**
 	 * The OpenClassic protocol version.
 	 */
-	public static final byte OPENCLASSIC_PROTOCOL_VERSION = 6;
+	public static final byte OPENCLASSIC_PROTOCOL_VERSION = 7;
 	
 	/**
 	 * Number of ticks per second

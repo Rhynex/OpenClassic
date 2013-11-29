@@ -10,7 +10,7 @@ import ch.spacebase.openclassic.api.block.physics.LiquidPhysics;
 public class WaterPhysics extends LiquidPhysics {
 
 	private Random random = new Random();
-	private int delay = 100;
+	private int delay = 200;
 	
 	public WaterPhysics(BlockType block, boolean soak, boolean fluidMovement) {
 		super(block, soak, fluidMovement);

@@ -5,9 +5,9 @@ import ch.spacebase.openclassic.api.block.model.Texture;
 
 public class GuiTextures {
 
-	public static final Texture LOGO = new Texture("/gui/logo.png", true, 502, 96);
-	public static final Texture GUI = new Texture("/gui/gui.png", true, 512, 512, 32);
-	public static final Texture ICONS = new Texture("/gui/icons.png", true, 512, 512, 32);
+	public static final Texture LOGO = new Texture("/textures/gui/logo.png", true, 502, 96);
+	public static final Texture GUI = new Texture("/textures/gui/gui.png", true, 512, 512, 32);
+	public static final Texture ICONS = new Texture("/textures/gui/icons.png", true, 512, 512, 32);
 	public static final SubTexture CROSSHAIR = ICONS.getSubTexture(0, 0, 32, 32);
     public static final SubTexture EMPTY_HEART = ICONS.getSubTexture(32, 0, 18, 18);
     public static final SubTexture EMPTY_HEART_FLASH =ICONS.getSubTexture(50, 0, 18, 18);

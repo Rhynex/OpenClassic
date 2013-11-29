@@ -1,10 +1,10 @@
 package com.mojang.minecraft.entity.particle;
 
-import com.mojang.minecraft.level.Level;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 
 public class RainParticle extends Particle {
 
-	public RainParticle(Level level, float x, float y, float z) {
+	public RainParticle(ClientLevel level, float x, float y, float z) {
 		super(level, x, y, z, 0, 0, 0);
 		this.xd *= 0.3F;
 		this.yd = (float) Math.random() * 0.2F + 0.1F;
@@ -38,6 +38,6 @@ public class RainParticle extends Particle {
 			this.xd *= 0.7F;
 			this.zd *= 0.7F;
 		}
-
 	}
+	
 }

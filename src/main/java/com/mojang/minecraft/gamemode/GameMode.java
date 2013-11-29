@@ -4,13 +4,14 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
+import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 import com.zachsthings.onevent.EventManager;
 
 public class GameMode {
@@ -22,9 +23,7 @@ public class GameMode {
 		this.mc = mc;
 	}
 
-	public void apply(Level level) {
-		level.creativeMode = false;
-		level.growTrees = true;
+	public void apply(ClientLevel level) {
 	}
 
 	public void openInventory() {
@@ -39,14 +38,14 @@ public class GameMode {
 	}
 
 	public void breakBlock(int x, int y, int z) {
-		Block block = this.mc.level.openclassic.getBlockAt(x, y, z);
+		Block block = this.mc.level.getBlockAt(x, y, z);
 		if(block == null) return;
 		if(!this.mc.isInMultiplayer() && EventManager.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.heldBlock.block)).isCancelled()) {
 			return;
 		}
 
 		BlockType old = block.getType();
-		boolean success = this.mc.level.netSetTile(x, y, z, 0);
+		boolean success = this.mc.level.setBlockAt(x, y, z, VanillaBlock.AIR);
 		if(old != null && success) {
 			if(this.mc.isInMultiplayer()) {
 				this.mc.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, false, (byte) this.mc.player.inventory.getSelected()));
@@ -89,7 +88,7 @@ public class GameMode {
 	public void spawnMobs() {
 	}
 
-	public void prepareLevel(Level level) {
+	public void prepareLevel(ClientLevel level) {
 	}
 
 	public boolean isSurvival() {

@@ -1,4 +1,4 @@
-package ch.spacebase.openclassic.server;
+package ch.spacebase.openclassic.game;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,20 +9,21 @@ import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
+import ch.spacebase.openclassic.client.render.ClientQuad;
 
-public class ServerQuad implements Quad {
+public class GameQuad implements Quad {
 
 	protected int id;
 	private Vertex vertices[] = new Vertex[4];
 	private SubTexture texture;
 	private Model parent;
 	
-	public ServerQuad(int id, SubTexture texture) {
+	public GameQuad(int id, SubTexture texture) {
 		this.texture = texture;
 		this.id = id;
 	}
 	
-	public ServerQuad(int id, SubTexture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
+	public GameQuad(int id, SubTexture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
 		this(id, texture);
 		this.addVertex(0, v1);
 		this.addVertex(1, v2);
@@ -77,10 +78,6 @@ public class ServerQuad implements Quad {
 	}
 	
 	@Override
-	public void render(float x, float y, float z, float brightness, boolean batch, boolean cull) {
-	}
-	
-	@Override
 	public void renderScaled(float x, float y, float z, float scale, float brightness) {
 	}
 
@@ -92,6 +89,11 @@ public class ServerQuad implements Quad {
 	@Override
 	public void setParent(Model parent) {
 		this.parent = parent;
+	}
+
+	@Override
+	public Quad reverseVertices(int newId) {
+		return new ClientQuad(newId, this.texture, this.vertices[3], this.vertices[2], this.vertices[1], this.vertices[0]);
 	}
 	
 }

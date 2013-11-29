@@ -1,10 +1,10 @@
 package com.mojang.minecraft.entity.particle;
 
-import com.mojang.minecraft.level.Level;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 
 public class SmokeParticle extends Particle {
 
-	public SmokeParticle(Level level, float x, float y, float z) {
+	public SmokeParticle(ClientLevel level, float x, float y, float z) {
 		super(level, x, y, z, 0, 0, 0);
 		this.xd *= 0.1F;
 		this.yd *= 0.1F;

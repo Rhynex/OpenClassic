@@ -1,6 +1,7 @@
 package com.mojang.minecraft.entity.mob.ai;
 
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
@@ -18,7 +19,7 @@ public class BasicAttackAI extends BasicAI {
 	}
 
 	protected void doAttack() {
-		Entity player = this.level.minecraft.player;
+		Entity player = GeneralUtils.getMinecraft().player;
 		if(this.attackTarget != null && this.attackTarget.removed) {
 			this.attackTarget = null;
 		}

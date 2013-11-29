@@ -8,15 +8,14 @@ import java.util.List;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import ch.spacebase.openclassic.client.render.RenderHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 
-public final class LevelRenderer {
+public class LevelRenderer {
 
-	public Level level;
+	public ClientLevel level;
 	public int boundaryList;
 	public IntBuffer listBuffer = BufferUtils.createIntBuffer(65536);
 	public List<Chunk> chunks = new ArrayList<Chunk>();
@@ -37,16 +36,20 @@ public final class LevelRenderer {
 		this.baseListId = GL11.glGenLists(524288);
 	}
 
-	public final void refresh() {
+	public void refresh() {
+		if(this.level == null) {
+			return;
+		}
+
 		if(this.chunkCache != null) {
 			for(int index = 0; index < this.chunkCache.length; index++) {
 				this.chunkCache[index].dispose();
 			}
 		}
 
-		this.xChunks = this.level.width / 16;
-		this.zChunks = this.level.height / 16;
-		this.yChunks = this.level.depth / 16;
+		this.xChunks = this.level.getWidth() / 16;
+		this.zChunks = this.level.getHeight() / 16;
+		this.yChunks = this.level.getDepth() / 16;
 		this.chunkCache = new Chunk[this.xChunks * this.zChunks * this.yChunks];
 		this.loadQueue = new Chunk[this.xChunks * this.zChunks * this.yChunks];
 		int listCount = 0;
@@ -70,20 +73,20 @@ public final class LevelRenderer {
 		GL11.glColor4f(0.5F, 0.5F, 0.5F, 1);
 		float groundLevel = this.level.getGroundLevel();
 		int length = 128;
-		if(length > this.level.width) {
-			length = this.level.width;
+		if(length > this.level.getWidth()) {
+			length = this.level.getWidth();
 		}
 
-		if(length > this.level.depth) {
-			length = this.level.depth;
+		if(length > this.level.getDepth()) {
+			length = this.level.getDepth();
 		}
 
 		int scale = 2048 / length;
 		Renderer.get().begin();
-		for(int x = -length * scale; x < this.level.width + length * scale; x += length) {
-			for(int z = -length * scale; z < this.level.depth + length * scale; z += length) {
+		for(int x = -length * scale; x < this.level.getWidth() + length * scale; x += length) {
+			for(int z = -length * scale; z < this.level.getDepth() + length * scale; z += length) {
 				float y = groundLevel;
-				if(x >= 0 && z >= 0 && x < this.level.width && z < this.level.depth) {
+				if(x >= 0 && z >= 0 && x < this.level.getWidth() && z < this.level.getDepth()) {
 					y = 0;
 				}
 
@@ -98,27 +101,27 @@ public final class LevelRenderer {
 		GL11.glColor3f(0.8F, 0.8F, 0.8F);
 		Renderer.get().begin();
 
-		for(int x = 0; x < this.level.width; x += length) {
+		for(int x = 0; x < this.level.getWidth(); x += length) {
 			Renderer.get().vertexuv(x, 0, 0, 0, 0);
 			Renderer.get().vertexuv((x + length), 0, 0, length, 0);
 			Renderer.get().vertexuv((x + length), groundLevel, 0, length, groundLevel);
 			Renderer.get().vertexuv(x, groundLevel, 0, 0, groundLevel);
-			Renderer.get().vertexuv(x, groundLevel, this.level.depth, 0, groundLevel);
-			Renderer.get().vertexuv((x + length), groundLevel, this.level.depth, length, groundLevel);
-			Renderer.get().vertexuv((x + length), 0, this.level.depth, length, 0);
-			Renderer.get().vertexuv(x, 0, this.level.depth, 0, 0);
+			Renderer.get().vertexuv(x, groundLevel, this.level.getDepth(), 0, groundLevel);
+			Renderer.get().vertexuv((x + length), groundLevel, this.level.getDepth(), length, groundLevel);
+			Renderer.get().vertexuv((x + length), 0, this.level.getDepth(), length, 0);
+			Renderer.get().vertexuv(x, 0, this.level.getDepth(), 0, 0);
 		}
 
 		GL11.glColor3f(0.6F, 0.6F, 0.6F);
-		for(int z = 0; z < this.level.depth; z += length) {
+		for(int z = 0; z < this.level.getDepth(); z += length) {
 			Renderer.get().vertexuv(0, groundLevel, z, 0, 0);
 			Renderer.get().vertexuv(0, groundLevel, (z + length), length, 0);
 			Renderer.get().vertexuv(0, 0, (z + length), length, groundLevel);
 			Renderer.get().vertexuv(0, 0, z, 0, groundLevel);
-			Renderer.get().vertexuv(this.level.width, 0, z, 0, groundLevel);
-			Renderer.get().vertexuv(this.level.width, 0, (z + length), length, groundLevel);
-			Renderer.get().vertexuv(this.level.width, groundLevel, (z + length), length, 0);
-			Renderer.get().vertexuv(this.level.width, groundLevel, z, 0, 0);
+			Renderer.get().vertexuv(this.level.getWidth(), 0, z, 0, groundLevel);
+			Renderer.get().vertexuv(this.level.getWidth(), 0, (z + length), length, groundLevel);
+			Renderer.get().vertexuv(this.level.getWidth(), groundLevel, (z + length), length, 0);
+			Renderer.get().vertexuv(this.level.getWidth(), groundLevel, z, 0, 0);
 		}
 
 		Renderer.get().end();
@@ -128,27 +131,26 @@ public final class LevelRenderer {
 		float waterLevel = this.level.getWaterLevel();
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		int len = 128;
-		if(len > this.level.width) {
-			len = this.level.width;
+		if(len > this.level.getWidth()) {
+			len = this.level.getWidth();
 		}
 
-		if(len > this.level.depth) {
-			len = this.level.depth;
+		if(len > this.level.getDepth()) {
+			len = this.level.getDepth();
 		}
 
-		int mul = 2048 / len;
 		Renderer.get().begin();
-		for(int x = -len * mul; x < this.level.width + len * mul; x += len) {
-			for(int z = -len * mul; z < this.level.depth + len * mul; z += len) {
+		for(int x = -2048; x < this.level.getWidth() + 2048; x += len) {
+			for(int z = -2048; z < this.level.getDepth() + 2048; z += len) {
 				float y = waterLevel - 0.05F;
-				if(x < 0 || z < 0 || x >= this.level.width || z >= this.level.depth) {
+				if(x < 0 || z < 0 || x >= this.level.getWidth() || z >= this.level.getDepth()) {
 					Renderer.get().vertexuv(x, y, (z + len), 0, len);
-					Renderer.get().vertexuv((x + len), y, (z + len), len, len);
-					Renderer.get().vertexuv((x + len), y, z, len, 0);
+					Renderer.get().vertexuv((x + len), y, (z + len), 0 + len, len);
+					Renderer.get().vertexuv((x + len), y, z, 0 + len, 0);
 					Renderer.get().vertexuv(x, y, z, 0, 0);
 					Renderer.get().vertexuv(x, y, z, 0, 0);
-					Renderer.get().vertexuv((x + len), y, z, len, 0);
-					Renderer.get().vertexuv((x + len), y, (z + len), len, len);
+					Renderer.get().vertexuv((x + len), y, z, 0 + len, 0);
+					Renderer.get().vertexuv((x + len), y, (z + len), 0 + len, len);
 					Renderer.get().vertexuv(x, y, (z + len), 0, len);
 				}
 			}
@@ -157,10 +159,10 @@ public final class LevelRenderer {
 		Renderer.get().end();
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEndList();
-		this.queueChunks(0, 0, 0, this.level.width, this.level.height, this.level.depth);
+		this.queueChunks(0, 0, 0, this.level.getWidth(), this.level.getHeight(), this.level.getDepth());
 	}
 
-	public final int sortAndRender(LocalPlayer player, int pass) {
+	public int sortAndRender(LocalPlayer player, int pass) {
 		float xDiff = player.x - this.lastLoadX;
 		float yDiff = player.y - this.lastLoadY;
 		float zDiff = player.z - this.lastLoadZ;
@@ -183,14 +185,13 @@ public final class LevelRenderer {
 
 		this.listBuffer.flip();
 		if(this.listBuffer.remaining() > 0) {
-			RenderHelper.getHelper().bindTexture("/terrain.png", true);
 			GL11.glCallLists(this.listBuffer);
 		}
 
 		return this.listBuffer.remaining();
 	}
 
-	public final void queueChunks(int x1, int z1, int y1, int x2, int z2, int y2) {
+	public void queueChunks(int x1, int z1, int y1, int x2, int z2, int y2) {
 		x1 /= 16;
 		z1 /= 16;
 		y1 /= 16;
@@ -233,4 +234,5 @@ public final class LevelRenderer {
 			}
 		}
 	}
+	
 }

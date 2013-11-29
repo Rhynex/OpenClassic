@@ -91,7 +91,7 @@ public class ClientProgressBar implements ProgressBar {
 				RenderHelper.getHelper().ortho();
 			}
 
-			RenderHelper.getHelper().drawDefaultBG();
+			RenderHelper.getHelper().drawDefaultBG(0, 0, width, height);
 			this.renderBar(false);
 			RenderHelper.getHelper().drawBlackBG(0, height - 56, width, height - (height - 56));
 			GL11.glEnable(GL11.GL_BLEND);

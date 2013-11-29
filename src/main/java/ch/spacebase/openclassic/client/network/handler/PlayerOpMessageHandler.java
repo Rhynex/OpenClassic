@@ -11,9 +11,9 @@ public class PlayerOpMessageHandler extends MessageHandler<PlayerOpMessage> {
 	@Override
 	public void handle(ClassicSession session, Player player, PlayerOpMessage message) {
 		if(message.getOp() == InternalConstants.OP) {
-			player.setCanBreakBedrock(true);
+			player.setCanBreakUnbreakables(true);
 		} else if(message.getOp() == InternalConstants.NOT_OP) {
-			player.setCanBreakBedrock(false);
+			player.setCanBreakUnbreakables(false);
 		}
 	}
 

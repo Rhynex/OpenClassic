@@ -7,12 +7,12 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Arrow extends Entity {
@@ -32,7 +32,7 @@ public class Arrow extends Entity {
 	private float gravity = 0.0F;
 	private int damage;
 
-	public Arrow(Level level, Entity owner, float x, float y, float z, float yaw, float pitch, float power) {
+	public Arrow(ClientLevel level, Entity owner, float x, float y, float z, float yaw, float pitch, float power) {
 		super(level);
 		this.owner = owner;
 		this.setSize(0.3F, 0.5F);
@@ -101,11 +101,11 @@ public class Arrow extends Entity {
 					this.collision = true;
 				}
 
-				List<Entity> entities = this.level.blockMap.getEntities(this, collision);
+				List<Entity> entities = this.level.getBlockMap().getEntities(this, collision);
 				for(int count = 0; count < entities.size(); count++) {
 					Entity entity = entities.get(count);
 					if(entity.isShootable() && (entity != this.owner || this.time > 5)) {
-						OpenClassic.getGame().getAudioManager().playSound("random.drr", this.x, this.y, this.z, 1, 1.2f / (this.level.random.nextFloat() * 0.2f + 0.9f));
+						OpenClassic.getGame().getAudioManager().playSound("random.drr", this.x, this.y, this.z, 1, 1.2f / (this.level.getRandom().nextFloat() * 0.2f + 0.9f));
 						entity.hurt(this, this.damage);
 						this.collision = true;
 						this.remove();
@@ -123,7 +123,7 @@ public class Arrow extends Entity {
 			}
 
 			if(this.collision) {
-				OpenClassic.getGame().getAudioManager().playSound("random.drr", this.x, this.y, this.z, 1, 1.2f / (this.level.random.nextFloat() * 0.2f + 0.9f));
+				OpenClassic.getGame().getAudioManager().playSound("random.drr", this.x, this.y, this.z, 1, 1.2f / (this.level.getRandom().nextFloat() * 0.2f + 0.9f));
 				this.hasHit = true;
 				this.xd = 0;
 				this.yd = 0;
@@ -155,7 +155,7 @@ public class Arrow extends Entity {
 	}
 
 	public void render(TextureManager textures, float dt) {
-		this.textureId = RenderHelper.getHelper().bindTexture("/item/arrows.png", true);
+		this.textureId = RenderHelper.getHelper().bindTexture("/textures/entity/arrow.png", true);
 		float brightness = this.level.getBrightness((int) this.x, (int) this.y, (int) this.z);
 		GL11.glPushMatrix();
 		GL11.glColor4f(brightness, brightness, brightness, 1);
@@ -208,7 +208,7 @@ public class Arrow extends Entity {
 
 	public void playerTouch(LocalPlayer player) {
 		if(this.hasHit && this.owner == player && player.arrows < 99) {
-			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.7f + 1) * 2);
+			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.7f + 1) * 2);
 			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
 			player.arrows++;
 			this.remove();

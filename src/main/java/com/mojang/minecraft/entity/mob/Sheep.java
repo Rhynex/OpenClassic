@@ -3,6 +3,7 @@ package com.mojang.minecraft.entity.mob;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
@@ -10,7 +11,6 @@ import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.mob.ai.SheepAI;
 import com.mojang.minecraft.entity.model.AnimalModel;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Sheep extends QuadrupedMob {
@@ -21,13 +21,13 @@ public class Sheep extends QuadrupedMob {
 	public float graze;
 	public float grazeO;
 
-	public Sheep(Level level, float x, float y, float z) {
+	public Sheep(ClientLevel level, float x, float y, float z) {
 		super(level, x, y, z);
 		this.setSize(1.4F, 1.72F);
 		this.setPos(x, y, z);
 		this.heightOffset = 1.72F;
 		this.modelName = "sheep";
-		this.textureName = "/mob/sheep.png";
+		this.textureName = "/textures/entity/mob/sheep.png";
 		this.ai = new SheepAI(this);
 	}
 
@@ -85,7 +85,7 @@ public class Sheep extends QuadrupedMob {
 		model.head.z -= this.grazeO + (this.graze - this.grazeO) * dt;
 		super.renderModel(textures, animStep, dt, runProgress, yaw, pitch, scale);
 		if(this.hasFur) {
-			RenderHelper.getHelper().bindTexture("/mob/sheep_fur.png", true);
+			RenderHelper.getHelper().bindTexture("/textures/entity/mob/sheep_fur.png", true);
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			AnimalModel fur = (AnimalModel) modelCache.getModel("sheep.fur");
 			fur.head.yaw = model.head.yaw;

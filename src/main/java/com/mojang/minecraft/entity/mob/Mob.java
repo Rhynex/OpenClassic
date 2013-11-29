@@ -2,17 +2,18 @@ package com.mojang.minecraft.entity.mob;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.util.Constants;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.ai.AI;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
 import com.mojang.minecraft.entity.model.ModelManager;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 
 public class Mob extends Entity {
@@ -33,7 +34,7 @@ public class Mob extends Entity {
 	protected float animStepO;
 	protected int tickCount = 0;
 	public boolean hasHair = true;
-	protected String textureName = "/char.png";
+	protected String textureName = "/textures/entity/char.png";
 	public boolean allowAlpha = true;
 	public float rotOffs = 0;
 	public String modelName = null;
@@ -56,7 +57,7 @@ public class Mob extends Entity {
 	private int drownTime = 20;
 	private int burnTime = 10;
 
-	public Mob(Level level) {
+	public Mob(ClientLevel level) {
 		super(level);
 		this.setPos(this.x, this.y, this.z);
 		this.timeOffs = (float) Math.random() * 12398;
@@ -343,7 +344,7 @@ public class Mob extends Entity {
 	}
 
 	public void hurt(Entity cause, int damage) {
-		if(!this.level.creativeMode) {
+		if(OpenClassic.getClient().isInSurvival()) {
 			if(this.health > 0) {
 				this.ai.hurt(cause, damage);
 				if(this.invulnerableTime > this.invulnerableDuration / 2) {
@@ -390,7 +391,7 @@ public class Mob extends Entity {
 	}
 
 	public void die(Entity cause) {
-		if(!this.level.creativeMode) {
+		if(OpenClassic.getClient().isInSurvival()) {
 			if(this.deathScore > 0 && cause != null) {
 				cause.awardKillScore(this, this.deathScore);
 			}
@@ -400,7 +401,7 @@ public class Mob extends Entity {
 	}
 
 	protected void causeFallDamage(float distance) {
-		if(!this.level.creativeMode) {
+		if(OpenClassic.getClient().isInSurvival()) {
 			int damage = (int) Math.ceil((distance - 3));
 			if(damage > 0) {
 				this.hurt(null, damage);

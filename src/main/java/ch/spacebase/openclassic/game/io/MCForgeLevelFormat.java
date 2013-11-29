@@ -83,9 +83,13 @@ public class MCForgeLevelFormat {
 	}
 
 	public static byte translateBlock(byte id) {
-		if(id <= 49) return id;
+		if(id <= 49) {
+			return id;
+		}
 
-		if(id == 111) return VanillaBlock.LOG.getId();
+		if(id == 111) {
+			return VanillaBlock.LOG.getId();
+		}
 
 		return VanillaBlock.AIR.getId();
 	}

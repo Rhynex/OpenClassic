@@ -17,7 +17,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.QuadFactory;
-import ch.spacebase.openclassic.api.data.NBTData;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
@@ -126,27 +125,22 @@ public class ClassicClient extends ClassicGame implements Client {
 			this.exitGameSession();
 		}
 		
-		com.mojang.minecraft.level.Level level = new com.mojang.minecraft.level.Level();
-		level.name = info.getName();
-		level.creator = this.getPlayer().getName() != null ? this.getPlayer().getName() : "unknown";
-		level.createTime = System.currentTimeMillis();
+		ClientLevel level = new ClientLevel(info);
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-		level.openclassic.setGenerating(true);
-		generator.generate(level.openclassic, data);
-		level.openclassic.setGenerating(false);
+		level.setGenerating(true);
+		generator.generate(level, data);
+		level.setGenerating(false);
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
-		level.openclassic.setSpawn(generator.findSpawn(level.openclassic));
+		level.setSpawn(generator.findSpawn(level));
 		if(info.getSpawn() != null) {
-			level.openclassic.setSpawn(info.getSpawn());
+			level.setSpawn(info.getSpawn());
 		}
 
-		level.openclassic.data = new NBTData(level.name);
-		level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
 		this.openLevel(level);
 		this.mc.mode.prepareLevel(level);
-		EventManager.callEvent(new LevelCreateEvent(level.openclassic));
-		return level.openclassic;
+		EventManager.callEvent(new LevelCreateEvent(level));
+		return level;
 	}
 
 	@Override
@@ -162,13 +156,13 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public Level getLevel() {
 		if(this.mc.level == null) return null;
-		return this.mc.level.openclassic;
+		return this.mc.level;
 	}
 
 	@Override
 	public Level openLevel(String name) {
-		if(this.mc.level != null && this.mc.level.name.equals(name)) {
-			return this.mc.level.openclassic;
+		if(this.mc.level != null && this.mc.level.getName().equals(name)) {
+			return this.mc.level;
 		}
 
 		OpenClassic.getClient().getProgressBar().setVisible(true);
@@ -177,16 +171,14 @@ public class ClassicClient extends ClassicGame implements Client {
 		OpenClassic.getClient().getProgressBar().setText(OpenClassic.getGame().getTranslator().translate("level.reading"));
 		OpenClassic.getClient().getProgressBar().setProgress(-1);
 		OpenClassic.getClient().getProgressBar().render();
-		com.mojang.minecraft.level.Level level = null;
+		ClientLevel level = null;
 		try {
-			level = new com.mojang.minecraft.level.Level();
-			level = ((ClientLevel) OpenClassicLevelFormat.load(level.openclassic, name, false)).getHandle();
-			level.openclassic.data = new NBTData(level.name);
-			level.openclassic.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + level.name + ".nbt");
-			EventManager.callEvent(new LevelLoadEvent(level.openclassic));
+			level = new ClientLevel();
+			level = (ClientLevel) OpenClassicLevelFormat.load(level, name, false);
+			EventManager.callEvent(new LevelLoadEvent(level));
 			this.openLevel(level);
 			OpenClassic.getClient().getProgressBar().setVisible(false);
-			return level.openclassic;
+			return level;
 		} catch(IOException e) {
 			OpenClassic.getClient().getProgressBar().setText(String.format(OpenClassic.getGame().getTranslator().translate("level.load-fail"), name));
 			e.printStackTrace();
@@ -200,7 +192,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		}
 	}
 	
-	private void openLevel(com.mojang.minecraft.level.Level level) {
+	private void openLevel(ClientLevel level) {
 		if(this.mc.level != null && this.mc.level == level) {
 			return;
 		}
@@ -218,19 +210,19 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public boolean saveLevel() {
 		if(this.mc.level == null) return false;
-		if(EventManager.callEvent(new LevelSaveEvent(this.mc.level.openclassic)).isCancelled()) {
+		if(EventManager.callEvent(new LevelSaveEvent(this.mc.level)).isCancelled()) {
 			return false;
 		}
 
 		try {
-			OpenClassicLevelFormat.save(this.mc.level.openclassic);
-			if(this.mc.level.openclassic.getData() != null) {
-				this.mc.level.openclassic.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.mc.level.name + ".nbt");
+			OpenClassicLevelFormat.save(this.mc.level);
+			if(this.mc.level.getData() != null) {
+				this.mc.level.getData().save(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.mc.level.getName() + ".nbt");
 			}
 			
 			return true;
 		} catch(IOException e) {
-			OpenClassic.getLogger().severe("Failed to save level \"" + this.mc.level.name + "\"");
+			OpenClassic.getLogger().severe("Failed to save level \"" + this.mc.level.getName() + "\"");
 			e.printStackTrace();
 			return false;
 		}
@@ -239,10 +231,10 @@ public class ClassicClient extends ClassicGame implements Client {
 	@Override
 	public boolean saveLevel(String name) {
 		if(this.mc.level == null) return false;
-		String old = this.mc.level.name;
-		this.mc.level.name = name;
+		String old = this.mc.level.getName();
+		this.mc.level.setName(name);
 		boolean ret = this.saveLevel();
-		this.mc.level.name = old;
+		this.mc.level.setName(old);
 		return ret;
 	}
 	

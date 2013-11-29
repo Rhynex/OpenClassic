@@ -205,9 +205,7 @@ public class ClientAudioManager implements AudioManager {
 		List<URL> files = this.sounds.get(sound);
 		if(files != null) {
 			URL file = files.get(rand.nextInt(files.size()));
-
-			nextSoundId = (nextSoundId + 1) % 256;
-			String source = "sound_" + nextSoundId;
+			String source = "sound_" + nextSoundId++;
 
 			float attenuation = 16;
 			if(volume > 1) attenuation = volume * 16;

@@ -3,7 +3,6 @@ package ch.spacebase.openclassic.server.network.handler;
 import ch.spacebase.openclassic.api.block.Block;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.event.block.BlockBreakEvent;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
 import ch.spacebase.openclassic.api.player.Player;
@@ -12,7 +11,6 @@ import ch.spacebase.openclassic.game.network.ClassicSession.State;
 import ch.spacebase.openclassic.game.network.msg.BlockChangeMessage;
 import ch.spacebase.openclassic.game.network.msg.PlayerSetBlockMessage;
 import ch.spacebase.openclassic.game.network.MessageHandler;
-import ch.spacebase.openclassic.server.level.ServerLevel;
 
 import com.zachsthings.onevent.EventManager;
 
@@ -31,7 +29,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 		// TODO: Reach hack checks and check if player is in position
 
 		BlockType old = player.getPosition().getLevel().getBlockTypeAt(message.getX(), message.getY(), message.getZ());
-		if(!message.isPlacing() && old == VanillaBlock.BEDROCK && !player.hasPermission("openclassic.commands.solid")) {
+		if(!message.isPlacing() && old.isUnbreakable() && !player.hasPermission("openclassic.commands.solid")) {
 			player.sendMessage("server.denied-hack.block-break");
 			return;
 		}
@@ -58,7 +56,6 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 			}
 		}
 
-		((ServerLevel) player.getPosition().getLevel()).updatePhysics(message.getX(), message.getY(), message.getZ());
 		if(block != null && block.getType() != null && block.getType().getPhysics() != null) {
 			if(message.isPlacing()) {
 				block.getType().getPhysics().onPlace(block);

@@ -35,6 +35,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
@@ -59,6 +60,7 @@ import ch.spacebase.openclassic.client.gui.LoginScreen;
 import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.gui.IngameMenuScreen;
 import ch.spacebase.openclassic.client.gui.hud.ClientHUDScreen;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.RenderHelper;
@@ -93,7 +95,6 @@ import com.mojang.minecraft.entity.player.net.NetworkPlayer;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.GameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.Chunk;
 import com.mojang.minecraft.render.ChunkVisibleAndDistanceComparator;
 import com.mojang.minecraft.render.Frustum;
@@ -116,7 +117,7 @@ public class Minecraft implements Runnable {
 	public int width;
 	public int height;
 	public Timer timer = new Timer(InternalConstants.TICKS_PER_SECOND);
-	public Level level;
+	public ClientLevel level;
 	public LevelRenderer levelRenderer;
 	public LocalPlayer player;
 	public ParticleManager particleManager;
@@ -207,12 +208,10 @@ public class Minecraft implements Runnable {
 		}
 	}
 
-	public void setLevel(Level level) {
+	public void setLevel(ClientLevel level) {
 		this.level = level;
 		if(level != null) {
-			level.initialize();
 			this.mode.apply(level);
-			level.minecraft = this;
 			if(this.isInMultiplayer() && this.player != null) {
 				this.player.resetPos();
 				this.mode.preparePlayer(this.player);
@@ -234,10 +233,6 @@ public class Minecraft implements Runnable {
 
 		if(this.levelRenderer != null) {
 			if(this.levelRenderer.level != level) {
-				if(this.levelRenderer.level != null) {
-					this.levelRenderer.level.minecraft = null;
-				}
-	
 				this.levelRenderer.level = level;
 			}
 			
@@ -257,7 +252,7 @@ public class Minecraft implements Runnable {
 		this.audio.stopMusic();
 		this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000));
 		if(this.level == null) {
-			Level level = new Level();
+			ClientLevel level = new ClientLevel();
 			level.setData(8, 8, 8, new byte[512]);
 			this.setLevel(level);
 		}
@@ -538,7 +533,7 @@ public class Minecraft implements Runnable {
 		this.textureManager = new TextureManager(this.settings);
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.LavaTexture()));
 		this.textureManager.addAnimatedTexture((new com.mojang.minecraft.render.animation.WaterTexture()));
-		this.fontRenderer = new FontRenderer("/default.png", this.textureManager);
+		this.fontRenderer = new FontRenderer("/textures/gui/font.png", this.textureManager);
 		this.levelRenderer = new LevelRenderer();
 		ShaderManager.setup();
 		GL11.glViewport(0, 0, this.width, this.height);
@@ -577,17 +572,16 @@ public class Minecraft implements Runnable {
 			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
 		}
 		
-		RenderHelper.getHelper().bindTexture("/terrain.png", true);
 		for(int index = 0; index < this.textureManager.animations.size(); index++) {
+			RenderHelper.getHelper().bindTexture("/textures/level/terrain.png", true);
 			AnimatedTexture animation = this.textureManager.animations.get(index);
 			ByteBuffer buffer = BufferUtils.createByteBuffer(animation.textureData.length);
 			buffer.put(animation.textureData);
 			buffer.flip();
-			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, animation.textureId % 16 << 4, animation.textureId / 16 << 4, 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, (animation.textureId % 16) * 16, (animation.textureId / 16) * 16, 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 			if(animation instanceof WaterTexture) {
-				RenderHelper.getHelper().bindTexture("/water.png", true);
+				RenderHelper.getHelper().bindTexture("/textures/level/water.png", true);
 				GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-				RenderHelper.getHelper().bindTexture("/terrain.png", true);
 			}
 		}
 
@@ -613,7 +607,7 @@ public class Minecraft implements Runnable {
 			}
 
 			Entity selectedEntity = null;
-			List<Entity> entities = this.level.blockMap.getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
+			List<Entity> entities = this.level.getBlockMap().getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
 
 			float distance = 0;
 			for(int count = 0; count < entities.size(); count++) {
@@ -648,12 +642,12 @@ public class Minecraft implements Runnable {
 
 				GL11.glViewport(0, 0, this.width, this.height);
 				float fogDensity = 1 - (float) Math.pow(1F / (4 - this.settings.getIntSetting("options.render-distance").getValue()), 0.25);
-				float skyRed = (this.level.skyColor >> 16 & 255) / 255F;
-				float skyGreen = (this.level.skyColor >> 8 & 255) / 255F;
-				float skyBlue = (this.level.skyColor & 255) / 255F;
-				this.fogRenderer.fogRed = (this.level.fogColor >> 16 & 255) / 255F;
-				this.fogRenderer.fogGreen = (this.level.fogColor >> 8 & 255) / 255F;
-				this.fogRenderer.fogBlue = (this.level.fogColor & 255) / 255F;
+				float skyRed = (this.level.getSkyColor() >> 16 & 255) / 255F;
+				float skyGreen = (this.level.getSkyColor() >> 8 & 255) / 255F;
+				float skyBlue = (this.level.getSkyColor() & 255) / 255F;
+				this.fogRenderer.fogRed = (this.level.getFogColor() >> 16 & 255) / 255F;
+				this.fogRenderer.fogGreen = (this.level.getFogColor() >> 8 & 255) / 255F;
+				this.fogRenderer.fogBlue = (this.level.getFogColor() & 255) / 255F;
 				this.fogRenderer.fogRed += (skyRed - this.fogRenderer.fogRed) * fogDensity;
 				this.fogRenderer.fogGreen += (skyGreen - this.fogRenderer.fogGreen) * fogDensity;
 				this.fogRenderer.fogBlue += (skyBlue - this.fogRenderer.fogBlue) * fogDensity;
@@ -715,17 +709,17 @@ public class Minecraft implements Runnable {
 				this.fogRenderer.updateFog();
 				GL11.glEnable(GL11.GL_FOG);
 				this.levelRenderer.sortAndRender(this.player, 0);
-				if(this.level.preventsRendering(this.player.x, this.player.y, this.player.z, 0.1F)) {
+				if(BlockUtils.preventsRendering(this.level, this.player.x, this.player.y, this.player.z, 0.1F)) {
 					for(int bx = (int) this.player.x - 1; bx <= (int) this.player.x + 1; bx++) {
 						for(int by = (int) this.player.y - 1; by <= (int) this.player.y + 1; by++) {
 							for(int bz = (int) this.player.z - 1; bz <= (int) this.player.z + 1; bz++) {
-								int id = this.levelRenderer.level.getTile(bx, by, bz);
-								if(id != 0 && Blocks.fromId(id) != null && Blocks.fromId(id).getPreventsRendering()) {
+								BlockType block = this.levelRenderer.level.getBlockTypeAt(bx, by, bz);
+								if(block != null && block.getPreventsRendering()) {
 									GL11.glColor4f(0.2F, 0.2F, 0.2F, 1);
 									GL11.glDepthFunc(GL11.GL_LESS);
-									Blocks.fromId(id).getModel().renderAll(bx, by, bz, 0.2F);
+									block.getModel(this.level, bx, by, bz).renderAll(bx, by, bz, 0.2F);
 									GL11.glCullFace(GL11.GL_FRONT);
-									Blocks.fromId(id).getModel().renderAll(bx, by, bz, 0.2F);
+									block.getModel(this.level, bx, by, bz).renderAll(bx, by, bz, 0.2F);
 									GL11.glCullFace(GL11.GL_BACK);
 									GL11.glDepthFunc(GL11.GL_LEQUAL);
 								}
@@ -735,7 +729,7 @@ public class Minecraft implements Runnable {
 				}
 
 				RenderHelper.getHelper().setLighting(true);
-				this.levelRenderer.level.blockMap.render(RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.textureManager, this.timer.delta);
+				this.levelRenderer.level.getBlockMap().render(RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.textureManager, this.timer.delta);
 				RenderHelper.getHelper().setLighting(false);
 				this.fogRenderer.updateFog();
 				float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);
@@ -748,11 +742,11 @@ public class Minecraft implements Runnable {
 					if(this.particleManager.particles[texture].size() != 0) {
 						int textureId = 0;
 						if(texture == 0) {
-							textureId = this.textureManager.bindTexture("/particles.png");
+							textureId = this.textureManager.bindTexture("/textures/level/particles.png");
 						}
 
 						if(texture == 1) {
-							textureId = this.textureManager.bindTexture("/terrain.png");
+							textureId = this.textureManager.bindTexture("/textures/level/terrain.png");
 						}
 
 						RenderHelper.getHelper().bindTexture(textureId);
@@ -765,15 +759,15 @@ public class Minecraft implements Runnable {
 					}
 				}
 
-				RenderHelper.getHelper().bindTexture("/rock.png", true);
+				RenderHelper.getHelper().bindTexture("/textures/level/rock.png", true);
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 				GL11.glCallList(this.levelRenderer.boundaryList);
 				this.fogRenderer.updateFog();
-				RenderHelper.getHelper().bindTexture("/clouds.png", true);
+				RenderHelper.getHelper().bindTexture("/textures/level/clouds.png", true);
 				GL11.glColor4f(1, 1, 1, 1);
-				float cloudRed = (this.levelRenderer.level.cloudColor >> 16 & 255) / 255F;
-				float cloudBlue = (this.levelRenderer.level.cloudColor >> 8 & 255) / 255F;
-				float cloudGreen = (this.levelRenderer.level.cloudColor & 255) / 255F;
+				float cloudRed = (this.levelRenderer.level.getCloudColor() >> 16 & 255) / 255F;
+				float cloudBlue = (this.levelRenderer.level.getCloudColor() >> 8 & 255) / 255F;
+				float cloudGreen = (this.levelRenderer.level.getCloudColor() & 255) / 255F;
 				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					cloudRed = (cloudRed * 30 + cloudBlue * 59 + cloudGreen * 11) / 100;
 					cloudBlue = (cloudRed * 30 + cloudBlue * 70) / 100;
@@ -781,13 +775,13 @@ public class Minecraft implements Runnable {
 				}
 
 				float texCoordMod = 1 / 2048f;
-				float cloudHeight = (this.levelRenderer.level.height + 2);
+				float cloudHeight = (this.levelRenderer.level.getHeight() + 2);
 				float movement = (this.levelRenderer.ticks + this.timer.delta) * texCoordMod * 0.03F;
 				Renderer.get().begin();
 				Renderer.get().color(cloudRed, cloudBlue, cloudGreen);
 
-				for(int x = -2048; x < this.levelRenderer.level.width + 2048; x += 512) {
-					for(int z = -2048; z < this.levelRenderer.level.depth + 2048; z += 512) {
+				for(int x = -2048; x < this.levelRenderer.level.getWidth() + 2048; x += 512) {
+					for(int z = -2048; z < this.levelRenderer.level.getDepth() + 2048; z += 512) {
 						Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
 						Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
 						Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
@@ -802,9 +796,9 @@ public class Minecraft implements Runnable {
 				Renderer.get().end();
 				GL11.glDisable(GL11.GL_TEXTURE_2D);
 				Renderer.get().begin();
-				float skRed = (this.levelRenderer.level.skyColor >> 16 & 255) / 255F;
-				float skBlue = (this.levelRenderer.level.skyColor >> 8 & 255) / 255F;
-				float skGreen = (this.levelRenderer.level.skyColor & 255) / 255F;
+				float skRed = (this.levelRenderer.level.getSkyColor() >> 16 & 255) / 255F;
+				float skBlue = (this.levelRenderer.level.getSkyColor() >> 8 & 255) / 255F;
+				float skGreen = (this.levelRenderer.level.getSkyColor() & 255) / 255F;
 				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					skRed = (skRed * 30 + skBlue * 59 + skGreen * 11) / 100;
 					skBlue = (skRed * 30 + skBlue * 70) / 100;
@@ -812,10 +806,10 @@ public class Minecraft implements Runnable {
 				}
 
 				Renderer.get().color(skRed, skBlue, skGreen);
-				float skyHeight = (this.levelRenderer.level.height + 10);
+				float skyHeight = (this.levelRenderer.level.getHeight() + 10);
 
-				for(int x = -2048; x < this.levelRenderer.level.width + 2048; x += 512) {
-					for(int z = -2048; z < this.levelRenderer.level.depth + 2048; z += 512) {
+				for(int x = -2048; x < this.levelRenderer.level.getWidth() + 2048; x += 512) {
+					for(int z = -2048; z < this.levelRenderer.level.getDepth() + 2048; z += 512) {
 						Renderer.get().vertex(x, skyHeight, z);
 						Renderer.get().vertex((x + 512), skyHeight, z);
 						Renderer.get().vertex((x + 512), skyHeight, (z + 512));
@@ -834,18 +828,17 @@ public class Minecraft implements Runnable {
 					GL11.glColor4f(1, 1, 1, (MathHelper.sin(System.currentTimeMillis() / 100F) * 0.2F + 0.4F) * 0.5F);
 					if(this.levelRenderer.cracks > 0) {
 						GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR);
-						RenderHelper.getHelper().bindTexture("/terrain.png", true);
 						GL11.glColor4f(1, 1, 1, 0.5F);
 						GL11.glPushMatrix();
-						int bid = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
-						BlockType btype = bid > 0 ? Blocks.fromId(bid) : null;
+						BlockType btype = this.levelRenderer.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z);
 						GL11.glDepthMask(false);
 						if(btype == null) {
 							btype = VanillaBlock.STONE;
 						}
 
-						for(int count = 0; count < btype.getModel().getQuads().size(); count++) {
-							RenderHelper.getHelper().drawCracks(btype.getModel().getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10));
+						Model model = btype.getModel(this.level, this.selected.x, this.selected.y, this.selected.z);
+						for(int count = 0; count < model.getQuads().size(); count++) {
+							RenderHelper.getHelper().drawCracks(model.getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10));
 						}
 
 						GL11.glDepthMask(true);
@@ -860,9 +853,9 @@ public class Minecraft implements Runnable {
 					GL11.glLineWidth(2);
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
 					GL11.glDepthMask(false);
-					int block = this.levelRenderer.level.getTile(this.selected.x, this.selected.y, this.selected.z);
-					if(block > 0) {
-						BoundingBox bb = Blocks.fromId(block).getModel().getSelectionBox(this.selected.x, this.selected.y, this.selected.z).grow(0.002F, 0.002F, 0.002F);
+					BlockType block = this.levelRenderer.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z);
+					if(block != null) {
+						BoundingBox bb = block.getModel(this.level, this.selected.x, this.selected.y, this.selected.z).getSelectionBox(this.selected.x, this.selected.y, this.selected.z).grow(0.002F, 0.002F, 0.002F);
 						GL11.glBegin(GL11.GL_LINE_STRIP);
 						GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
 						GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
@@ -899,8 +892,9 @@ public class Minecraft implements Runnable {
 				this.fogRenderer.updateFog();
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 				GL11.glEnable(GL11.GL_BLEND);
-				RenderHelper.getHelper().bindTexture("/water.png", true);
+				RenderHelper.getHelper().bindTexture("/textures/level/water.png", true);
 				GL11.glCallList(this.levelRenderer.boundaryList + 1);
+				RenderHelper.getHelper().bindTexture("/textures/level/terrain.png", true);
 				GL11.glDisable(GL11.GL_BLEND);
 				GL11.glEnable(GL11.GL_BLEND);
 				GL11.glColorMask(false, false, false, false);
@@ -915,7 +909,6 @@ public class Minecraft implements Runnable {
 				}
 
 				if(cy > 0) {
-					RenderHelper.getHelper().bindTexture("/terrain.png", true);
 					GL11.glCallLists(this.levelRenderer.listBuffer);
 				}
 
@@ -930,11 +923,11 @@ public class Minecraft implements Runnable {
 					GL11.glNormal3f(0, 1, 0);
 					GL11.glEnable(GL11.GL_BLEND);
 					GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-					RenderHelper.getHelper().bindTexture("/rain.png", true);
+					RenderHelper.getHelper().bindTexture("/textures/level/rain.png", true);
 
 					for(int cx = x - 5; cx <= x + 5; cx++) {
 						for(int cz = z - 5; cz <= z + 5; cz++) {
-							cy = this.level.getHighestTile(cx, cz);
+							cy = this.level.getHighestBlockY(cx, cz);
 							int minRY = y - 5;
 							int maxRY = y + 5;
 							if(minRY < cy) {
@@ -1149,7 +1142,7 @@ public class Minecraft implements Runnable {
 					}
 
 					if(button == 0) {
-						if(this.level != null && (Blocks.fromId(this.level.getTile(x, y, z)) != VanillaBlock.BEDROCK || this.ocPlayer.canBreakBedrock())) {
+						if(this.level != null && (!this.level.getBlockTypeAt(x, y, z).isUnbreakable() || this.ocPlayer.canBreakUnbreakables())) {
 							this.mode.hitBlock(x, y, z);
 							return;
 						}
@@ -1163,8 +1156,8 @@ public class Minecraft implements Runnable {
 							id = this.ocPlayer.getPlaceMode();
 						}
 
-						BlockType block = this.level.openclassic.getBlockTypeAt(x, y, z);
-						BoundingBox collision = Blocks.fromId(id).getModel().getCollisionBox(x, y, z);
+						BlockType block = this.level.getBlockTypeAt(x, y, z);
+						BoundingBox collision = Blocks.fromId(id).getModel(this.level, x, y, z).getCollisionBox(x, y, z);
 						if((block == null || block.canPlaceIn()) && (collision == null || (!this.player.bb.intersects(collision) && this.level.isFree(collision)))) {
 							if(!this.mode.canPlace(id)) {
 								return;
@@ -1174,14 +1167,14 @@ public class Minecraft implements Runnable {
 								this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, button == 1, (byte) id));
 							}
 
-							if(!this.isInMultiplayer() && EventManager.callEvent(new BlockPlaceEvent(this.level.openclassic.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.heldBlock.block)).isCancelled()) {
+							if(!this.isInMultiplayer() && EventManager.callEvent(new BlockPlaceEvent(this.level.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.heldBlock.block)).isCancelled()) {
 								return;
 							}
 
-							this.level.netSetTile(x, y, z, id);
+							this.level.setBlockAt(x, y, z, Blocks.fromId(id));
 							this.heldBlock.heldPosition = 0;
 							if(Blocks.fromId(id) != null && Blocks.fromId(id).getPhysics() != null) {
-								Blocks.fromId(id).getPhysics().onPlace(this.level.openclassic.getBlockAt(x, y, z));
+								Blocks.fromId(id).getPhysics().onPlace(this.level.getBlockAt(x, y, z));
 							}
 
 							BlockType type = Blocks.fromId(id);
@@ -1223,7 +1216,7 @@ public class Minecraft implements Runnable {
 						}
 
 						if(Mouse.getEventButton() == 2 && this.selected != null) {
-							int block = this.level.getTile(this.selected.x, this.selected.y, this.selected.z);
+							int block = this.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z).getId();
 							if(block == VanillaBlock.GRASS.getId()) {
 								block = VanillaBlock.DIRT.getId();
 							}
@@ -1316,14 +1309,14 @@ public class Minecraft implements Runnable {
 
 						if(this.mode instanceof CreativeGameMode) {
 							if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.load-loc").getKey()) {
-								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.xSpawn + 0.5F, this.level.ySpawn, this.level.zSpawn + 0.5F, this.level.yawSpawn, this.level.pitchSpawn));
+								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.getSpawn().getX(), this.level.getSpawn().getY(), this.level.getSpawn().getZ(), this.level.getSpawn().getYaw(), this.level.getSpawn().getPitch()));
 								if(!event.isCancelled()) {
 									this.player.resetPos(event.getPosition());
 								}
 							}
 
 							if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.save-loc").getKey()) {
-								this.level.setSpawnPos(this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch);
+								this.level.setSpawn(new Position(this.level, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch));
 								this.player.resetPos();
 							}
 						}
@@ -1493,7 +1486,7 @@ public class Minecraft implements Runnable {
 				for(int count = 0; count < 50; count++) {
 					int x = (int) this.player.x + rand.nextInt(9) - 4;
 					int z = (int) this.player.z + rand.nextInt(9) - 4;
-					int y = this.level.getHighestTile(x, z);
+					int y = this.level.getHighestBlockY(x, z);
 					if(y <= (int) this.player.y + 4 && y >= (int) this.player.y - 4) {
 						float xOffset = rand.nextFloat();
 						float zOffset = rand.nextFloat();

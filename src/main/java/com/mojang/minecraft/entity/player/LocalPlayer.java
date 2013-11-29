@@ -6,6 +6,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.event.player.PlayerMoveEvent;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.util.InternalConstants;
@@ -13,7 +14,6 @@ import ch.spacebase.openclassic.game.util.InternalConstants;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.model.HumanoidModel;
-import com.mojang.minecraft.level.Level;
 import com.mojang.minecraft.render.TextureManager;
 import com.zachsthings.onevent.EventManager;
 
@@ -24,7 +24,7 @@ public class LocalPlayer extends Player {
 	public float bob;
 	public boolean speedHack = false;
 
-	public LocalPlayer(Level level, ClientPlayer openclassic) {
+	public LocalPlayer(ClientLevel level, ClientPlayer openclassic) {
 		super(level, 0, 0, 0, openclassic);
 		if(level != null) {
 			level.removeEntity(this);
@@ -114,8 +114,8 @@ public class LocalPlayer extends Player {
 	}
 
 	public void hurt(Entity entity, int damage) {
-		if(!this.level.creativeMode) {
-			OpenClassic.getGame().getAudioManager().playSound("random.hurt", this.x, this.y, this.z, 1, (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F + 1.0F);
+		if(OpenClassic.getClient().isInSurvival()) {
+			OpenClassic.getGame().getAudioManager().playSound("random.hurt", this.x, this.y, this.z, 1, (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.2F + 1.0F);
 			super.hurt(entity, damage);
 		}
 	}
@@ -165,8 +165,8 @@ public class LocalPlayer extends Player {
 
 	@Override
 	public void moveTo(float x, float y, float z, float yaw, float pitch) {
-		Position from = new Position(this.level.openclassic, this.x, this.y, this.z, (byte) this.yaw, (byte) this.pitch);
-		Position to = new Position(this.level.openclassic, x, y, z, (byte) yaw, (byte) pitch);
+		Position from = new Position(this.level, this.x, this.y, this.z, (byte) this.yaw, (byte) this.pitch);
+		Position to = new Position(this.level, x, y, z, (byte) yaw, (byte) pitch);
 		PlayerMoveEvent event = EventManager.callEvent(new PlayerMoveEvent(this.openclassic, from, to));
 		if(event.isCancelled()) {
 			return;
@@ -191,10 +191,10 @@ public class LocalPlayer extends Player {
 			item.xd = MathHelper.sin((this.yaw / 180) * (float) Math.PI) * MathHelper.cos((this.pitch / 180) * (float) Math.PI) * 0.3f;
 			item.zd = -MathHelper.cos((this.yaw / 180) * (float) Math.PI) * MathHelper.cos((this.pitch / 180) * (float) Math.PI) * 0.3f;
 			item.yd = -MathHelper.sin((this.pitch / 180) * (float) Math.PI) * 0.3f + 0.1f;
-			float mod = this.level.random.nextFloat() * (float) Math.PI * 2;
-			float off = 0.02f * this.level.random.nextFloat();
+			float mod = this.level.getRandom().nextFloat() * (float) Math.PI * 2;
+			float off = 0.02f * this.level.getRandom().nextFloat();
 			item.xd += Math.cos(mod) * off;
-			item.yd += (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.1f;
+			item.yd += (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.1f;
 			item.zd += Math.sin(mod) * off;
 			this.level.addEntity(item);
 		}

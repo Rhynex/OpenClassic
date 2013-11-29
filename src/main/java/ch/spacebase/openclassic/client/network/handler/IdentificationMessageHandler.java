@@ -39,9 +39,9 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 		OpenClassic.getClient().getProgressBar().setText(message.getVerificationKeyOrMotd());
 		byte op = message.getOpOrCustomClient();
 		if(op == InternalConstants.OP) {
-			player.setCanBreakBedrock(true);	
+			player.setCanBreakUnbreakables(true);	
 		} else if(op == InternalConstants.NOT_OP) {
-			player.setCanBreakBedrock(false);
+			player.setCanBreakUnbreakables(false);
 		}
 		
 		if(session.getState() == State.IDENTIFYING) {

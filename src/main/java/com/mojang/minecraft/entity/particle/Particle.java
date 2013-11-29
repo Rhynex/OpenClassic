@@ -1,9 +1,9 @@
 package com.mojang.minecraft.entity.particle;
 
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.level.Level;
 
 public class Particle extends Entity {
 
@@ -18,7 +18,7 @@ public class Particle extends Entity {
 	protected float gCol;
 	protected float bCol;
 
-	public Particle(Level level, float x, float y, float z, float xd, float yd, float zd) {
+	public Particle(ClientLevel level, float x, float y, float z, float xd, float yd, float zd) {
 		super(level);
 		this.setSize(0.2F, 0.2F);
 		this.heightOffset = this.bbHeight / 2;
@@ -74,9 +74,9 @@ public class Particle extends Entity {
 
 	public void render(float dt, float xmod, float ymod, float zmod, float xdir, float zdir) {
 		float tminX = (this.tex % 16) / 16f;
-		float tmaxX = tminX + 0.0624375F;
+		float tmaxX = tminX + (1 / 16f);
 		float tminY = (this.tex / 16f) / 16f;
-		float tmaxY = tminY + 0.0624375F;
+		float tmaxY = tminY + (1 / 16f);
 		float size = 0.1F * this.size;
 		float x = this.xo + (this.x - this.xo) * dt;
 		float y = this.yo + (this.y - this.yo) * dt;

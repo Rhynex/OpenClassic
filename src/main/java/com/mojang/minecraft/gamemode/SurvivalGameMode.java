@@ -5,14 +5,14 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.level.MobSpawner;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.mob.Mob;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.level.Level;
-import com.mojang.minecraft.level.MobSpawner;
 
 public class SurvivalGameMode extends GameMode {
 
@@ -35,7 +35,7 @@ public class SurvivalGameMode extends GameMode {
 	}
 
 	public void breakBlock(int x, int y, int z) {
-		int block = this.mc.level.getTile(x, y, z);
+		BlockType block = this.mc.level.getBlockTypeAt(x, y, z);
 		BlockUtils.dropItems(block, this.mc.level, x, y, z);
 		super.breakBlock(x, y, z);
 	}
@@ -45,8 +45,8 @@ public class SurvivalGameMode extends GameMode {
 	}
 
 	public void hitBlock(int x, int y, int z) {
-		int block = this.mc.level.getTile(x, y, z);
-		if(block > 0 && BlockUtils.getHardness(Blocks.fromId(block)) == 0) {
+		BlockType block = this.mc.level.getBlockTypeAt(x, y, z);
+		if(block != null && BlockUtils.getHardness(block) == 0) {
 			this.breakBlock(x, y, z);
 		}
 	}
@@ -61,13 +61,13 @@ public class SurvivalGameMode extends GameMode {
 		if(this.hitDelay > 0) {
 			this.hitDelay--;
 		} else if(x == this.hitX && y == this.hitY && z == this.hitZ) {
-			int type = this.mc.level.getTile(x, y, z);
-			if(type != 0) {
-				this.blockHardness = BlockUtils.getHardness(Blocks.fromId(type));
+			BlockType type = this.mc.level.getBlockTypeAt(x, y, z);
+			if(type != null) {
+				this.blockHardness = BlockUtils.getHardness(type);
 				RenderHelper.getHelper().spawnBlockParticles(this.mc.level, x, y, z, side, this.mc.particleManager);
 				this.hits++;
 				if(this.soundCounter % 4 == 0) {
-					StepSound sound = Blocks.fromId(type).getStepSound();
+					StepSound sound = type.getStepSound();
 					OpenClassic.getClient().getAudioManager().playSound(sound.getSound(), x, y, z, (sound.getVolume() + 1.0F) / 8F, sound.getPitch() * 0.5F);
 				}
 
@@ -113,7 +113,7 @@ public class SurvivalGameMode extends GameMode {
 		return false;
 	}
 
-	public void apply(Level level) {
+	public void apply(ClientLevel level) {
 		super.apply(level);
 		this.spawner = new MobSpawner(level);
 	}
@@ -129,15 +129,15 @@ public class SurvivalGameMode extends GameMode {
 	}
 
 	public void spawnMobs() {
-		int area = this.spawner.level.width * this.spawner.level.height * this.spawner.level.depth / 64 / 64 / 64;
-		if(this.spawner.level.random.nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
-			this.spawner.spawn(area, this.spawner.level.minecraft.player, null);
+		int area = this.spawner.level.getWidth() * this.spawner.level.getHeight() * this.spawner.level.getDepth() / 64 / 64 / 64;
+		if(this.spawner.level.getRandom().nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
+			this.spawner.spawn(area, this.mc.player, false);
 		}
 	}
 
-	public void prepareLevel(Level level) {
+	public void prepareLevel(ClientLevel level) {
 		this.spawner = new MobSpawner(level);
-		int area = level.width * level.height * level.depth / 800;
-		this.spawner.spawn(area, null, this.mc.progressBar);
+		int area = level.getWidth() * level.getHeight() * level.getDepth() / 800;
+		this.spawner.spawn(area, null, true);
 	}
 }

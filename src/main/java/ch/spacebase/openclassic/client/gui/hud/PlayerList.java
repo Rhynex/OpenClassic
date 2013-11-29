@@ -29,7 +29,7 @@ public class PlayerList extends GuiComponent {
 			List<Player> players = OpenClassic.getClient().getLevel().getPlayers();
 			for(int count = 0; count < players.size(); count++) {
 				int x = 6 + ((count % 2) * 250);
-				int y = 32 + ((count / 2) * 4);
+				int y = 32 + ((count / 2) * 20);
 				Label normal = this.getComponent("normal" + count, Label.class);
 				Label hover = this.getComponent("hover" + count, Label.class);
 				if(normal == null) {

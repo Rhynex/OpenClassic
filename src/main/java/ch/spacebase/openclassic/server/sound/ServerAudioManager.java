@@ -1,10 +1,6 @@
 package ch.spacebase.openclassic.server.sound;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
@@ -19,16 +15,10 @@ import ch.spacebase.openclassic.server.player.ServerPlayer;
 
 public class ServerAudioManager implements AudioManager {
 
-	private final Map<String, List<URL>> sounds = new HashMap<String, List<URL>>();
-	private final Map<String, List<URL>> music = new HashMap<String, List<URL>>();
-
 	@Override
 	public void registerSound(String sound, URL file, boolean included) {
 		Validate.notNull(sound, "Sound cannot be null.");
 		Validate.notNull(file, "URL cannot be null.");
-		if(!this.sounds.containsKey(sound)) this.sounds.put(sound, new ArrayList<URL>());
-		this.sounds.get(sound).add(file);
-
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			((ServerPlayer) player).getSession().send(new AudioRegisterMessage(sound, file.getPath(), included, false));
 		}
@@ -38,9 +28,6 @@ public class ServerAudioManager implements AudioManager {
 	public void registerMusic(String music, URL file, boolean included) {
 		Validate.notNull(music, "Music cannot be null.");
 		Validate.notNull(file, "URL cannot be null.");
-		if(!this.music.containsKey(music)) this.music.put(music, new ArrayList<URL>());
-		this.music.get(music).add(file);
-
 		for(Player player : OpenClassic.getServer().getPlayers()) {
 			((ServerPlayer) player).getSession().send(new AudioRegisterMessage(music, file.getPath(), included, true));
 		}

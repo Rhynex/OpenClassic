@@ -28,8 +28,8 @@ import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 import ch.spacebase.openclassic.server.ClassicServer;
 import ch.spacebase.openclassic.server.level.ServerLevel;
-import ch.spacebase.openclassic.server.network.ServerSession;
 import ch.spacebase.openclassic.server.player.ServerPlayer;
+import ch.spacebase.openclassic.server.player.ServerSession;
 import ch.spacebase.openclassic.server.ui.GuiConsoleManager;
 
 import com.zachsthings.onevent.EventManager;
@@ -143,7 +143,7 @@ public class IdentificationMessageHandler extends MessageHandler<IdentificationM
 			player.getPosition().setLevel(level);
 		}
 
-		level.addPlayer(player);
+		((ServerLevel) level).addPlayer(player);
 
 		session.send(new IdentificationMessage(InternalConstants.PROTOCOL_VERSION, OpenClassic.getServer().getServerName(), OpenClassic.getServer().getMotd(), player.getGroup().hasPermission("openclassic.commands.solid") ? InternalConstants.OP : InternalConstants.NOT_OP));
 		if(message.getOpOrCustomClient() != 0) {
