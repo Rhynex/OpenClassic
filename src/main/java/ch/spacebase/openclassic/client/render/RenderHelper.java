@@ -43,7 +43,7 @@ public class RenderHelper {
 		return helper;
 	}
 
-	private int binded = -1;
+	private int bound = -1;
 	private MipmapMode mipmap = MipmapMode.NONE;
 	
 	public void init() {
@@ -209,7 +209,7 @@ public class RenderHelper {
 
 	public void bindTexture(int id) {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-		this.binded = id;
+		this.bound = id;
 	}
 
 	public void glColor(float red, float green, float blue, float alpha) {
@@ -253,7 +253,7 @@ public class RenderHelper {
 		}
 		
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
-		if(id == null || id.intValue() != this.binded) {
+		if(id == null || id.intValue() != this.bound) {
 			this.bindTexture(quad.getTexture().getParent().getTexture(), quad.getTexture().getParent().isInJar());
 		}
 		
@@ -388,7 +388,7 @@ public class RenderHelper {
 	public void drawScaledQuad(Quad quad, float x, float y, float z, float scale, float brightness) {
 		Renderer.get().begin();
 		int id = GeneralUtils.getMinecraft().textureManager.textures.get(quad.getTexture().getParent().getTexture());
-		if(id == -1 || id != this.binded) {
+		if(id == -1 || id != this.bound) {
 			this.bindTexture(quad.getTexture().getParent().getTexture(), quad.getTexture().getParent().isInJar());
 		}
 
@@ -566,7 +566,7 @@ public class RenderHelper {
 	public void drawSubTex(SubTexture texture, float x, float y, float z, float scale, float r, float g, float b) {
 		Renderer.get().begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture());
-		if(id == null || id.intValue() != this.binded) {
+		if(id == null || id.intValue() != this.bound) {
 			this.bindTexture(texture.getParent().getTexture(), texture.getParent().isInJar());
 		}
 
@@ -585,7 +585,7 @@ public class RenderHelper {
 	public void drawStretchedSubTex(SubTexture texture, float x, float y, float width, float height) {
 		Renderer.get().begin();
 		Integer id = GeneralUtils.getMinecraft().textureManager.textures.get(texture.getParent().getTexture());
-		if(id == null || id.intValue() != this.binded) {
+		if(id == null || id.intValue() != this.bound) {
 			this.bindTexture(texture.getParent().getTexture(), texture.getParent().isInJar());
 		}
 		
@@ -719,6 +719,7 @@ public class RenderHelper {
 	}
 
 	public void drawImage(BufferedImage image, int x, int y, int z) {
+		int bound = this.bound;
 		GeneralUtils.getMinecraft().textureManager.bindTexture(image);
 
 		this.glColor(1, 1, 1, 1);
@@ -728,6 +729,7 @@ public class RenderHelper {
 		Renderer.get().vertexuv(x + image.getWidth(), y + image.getHeight(), z, image.getWidth() / image.getWidth(), image.getHeight() / image.getHeight());
 		Renderer.get().vertexuv(x + image.getWidth(), y, z, image.getWidth() / image.getWidth(), 0);
 		Renderer.get().end();
+		this.bindTexture(bound);
 	}
 
 	public void setCulling(boolean enabled) {
