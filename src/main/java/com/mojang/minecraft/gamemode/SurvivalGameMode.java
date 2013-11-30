@@ -115,7 +115,7 @@ public class SurvivalGameMode extends GameMode {
 
 	public void apply(ClientLevel level) {
 		super.apply(level);
-		this.spawner = new MobSpawner(level);
+		this.spawner = new MobSpawner();
 	}
 
 	public void apply(LocalPlayer player) {
@@ -129,15 +129,16 @@ public class SurvivalGameMode extends GameMode {
 	}
 
 	public void spawnMobs() {
-		int area = this.spawner.level.getWidth() * this.spawner.level.getHeight() * this.spawner.level.getDepth() / 64 / 64 / 64;
-		if(this.spawner.level.getRandom().nextInt(100) < area && this.spawner.level.countInstanceOf(Mob.class) < area * 20) {
-			this.spawner.spawn(area, this.mc.player, false);
+		ClientLevel level = (ClientLevel) OpenClassic.getClient().getLevel();
+		int area = level.getWidth() * level.getHeight() * level.getDepth() / 64 / 64 / 64;
+		if(level.getRandom().nextInt(100) < area && level.countInstanceOf(Mob.class) < area * 20) {
+			this.spawner.spawn(OpenClassic.getClient().getPlayer().getPosition(), area, false);
 		}
 	}
 
 	public void prepareLevel(ClientLevel level) {
-		this.spawner = new MobSpawner(level);
+		this.spawner = new MobSpawner();
 		int area = level.getWidth() * level.getHeight() * level.getDepth() / 800;
-		this.spawner.spawn(area, null, true);
+		this.spawner.spawn(level.getSpawn(), area, true);
 	}
 }

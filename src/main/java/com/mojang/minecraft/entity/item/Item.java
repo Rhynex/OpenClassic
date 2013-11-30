@@ -73,7 +73,7 @@ public class Item extends Entity {
 			this.remove();
 		}
 		
-		if(this.getLiquid().getLiquidName().equals("lava")) {
+		if(this.getLiquid() != null && this.getLiquid().getLiquidName().equals("lava")) {
 			OpenClassic.getGame().getAudioManager().playSound("random.fizz", this.x, this.y, this.z, 0.4f, 2 + this.level.getRandom().nextFloat() * 0.4f);
 			this.remove();
 		}

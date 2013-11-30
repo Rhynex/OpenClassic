@@ -857,31 +857,34 @@ public class Minecraft implements Runnable {
 					GL11.glDepthMask(false);
 					BlockType block = this.levelRenderer.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z);
 					if(block != null) {
-						BoundingBox bb = block.getModel(this.level, this.selected.x, this.selected.y, this.selected.z).getSelectionBox(this.selected.x, this.selected.y, this.selected.z).grow(0.002F, 0.002F, 0.002F);
-						GL11.glBegin(GL11.GL_LINE_STRIP);
-						GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ2());
-						GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ2());
-						GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_LINE_STRIP);
-						GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ2());
-						GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ2());
-						GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
-						GL11.glEnd();
-						GL11.glBegin(GL11.GL_LINES);
-						GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
-						GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ1());
-						GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ2());
-						GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ2());
-						GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ2());
-						GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ2());
-						GL11.glEnd();
+						BoundingBox bb = block.getModel(this.level, this.selected.x, this.selected.y, this.selected.z).getSelectionBox(this.selected.x, this.selected.y, this.selected.z);
+						if(bb != null) {
+							bb = bb.grow(0.002F, 0.002F, 0.002F);
+							GL11.glBegin(GL11.GL_LINE_STRIP);
+							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ2());
+							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ2());
+							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
+							GL11.glEnd();
+							GL11.glBegin(GL11.GL_LINE_STRIP);
+							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ2());
+							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ2());
+							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
+							GL11.glEnd();
+							GL11.glBegin(GL11.GL_LINES);
+							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
+							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ1());
+							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ2());
+							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ2());
+							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ2());
+							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ2());
+							GL11.glEnd();
+						}
 					}
 
 					GL11.glDepthMask(true);
