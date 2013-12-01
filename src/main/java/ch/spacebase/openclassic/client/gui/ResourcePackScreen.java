@@ -16,12 +16,12 @@ import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
 import ch.spacebase.openclassic.client.render.ClientTextureFactory;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-public class TexturePackScreen extends GuiComponent {
+public class ResourcePackScreen extends GuiComponent {
 
 	private GuiComponent parent;
 	private String[] textures = null;
 
-	public TexturePackScreen(GuiComponent parent) {
+	public ResourcePackScreen(GuiComponent parent) {
 		super("texturepackscreen");
 		this.parent = parent;
 	}
@@ -40,9 +40,9 @@ public class TexturePackScreen extends GuiComponent {
 			@Override
 			public void onButtonListClick(ButtonList list, Button button) {
 				if(button.getText().equals("Default")) {
-					OpenClassic.getClient().getConfig().setValue("options.texture-pack", "none");
+					OpenClassic.getClient().getConfig().setValue("options.resource-pack", "none");
 				} else {
-					OpenClassic.getClient().getConfig().setValue("options.texture-pack", button.getText() + ".zip");
+					OpenClassic.getClient().getConfig().setValue("options.resource-pack", button.getText() + ".zip");
 				}
 
 				OpenClassic.getClient().getConfig().save();
@@ -61,14 +61,14 @@ public class TexturePackScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 80, OpenClassic.getGame().getTranslator().translate("gui.texture-packs.select"), true));
+		this.attachComponent(new Label("title", this.getWidth() / 2, this.getHeight() / 4 - 80, OpenClassic.getGame().getTranslator().translate("gui.resource-packs.select"), true));
 		
-		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
-		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
+		String pack = OpenClassic.getClient().getConfig().getString("options.resource-pack");
+		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.resource-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
 		this.attachComponent(new Label("current", this.getWidth() / 2, (int) (this.getHeight() * 0.8f) - 56, text, true));
 		
 		StringBuilder textures = new StringBuilder("Default");
-		for(String file : (new File(OpenClassic.getClient().getDirectory(), "texturepacks").list())) {
+		for(String file : (new File(OpenClassic.getClient().getDirectory(), "resourcepacks").list())) {
 			if(!file.endsWith(".zip")) continue;
 			textures.append(";").append(file.substring(0, file.indexOf(".")));
 		}
@@ -79,8 +79,8 @@ public class TexturePackScreen extends GuiComponent {
 	
 	@Override
 	public void update(int mouseX, int mouseY) {
-		String pack = OpenClassic.getClient().getConfig().getString("options.texture-pack");
-		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.texture-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
+		String pack = OpenClassic.getClient().getConfig().getString("options.resource-pack");
+		String text = String.format(OpenClassic.getGame().getTranslator().translate("gui.resource-packs.current"), (!pack.equals("none") ? pack.substring(0, pack.indexOf('.')) : "Default"));
 		Label label = this.getComponent("current", Label.class);
 		if(!label.getText().equals(text)) {
 			label.setText(text);

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -51,7 +52,6 @@ public class ClientAudioManager implements AudioManager {
 		this.mc = mc;
 
 		Class<? extends Library> lib = Library.class;
-
 		if(SoundSystem.libraryCompatible(LibraryLWJGLOpenAL.class)) {
 			lib = LibraryLWJGLOpenAL.class;
 		} else if(SoundSystem.libraryCompatible(LibraryJavaSound.class)) {
@@ -205,15 +205,45 @@ public class ClientAudioManager implements AudioManager {
 			OpenClassic.getLogger().info(String.format(OpenClassic.getGame().getTranslator().translate("http.downloaded"), file.getName()));
 		}
 	}
+	
+	private URL getURLFor(String audio, Map<String, List<URL>> map) {
+		List<URL> files = map.get(audio);
+		URL url = files.get(rand.nextInt(files.size()));
+		String pack = OpenClassic.getGame().getConfig().getString("options.resource-pack");
+		if(!pack.equals("none")) {
+			File f = new File(OpenClassic.getClient().getDirectory(), "resourcepacks/" + pack);
+			ZipFile zip = null;
+			try {
+				zip = new ZipFile(f);
+				String p = url.getPath();
+				if(p.contains("!")) {
+					p = p.substring(p.indexOf("!") + 1);
+				}
+				
+				p = p.startsWith("/") ? p.substring(1, p.length()) : p;
+				System.out.println(p);
+				if(zip.getEntry(p) != null) {
+					System.out.println(p);
+					url = new URL("zip:" + f.toURI().toURL().toString() + "!/" + p);
+				}
+			} catch(IOException e) {
+				OpenClassic.getLogger().severe("Failed to read resource pack.");
+				e.printStackTrace();
+			} finally {
+				IOUtils.closeQuietly(zip);
+			}
+		}
+		
+		return url;
+	}
 
 	public boolean playSound(String sound, float x, float y, float z, float volume, float pitch) {
 		if(!this.mc.settings.getBooleanSetting("options.sound").getValue()) {
 			return true;
 		}
 
-		List<URL> files = this.sounds.get(sound);
-		if(files != null) {
-			URL file = files.get(rand.nextInt(files.size()));
+		URL file = this.getURLFor(sound, this.sounds);
+		if(file != null) {
 			String source = "sound_" + nextSoundId++;
 
 			float attenuation = 16;
@@ -242,9 +272,8 @@ public class ClientAudioManager implements AudioManager {
 
 	public boolean playMusic(String music, boolean loop) {
 		if(!this.mc.settings.getBooleanSetting("options.music").getValue()) return true;
-		List<URL> files = this.music.get(music);
-		if(files != null) {
-			URL file = files.get(rand.nextInt(files.size()));
+		URL file = this.getURLFor(music, this.music);
+		if(file != null) {
 			if(this.isPlaying(music)) {
 				return true;
 			}

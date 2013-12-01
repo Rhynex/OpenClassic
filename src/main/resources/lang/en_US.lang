@@ -2,12 +2,6 @@ core:
     fail-working-dir: Failed to create working directory!
     no-lwjgl: Your system does not support LWJGL.
     fail-unpack: Failed to unpack native "%s"!
-    fail-options-load: Failed to load options.
-    fail-options-save: Failed to save options.
-    fail-resources: "The resource directory could not be created: %s"
-    fail-font: Failed to load font image!
-    fail-texture: Failed to bind texture!
-    fail-start: Failed to start Minecraft!
     exception: Exception occured
     client-error: Client error
     game-broke: The game broke! [%s]
@@ -150,7 +144,7 @@ gui:
         singleplayer: Singleplayer
         multiplayer: Multiplayer
         options: Options
-        texture-packs: Texture Packs
+        resource-packs: Resource Packs
         about: About
         quit: Quit
         language: Language
@@ -176,9 +170,9 @@ gui:
         console: Server Console
         awaiting: Awaiting URL...
         connect: Connect
-    texture-packs:
-        select: Select a texture pack.
-        current: "Current Texture Pack: %s"
+    resource-packs:
+        select: Select a resource pack.
+        current: "Current Resource Pack: %s"
     blocks:
         select: Select a block.
     hud:
@@ -234,6 +228,20 @@ http:
 options:
     "on": "ON"
     "off": "OFF"
+    render-distance-options:
+        far: FAR
+        normal: NORMAL
+        short: SHORT
+        tiny: TINY
+    survival-options:
+        peaceful: PEACEFUL
+        normal: NORMAL
+    sensitivity-options:
+        slow: SLOW
+        normal: NORMAL
+        fast: FAST
+        faster: FASTER
+        fastest: FASTEST
     music: Music
     sound: Sound
     invert-mouse: Invert Mouse

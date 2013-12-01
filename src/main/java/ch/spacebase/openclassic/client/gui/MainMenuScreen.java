@@ -39,10 +39,10 @@ public class MainMenuScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("texturepacks", this.getWidth() / 2 - 200, this.getHeight() / 2 + 56, OpenClassic.getGame().getTranslator().translate("gui.main-menu.texture-packs")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("resourcepacks", this.getWidth() / 2 - 200, this.getHeight() / 2 + 56, OpenClassic.getGame().getTranslator().translate("gui.main-menu.resource-packs")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
-				OpenClassic.getClient().setActiveComponent(new TexturePackScreen(MainMenuScreen.this));
+				OpenClassic.getClient().setActiveComponent(new ResourcePackScreen(MainMenuScreen.this));
 			}
 		}));
 		

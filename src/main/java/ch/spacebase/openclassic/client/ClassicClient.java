@@ -64,6 +64,7 @@ public class ClassicClient extends ClassicGame implements Client {
 	private final Minecraft mc;
 	
 	public static void start(String[] args) {
+		System.setProperty("java.protocol.handler.pkgs", "ch.spacebase.openclassic.client.util.protocol");
 		new Thread(new Minecraft(null, 854, 480), "Client-Main").start();
 	}
 

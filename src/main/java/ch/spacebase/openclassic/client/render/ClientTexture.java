@@ -7,8 +7,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.zip.ZipFile;
 
-import javax.imageio.ImageIO;
-
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -188,31 +186,32 @@ public class ClientTexture extends GameTexture {
 	
 	@Override
 	public void loadImage(URL url) {
-		String pack = OpenClassic.getGame().getConfig().getString("options.texture-pack");
-		boolean found = false;
+		String pack = OpenClassic.getGame().getConfig().getString("options.resource-pack");
 		if(!pack.equals("none")) {
-			String path = url.getPath();
+			File f = new File(OpenClassic.getClient().getDirectory(), "resourcepacks/" + pack);
 			ZipFile zip = null;
 			try {
-				zip = new ZipFile(new File(OpenClassic.getClient().getDirectory(), "texturepacks/" + pack));
-				String p = path.startsWith("/") ? path.substring(1, path.length()) : path;
+				zip = new ZipFile(f);
+				String p = url.getPath();
+				if(p.contains("!")) {
+					p = p.substring(p.indexOf("!") + 1);
+				}
+				
+				p = p.startsWith("/") ? p.substring(1, p.length()) : p;
+				System.out.println(p);
 				if(zip.getEntry(p) != null) {
-					this.image = ImageIO.read(zip.getInputStream(zip.getEntry(path.startsWith("/") ? path.substring(1, path.length()) : path)));
-					found = true;
+					System.out.println(p);
+					url = new URL("zip:" + f.toURI().toURL().toString() + "!/" + p);
 				}
 			} catch(IOException e) {
-				OpenClassic.getLogger().severe("Failed to read texture \"" + url.toString() + "\" from texture pack.");
+				OpenClassic.getLogger().severe("Failed to read resource pack.");
 				e.printStackTrace();
-				return;
 			} finally {
 				IOUtils.closeQuietly(zip);
 			}
 		}
 
-		if(!found) {
-			super.loadImage(url);
-		}
-		
+		super.loadImage(url);
 		if(this.frameSpeed > -1) {
 			this.frames = new BufferedImage[(this.image.getWidth() / frameWidth) * (this.image.getHeight() / frameHeight)];
 			int count = 0;

@@ -409,11 +409,11 @@ public class Minecraft implements Runnable {
 				e.printStackTrace();
 			}
 		}
-
-		File texturepacks = new File(this.dir, "texturepacks");
-		if(!texturepacks.exists()) {
+		
+		File resourcepacks = new File(this.dir, "resourcepacks");
+		if(!resourcepacks.exists()) {
 			try {
-				texturepacks.mkdirs();
+				resourcepacks.mkdirs();
 			} catch(SecurityException e) {
 				e.printStackTrace();
 			}
@@ -441,22 +441,37 @@ public class Minecraft implements Runnable {
 		this.settings.getBooleanSetting("options.sound").setDefault(true);
 		this.settings.registerSetting(new BooleanSetting("options.invert-mouse"));
 		this.settings.registerSetting(new BooleanSetting("options.show-info"));
-		this.settings.registerSetting(new IntSetting("options.render-distance", new String[] { "FAR", "NORMAL", "SHORT", "TINY" }));
+		this.settings.registerSetting(new IntSetting("options.render-distance", new String[] {
+				OpenClassic.getGame().getTranslator().translate("options.render-distance-options.far"),
+				OpenClassic.getGame().getTranslator().translate("options.render-distance-options.normal"),
+				OpenClassic.getGame().getTranslator().translate("options.render-distance-options.short"),
+				OpenClassic.getGame().getTranslator().translate("options.render-distance-options.tiny") }));
+		
 		this.settings.registerSetting(new BooleanSetting("options.view-bobbing"));
 		this.settings.getBooleanSetting("options.view-bobbing").setDefault(true);
 		this.settings.registerSetting(new TextureRefreshSetting("options.3d-anaglyph"));
 		this.settings.registerSetting(new BooleanSetting("options.limit-fps"));
-		this.settings.registerSetting(new SurvivalSetting("options.survival", new String[] { "OFF", "PEACEFUL", "NORMAL" }));
+		this.settings.registerSetting(new SurvivalSetting("options.survival", new String[] {
+				OpenClassic.getGame().getTranslator().translate("options.off"),
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.peaceful"),
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.normal") }));
+		
 		this.settings.registerSetting(new SmoothingSetting("options.smoothing"));
 		this.settings.registerSetting(new NightSetting("options.night"));
-		this.settings.registerSetting(new IntSetting("options.sensitivity", new String[] { "SLOW", "NORMAL", "FAST", "FASTER", "FASTEST" }));
+		this.settings.registerSetting(new IntSetting("options.sensitivity", new String[] {
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.slow"),
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.normal"),
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.fast"),
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.faster"),
+				OpenClassic.getGame().getTranslator().translate("options.survival-options.fastest") }));
+		
 		this.settings.getIntSetting("options.sensitivity").setDefault(1);
 		this.settings.registerSetting(new MinimapSetting("options.minimap"));
 		
 		this.hackSettings = new Settings();
 		this.hackSettings.registerSetting(new BooleanSetting("hacks.speed"));
 		this.hackSettings.registerSetting(new BooleanSetting("hacks.flying"));
-		OpenClassic.getClient().getConfig().applyDefault("options.texture-pack", "none");
+		OpenClassic.getClient().getConfig().applyDefault("options.resource-pack", "none");
 		OpenClassic.getClient().getConfig().save();
 		
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
