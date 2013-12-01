@@ -5,16 +5,15 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.api.util.Constants;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.ai.AI;
 import com.mojang.minecraft.entity.mob.ai.BasicAI;
 import com.mojang.minecraft.entity.model.ModelManager;
-import com.mojang.minecraft.render.TextureManager;
 
 public class Mob extends Entity {
 
@@ -34,7 +33,6 @@ public class Mob extends Entity {
 	protected float animStepO;
 	protected int tickCount = 0;
 	public boolean hasHair = true;
-	protected String textureName = "/textures/entity/char.png";
 	public boolean allowAlpha = true;
 	public float rotOffs = 0;
 	public String modelName = null;
@@ -56,8 +54,9 @@ public class Mob extends Entity {
 	public AI ai;
 	private int drownTime = 20;
 	private int burnTime = 10;
+	private Texture texture;
 
-	public Mob(ClientLevel level) {
+	public Mob(ClientLevel level, Texture texture) {
 		super(level);
 		this.setPos(this.x, this.y, this.z);
 		this.timeOffs = (float) Math.random() * 12398;
@@ -65,6 +64,7 @@ public class Mob extends Entity {
 		this.speed = 1;
 		this.ai = new BasicAI();
 		this.footSize = 0.5F;
+		this.texture = texture;
 	}
 
 	public boolean isPickable() {
@@ -224,11 +224,11 @@ public class Mob extends Entity {
 		}
 	}
 
-	protected void bindTexture(TextureManager textures) {
-		this.textureId = RenderHelper.getHelper().bindTexture(this.textureName, true);
+	protected void bindTexture() {
+		this.texture.bind();
 	}
 
-	public void render(TextureManager textures, float dt) {
+	public void render(float dt) {
 		if(this.modelName != null) {
 			float attackTime = this.attackTime - dt;
 			if(attackTime < 0) {
@@ -306,20 +306,19 @@ public class Mob extends Entity {
 
 			GL11.glScalef(-1, 1, 1);
 			modelCache.getModel(this.modelName).attackTime = attackTime / 5;
-			this.bindTexture(textures);
-			this.renderModel(textures, animStep, dt, runProgress, yaw, pitch, 0.0625F);
+			this.bindTexture();
+			this.renderModel(animStep, dt, runProgress, yaw, pitch, 0.0625F);
 			if(this.invulnerableTime > this.invulnerableDuration - 10) {
 				GL11.glColor4f(1, 1, 1, 0.75F);
-				GL11.glEnable(GL11.GL_BLEND);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-				this.bindTexture(textures);
-				this.renderModel(textures, animStep, dt, runProgress, yaw, pitch, 0.0625F);
-				GL11.glDisable(GL11.GL_BLEND);
+				this.bindTexture();
+				this.renderModel(animStep, dt, runProgress, yaw, pitch, 0.0625F);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			}
 
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			if(this.allowAlpha) {
+			if(!this.allowAlpha) {
+				GL11.glEnable(GL11.GL_ALPHA_TEST);
+			} else {
 				GL11.glEnable(GL11.GL_CULL_FACE);
 			}
 
@@ -328,7 +327,7 @@ public class Mob extends Entity {
 		}
 	}
 
-	public void renderModel(TextureManager textures, float animStep, float dt, float runProgress, float yaw, float pitch, float scale) {
+	public void renderModel(float animStep, float dt, float runProgress, float yaw, float pitch, float scale) {
 		modelCache.getModel(this.modelName).render(animStep, runProgress, this.tickCount + dt, yaw, pitch, scale);
 	}
 

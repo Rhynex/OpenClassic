@@ -19,7 +19,7 @@ public class CustomCodec extends MessageCodec<CustomMessage> {
 	@Override
 	public ChannelBuffer encode(CustomMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getId());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getId());
 		byte data[] = message.getData();
 		if(data.length > 1024) {
 			data = Arrays.copyOfRange(data, 0, 64);
@@ -40,7 +40,7 @@ public class CustomCodec extends MessageCodec<CustomMessage> {
 
 	@Override
 	public CustomMessage decode(ChannelBuffer buffer) throws IOException {
-		String id = ChannelBufferUtils.readString(buffer);
+		String id = ChannelBufferUtils.readExtendedString(buffer);
 		byte[] data = new byte[1024];
 		buffer.readBytes(data);
 		return new CustomMessage(id, Arrays.copyOfRange(data, 0, buffer.readShort()));

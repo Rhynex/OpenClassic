@@ -1,4 +1,4 @@
-package com.mojang.minecraft.render;
+package com.mojang.minecraft.render.level;
 
 import java.util.Comparator;
 

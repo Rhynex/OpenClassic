@@ -18,13 +18,13 @@ public class MusicStopCodec extends MessageCodec<MusicStopMessage> {
 	@Override
 	public ChannelBuffer encode(MusicStopMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getIdentifier());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getIdentifier());
 		return buffer;
 	}
 
 	@Override
 	public MusicStopMessage decode(ChannelBuffer buffer) throws IOException {
-		String identifier = ChannelBufferUtils.readString(buffer);
+		String identifier = ChannelBufferUtils.readExtendedString(buffer);
 		return new MusicStopMessage(identifier);
 	}
 

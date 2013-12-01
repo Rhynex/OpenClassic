@@ -18,16 +18,16 @@ public class PluginCodec extends MessageCodec<PluginMessage> {
 	@Override
 	public ChannelBuffer encode(PluginMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getName());
-		ChannelBufferUtils.writeString(buffer, message.getVersion());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getName());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getVersion());
 
 		return buffer;
 	}
 
 	@Override
 	public PluginMessage decode(ChannelBuffer buffer) throws IOException {
-		String name = ChannelBufferUtils.readString(buffer);
-		String version = ChannelBufferUtils.readString(buffer);
+		String name = ChannelBufferUtils.readExtendedString(buffer);
+		String version = ChannelBufferUtils.readExtendedString(buffer);
 		return new PluginMessage(name, version);
 	}
 

@@ -239,6 +239,7 @@ public class ClientHUDScreen extends HUDComponent {
 				}
 			} else if(heart != null) {
 				heart.setVisible(false);
+				heartBg.setVisible(false);
 			}
 		}
 		

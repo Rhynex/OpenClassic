@@ -48,7 +48,7 @@ public class ClassicAsyncTask extends ClassicTask {
 		try {
 			super.run();
 		} catch(Throwable t) {
-			OpenClassic.getLogger().severe(String.format("Plugin %s generated an exception while executing task %s", this.getOwner(), this.getTaskId()));
+			OpenClassic.getLogger().severe(String.format("%s generated an exception while executing task %s", this.getOwner(), this.getTaskId()));
 			t.printStackTrace();
 		} finally {
 			synchronized(this.workers) {

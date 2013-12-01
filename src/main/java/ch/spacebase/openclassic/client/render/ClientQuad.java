@@ -1,16 +1,16 @@
 package ch.spacebase.openclassic.client.render;
 
-import ch.spacebase.openclassic.api.block.model.SubTexture;
+import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
 import ch.spacebase.openclassic.game.GameQuad;
 
 public class ClientQuad extends GameQuad {
 
-	public ClientQuad(int id, SubTexture texture) {
+	public ClientQuad(int id, Texture texture) {
 		super(id, texture);
 	}
 	
-	public ClientQuad(int id, SubTexture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
+	public ClientQuad(int id, Texture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
 		super(id, texture, v1, v2, v3, v4);
 	}
 	

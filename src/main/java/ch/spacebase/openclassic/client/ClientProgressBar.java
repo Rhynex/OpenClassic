@@ -94,9 +94,7 @@ public class ClientProgressBar implements ProgressBar {
 			RenderHelper.getHelper().drawDefaultBG(0, 0, width, height);
 			this.renderBar(false);
 			RenderHelper.getHelper().drawBlackBG(0, height - 56, width, height - (height - 56));
-			GL11.glEnable(GL11.GL_BLEND);
-			RenderHelper.getHelper().drawSubTex(GuiTextures.LOGO.getSubTexture(0), 20, 20, 0, 0.5625f, 1);
-			GL11.glDisable(GL11.GL_BLEND);
+			RenderHelper.getHelper().drawTexture(GuiTextures.LOGO, 20, 20, 0, 0.5625f, 1);
 			RenderHelper.getHelper().renderScaledText(this.title, width - 20 - RenderHelper.getHelper().getStringWidth(this.title), 20);
 			if(this.isSubtitleScaled()) {
 				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 64);

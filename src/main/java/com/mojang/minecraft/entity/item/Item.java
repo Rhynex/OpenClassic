@@ -9,7 +9,6 @@ import ch.spacebase.openclassic.client.level.ClientLevel;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.render.TextureManager;
 
 public class Item extends Entity {
 
@@ -79,7 +78,7 @@ public class Item extends Entity {
 		}
 	}
 
-	public void render(TextureManager textures, float dt) {
+	public void render(float dt) {
 		float rot = this.rot + (this.tickCount + dt) * 3;
 		GL11.glPushMatrix();
 		float rsin = MathHelper.sin(rot / 10);

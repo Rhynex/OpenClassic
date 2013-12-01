@@ -167,12 +167,12 @@ public class ClientCommands extends CommandExecutor {
 	@Command(aliases = { "solid", "bedrock" }, desc = "Toggles bedrock placement mode.", permission = "openclassic.commands.solid", senders = { Player.class })
 	public void solid(Sender sender, String command, String args[]) {
 		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.BEDROCK.getId()) {
-			player.setPlaceMode(VanillaBlock.BEDROCK.getId());
+		if(player.getPlaceMode() != VanillaBlock.BEDROCK) {
+			player.setPlaceMode(VanillaBlock.BEDROCK);
 			player.setCanBreakUnbreakables(true);
 			player.sendMessage("solid.enable");
 		} else {
-			player.setPlaceMode(0);
+			player.setPlaceMode(null);
 			player.setCanBreakUnbreakables(false);
 			player.sendMessage("solid.disable");
 		}
@@ -181,11 +181,11 @@ public class ClientCommands extends CommandExecutor {
 	@Command(aliases = { "water" }, desc = "Toggles water placement mode.", permission = "openclassic.commands.water", senders = { Player.class })
 	public void water(Sender sender, String command, String args[]) {
 		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.WATER.getId()) {
-			player.setPlaceMode(VanillaBlock.WATER.getId());
+		if(player.getPlaceMode() != VanillaBlock.WATER) {
+			player.setPlaceMode(VanillaBlock.WATER);
 			player.sendMessage("water.enable");
 		} else {
-			player.setPlaceMode(0);
+			player.setPlaceMode(null);
 			player.sendMessage("water.disable");
 		}
 	}
@@ -193,11 +193,11 @@ public class ClientCommands extends CommandExecutor {
 	@Command(aliases = { "stillwater" }, desc = "Toggles still water placement mode.", permission = "openclassic.commands.stillwater", senders = { Player.class })
 	public void stillwater(Sender sender, String command, String args[]) {
 		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.STATIONARY_WATER.getId()) {
-			player.setPlaceMode(VanillaBlock.STATIONARY_WATER.getId());
+		if(player.getPlaceMode() != VanillaBlock.STATIONARY_WATER) {
+			player.setPlaceMode(VanillaBlock.STATIONARY_WATER);
 			player.sendMessage("stillwater.enable");
 		} else {
-			player.setPlaceMode(0);
+			player.setPlaceMode(null);
 			player.sendMessage("stillwater.disable");
 		}
 	}
@@ -205,11 +205,11 @@ public class ClientCommands extends CommandExecutor {
 	@Command(aliases = { "lava" }, desc = "Toggles lava placement mode.", permission = "openclassic.commands.lava", senders = { Player.class })
 	public void lava(Sender sender, String command, String args[]) {
 		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.LAVA.getId()) {
-			player.setPlaceMode(VanillaBlock.LAVA.getId());
+		if(player.getPlaceMode() != VanillaBlock.LAVA) {
+			player.setPlaceMode(VanillaBlock.LAVA);
 			player.sendMessage("lava.enable");
 		} else {
-			player.setPlaceMode(0);
+			player.setPlaceMode(null);
 			player.sendMessage("lava.disable");
 		}
 	}
@@ -217,11 +217,11 @@ public class ClientCommands extends CommandExecutor {
 	@Command(aliases = { "stilllava" }, desc = "Toggles still lava placement mode.", permission = "openclassic.commands.stilllava", senders = { Player.class })
 	public void stilllava(Sender sender, String command, String args[]) {
 		Player player = (Player) sender;
-		if(player.getPlaceMode() != VanillaBlock.STATIONARY_LAVA.getId()) {
-			player.setPlaceMode(VanillaBlock.STATIONARY_LAVA.getId());
+		if(player.getPlaceMode() != VanillaBlock.STATIONARY_LAVA) {
+			player.setPlaceMode(VanillaBlock.STATIONARY_LAVA);
 			player.sendMessage("stilllava.enable");
 		} else {
-			player.setPlaceMode(0);
+			player.setPlaceMode(null);
 			player.sendMessage("stilllava.disable");
 		}
 	}

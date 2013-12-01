@@ -7,7 +7,7 @@ import org.apache.commons.lang3.Validate;
 
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
-import ch.spacebase.openclassic.api.block.model.SubTexture;
+import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.Vertex;
 import ch.spacebase.openclassic.client.render.ClientQuad;
 
@@ -15,15 +15,15 @@ public class GameQuad implements Quad {
 
 	protected int id;
 	private Vertex vertices[] = new Vertex[4];
-	private SubTexture texture;
+	private Texture texture;
 	private Model parent;
 	
-	public GameQuad(int id, SubTexture texture) {
+	public GameQuad(int id, Texture texture) {
 		this.texture = texture;
 		this.id = id;
 	}
 	
-	public GameQuad(int id, SubTexture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
+	public GameQuad(int id, Texture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
 		this(id, texture);
 		this.addVertex(0, v1);
 		this.addVertex(1, v2);
@@ -65,7 +65,7 @@ public class GameQuad implements Quad {
 	}
 	
 	@Override
-	public SubTexture getTexture() {
+	public Texture getTexture() {
 		return this.texture;
 	}
 	

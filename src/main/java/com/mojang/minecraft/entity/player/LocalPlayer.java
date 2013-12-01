@@ -14,7 +14,6 @@ import ch.spacebase.openclassic.game.util.InternalConstants;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.model.HumanoidModel;
-import com.mojang.minecraft.render.TextureManager;
 import com.zachsthings.onevent.EventManager;
 
 public class LocalPlayer extends Player {
@@ -79,7 +78,7 @@ public class LocalPlayer extends Player {
 		}
 	}
 
-	public void render(TextureManager textureManager, float dt) {
+	public void render(float dt) {
 	}
 	
 	public HumanoidModel getModel() {

@@ -6,11 +6,11 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.client.player.ClientPlayer;
+import ch.spacebase.openclassic.client.render.ClientTexture;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.Player;
 import com.mojang.minecraft.render.FontRenderer;
-import com.mojang.minecraft.render.TextureManager;
 
 public class NetworkPlayer extends Player {
 
@@ -49,7 +49,7 @@ public class NetworkPlayer extends Player {
 		this.onGround = true;
 	}
 
-	public void renderHover(TextureManager textures, float dt) {
+	public void renderHover(float dt) {
 		FontRenderer fontRenderer = this.minecraft.fontRenderer;
 		GL11.glPushMatrix();
 		GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt + 0.8F + this.renderOffset, this.zo + (this.z - this.zo) * dt);
@@ -68,10 +68,8 @@ public class NetworkPlayer extends Player {
 		GL11.glDepthFunc(GL11.GL_GREATER);
 		GL11.glDepthMask(false);
 		GL11.glColor4f(1, 1, 1, 0.8F);
-		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		fontRenderer.renderNoShadow(this.displayName, 0, 0, 16777215);
-		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDepthMask(true);
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glTranslatef(1, 1, -0.05F);
@@ -172,12 +170,8 @@ public class NetworkPlayer extends Player {
 	}
 
 	public void clear() {
-		if(this.newTextureId >= 0 && this.textures != null) {
-			this.textures.textureImgs.remove(this.newTextureId);
-			this.textures.textureBuffer.clear();
-			this.textures.textureBuffer.put(this.newTextureId);
-			this.textures.textureBuffer.flip();
-			GL11.glDeleteTextures(this.textures.textureBuffer);
+		if(this.skin != null) {
+			((ClientTexture) this.skin).dispose();
 		}
 	}
 

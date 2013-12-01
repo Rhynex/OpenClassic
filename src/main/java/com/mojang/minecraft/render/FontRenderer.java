@@ -1,36 +1,17 @@
 package com.mojang.minecraft.render;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.Color;
-import ch.spacebase.openclassic.api.OpenClassic;
-import ch.spacebase.openclassic.client.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.GuiTextures;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 public final class FontRenderer {
 
 	private int[] font = new int[256];
-	private int fontId = 0;
 
-	public FontRenderer(String fontImage, TextureManager textures) {
-		BufferedImage font;
-
-		try {
-			font = ImageIO.read(TextureManager.class.getResourceAsStream(fontImage));
-		} catch(IOException e) {
-			throw new RuntimeException(OpenClassic.getGame().getTranslator().translate("core.fail-font"), e);
-		}
-
-		int width = font.getWidth();
-		int height = font.getHeight();
-		int[] fontData = new int[width * height];
-		font.getRGB(0, 0, width, height, fontData, 0, width);
-
+	public FontRenderer() {
+		int fontData[] = GuiTextures.FONT.getRGBA();
 		for(int character = 0; character < 256; character++) {
 			int tx = character % 16;
 			int ty = character / 16;
@@ -39,7 +20,7 @@ public final class FontRenderer {
 				int xk = (tx << 3) + chWidth;
 				empty = true;
 				for(int y = 0; y < 8 && empty; y++) {
-					int yk = ((ty << 3) + y) * width;
+					int yk = ((ty << 3) + y) * GuiTextures.FONT.getWidth();
 					if((fontData[xk + yk] & 255) > 128) {
 						empty = false;
 					}
@@ -52,8 +33,6 @@ public final class FontRenderer {
 
 			this.font[character] = chWidth * 2;
 		}
-
-		this.fontId = textures.bindTexture(fontImage);
 	}
 
 	public final void renderWithShadow(String text, int x, int y, int color) {
@@ -85,7 +64,7 @@ public final class FontRenderer {
 				color = (color & 16579836) >> 2;
 			}
 
-			RenderHelper.getHelper().bindTexture(this.fontId);
+			GuiTextures.FONT.bind();
 			Renderer.get().begin();
 			Renderer.get().color(color);
 			int width = 0;

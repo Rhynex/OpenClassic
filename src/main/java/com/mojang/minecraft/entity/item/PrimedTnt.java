@@ -13,7 +13,6 @@ import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.particle.SmokeParticle;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.render.TextureManager;
 
 public class PrimedTnt extends Entity {
 
@@ -99,7 +98,7 @@ public class PrimedTnt extends Entity {
 		}
 	}
 
-	public void render(TextureManager textures, float dt) {
+	public void render(float dt) {
 		float brightness = this.level.getBrightness((int) this.x, (int) this.y, (int) this.z);
 		GL11.glPushMatrix();
 		VanillaBlock.TNT.getModel().renderAll(this.xo + (this.x - this.xo) * dt - 0.5F, this.yo + (this.y - this.yo) * dt - 0.5F, this.zo + (this.z - this.zo) * dt - 0.5F, brightness);
@@ -114,9 +113,7 @@ public class PrimedTnt extends Entity {
 			GL11.glColor4f(1, 1, 1, 0.9F);
 		}
 
-		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		VanillaBlock.TNT.getModel().renderAll(this.xo + (this.x - this.xo) * dt - 0.5F, this.yo + (this.y - this.yo) * dt - 0.5F, this.zo + (this.z - this.zo) * dt - 0.5F, -1);
 		GL11.glEnable(GL11.GL_LIGHTING);

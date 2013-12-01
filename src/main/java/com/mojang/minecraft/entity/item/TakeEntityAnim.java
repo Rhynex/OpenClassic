@@ -3,7 +3,6 @@ package com.mojang.minecraft.entity.item;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.render.TextureManager;
 
 public class TakeEntityAnim extends Entity {
 
@@ -40,7 +39,7 @@ public class TakeEntityAnim extends Entity {
 		this.setPos(this.x, this.y, this.z);
 	}
 
-	public void render(TextureManager textures, float dt) {
-		this.taking.render(textures, dt);
+	public void render(float dt) {
+		this.taking.render(dt);
 	}
 }

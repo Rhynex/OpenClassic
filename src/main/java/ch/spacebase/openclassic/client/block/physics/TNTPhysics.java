@@ -19,7 +19,7 @@ public class TNTPhysics implements BlockPhysics {
 
 	@Override
 	public void onBreak(Block block) {
-		if(!OpenClassic.getClient().isInSurvival()) {
+		if(OpenClassic.getClient().isInSurvival()) {
 			((ClientLevel) block.getLevel()).addEntity(new PrimedTnt((ClientLevel) block.getLevel(), block.getPosition().getBlockX() + 0.5F, block.getPosition().getBlockY() + 0.5F, block.getPosition().getBlockZ() + 0.5F));
 		}
 	}

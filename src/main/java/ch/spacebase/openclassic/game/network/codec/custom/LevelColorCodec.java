@@ -18,14 +18,14 @@ public class LevelColorCodec extends MessageCodec<LevelColorMessage> {
 	@Override
 	public ChannelBuffer encode(LevelColorMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getType());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getType());
 		buffer.writeInt(message.getValue());
 		return buffer;
 	}
 
 	@Override
 	public LevelColorMessage decode(ChannelBuffer buffer) throws IOException {
-		String type = ChannelBufferUtils.readString(buffer);
+		String type = ChannelBufferUtils.readExtendedString(buffer);
 		int value = buffer.readInt();
 		return new LevelColorMessage(type, value);
 	}

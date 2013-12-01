@@ -1,4 +1,4 @@
-package com.mojang.minecraft.render;
+package com.mojang.minecraft.render.level;
 
 import java.nio.IntBuffer;
 
@@ -7,10 +7,10 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
+import com.mojang.minecraft.render.Frustum;
 
 public class Chunk {
 
@@ -40,7 +40,7 @@ public class Chunk {
 		this.setAllDirty();
 	}
 
-	public final void update() {
+	public void update() {
 		chunkUpdates++;
 		this.setAllDirty();
 
@@ -48,7 +48,7 @@ public class Chunk {
 			boolean continuing = false;
 			GL11.glNewList(this.baseListId + pass, GL11.GL_COMPILE);
 			if(pass == 1) {
-				RenderHelper.getHelper().setCulling(false);
+				GL11.glDisable(GL11.GL_CULL_FACE);
 			}
 			
 			Renderer.get().begin();
@@ -72,7 +72,7 @@ public class Chunk {
 
 			Renderer.get().end();
 			if(pass == 1) {
-				RenderHelper.getHelper().setCulling(true);
+				GL11.glEnable(GL11.GL_CULL_FACE);
 			}
 			
 			GL11.glEndList();
@@ -84,7 +84,7 @@ public class Chunk {
 
 	}
 
-	public final float distanceSquared(LocalPlayer player) {
+	public float distanceSquared(LocalPlayer player) {
 		float xDistance = player.x - this.x;
 		float yDistance = player.y - this.y;
 		float zDistance = player.z - this.z;
@@ -97,18 +97,18 @@ public class Chunk {
 		}
 	}
 
-	public final void dispose() {
+	public void dispose() {
 		this.setAllDirty();
 		this.level = null;
 	}
 
-	public final void appendLists(IntBuffer buffer, int pass) {
+	public void appendLists(IntBuffer buffer, int pass) {
 		if(this.visible && !this.dirty[pass]) {
 			buffer.put(this.baseListId + pass);
 		}
 	}
 
-	public final void clip() {
+	public void clip() {
 		this.visible = Frustum.isBoxInFrustum(this.x, this.y, this.z, this.x + this.width, this.y + this.height, this.z + this.depth);
 	}
 

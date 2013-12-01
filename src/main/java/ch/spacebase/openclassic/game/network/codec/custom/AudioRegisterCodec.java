@@ -18,8 +18,8 @@ public class AudioRegisterCodec extends MessageCodec<AudioRegisterMessage> {
 	@Override
 	public ChannelBuffer encode(AudioRegisterMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getIdentifier());
-		ChannelBufferUtils.writeString(buffer, message.getUrl());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getIdentifier());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getUrl());
 		buffer.writeByte(message.isIncluded() ? 1 : 0);
 		buffer.writeByte(message.isMusic() ? 1 : 0);
 		return buffer;
@@ -27,8 +27,8 @@ public class AudioRegisterCodec extends MessageCodec<AudioRegisterMessage> {
 
 	@Override
 	public AudioRegisterMessage decode(ChannelBuffer buffer) throws IOException {
-		String identifier = ChannelBufferUtils.readString(buffer);
-		String url = ChannelBufferUtils.readString(buffer);
+		String identifier = ChannelBufferUtils.readExtendedString(buffer);
+		String url = ChannelBufferUtils.readExtendedString(buffer);
 		boolean included = buffer.readByte() == 1;
 		boolean music = buffer.readByte() == 1;
 		return new AudioRegisterMessage(identifier, url, included, music);

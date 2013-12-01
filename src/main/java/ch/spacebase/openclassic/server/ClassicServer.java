@@ -43,6 +43,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.QuadFactory;
+import ch.spacebase.openclassic.api.block.model.TextureFactory;
 import ch.spacebase.openclassic.api.command.Console;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
@@ -194,6 +195,7 @@ public class ClassicServer extends ClassicGame implements Server {
 		}
 
 		QuadFactory.setFactory(new ServerQuadFactory());
+		TextureFactory.setFactory(new ServerTextureFactory());
 		this.persistenceManager.load();
 		this.permManager.load();
 

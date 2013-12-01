@@ -1,4 +1,4 @@
-package com.mojang.minecraft.render;
+package com.mojang.minecraft.render.level;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -157,7 +157,6 @@ public class LevelRenderer {
 		}
 
 		Renderer.get().end();
-		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEndList();
 		this.queueChunks(0, 0, 0, this.level.getWidth(), this.level.getHeight(), this.level.getDepth());
 	}

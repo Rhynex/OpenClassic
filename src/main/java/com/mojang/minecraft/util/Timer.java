@@ -1,6 +1,6 @@
 package com.mojang.minecraft.util;
 
-public final class Timer {
+public class Timer {
 
 	public float tps;
 	public double lastHR;

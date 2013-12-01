@@ -525,8 +525,8 @@ public class ClientLevel extends ClassicLevel {
 					BlockType block = this.getBlockTypeAt(bx, by, bz);
 					if(x >= 0 && y >= 0 && z >= 0 && x < this.getWidth() && y < this.getHeight() && z < this.getDepth() && dx * dx + dy * dy + dz * dz < power * power && block != null && BlockUtils.canExplode(block)) {
 						this.setBlockAt(bx, by, bz, VanillaBlock.AIR);
+						BlockUtils.dropItems(block, this, bx, by, bz, 0.3F);
 						if(block == VanillaBlock.TNT && OpenClassic.getClient().isInSurvival()) {
-							BlockUtils.dropItems(block, this, bx, by, bz, 0.3F);
 							PrimedTnt tnt = new PrimedTnt(this, bx + 0.5F, by + 0.5F, bz + 0.5F);
 							tnt.life = this.getRandom().nextInt(tnt.life / 4) + tnt.life / 8;
 							this.addEntity(tnt);

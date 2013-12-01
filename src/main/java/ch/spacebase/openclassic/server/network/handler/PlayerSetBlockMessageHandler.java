@@ -36,7 +36,7 @@ public class PlayerSetBlockMessageHandler extends MessageHandler<PlayerSetBlockM
 
 		Block block = player.getPosition().getLevel().getBlockAt(message.getX(), message.getY(), message.getZ());
 		byte type = (message.isPlacing()) ? message.getBlock() : 0;
-		if(message.isPlacing() && player.getPlaceMode() != 0 && type != 0) type = player.getPlaceMode();
+		if(message.isPlacing() && player.getPlaceMode() != null && type != 0) type = player.getPlaceMode().getId();
 
 		if(!message.isPlacing()) {
 			if(EventManager.callEvent(new BlockBreakEvent(block, player, Blocks.fromId(message.getBlock()))).isCancelled()) {

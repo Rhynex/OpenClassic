@@ -8,7 +8,6 @@ import ch.spacebase.openclassic.api.math.BoundingBox;
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.render.Frustum;
-import com.mojang.minecraft.render.TextureManager;
 
 public class BlockMap {
 
@@ -179,7 +178,7 @@ public class BlockMap {
 
 	}
 
-	public void render(Vector pos, TextureManager textureManager, float dt) {
+	public void render(Vector pos, float dt) {
 		for(int x = 0; x < this.width; x++) {
 			float x1 = (x << 4) - 2;
 			float x2 = (x + 1 << 4) + 2;
@@ -253,7 +252,7 @@ public class BlockMap {
 										}
 									}
 
-									entity.render(textureManager, dt);
+									entity.render(dt);
 								}
 							}
 						}

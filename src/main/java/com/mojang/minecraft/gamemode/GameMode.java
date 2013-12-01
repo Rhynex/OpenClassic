@@ -40,7 +40,7 @@ public class GameMode {
 	public void breakBlock(int x, int y, int z) {
 		Block block = this.mc.level.getBlockAt(x, y, z);
 		if(block == null) return;
-		if(!this.mc.isInMultiplayer() && EventManager.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.heldBlock.block)).isCancelled()) {
+		if(!this.mc.isInMultiplayer() && EventManager.callEvent(new BlockBreakEvent(block, OpenClassic.getClient().getPlayer(), this.mc.heldBlock.getBlock())).isCancelled()) {
 			return;
 		}
 
@@ -97,4 +97,5 @@ public class GameMode {
 
 	public void apply(LocalPlayer player) {
 	}
+	
 }

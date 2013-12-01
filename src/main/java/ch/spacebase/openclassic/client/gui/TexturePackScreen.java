@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.block.model.TextureFactory;
 import ch.spacebase.openclassic.api.gui.GuiComponent;
 import ch.spacebase.openclassic.api.gui.base.Button;
 import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
@@ -11,6 +12,8 @@ import ch.spacebase.openclassic.api.gui.base.ButtonList;
 import ch.spacebase.openclassic.api.gui.base.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
 import ch.spacebase.openclassic.api.gui.base.Label;
+import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
+import ch.spacebase.openclassic.client.render.ClientTextureFactory;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class TexturePackScreen extends GuiComponent {
@@ -26,7 +29,12 @@ public class TexturePackScreen extends GuiComponent {
 	@Override
 	public void onAttached(GuiComponent oparent) {
 		this.setSize(oparent.getWidth(), oparent.getHeight());
-		this.attachComponent(new DefaultBackground("bg"));
+		if(OpenClassic.getClient().isInGame()) {
+			this.attachComponent(new TranslucentBackground("bg"));
+		} else {
+			this.attachComponent(new DefaultBackground("bg"));
+		}
+		
 		ButtonList list = new ButtonList("packs", 0, 0, this.getWidth(), (int) (this.getHeight() * 0.8f));
 		list.setCallback(new ButtonListCallback() {
 			@Override
@@ -38,7 +46,10 @@ public class TexturePackScreen extends GuiComponent {
 				}
 
 				OpenClassic.getClient().getConfig().save();
-				GeneralUtils.getMinecraft().textureManager.clear();
+				((ClientTextureFactory) TextureFactory.getFactory()).reloadTextures();
+				if(OpenClassic.getClient().isInGame()) {
+					GeneralUtils.getMinecraft().levelRenderer.refresh();
+				}
 			}
 		});
 		

@@ -15,7 +15,6 @@ import ch.spacebase.openclassic.game.util.InternalConstants;
 import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.entity.player.net.PositionUpdate;
-import com.mojang.minecraft.render.TextureManager;
 
 public abstract class Entity {
 
@@ -51,7 +50,6 @@ public abstract class Entity {
 	public float xOld;
 	public float yOld;
 	public float zOld;
-	public int textureId = 0;
 	public float ySlideOffset = 0;
 	public float footSize = 0;
 	public boolean noPhysics = false;
@@ -391,7 +389,7 @@ public abstract class Entity {
 		return this.level.getBrightness((int) this.x, y, (int) this.z);
 	}
 
-	public void render(TextureManager textures, float dt) {
+	public void render(float dt) {
 	}
 
 	public void setLevel(ClientLevel level) {
@@ -494,14 +492,10 @@ public abstract class Entity {
 		return sqDistance < size * size;
 	}
 
-	public int getTexture() {
-		return this.textureId;
-	}
-
 	public boolean isCreativeModeAllowed() {
 		return false;
 	}
 
-	public void renderHover(TextureManager textures, float dt) {
+	public void renderHover(float dt) {
 	}
 }

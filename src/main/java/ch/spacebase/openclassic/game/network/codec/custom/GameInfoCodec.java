@@ -18,16 +18,16 @@ public class GameInfoCodec extends MessageCodec<GameInfoMessage> {
 	@Override
 	public ChannelBuffer encode(GameInfoMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getVersion());
-		ChannelBufferUtils.writeString(buffer, message.getLanguage());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getVersion());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getLanguage());
 
 		return buffer;
 	}
 
 	@Override
 	public GameInfoMessage decode(ChannelBuffer buffer) throws IOException {
-		String version = ChannelBufferUtils.readString(buffer);
-		String language = ChannelBufferUtils.readString(buffer);
+		String version = ChannelBufferUtils.readExtendedString(buffer);
+		String language = ChannelBufferUtils.readExtendedString(buffer);
 		return new GameInfoMessage(version, language);
 	}
 

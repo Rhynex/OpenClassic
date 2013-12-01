@@ -298,7 +298,7 @@ public class ClassicScheduler implements Scheduler {
 				try {
 					task.run();
 				} catch(Throwable t) {
-					OpenClassic.getLogger().warning(String.format("Task #%s for %s generated an exception", task.getTaskId(), task.getOwner()));
+					OpenClassic.getLogger().warning(String.format("Task #%s of %s generated an exception", task.getTaskId(), task.getOwner()));
 					t.printStackTrace();
 				}
 

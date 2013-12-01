@@ -3,14 +3,12 @@ package com.mojang.minecraft.entity.particle;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mojang.minecraft.render.TextureManager;
-
 public class ParticleManager {
 
 	@SuppressWarnings("unchecked")
 	public List<Particle>[] particles = new List[2];
 
-	public ParticleManager(TextureManager textureManager) {
+	public ParticleManager() {
 		for(int texture = 0; texture < this.particles.length; texture++) {
 			this.particles[texture] = new ArrayList<Particle>();
 		}

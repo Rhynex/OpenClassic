@@ -18,7 +18,7 @@ public class AudioPlayCodec extends MessageCodec<AudioPlayMessage> {
 	@Override
 	public ChannelBuffer encode(AudioPlayMessage message) throws IOException {
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		ChannelBufferUtils.writeString(buffer, message.getIdentifier());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getIdentifier());
 		buffer.writeFloat(message.getX());
 		buffer.writeFloat(message.getY());
 		buffer.writeFloat(message.getZ());
@@ -31,7 +31,7 @@ public class AudioPlayCodec extends MessageCodec<AudioPlayMessage> {
 
 	@Override
 	public AudioPlayMessage decode(ChannelBuffer buffer) throws IOException {
-		String identifier = ChannelBufferUtils.readString(buffer);
+		String identifier = ChannelBufferUtils.readExtendedString(buffer);
 		float x = buffer.readFloat();
 		float y = buffer.readFloat();
 		float z = buffer.readFloat();

@@ -1,22 +1,7 @@
 package ch.spacebase.openclassic.client.network.handler.custom;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-
-import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.Blocks;
-import ch.spacebase.openclassic.api.block.model.Model;
-import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.player.Player;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.network.ClassicSession;
 import ch.spacebase.openclassic.game.network.MessageHandler;
 import ch.spacebase.openclassic.game.network.msg.custom.block.CustomBlockMessage;
@@ -25,7 +10,7 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 
 	@Override
 	public void handle(ClassicSession session, Player player, CustomBlockMessage message) {
-		List<Model> models = new ArrayList<Model>();
+		/* List<Model> models = new ArrayList<Model>();
 		models.add(message.getBlock().getModel());
 		models.addAll(message.getBlock().getOutwardModels().keySet());
 		for(Model model : models) {
@@ -78,7 +63,7 @@ public class CustomBlockMessageHandler extends MessageHandler<CustomBlockMessage
 					quad.getTexture().getParent().setTexture(file.getPath());
 				}
 			}
-		}
+		} */
 
 		Blocks.register(message.getBlock());
 	}

@@ -27,7 +27,7 @@ public class ClientPlayer implements Player {
 
 	private String name;
 	private com.mojang.minecraft.entity.player.Player handle;
-	private byte placeMode = 0;
+	private BlockType placeMode = null;
 	private DummySession dummySession = new DummySession(this);
 	private NBTData data = new NBTData("Player");
 	private boolean breakUnbreakables = false;
@@ -94,13 +94,13 @@ public class ClientPlayer implements Player {
 	}
 
 	@Override
-	public byte getPlaceMode() {
+	public BlockType getPlaceMode() {
 		return this.placeMode;
 	}
 
 	@Override
-	public void setPlaceMode(int type) {
-		this.placeMode = (byte) type;
+	public void setPlaceMode(BlockType type) {
+		this.placeMode = type;
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class ClientPlayer implements Player {
 	
 	public void setHandle(com.mojang.minecraft.entity.player.Player handle) {
 		this.handle = handle;
-		this.placeMode = 0;
+		this.placeMode = null;
 		this.breakUnbreakables = false;
 	}
 

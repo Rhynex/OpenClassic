@@ -8,12 +8,11 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.RenderHelper;
+import ch.spacebase.openclassic.client.render.GuiTextures;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.render.TextureManager;
 
 public class Arrow extends Entity {
 
@@ -154,8 +153,8 @@ public class Arrow extends Entity {
 		}
 	}
 
-	public void render(TextureManager textures, float dt) {
-		this.textureId = RenderHelper.getHelper().bindTexture("/textures/entity/arrow.png", true);
+	public void render(float dt) {
+		GuiTextures.ARROW.bind();
 		float brightness = this.level.getBrightness((int) this.x, (int) this.y, (int) this.z);
 		GL11.glPushMatrix();
 		GL11.glColor4f(brightness, brightness, brightness, 1);

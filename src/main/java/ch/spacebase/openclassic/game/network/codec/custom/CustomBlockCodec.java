@@ -1,11 +1,14 @@
 package ch.spacebase.openclassic.game.network.codec.custom;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
+import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.StepSound;
@@ -13,10 +16,11 @@ import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.QuadFactory;
-import ch.spacebase.openclassic.api.block.model.SubTexture;
 import ch.spacebase.openclassic.api.block.model.Texture;
+import ch.spacebase.openclassic.api.block.model.TextureFactory;
 import ch.spacebase.openclassic.api.block.model.Vertex;
 import ch.spacebase.openclassic.api.math.BoundingBox;
+import ch.spacebase.openclassic.game.SubTexture;
 import ch.spacebase.openclassic.game.network.MessageCodec;
 import ch.spacebase.openclassic.game.network.msg.custom.block.CustomBlockMessage;
 import ch.spacebase.openclassic.server.util.ChannelBufferUtils;
@@ -33,7 +37,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().getId());
 		buffer.writeByte(message.getBlock().isOpaque() ? 1 : 0);
 		buffer.writeByte(message.getBlock().isSelectable() ? 1 : 0);
-		ChannelBufferUtils.writeString(buffer, message.getBlock().getStepSound().name());
+		ChannelBufferUtils.writeExtendedString(buffer, message.getBlock().getStepSound().name());
 		buffer.writeByte(message.getBlock().isLiquid() ? 1 : 0);
 		buffer.writeInt(message.getBlock().getTickDelay());
 		buffer.writeByte(message.getBlock().getPreventsRendering() ? 1 : 0);
@@ -48,7 +52,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		buffer.writeByte(message.getBlock().isUnbreakable() ? 1 : 0);
 		buffer.writeByte(message.getBlock().getLiquidName() != null ? 1 : 0);
 		if(message.getBlock().getLiquidName() != null) {
-			ChannelBufferUtils.writeString(buffer, message.getBlock().getLiquidName());
+			ChannelBufferUtils.writeExtendedString(buffer, message.getBlock().getLiquidName());
 		}
 		
 		this.writeModel(buffer, message.getBlock().getModel());
@@ -58,7 +62,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 			BlockFace faces[] = outwardModels.get(model);
 			buffer.writeInt(faces.length);
 			for(BlockFace face : faces) {
-				ChannelBufferUtils.writeString(buffer, face.name());
+				ChannelBufferUtils.writeExtendedString(buffer, face.name());
 			}
 			
 			this.writeModel(buffer, model);
@@ -99,16 +103,15 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 				buffer.writeFloat(vertex.getZ());
 			}
 
-			ChannelBufferUtils.writeString(buffer, quad.getTexture().getParent().getTexture());
-			buffer.writeByte(quad.getTexture().getParent().isInJar() ? 1 : 0);
-			buffer.writeInt(quad.getTexture().getParent().getWidth());
-			buffer.writeInt(quad.getTexture().getParent().getHeight());
-			buffer.writeInt(quad.getTexture().getParent().getSubTextureWidth());
-			buffer.writeInt(quad.getTexture().getParent().getSubTextureHeight());
-			buffer.writeFloat(quad.getTexture().getX1());
-			buffer.writeFloat(quad.getTexture().getY1());
-			buffer.writeFloat(quad.getTexture().getWidth());
-			buffer.writeFloat(quad.getTexture().getHeight());
+			ChannelBufferUtils.writeExtendedString(buffer, quad.getTexture().getURL().toString());
+			buffer.writeByte(quad.getTexture() instanceof SubTexture ? 1 : 0);
+			buffer.writeInt(quad.getTexture().getX());
+			buffer.writeInt(quad.getTexture().getY());
+			buffer.writeInt(quad.getTexture().getWidth());
+			buffer.writeInt(quad.getTexture().getHeight());
+			buffer.writeInt(quad.getTexture().getFrameWidth());
+			buffer.writeInt(quad.getTexture().getFrameHeight());
+			buffer.writeInt(quad.getTexture().getFrameSpeed());
 		}
 	}
 
@@ -117,7 +120,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		byte id = buffer.readByte();
 		boolean opaque = buffer.readByte() == 1;
 		boolean selectable = buffer.readByte() == 1;
-		StepSound sound = StepSound.valueOf(ChannelBufferUtils.readString(buffer));
+		StepSound sound = StepSound.valueOf(ChannelBufferUtils.readExtendedString(buffer));
 		boolean liquid = buffer.readByte() == 1;
 		int delay = buffer.readInt();
 		boolean preventsRendering = buffer.readByte() == 1;
@@ -130,7 +133,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		int fogBlue = buffer.readInt();
 		float fogDensity = buffer.readFloat();
 		boolean unbreakable = buffer.readByte() == 1;
-		String liquidName = buffer.readByte() == 1 ? ChannelBufferUtils.readString(buffer) : null;
+		String liquidName = buffer.readByte() == 1 ? ChannelBufferUtils.readExtendedString(buffer) : null;
 		Model model = this.readModel(buffer);
 		int outwards = buffer.readInt();
 
@@ -138,7 +141,7 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 		for(int count = 0; count < outwards; count++) {
 			BlockFace faces[] = new BlockFace[buffer.readInt()];
 			for(int ct = 0; ct < faces.length; ct++) {
-				faces[ct] = BlockFace.valueOf(ChannelBufferUtils.readString(buffer));
+				faces[ct] = BlockFace.valueOf(ChannelBufferUtils.readExtendedString(buffer));
 			}
 			
 			block.addOutwardModel(this.readModel(buffer), faces);
@@ -203,21 +206,35 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 				vertices[ind] = new Vertex(x, y, z);
 			}
 
-			String texture = ChannelBufferUtils.readString(buffer);
-			boolean jar = buffer.readByte() == 1;
+			String u = ChannelBufferUtils.readExtendedString(buffer);
+			URL url = null;
+			try {
+				url = new URL(u);
+			} catch(MalformedURLException e) {
+				OpenClassic.getLogger().severe("Invalid texture URL when receiving custom block: " + u);
+			}
+			
+			boolean sub = buffer.readByte() == 1;
+			int x = buffer.readInt();
+			int y = buffer.readInt();
 			int width = buffer.readInt();
 			int height = buffer.readInt();
-			int swidth = buffer.readInt();
-			int sheight = buffer.readInt();
-			Texture t = new Texture(texture, jar, width, height, swidth, sheight);
+			int frameWidth = buffer.readInt();
+			int frameHeight = buffer.readInt();
+			int frameSpeed = buffer.readInt();
 			
-			float subx = buffer.readFloat();
-			float suby = buffer.readFloat();
-			float subwidth = buffer.readFloat();
-			float subheight = buffer.readFloat();
-			SubTexture sub = new SubTexture(t, subx, suby, subwidth, subheight);
+			Texture t = null;
+			if(frameWidth > 0 && frameHeight > 0 && frameSpeed > 0) {
+				t = TextureFactory.getFactory().newTexture(url, frameWidth, frameHeight, frameSpeed);
+			} else {
+				t = TextureFactory.getFactory().newTexture(url);
+			}
 			
-			model.addQuad(QuadFactory.getFactory().newQuad(qid, sub, vertices[0], vertices[1], vertices[2], vertices[3]));
+			if(sub) {
+				t = t.getSubTexture(x, y, width, height);
+			}
+			
+			model.addQuad(QuadFactory.getFactory().newQuad(qid, t, vertices[0], vertices[1], vertices[2], vertices[3]));
 		}
 		
 		return model;

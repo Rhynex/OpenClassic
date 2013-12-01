@@ -2,7 +2,7 @@ package ch.spacebase.openclassic.client.gui.base;
 
 import org.lwjgl.opengl.GL11;
 
-import ch.spacebase.openclassic.api.block.model.SubTexture;
+import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.gui.base.BlockPreview;
 import ch.spacebase.openclassic.api.gui.base.Button;
 import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
@@ -37,8 +37,7 @@ public class ClientComponentHelper extends ComponentHelper {
 	@Override
 	public void renderButton(Button button, int mouseX, int mouseY) {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		RenderHelper.getHelper().glColor(1, 1, 1, 1);
-		SubTexture texture = GuiTextures.BUTTON;
+		Texture texture = GuiTextures.BUTTON;
 		boolean hover = mouseX >= 0 && mouseY >= 0 && mouseX < button.getWidth() && mouseY < button.getHeight();
 		if (!button.isActive()) {
 			texture = GuiTextures.BUTTON_INACTIVE;
@@ -46,15 +45,7 @@ public class ClientComponentHelper extends ComponentHelper {
 			texture = GuiTextures.BUTTON_HOVER;
 		}
 
-		SubTexture part1 = new SubTexture(texture.getParent(), texture.getX1(), texture.getY1(), button.getWidth() / 2, button.getHeight() / 2);
-		SubTexture part2 = new SubTexture(texture.getParent(), texture.getX1() + 400 - button.getWidth() / 2, texture.getY1(), button.getWidth() / 2, button.getHeight() / 2);
-		SubTexture part3 = new SubTexture(texture.getParent(), texture.getX1(), texture.getY1() + 40 - button.getHeight() / 2, button.getWidth() / 2, button.getHeight() / 2);
-		SubTexture part4 = new SubTexture(texture.getParent(), texture.getX1() + 400 - button.getWidth() / 2, texture.getY1() + 40 - button.getHeight() / 2, button.getWidth() / 2, button.getHeight() / 2);
-		RenderHelper.getHelper().drawSubTex(part1, button.getX(), button.getY(), 1);
-		RenderHelper.getHelper().drawSubTex(part2, button.getX() + button.getWidth() / 2, button.getY(), 1);
-		RenderHelper.getHelper().drawSubTex(part3, button.getX(), button.getY() + button.getHeight() / 2, 1);
-		RenderHelper.getHelper().drawSubTex(part4, button.getX() + button.getWidth() / 2, button.getY() + button.getHeight() / 2, 1);
-
+		RenderHelper.getHelper().drawStretchedTexture(texture, button.getX(), button.getY(), button.getWidth(), button.getHeight());
 		String message = button.getText();
 		if(message.length() > 30) {
 			message = message.substring(0, 30) + "...";
@@ -88,9 +79,7 @@ public class ClientComponentHelper extends ComponentHelper {
 	@Override
 	public void renderImage(Image image) {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		RenderHelper.getHelper().enableBlend();
-		RenderHelper.getHelper().drawStretchedSubTex(image.getTexture(), image.getX(), image.getY(), image.getWidth(), image.getHeight());
-		RenderHelper.getHelper().disableBlend();
+		RenderHelper.getHelper().drawStretchedTexture(image.getTexture(), image.getX(), image.getY(), image.getWidth(), image.getHeight());
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 

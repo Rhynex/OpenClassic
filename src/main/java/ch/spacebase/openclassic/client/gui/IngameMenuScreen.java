@@ -28,14 +28,21 @@ public class IngameMenuScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Button("dumplevel", this.getWidth() / 2 - 200, this.getHeight() / 2 - 48, OpenClassic.getGame().getTranslator().translate("gui.menu.dump")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("texturepacks", this.getWidth() / 2 - 200, this.getHeight() / 2 - 48, OpenClassic.getGame().getTranslator().translate("gui.main-menu.texture-packs")).setCallback(new ButtonCallback() {
+			@Override
+			public void onButtonClick(Button button) {
+				OpenClassic.getClient().setActiveComponent(new TexturePackScreen(IngameMenuScreen.this));
+			}
+		}));
+		
+		this.attachComponent(new Button("dumplevel", this.getWidth() / 2 - 200, this.getHeight() / 2, OpenClassic.getGame().getTranslator().translate("gui.menu.dump")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				OpenClassic.getClient().setActiveComponent(new LevelDumpScreen(IngameMenuScreen.this));
 			}
 		}));
 		
-		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 2, OpenClassic.getGame().getTranslator().translate("gui.menu.main-menu")).setCallback(new ButtonCallback() {
+		this.attachComponent(new Button("mainmenu", this.getWidth() / 2 - 200, this.getHeight() / 2 + 48, OpenClassic.getGame().getTranslator().translate("gui.menu.main-menu")).setCallback(new ButtonCallback() {
 			@Override
 			public void onButtonClick(Button button) {
 				if(!OpenClassic.getClient().isInMultiplayer()) {

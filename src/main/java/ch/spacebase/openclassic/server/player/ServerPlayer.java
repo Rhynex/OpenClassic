@@ -46,7 +46,7 @@ public class ServerPlayer implements Player {
 	private String name;
 	private String displayName;
 	private ServerSession session;
-	private byte placeMode = 0;
+	private BlockType placeMode = null;
 	private ClientInfo client = new ClientInfo(this);
 	private NBTData data;
 	private List<String> hidden = new CopyOnWriteArrayList<String>();
@@ -95,12 +95,12 @@ public class ServerPlayer implements Player {
 		this.displayName = name;
 	}
 
-	public byte getPlaceMode() {
+	public BlockType getPlaceMode() {
 		return this.placeMode;
 	}
 
-	public void setPlaceMode(int type) {
-		this.placeMode = (byte) type;
+	public void setPlaceMode(BlockType type) {
+		this.placeMode = type;
 	}
 
 	public void moveTo(Position pos) {

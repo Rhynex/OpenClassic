@@ -5,18 +5,20 @@ import java.awt.image.BufferedImage;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.model.SubTexture;
+import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.client.render.ClientTexture;
 import ch.spacebase.openclassic.client.render.RenderHelper;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class Minimap extends GuiComponent {
 
 	private BufferedImage texture;
+	private ClientTexture tex;
 
 	public Minimap(String name, int x, int y, int width, int height) {
 		super(name, x, y, width, height);
 		this.texture = new BufferedImage(width - 2, height - 2, BufferedImage.TYPE_INT_ARGB);
+		this.tex = new ClientTexture(this.texture);
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public class Minimap extends GuiComponent {
 		if(OpenClassic.getClient().getLevel() == null) return;
 		this.updateTexture();
 		RenderHelper.getHelper().drawBox(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), Color.black.getRGB());
-		RenderHelper.getHelper().drawImage(this.texture, this.getX() + 1, this.getY() + 1);
+		RenderHelper.getHelper().drawTexture(this.tex, this.getX() + 1, this.getY() + 1, 1);
 	}
 
 	private void updateTexture() {
@@ -55,8 +57,10 @@ public class Minimap extends GuiComponent {
 						if(imgX + w < this.texture.getWidth() && imgY + h < this.texture.getHeight()) {
 							if(type != null) {
 								this.texture.setRGB(imgX + w, imgY + h, rgb);
+								this.tex.resetTextureId();
 							} else {
 								this.texture.setRGB(imgX + w, imgY + h, 0);
+								this.tex.resetTextureId();
 							}
 						}
 					}
@@ -72,6 +76,7 @@ public class Minimap extends GuiComponent {
 		for(int w = 0; w < scale; w++) {
 			for(int h = 0; h < scale; h++) {
 				this.texture.setRGB((this.texture.getWidth() / 2) + w, (this.texture.getHeight() / 2) + h, Color.orange.getRGB());
+				this.tex.resetTextureId();
 			}
 		}
 	}
@@ -87,15 +92,12 @@ public class Minimap extends GuiComponent {
 			quad = 0;
 		}
 		
-		SubTexture tex = type.getModel().getQuad(quad).getTexture();
-		if(tex == null) return 0;
-		
-		if(!GeneralUtils.getMinecraft().textureManager.textures.containsKey(tex.getParent().getTexture())) {
-			RenderHelper.getHelper().bindTexture(tex.getParent().getTexture(), tex.getParent().isInJar());
+		Texture tex = type.getModel().getQuad(quad).getTexture();
+		if(tex == null) {
+			return 0;
 		}
-
-		BufferedImage img = GeneralUtils.getMinecraft().textureManager.textureImgs.get(GeneralUtils.getMinecraft().textureManager.textures.get(tex.getParent().getTexture()));
-		return img.getRGB((int) tex.getX1(), (int) tex.getY1());
+		
+		return tex.getRGB(0, 0);
 	}
 
 }

@@ -9,9 +9,8 @@ import com.mojang.minecraft.entity.mob.ai.SkeletonAI;
 public class Skeleton extends Zombie {
 
 	public Skeleton(ClientLevel level, float x, float y, float z) {
-		super(level, x, y, z);
+		super(level, x, y, z, "/textures/entity/mob/skeleton.png");
 		this.modelName = "skeleton";
-		this.textureName = "/textures/entity/mob/skeleton.png";
 		this.deathScore = 120;
 		BasicAttackAI ai = new SkeletonAI(this);
 		ai.runSpeed = 0.3F;

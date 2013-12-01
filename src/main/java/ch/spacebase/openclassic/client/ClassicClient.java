@@ -17,6 +17,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.QuadFactory;
+import ch.spacebase.openclassic.api.block.model.TextureFactory;
 import ch.spacebase.openclassic.api.event.level.LevelCreateEvent;
 import ch.spacebase.openclassic.api.event.level.LevelLoadEvent;
 import ch.spacebase.openclassic.api.event.level.LevelSaveEvent;
@@ -43,6 +44,7 @@ import ch.spacebase.openclassic.client.gui.base.ClientComponentHelper;
 import ch.spacebase.openclassic.client.input.ClientInputHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.ClientQuadFactory;
+import ch.spacebase.openclassic.client.render.ClientTextureFactory;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.HTTPUtil;
 import ch.spacebase.openclassic.client.util.ServerDataStore;
@@ -69,6 +71,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		super(GeneralUtils.getMinecraftDirectory());
 		InputHelper.setHelper(new ClientInputHelper());
 		QuadFactory.setFactory(new ClientQuadFactory());
+		TextureFactory.setFactory(new ClientTextureFactory());
 		ComponentHelper.setHelper(new ClientComponentHelper());
 		this.mc = mc;
 
@@ -98,7 +101,7 @@ public class ClassicClient extends ClassicGame implements Client {
 
 	public void init() {
 		OpenClassic.getLogger().info(String.format(this.getTranslator().translate("core.startup.client"), Constants.VERSION));
-
+		
 		ServerDataStore.loadFavorites(this.getDirectory());
 		this.registerExecutor(this, new ClientCommands());
 		this.registerGenerator("normal", new NormalGenerator());

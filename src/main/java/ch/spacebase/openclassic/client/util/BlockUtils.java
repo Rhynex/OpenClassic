@@ -400,7 +400,6 @@ public class BlockUtils {
 	public static void dropItems(BlockType block, ClientLevel level, int x, int y, int z, float chance) {
 		if(OpenClassic.getClient().isInSurvival()) {
 			int dropCount = getDropCount(block);
-
 			for(int count = 0; count < dropCount; count++) {
 				if(rand.nextFloat() <= chance) {
 					float xOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
