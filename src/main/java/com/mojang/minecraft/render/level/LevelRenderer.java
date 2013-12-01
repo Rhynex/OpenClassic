@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.Renderer;
+import ch.spacebase.openclassic.client.util.ChunkDistanceComparator;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
 

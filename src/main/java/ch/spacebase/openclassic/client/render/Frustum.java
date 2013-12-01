@@ -1,11 +1,11 @@
-package com.mojang.minecraft.render;
+package ch.spacebase.openclassic.client.render;
 
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-public final class Frustum {
+public class Frustum {
 
 	public static float[][] frustum = new float[16][16];
 	public static float[] projectionMatrix = new float[16];

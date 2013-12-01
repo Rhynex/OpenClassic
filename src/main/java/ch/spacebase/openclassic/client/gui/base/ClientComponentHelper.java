@@ -19,7 +19,7 @@ public class ClientComponentHelper extends ComponentHelper {
 
 	@Override
 	public int getStringWidth(String string, boolean scaled) {
-		int width = (int) RenderHelper.getHelper().getStringWidth(string);
+		int width = RenderHelper.getHelper().getStringWidth(string);
 		if(scaled) {
 			width *= 2;
 		}
@@ -52,11 +52,11 @@ public class ClientComponentHelper extends ComponentHelper {
 		}
 		
 		if (!button.isActive()) {
-			RenderHelper.getHelper().renderText(message, button.getX() + button.getWidth() / 2, button.getY() + (button.getHeight() - 16) / 2, -6250336);
+			RenderHelper.getHelper().renderText(message, button.getX() + button.getWidth() / 2, button.getY() + (button.getHeight() - 16) / 2, -6250336, true);
 		} else if (hover) {
-			RenderHelper.getHelper().renderText(message, button.getX() + button.getWidth() / 2, button.getY() + (button.getHeight() - 16) / 2, 16777120);
+			RenderHelper.getHelper().renderText(message, button.getX() + button.getWidth() / 2, button.getY() + (button.getHeight() - 16) / 2, 16777120, true);
 		} else {
-			RenderHelper.getHelper().renderText(message, button.getX() + button.getWidth() / 2, button.getY() + (button.getHeight() - 16) / 2, 14737632);
+			RenderHelper.getHelper().renderText(message, button.getX() + button.getWidth() / 2, button.getY() + (button.getHeight() - 16) / 2, 14737632, true);
 		}
 		
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

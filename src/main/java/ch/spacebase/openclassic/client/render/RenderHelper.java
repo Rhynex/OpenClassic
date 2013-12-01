@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GLContext;
 
+import ch.spacebase.openclassic.api.Color;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockFace;
 import ch.spacebase.openclassic.api.block.BlockType;
@@ -17,7 +18,6 @@ import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.client.ClassicClient;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
@@ -26,7 +26,6 @@ import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.render.FontRenderer;
 
 public class RenderHelper {
 
@@ -42,6 +41,7 @@ public class RenderHelper {
 	}
 
 	private MipmapMode mipmap = MipmapMode.NONE;
+	private int[] font = new int[256];
 	
 	public void init() {
 		if(GLContext.getCapabilities().OpenGL30) {
@@ -51,6 +51,29 @@ public class RenderHelper {
 		} else if(GLContext.getCapabilities().OpenGL14) {
 			this.mipmap = MipmapMode.GL14;
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
+		}
+		
+		int fontData[] = GuiTextures.FONT.getRGBA();
+		for(int character = 0; character < 256; character++) {
+			int tx = character % 16;
+			int ty = character / 16;
+			int chWidth = 0;
+			for(boolean empty = false; chWidth < 8 && !empty; chWidth++) {
+				int xk = (tx << 3) + chWidth;
+				empty = true;
+				for(int y = 0; y < 8 && empty; y++) {
+					int yk = ((ty << 3) + y) * GuiTextures.FONT.getWidth();
+					if((fontData[xk + yk] & 255) > 128) {
+						empty = false;
+					}
+				}
+			}
+
+			if(character == 32) {
+				chWidth = 4;
+			}
+
+			this.font[character] = chWidth * 2;
 		}
 	}
 	
@@ -77,61 +100,103 @@ public class RenderHelper {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
-	public void renderText(String text, float x, float y) {
-		this.renderText(text, x, y, true);
-	}
-
 	public void renderText(String text, float x, float y, boolean xCenter) {
 		this.renderText(text, x, y, 16777215, xCenter);
 	}
-
-	public void renderScaledText(String text, float x, float y) {
-		this.renderScaledText(text, x, y, true);
+	
+	public void renderText(String text, float x, float y, int color, boolean xCenter) {
+		if(xCenter) {
+			this.renderWithShadow(text, (int) x - this.getStringWidth(text) / 2, (int) y, color, false);
+		} else {
+			this.renderWithShadow(text, (int) x, (int) y, color, false);
+		}
 	}
 
 	public void renderScaledText(String text, float x, float y, boolean xCenter) {
-		FontRenderer renderer = ((ClassicClient) OpenClassic.getClient()).getMinecraft().fontRenderer;
-
 		if(xCenter) {
-			renderer.renderWithShadow(text, (int) x - renderer.getWidth(text), (int) y, 16777215, true);
+			this.renderWithShadow(text, (int) x - this.getStringWidth(text), (int) y, 16777215, true);
 		} else {
-			renderer.renderWithShadow(text, (int) x, (int) y, 16777215, true);
+			this.renderWithShadow(text, (int) x, (int) y, 16777215, true);
 		}
 	}
-
-	public void renderText(String text, float x, float y, int color) {
-		this.renderText(text, x, y, color, true);
+	
+	private void renderWithShadow(String text, int x, int y, int color, boolean scaled) {
+		this.render(text, x + 2, y + 2, color, true, scaled);
+		this.render(text, x, y, color, false, scaled);
 	}
 
-	public void renderText(String text, float x, float y, int color, boolean xCenter) {
-		FontRenderer renderer = ((ClassicClient) OpenClassic.getClient()).getMinecraft().fontRenderer;
+	private void render(String text, int x, int y, int color, boolean shadow, boolean scaled) {
+		if(scaled) {
+			GL11.glScalef(2, 2, 2);
+			GL11.glTranslatef(-(x / 2), -(y / 2), 0);
+		}
 
-		if(xCenter) {
-			renderer.renderWithShadow(text, (int) x - renderer.getWidth(text) / 2, (int) y, color);
-		} else {
-			renderer.renderWithShadow(text, (int) x, (int) y, color);
+		if(text != null) {
+			char[] chars = text.toCharArray();
+			if(shadow) {
+				color = (color & 16579836) >> 2;
+			}
+
+			GuiTextures.FONT.bind();
+			Renderer.get().begin();
+			Renderer.get().color(color);
+			int width = 0;
+			for(int count = 0; count < chars.length; count++) {
+				if(chars[count] == '&' && chars.length > count + 1) {
+					Color code = Color.getByChar(chars[count + 1]);
+					if(code == null) {
+						code = Color.WHITE;
+					}
+
+					int red = code.getRed();
+					int green = code.getGreen();
+					int blue = code.getBlue();
+					int c = red << 16 | green << 8 | blue;
+					if(shadow) {
+						c = (c & 16579836) >> 2;
+					}
+
+					Renderer.get().color(c);
+					count++;
+					continue;
+				}
+				
+				int tx = chars[count] % 16 << 3;
+				int ty = chars[count] / 16 << 3;
+				Renderer.get().vertexuv((x + width), y + 16, 0, tx / 128f, (ty + 7.99f) / 128f);
+				Renderer.get().vertexuv((x + width) + 16, y + 16, 0, (tx + 7.99f) / 128f, (ty + 7.99f) / 128f);
+				Renderer.get().vertexuv((x + width) + 16, y, 0, (tx + 7.99f) / 128f, ty / 128f);
+				Renderer.get().vertexuv((x + width), y, 0, tx / 128f, ty / 128f);
+				if(chars[count] < this.font.length) {
+					width += this.font[chars[count]];
+				}
+			}
+
+			Renderer.get().end();
+		}
+
+		if(scaled) {
+			GL11.glTranslatef(x / 2, y / 2, 0);
+			GL11.glScalef(0.5f, 0.5f, 0.5f);
 		}
 	}
-
-	public void renderTextNoShadow(String text, float x, float y) {
-		this.renderText(text, x, y, true);
-	}
-
-	public void renderTextNoShadow(String text, float x, float y, boolean xCenter) {
-		this.renderText(text, x, y, 16777215, xCenter);
-	}
-
-	public void renderTextNoShadow(String text, float x, float y, int color) {
-		this.renderText(text, x, y, color, true);
-	}
-
-	public void renderTextNoShadow(String text, float x, float y, int color, boolean xCenter) {
-		FontRenderer renderer = ((ClassicClient) OpenClassic.getClient()).getMinecraft().fontRenderer;
-
-		if(xCenter) {
-			renderer.renderNoShadow(text, (int) x - renderer.getWidth(text) / 2, (int) y, color);
+	
+	public int getStringWidth(String string) {
+		if(string == null) {
+			return 0;
 		} else {
-			renderer.renderNoShadow(text, (int) x, (int) y, color);
+			char[] chars = string.toCharArray();
+			int width = 0;
+
+			for(int index = 0; index < chars.length; index++) {
+				if(chars[index] == '&') {
+					index++;
+				} else if(chars[index] < this.font.length) {
+					width += this.font[chars[index]];
+				}
+			}
+
+			return width;
 		}
 	}
 
@@ -541,9 +606,9 @@ public class RenderHelper {
 		}
 
 		Renderer.get().vertexuv(x, y, z, x1, y1);
-		Renderer.get().vertexuv(x, y + texture.getHeight(), z, x1, y2);
-		Renderer.get().vertexuv(x + texture.getWidth(), y + texture.getHeight(), z, x2, y2);
-		Renderer.get().vertexuv(x + texture.getWidth(), y, z, x2, y1);
+		Renderer.get().vertexuv(x, y + texture.getHeight() * scale, z, x1, y2);
+		Renderer.get().vertexuv(x + texture.getWidth() * scale, y + texture.getHeight() * scale, z, x2, y2);
+		Renderer.get().vertexuv(x + texture.getWidth() * scale, y, z, x2, y1);
 		Renderer.get().end();
 	}
 	
@@ -638,10 +703,6 @@ public class RenderHelper {
 	
 			particles.spawnParticle((new TerrainParticle(level, particleX, particleY, particleZ, 0.0F, 0.0F, 0.0F, level.getBlockTypeAt(x, y, z))).setPower(0.2F).scale(0.6F));
 		}
-	}
-
-	public float getStringWidth(String string) {
-		return GeneralUtils.getMinecraft().fontRenderer.getWidth(string);
 	}
 
 	public void drawRotatedBlock(int x, int y, BlockType block) {

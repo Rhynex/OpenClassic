@@ -1,10 +1,11 @@
-package com.mojang.minecraft.render.level;
+package ch.spacebase.openclassic.client.util;
 
 import java.util.Comparator;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
+import com.mojang.minecraft.render.level.Chunk;
 
-public final class ChunkVisibleAndDistanceComparator implements Comparator<Chunk> {
+public class ChunkVisibleAndDistanceComparator implements Comparator<Chunk> {
 
 	private LocalPlayer player;
 

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.spacebase.openclassic.api.math.BoundingBox;
+import ch.spacebase.openclassic.client.render.Frustum;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.render.Frustum;
 
 public class BlockMap {
 

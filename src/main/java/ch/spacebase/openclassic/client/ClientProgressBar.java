@@ -95,13 +95,14 @@ public class ClientProgressBar implements ProgressBar {
 			this.renderBar(false);
 			RenderHelper.getHelper().drawBlackBG(0, height - 56, width, height - (height - 56));
 			RenderHelper.getHelper().drawTexture(GuiTextures.LOGO, 20, 20, 0, 0.5625f, 1);
-			RenderHelper.getHelper().renderScaledText(this.title, width - 20 - RenderHelper.getHelper().getStringWidth(this.title), 20);
+			RenderHelper.getHelper().renderScaledText(this.title, width - 20 - RenderHelper.getHelper().getStringWidth(this.title), 20, true);
 			if(this.isSubtitleScaled()) {
-				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 64);
+				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 64, true);
 			} else {
-				RenderHelper.getHelper().renderText(this.subtitle, width / 2, height / 2 - 64);
+				RenderHelper.getHelper().renderText(this.subtitle, width / 2, height / 2 - 64, true);
 			}
-			RenderHelper.getHelper().renderText(this.text, width / 2, height - 38);
+			
+			RenderHelper.getHelper().renderText(this.text, width / 2, height - 38, true);
 			if(fresh) {
 				Display.update();
 			}

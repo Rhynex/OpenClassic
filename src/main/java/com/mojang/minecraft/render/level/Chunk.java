@@ -7,10 +7,10 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.render.Frustum;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.render.Frustum;
 
 public class Chunk {
 

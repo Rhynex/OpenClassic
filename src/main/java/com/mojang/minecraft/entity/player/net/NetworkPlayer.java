@@ -7,10 +7,10 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.ClientTexture;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.Minecraft;
 import com.mojang.minecraft.entity.player.Player;
-import com.mojang.minecraft.render.FontRenderer;
 
 public class NetworkPlayer extends Player {
 
@@ -50,30 +50,29 @@ public class NetworkPlayer extends Player {
 	}
 
 	public void renderHover(float dt) {
-		FontRenderer fontRenderer = this.minecraft.fontRenderer;
 		GL11.glPushMatrix();
 		GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt + 0.8F + this.renderOffset, this.zo + (this.z - this.zo) * dt);
 		GL11.glRotatef(-this.minecraft.player.yaw, 0, 1, 0);
 		GL11.glScalef(0.05F, -0.05F, 0.05F);
-		GL11.glTranslatef((-fontRenderer.getWidth(this.displayName)) / 2F, 0, 0);
+		GL11.glTranslatef((-RenderHelper.getHelper().getStringWidth(this.displayName)) / 2F, 0, 0);
 		GL11.glNormal3f(1, -1, 1);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glDisable(GL11.GL_COLOR_BUFFER_BIT);
 		if(this.getName().equalsIgnoreCase("Notch")) {
-			fontRenderer.renderNoShadow(this.displayName, 0, 0, 16776960);
+			RenderHelper.getHelper().renderText(this.displayName, 0, 0, 16776960, false);
 		} else {
-			fontRenderer.renderNoShadow(this.displayName, 0, 0, 16777215);
+			RenderHelper.getHelper().renderText(this.displayName, 0, 0, 16777215, false);
 		}
 
 		GL11.glDepthFunc(GL11.GL_GREATER);
 		GL11.glDepthMask(false);
 		GL11.glColor4f(1, 1, 1, 0.8F);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		fontRenderer.renderNoShadow(this.displayName, 0, 0, 16777215);
+		RenderHelper.getHelper().renderText(this.displayName, 0, 0, 16777215, false);
 		GL11.glDepthMask(true);
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glTranslatef(1, 1, -0.05F);
-		fontRenderer.renderNoShadow(this.getName(), 0, 0, 5263440);
+		RenderHelper.getHelper().renderText(this.getName(), 0, 0, 5263440, false);
 		GL11.glEnable(GL11.GL_COLOR_BUFFER_BIT);
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glPopMatrix();
