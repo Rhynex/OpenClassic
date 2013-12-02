@@ -25,10 +25,10 @@ public class GameQuad implements Quad {
 	
 	public GameQuad(int id, Texture texture, Vertex v1, Vertex v2, Vertex v3, Vertex v4) {
 		this(id, texture);
-		this.addVertex(0, v1);
-		this.addVertex(1, v2);
-		this.addVertex(2, v3);
-		this.addVertex(3, v4);
+		this.setVertex(0, v1);
+		this.setVertex(1, v2);
+		this.setVertex(2, v3);
+		this.setVertex(3, v4);
 	}
 	
 	@Override
@@ -37,14 +37,14 @@ public class GameQuad implements Quad {
 	}
 	
 	@Override
-	public void addVertex(int id, Vertex vertex) {
+	public void setVertex(int id, Vertex vertex) {
 		Validate.isTrue(id >= 0 && id <= 3, "Quad can only have 4 vertices with IDs 0 - 3!");
 		this.vertices[id] = vertex;
 	}
 	
 	@Override
 	public void addVertex(int id, float x, float y, float z) {
-		this.addVertex(id, new Vertex(x, y, z));
+		this.setVertex(id, new Vertex(x, y, z));
 	}
 	
 	@Override

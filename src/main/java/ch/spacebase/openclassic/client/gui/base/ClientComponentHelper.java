@@ -45,7 +45,15 @@ public class ClientComponentHelper extends ComponentHelper {
 			texture = GuiTextures.BUTTON_HOVER;
 		}
 
-		RenderHelper.getHelper().drawStretchedTexture(texture, button.getX(), button.getY(), button.getWidth(), button.getHeight());
+        Texture topLeft = texture.getSubTexture(0, 0, button.getWidth() / 2, button.getHeight() / 2);
+        Texture topRight = texture.getSubTexture(400 - button.getWidth() / 2, 0, button.getWidth() / 2, button.getHeight() / 2);
+        Texture bottomLeft = texture.getSubTexture(0, 40 - button.getHeight() / 2, button.getWidth() / 2, button.getHeight() / 2);
+        Texture bottomRight = texture.getSubTexture(400 - button.getWidth() / 2, 40 - button.getHeight() / 2, button.getWidth() / 2, button.getHeight() / 2);
+        RenderHelper.getHelper().drawTexture(topLeft, button.getX(), button.getY(), 1);
+        RenderHelper.getHelper().drawTexture(topRight, button.getX() + button.getWidth() / 2, button.getY(), 1);
+        RenderHelper.getHelper().drawTexture(bottomLeft, button.getX(), button.getY() + button.getHeight() / 2, 1);
+        RenderHelper.getHelper().drawTexture(bottomRight, button.getX() + button.getWidth() / 2, button.getY() + button.getHeight() / 2, 1);
+        
 		String message = button.getText();
 		if(message.length() > 30) {
 			message = message.substring(0, 30) + "...";

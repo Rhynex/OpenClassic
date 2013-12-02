@@ -122,6 +122,11 @@ public class GameTexture implements TextureBase {
 
 	@Override
 	public void bind() {
+		this.bind(false);
+	}
+	
+	@Override
+	public void bind(boolean force) {
 	}
 
 	@Override

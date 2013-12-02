@@ -38,16 +38,13 @@ public class ClientTextureFactory extends TextureFactory {
 	}
 	
 	public void updateTextures() {
-		List<ClientTexture> disposed = new ArrayList<ClientTexture>();
-		for(ClientTexture texture : this.textures) {
+		for(ClientTexture texture : new ArrayList<ClientTexture>(this.textures)) {
 			if(texture.isDisposed()) {
-				disposed.add(texture);
+				this.textures.remove(texture);
 			}
 			
 			texture.update();
 		}
-		
-		this.textures.remove(disposed);
 	}
 	
 	public void resetTextures() {

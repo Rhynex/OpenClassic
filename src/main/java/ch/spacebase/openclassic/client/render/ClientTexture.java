@@ -68,9 +68,9 @@ public class ClientTexture extends GameTexture {
 	public boolean isBound() {
 		return this.textureId != -1 && bound == this.textureId;
 	}
-
+	
 	@Override
-	public void bind() {
+	public void bind(boolean force) {
 		if(this.isDisposed()) {
 			return;
 		}
@@ -79,7 +79,7 @@ public class ClientTexture extends GameTexture {
 			this.textureId = this.generateTextureId();
 		}
 		
-		if(this.isBound()) {
+		if(this.isBound() && !force) {
 			return;
 		}
 
@@ -161,11 +161,11 @@ public class ClientTexture extends GameTexture {
 					this.currentFrame = 0;
 				}
 				
-				BufferedImage image = this.frames[this.currentFrame];
-				int rgba[] = new int[image.getWidth() * image.getHeight()];
-				image.getRGB(0, 0, image.getWidth(), image.getHeight(), rgba, 0, image.getWidth());
-				this.image.setRGB(0, 0, this.getWidth(), this.getHeight(), rgba, 0, this.getWidth());
-				this.bind(this.image, this.textureId);
+				if(this.textureId == -1) {
+					this.textureId = this.generateTextureId();
+				} else {
+					this.bind(this.getCurrentImage(), this.textureId);
+				}
 			}
 		}
 	}

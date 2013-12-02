@@ -130,7 +130,6 @@ public class LevelRenderer {
 		GL11.glNewList(this.boundaryList + 1, GL11.GL_COMPILE);
 		GL11.glColor3f(1, 1, 1);
 		float waterLevel = this.level.getWaterLevel();
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		int len = 128;
 		if(len > this.level.getWidth()) {
 			len = this.level.getWidth();
@@ -162,7 +161,7 @@ public class LevelRenderer {
 		this.queueChunks(0, 0, 0, this.level.getWidth(), this.level.getHeight(), this.level.getDepth());
 	}
 
-	public int sortAndRender(LocalPlayer player, int pass) {
+	public int sortAndRender(LocalPlayer player, boolean firstPass) {
 		float xDiff = player.x - this.lastLoadX;
 		float yDiff = player.y - this.lastLoadY;
 		float zDiff = player.z - this.lastLoadZ;
@@ -180,7 +179,7 @@ public class LevelRenderer {
 
 		this.listBuffer.clear();
 		for(int index = 0; index < this.loadQueue.length; index++) {
-			this.loadQueue[index].appendLists(this.listBuffer, pass);
+			this.loadQueue[index].appendLists(this.listBuffer, firstPass);
 		}
 
 		this.listBuffer.flip();

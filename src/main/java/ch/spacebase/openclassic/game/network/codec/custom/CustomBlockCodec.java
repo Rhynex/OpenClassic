@@ -73,6 +73,12 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 	
 	private void writeModel(ChannelBuffer buffer, Model model) {
 		buffer.writeByte(model instanceof CuboidModel ? 1 : 0);
+		if(model instanceof CuboidModel) {
+			buffer.writeInt(((CuboidModel) model).getSubWidth());
+			buffer.writeInt(((CuboidModel) model).getSubHeight());
+		}
+		
+		buffer.writeByte(model.useCulling() ? 1 : 0);
 		buffer.writeByte(model.getDefaultCollisionBox() != null ? (byte) 1 : (byte) 0);
 		if(model.getDefaultCollisionBox() != null) {
 			buffer.writeFloat(model.getDefaultCollisionBox().getX1());
@@ -167,8 +173,11 @@ public class CustomBlockCodec extends MessageCodec<CustomBlockMessage> {
 	}
 	
 	private Model readModel(ChannelBuffer buffer) {
-		Model model = buffer.readByte() == 1 ? new CuboidModel(BlockType.TERRAIN_TEXTURE, 16, 0, 0, 0, 1, 1, 1) : new Model();
+		Model model = buffer.readByte() == 1 ? new CuboidModel(BlockType.TERRAIN_TEXTURE, 16, 0, 0, 0, 1, 1, 1, buffer.readInt(), buffer.readInt()) : new Model();
 		model.clearQuads();
+		if(buffer.readByte() == 0) {
+			model.setUseCulling(false);
+		}
 
 		if(buffer.readByte() == 1) {
 			float x1 = buffer.readFloat();

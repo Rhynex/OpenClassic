@@ -1,6 +1,7 @@
 package com.mojang.minecraft.entity.particle;
 
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.render.GuiTextures;
 import ch.spacebase.openclassic.client.render.Renderer;
 
 import com.mojang.minecraft.entity.Entity;
@@ -73,6 +74,7 @@ public class Particle extends Entity {
 	}
 
 	public void render(float dt, float xmod, float ymod, float zmod, float xdir, float zdir) {
+		GuiTextures.PARTICLES.bind();
 		float tminX = (this.tex % 16) / 16f;
 		float tmaxX = tminX + (1 / 16f);
 		float tminY = (this.tex / 16f) / 16f;
@@ -87,10 +89,6 @@ public class Particle extends Entity {
 		Renderer.get().vertexuv(x - xmod * size + xdir * size, y + ymod * size, z - zmod * size + zdir * size, tminX, tminY);
 		Renderer.get().vertexuv(x + xmod * size + xdir * size, y + ymod * size, z + zmod * size + zdir * size, tmaxX, tminY);
 		Renderer.get().vertexuv(x + xmod * size - xdir * size, y - ymod * size, z + zmod * size - zdir * size, tmaxX, tmaxY);
-	}
-
-	public int getParticleTextureId() {
-		return 0;
 	}
 	
 }

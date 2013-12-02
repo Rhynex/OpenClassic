@@ -24,10 +24,6 @@ public class TerrainParticle extends Particle {
 		this.bCol = 0.6F;
 	}
 
-	public int getParticleTextureId() {
-		return 1;
-	}
-
 	public void render(float dt, float xmod, float ymod, float zmod, float xdir, float zdir) {
 		if(this.texture == null) {
 			return;

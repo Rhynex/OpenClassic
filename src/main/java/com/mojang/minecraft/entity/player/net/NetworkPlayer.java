@@ -67,7 +67,6 @@ public class NetworkPlayer extends Player {
 		GL11.glDepthFunc(GL11.GL_GREATER);
 		GL11.glDepthMask(false);
 		GL11.glColor4f(1, 1, 1, 0.8F);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		RenderHelper.getHelper().renderText(this.displayName, 0, 0, 16777215, false);
 		GL11.glDepthMask(true);
 		GL11.glDepthFunc(GL11.GL_LEQUAL);

@@ -207,7 +207,6 @@ public class RenderHelper {
 		float blue = (color & 255) / 255F;
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		this.glColor(red, green, blue, alpha);
 
 		Renderer.get().begin();
@@ -236,7 +235,6 @@ public class RenderHelper {
 		float blue2 = (fadeTo & 255) / 255F;
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glBegin(GL11.GL_QUADS);
 
 		this.glColor(red, green, blue, alpha);
@@ -307,8 +305,11 @@ public class RenderHelper {
 	
 	public void drawQuad(Quad quad, float x, float y, float z, float brightness, boolean batch) {
 		quad.getTexture().bind();
-		
 		if(!batch) {
+			if(!quad.getParent().useCulling()) {
+				GL11.glDisable(GL11.GL_CULL_FACE);
+			}
+			
 			Renderer.get().begin();
 		}
 		
@@ -436,12 +437,19 @@ public class RenderHelper {
 		Renderer.get().vertexuv(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 
 		if(!batch) {
+			if(!quad.getParent().useCulling()) {
+				GL11.glEnable(GL11.GL_CULL_FACE);
+			}
+			
 			Renderer.get().end();
 		}
 	}
 
 	public void drawScaledQuad(Quad quad, float x, float y, float z, float scale, float brightness) {
 		quad.getTexture().bind();
+		if(!quad.getParent().useCulling()) {
+			GL11.glDisable(GL11.GL_CULL_FACE);
+		}
 		
 		Renderer.get().begin();
 		if(brightness >= 0) {
@@ -511,6 +519,9 @@ public class RenderHelper {
 		Renderer.get().vertexuv(x + quad.getVertex(3).getX() * scale, y + quad.getVertex(3).getY() * scale, z + quad.getVertex(3).getZ() * scale, x1 / width, y2 / height);
 
 		Renderer.get().end();
+		if(!quad.getParent().useCulling()) {
+			GL11.glEnable(GL11.GL_CULL_FACE);
+		}
 	}
 
 	public void drawCracks(Quad quad, int x, int y, int z, int crackTexture) {
@@ -831,7 +842,6 @@ public class RenderHelper {
 	
 	public void drawTranslucentBox(int x, int y, int width, int height) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glColor4f(0, 0, 0, 0.7F);

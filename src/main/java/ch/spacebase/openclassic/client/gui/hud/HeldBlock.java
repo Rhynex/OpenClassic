@@ -10,6 +10,7 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
+// TODO: fix block rendering multitexture per chunk
 public class HeldBlock {
 
 	private BlockType block = null;

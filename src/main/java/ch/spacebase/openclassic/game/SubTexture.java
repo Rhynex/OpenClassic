@@ -34,7 +34,7 @@ public class SubTexture implements TextureBase {
 	@Override
 	public int[] getRGBA() {
 		int rgba[] = new int[this.width * this.height];
-		this.parent.getImage().getRGB(this.x, this.y, this.width, this.height, rgba, 0, this.width);
+		this.parent.getImage().getRGB(this.parent.getX() + this.x, this.parent.getY() + this.y, this.width, this.height, rgba, 0, this.width);
 		return rgba;
 	}
 	
@@ -65,12 +65,12 @@ public class SubTexture implements TextureBase {
 	
 	@Override
 	public int getFullWidth() {
-		return this.parent.getWidth();
+		return this.parent.getFullWidth();
 	}
 
 	@Override
 	public int getFullHeight() {
-		return this.parent.getHeight();
+		return this.parent.getFullHeight();
 	}
 	
 	@Override
@@ -82,7 +82,7 @@ public class SubTexture implements TextureBase {
 	
 	@Override
 	public Texture getSubTexture(int x, int y, int width, int height) {
-		return new SubTexture(this.x + x, this.y + y, width, height, this);
+		return new SubTexture(x, y, width, height, this);
 	}
 
 	@Override
@@ -109,10 +109,19 @@ public class SubTexture implements TextureBase {
 	public void bind() {
 		this.parent.bind();
 	}
+	
+	@Override
+	public void bind(boolean force) {
+		this.parent.bind(force);
+	}
 
 	@Override
 	public BufferedImage getImage() {
 		return this.parent.getImage();
+	}
+
+	public Texture getParent() {
+		return this.parent;
 	}
 	
 }

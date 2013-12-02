@@ -117,6 +117,7 @@ public class PrimedTnt extends Entity {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		VanillaBlock.TNT.getModel().renderAll(this.xo + (this.x - this.xo) * dt - 0.5F, this.yo + (this.y - this.yo) * dt - 0.5F, this.zo + (this.z - this.zo) * dt - 0.5F, -1);
 		GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glPopMatrix();
 	}
 	
