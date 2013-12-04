@@ -99,20 +99,10 @@ public class SubTexture implements TextureBase {
 	public int getFrameSpeed() {
 		return this.parent.getFrameSpeed();
 	}
-	
-	@Override
-	public boolean isBound() {
-		return this.parent.isBound();
-	}
 
 	@Override
 	public void bind() {
 		this.parent.bind();
-	}
-	
-	@Override
-	public void bind(boolean force) {
-		this.parent.bind(force);
 	}
 
 	@Override

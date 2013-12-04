@@ -1,7 +1,6 @@
 package com.mojang.minecraft.entity.mob.ai;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.particle.TerrainParticle;
@@ -18,7 +17,7 @@ public class CreeperAI extends BasicAttackAI {
 	}
 
 	public void beforeRemove() {
-		this.level.explode(this.mob, this.mob.x, this.mob.y, this.mob.z, 4);
+		this.mob.getClientLevel().explode(this.mob, this.mob.pos.getX(), this.mob.pos.getY(), this.mob.pos.getZ(), 4);
 		for(int count = 0; count < 500; count++) {
 			float particleX = (float) this.random.nextGaussian();
 			float particleY = (float) this.random.nextGaussian();
@@ -27,7 +26,7 @@ public class CreeperAI extends BasicAttackAI {
 			float xd = particleX / len / len;
 			float yd = particleY / len / len;
 			float zd = particleZ / len / len;
-			GeneralUtils.getMinecraft().particleManager.spawnParticle(new TerrainParticle(this.level, this.mob.x + particleX, this.mob.y + particleY, this.mob.z + particleZ, xd, yd, zd, VanillaBlock.LEAVES));
+			this.mob.getClientLevel().getParticleManager().spawnParticle(new TerrainParticle(this.mob.pos.clone().add(particleX, particleY, particleZ), xd, yd, zd, VanillaBlock.LEAVES));
 		}
 	}
 	

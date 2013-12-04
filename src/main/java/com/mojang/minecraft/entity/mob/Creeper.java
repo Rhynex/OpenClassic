@@ -2,14 +2,14 @@ package com.mojang.minecraft.entity.mob;
 
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 
 import com.mojang.minecraft.entity.mob.ai.CreeperAI;
 
 public class Creeper extends Mob {
 
 	public Creeper(ClientLevel level, float x, float y, float z) {
-		super(level, GuiTextures.CREEPER);
+		super(level, Textures.CREEPER);
 		this.heightOffset = 1.62F;
 		this.modelName = "creeper";
 		this.ai = new CreeperAI();

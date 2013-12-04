@@ -116,17 +116,7 @@ public class GameTexture implements TextureBase {
 	}
 	
 	@Override
-	public boolean isBound() {
-		return false;
-	}
-
-	@Override
 	public void bind() {
-		this.bind(false);
-	}
-	
-	@Override
-	public void bind(boolean force) {
 	}
 
 	@Override

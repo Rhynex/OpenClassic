@@ -1,7 +1,6 @@
 package ch.spacebase.openclassic.client.render;
 
 import java.nio.FloatBuffer;
-import java.util.Random;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
@@ -17,19 +16,17 @@ import ch.spacebase.openclassic.api.block.model.CuboidModel;
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.Quad;
 import ch.spacebase.openclassic.api.block.model.Texture;
+import ch.spacebase.openclassic.api.level.Level;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.entity.particle.ParticleManager;
-import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 
 public class RenderHelper {
 
-	private static final Random rand = new Random();
 	private static final RenderHelper helper = new RenderHelper();
 	
 	/**
@@ -53,7 +50,7 @@ public class RenderHelper {
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
 		}
 		
-		int fontData[] = GuiTextures.FONT.getRGBA();
+		int fontData[] = Textures.FONT.getRGBA();
 		for(int character = 0; character < 256; character++) {
 			int tx = character % 16;
 			int ty = character / 16;
@@ -62,7 +59,7 @@ public class RenderHelper {
 				int xk = (tx << 3) + chWidth;
 				empty = true;
 				for(int y = 0; y < 8 && empty; y++) {
-					int yk = ((ty << 3) + y) * GuiTextures.FONT.getWidth();
+					int yk = ((ty << 3) + y) * Textures.FONT.getWidth();
 					if((fontData[xk + yk] & 255) > 128) {
 						empty = false;
 					}
@@ -78,7 +75,7 @@ public class RenderHelper {
 	}
 	
 	public void drawDefaultBG(int x, int y, int width, int height) {
-		GuiTextures.DIRT.bind();
+		Textures.DIRT.bind();
 		Renderer.get().begin();
 		Renderer.get().color(4210752);
 		Renderer.get().vertexuv(x, y + height, 0, 0, height / 64);
@@ -137,7 +134,7 @@ public class RenderHelper {
 				color = (color & 16579836) >> 2;
 			}
 
-			GuiTextures.FONT.bind();
+			Textures.FONT.bind();
 			Renderer.get().begin();
 			Renderer.get().color(color);
 			int width = 0;
@@ -207,9 +204,8 @@ public class RenderHelper {
 		float blue = (color & 255) / 255F;
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		this.glColor(red, green, blue, alpha);
-
 		Renderer.get().begin();
+		Renderer.get().color(red, green, blue, alpha);
 		Renderer.get().vertex(x1, y2, 0);
 		Renderer.get().vertex(x2, y2, 0);
 		Renderer.get().vertex(x2, y1, 0);
@@ -235,16 +231,14 @@ public class RenderHelper {
 		float blue2 = (fadeTo & 255) / 255F;
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glBegin(GL11.GL_QUADS);
-
-		this.glColor(red, green, blue, alpha);
-		GL11.glVertex2f(x2, y1);
-		GL11.glVertex2f(x1, y1);
-		this.glColor(red2, green2, blue2, alpha2);
-		GL11.glVertex2f(x1, y2);
-		GL11.glVertex2f(x2, y2);
-
-		GL11.glEnd();
+		Renderer.get().begin();
+		Renderer.get().color(red, green, blue, alpha);
+		Renderer.get().vertex(x2, y1, 0);
+		Renderer.get().vertex(x1, y1, 0);
+		Renderer.get().color(red2, green2, blue2, alpha2);
+		Renderer.get().vertex(x1, y2, 0);
+		Renderer.get().vertex(x2, y2, 0);
+		Renderer.get().end();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
@@ -257,27 +251,12 @@ public class RenderHelper {
 		Renderer.get().end();
 	}
 
-	/* public int bindTexture(String file, boolean jar) {
-		int id = GeneralUtils.getMinecraft().textureManager.bindTexture(file, jar);
-		this.bindTexture(id);
-		return id;
-	}
-
-	public void bindTexture(int id) {
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-		this.bound = id;
-	} */
-
-	public void glColor(float red, float green, float blue, float alpha) {
-		GL11.glColor4f(red, green, blue, alpha);
-	}
-
 	public int getDisplayWidth() {
-		return Display.getWidth();
+		return GeneralUtils.getMinecraft().width;
 	}
 
 	public int getDisplayHeight() {
-		return Display.getHeight();
+		return GeneralUtils.getMinecraft().height;
 	}
 
 	public void drawQuad(Quad quad, float x, float y, float z) {
@@ -304,8 +283,8 @@ public class RenderHelper {
 	}
 	
 	public void drawQuad(Quad quad, float x, float y, float z, float brightness, boolean batch) {
-		quad.getTexture().bind();
 		if(!batch) {
+			quad.getTexture().bind();
 			if(!quad.getParent().useCulling()) {
 				GL11.glDisable(GL11.GL_CULL_FACE);
 			}
@@ -396,12 +375,13 @@ public class RenderHelper {
 				againstSurface = true;
 			}
 			
-			if(batch) {
-				if(againstSurface && !this.canRenderSide(OpenClassic.getClient().getLevel().getBlockTypeAt((int) x, (int) y, (int) z), quad.getParent(), (int) x, (int) y, (int) z, face)) {
+			Level level = OpenClassic.getClient().getLevel();
+			if(batch && level != null) {
+				if(againstSurface && !this.canRenderSide(level, level.getBlockTypeAt((int) x, (int) y, (int) z), quad.getParent(), (int) x, (int) y, (int) z, face)) {
 					return;
 				}
 				
-				brightness = OpenClassic.getClient().getLevel().getBrightness((int) x + face.getModX(), (int) y + face.getModY(), (int) z + face.getModZ());
+				brightness = level.getBrightness((int) x + face.getModX(), (int) y + face.getModY(), (int) z + face.getModZ());
 			}
 			
 			float mod = 0;
@@ -526,7 +506,7 @@ public class RenderHelper {
 
 	public void drawCracks(Quad quad, int x, int y, int z, int crackTexture) {
 		Renderer.get().begin();
-		Renderer.get().disableColors();
+		Renderer.get().color(1, 1, 1, 0.5f);
 		BlockType.TERRAIN_TEXTURE.bind();
 		Texture texture = BlockType.TERRAIN_TEXTURE.getSubTexture(crackTexture, 16, 16);
 		float ox1 = texture.getX();
@@ -639,9 +619,9 @@ public class RenderHelper {
 		Renderer.get().end();
 	}
 
-	public boolean canRenderSide(BlockType block, Model model, int x, int y, int z, BlockFace face) {
+	public boolean canRenderSide(Level level, BlockType block, Model model, int x, int y, int z, BlockFace face) {
 		if(block == null) return false;
-		BlockType relative = OpenClassic.getClient().getLevel().getBlockTypeAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
+		BlockType relative = level.getBlockTypeAt(x + face.getModX(), y + face.getModY(), z + face.getModZ());
 		if(block.isLiquid()) {
 			if(relative == null) {
 				return false;
@@ -651,7 +631,7 @@ public class RenderHelper {
 				return false;
 			}
 
-			if(y <= OpenClassic.getClient().getLevel().getWaterLevel() - 1 && (face.getModX() < 0 && x <= 0 || face.getModX() > 0 && x >= OpenClassic.getClient().getLevel().getWidth() - 1 || face.getModZ() < 0 && z <= 0 || face.getModZ() > 0 && z >= OpenClassic.getClient().getLevel().getDepth() - 1)) {
+			if(y <= level.getWaterLevel() - 1 && (face.getModX() < 0 && x <= 0 || face.getModX() > 0 && x >= level.getWidth() - 1 || face.getModZ() < 0 && z <= 0 || face.getModZ() > 0 && z >= level.getDepth() - 1)) {
 				return false;
 			}
 
@@ -663,57 +643,6 @@ public class RenderHelper {
 		}
 
 		return relative == null || !relative.getPreventsRendering();
-	}
-
-	public float getBrightness(BlockType main, int x, int y, int z) {
-		return ((ClientLevel) OpenClassic.getClient().getLevel()).getBrightness(x, y, z);
-	}
-
-	public void spawnDestructionParticles(BlockType block, ClientLevel level, int x, int y, int z, ParticleManager particles) {
-		for(int xMod = 0; xMod < 4; xMod++) {
-			for(int yMod = 0; yMod < 4; yMod++) {
-				for(int zMod = 0; zMod < 4; zMod++) {
-					float particleX = x + (xMod + 0.5F) / 4;
-					float particleY = y + (yMod + 0.5F) / 4;
-					float particleZ = z + (zMod + 0.5F) / 4;
-					particles.spawnParticle(new TerrainParticle(level, particleX, particleY, particleZ, particleX - x - 0.5F, particleY - y - 0.5F, particleZ - z - 0.5F, block));
-				}
-			}
-		}
-	}
-
-	public final void spawnBlockParticles(ClientLevel level, int x, int y, int z, int side, ParticleManager particles) {
-		Model model = level.getBlockTypeAt(x, y, z).getModel();
-		if(model.getSelectionBox(x, y, z) != null) {
-			float particleX = x + rand.nextFloat() * (model.getSelectionBox(x, y, z).getX2() - model.getSelectionBox(x, y, z).getX1() - 0.1F * 2.0F) + 0.1F + model.getSelectionBox(x, y, z).getX1();
-			float particleY = y + rand.nextFloat() * (model.getSelectionBox(x, y, z).getY2() - model.getSelectionBox(x, y, z).getY1() - 0.1F * 2.0F) + 0.1F + model.getSelectionBox(x, y, z).getY1();
-			float particleZ = z + rand.nextFloat() * (model.getSelectionBox(x, y, z).getZ2() - model.getSelectionBox(x, y, z).getZ1() - 0.1F * 2.0F) + 0.1F + model.getSelectionBox(x, y, z).getZ1();
-			if(side == 0) {
-				particleY = y + model.getSelectionBox(x, y, z).getY1() - 0.1F;
-			}
-	
-			if(side == 1) {
-				particleY = y + model.getSelectionBox(x, y, z).getY2() + 0.1F;
-			}
-	
-			if(side == 2) {
-				particleZ = z + model.getSelectionBox(x, y, z).getZ1() - 0.1F;
-			}
-	
-			if(side == 3) {
-				particleZ = z + model.getSelectionBox(x, y, z).getZ2() + 0.1F;
-			}
-	
-			if(side == 4) {
-				particleX = x + model.getSelectionBox(x, y, z).getX1() - 0.1F;
-			}
-	
-			if(side == 5) {
-				particleX = x + model.getSelectionBox(x, y, z).getX2() + 0.1F;
-			}
-	
-			particles.spawnParticle((new TerrainParticle(level, particleX, particleY, particleZ, 0.0F, 0.0F, 0.0F, level.getBlockTypeAt(x, y, z))).setPower(0.2F).scale(0.6F));
-		}
 	}
 
 	public void drawRotatedBlock(int x, int y, BlockType block) {
@@ -760,8 +689,8 @@ public class RenderHelper {
 	}
 
 	public void ortho() {
-		int width = Display.getWidth();//this.getGuiWidth();
-		int height = Display.getHeight();//this.getGuiHeight();
+		int width = Display.getWidth();
+		int height = Display.getHeight();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
@@ -778,46 +707,43 @@ public class RenderHelper {
 		} else {
 			GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_COLOR_BUFFER_BIT);
-			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 			GL11.glColorMaterial(GL11.GL_FRONT_AND_BACK, GL11.GL_AMBIENT_AND_DIFFUSE);
-			Vector vec = new Vector(0.0F, -1.0F, 0.5F).normalize();
-			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_POSITION, this.getParamBuffer(vec.x, vec.y, vec.z, 0));
+			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_POSITION, this.getParamBuffer(0, -0.894427f, 0.447214f, 0));
 			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_DIFFUSE, this.getParamBuffer(0.3F, 0.3F, 0.3F, 1));
 			GL11.glLight(GL11.GL_COLOR_BUFFER_BIT, GL11.GL_AMBIENT, this.getParamBuffer(0, 0, 0, 1));
 			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, this.getParamBuffer(0.7F, 0.7F, 0.7F, 1));
 		}
 	}
 
-	public Vector getPlayerVector(LocalPlayer player, float dt) {
-		float x = player.xo + (player.x - player.xo) * dt;
-		float y = player.yo + (player.y - player.yo) * dt;
-		float z = player.zo + (player.z - player.zo) * dt;
-		return new Vector(x, y, z);
-	}
-
-	public void hurtEffect(LocalPlayer player, float dt) {
-		float effect = player.hurtTime - dt;
-		if(player.health <= 0) {
-			dt += player.deathTime;
-			GL11.glRotatef(40.0F - 8000.0F / (dt + 200.0F), 0, 0, 1);
-		}
-
-		if(effect >= 0) {
-			effect = MathHelper.sin((effect /= player.hurtDuration) * effect * effect * effect * MathHelper.PI);
-			GL11.glRotatef(-player.hurtDir, 0, 1, 0);
-			GL11.glRotatef(-effect * 14.0F, 0, 0, 1);
-			GL11.glRotatef(player.hurtDir, 0, 1, 0);
+	public void hurtEffect(Player player, float dt) {
+		LocalPlayer handle = (LocalPlayer) ((ClientPlayer) player).getHandle();
+		if(handle != null) {
+			float effect = handle.hurtTime - dt;
+			if(player.getHealth() <= 0) {
+				dt += handle.deathTime;
+				GL11.glRotatef(40.0F - 8000.0F / (dt + 200.0F), 0, 0, 1);
+			}
+	
+			if(effect >= 0) {
+				effect = MathHelper.sin((effect /= handle.hurtDuration) * effect * effect * effect * MathHelper.PI);
+				GL11.glRotatef(-handle.hurtDir, 0, 1, 0);
+				GL11.glRotatef(-effect * 14.0F, 0, 0, 1);
+				GL11.glRotatef(handle.hurtDir, 0, 1, 0);
+			}
 		}
 	}
 
-	public void applyBobbing(LocalPlayer player, float dt) {
-		float dist = player.walkDist + (player.walkDist - player.walkDistO) * dt;
-		float bob = player.oBob + (player.bob - player.oBob) * dt;
-		float tilt = player.oTilt + (player.tilt - player.oTilt) * dt;
-		GL11.glTranslatef(MathHelper.sin(dist * MathHelper.PI) * bob * 0.5F, -Math.abs(MathHelper.cos(dist * MathHelper.PI) * bob), 0);
-		GL11.glRotatef(MathHelper.sin(dist * MathHelper.PI) * bob * 3.0F, 0, 0, 1);
-		GL11.glRotatef(Math.abs(MathHelper.cos(dist * MathHelper.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
-		GL11.glRotatef(tilt, 1, 0, 0);
+	public void applyBobbing(Player player, float dt) {
+		LocalPlayer handle = (LocalPlayer) ((ClientPlayer) player).getHandle();
+		if(handle != null) {
+			float dist = handle.walkDist + (handle.walkDist - handle.walkDistO) * dt;
+			float bob = handle.oBob + (handle.bob - handle.oBob) * dt;
+			float tilt = handle.oTilt + (handle.tilt - handle.oTilt) * dt;
+			GL11.glTranslatef(MathHelper.sin(dist * MathHelper.PI) * bob * 0.5F, -Math.abs(MathHelper.cos(dist * MathHelper.PI) * bob), 0);
+			GL11.glRotatef(MathHelper.sin(dist * MathHelper.PI) * bob * 3.0F, 0, 0, 1);
+			GL11.glRotatef(Math.abs(MathHelper.cos(dist * MathHelper.PI + 0.2F) * bob) * 5.0F, 1, 0, 0);
+			GL11.glRotatef(tilt, 1, 0, 0);
+		}
 	}
 	
 	public void pushMatrix() {
@@ -842,16 +768,14 @@ public class RenderHelper {
 	
 	public void drawTranslucentBox(int x, int y, int width, int height) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glColor4f(0, 0, 0, 0.7F);
-		GL11.glVertex2f(x + width, y);
-		GL11.glVertex2f(x, y);
-		GL11.glColor4f(0.2F, 0.2F, 0.2F, 0.8F);
-		GL11.glVertex2f(x, y + height);
-		GL11.glVertex2f(x + width, y + height);
-		GL11.glEnd();
-
+		Renderer.get().begin();
+		Renderer.get().color(0, 0, 0, 0.7f);
+		Renderer.get().vertex(x + width, y, 0);
+		Renderer.get().vertex(x, y, 0);
+		Renderer.get().color(0.2f, 0.2f, 0.2f, 0.8f);
+		Renderer.get().vertex(x, y + height, 0);
+		Renderer.get().vertex(x + width, y + height, 0);
+		Renderer.get().end();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	

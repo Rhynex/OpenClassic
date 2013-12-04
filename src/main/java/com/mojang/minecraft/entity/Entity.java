@@ -1,6 +1,7 @@
 package com.mojang.minecraft.entity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
@@ -12,26 +13,15 @@ import ch.spacebase.openclassic.client.level.BlockMap;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
-import com.mojang.minecraft.entity.model.Vector;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.entity.player.net.PositionUpdate;
 
 public abstract class Entity {
 
-	public ClientLevel level;
-	public float xo;
-	public float yo;
-	public float zo;
-	public float x;
-	public float y;
-	public float z;
+	public Position pos;
 	public float xd;
 	public float yd;
 	public float zd;
-	public float yaw;
-	public float pitch;
-	public float oYaw;
-	public float oPitch;
 	public BoundingBox bb;
 	public boolean onGround = false;
 	public boolean horizontalCollision = false;
@@ -58,8 +48,7 @@ public abstract class Entity {
 	private boolean waterSplashed = false;
 
 	public Entity(ClientLevel level) {
-		this.level = level;
-		this.setPos(0, 0, 0);
+		this.pos = new Position(level, 0, 0, 0);
 	}
 
 	public void resetPos() {
@@ -69,7 +58,7 @@ public abstract class Entity {
 	public void resetPos(Position pos) {
 		if(pos != null) {
 			pos = pos.clone();
-			while(pos.getY() < this.level.getHeight() && this.level.getCubes(this.bb).size() != 0) {
+			while(pos.getY() < this.pos.getLevel().getHeight() && this.getClientLevel().getBoxes(this.bb).size() != 0) {
 				pos.setY(pos.getY() + 1);
 			}
 
@@ -77,15 +66,15 @@ public abstract class Entity {
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
-			this.yaw = pos.getYaw();
-			this.pitch = pos.getPitch();
-		} else if(this.level != null && this.level.getSpawn() != null) {
-			float x = this.level.getSpawn().getX();
-			float y = this.level.getSpawn().getY();
-			float z = this.level.getSpawn().getZ();
-			while(y < this.level.getHeight()) {
+			this.pos.setYaw(pos.getYaw());
+			this.pos.setPitch(pos.getPitch());
+		} else if(this.pos.getLevel() != null && this.pos.getLevel().getSpawn() != null) {
+			float x = this.pos.getLevel().getSpawn().getX();
+			float y = this.pos.getLevel().getSpawn().getY();
+			float z = this.pos.getLevel().getSpawn().getZ();
+			while(y < this.pos.getLevel().getHeight()) {
 				this.setPos(x, y, z);
-				if(this.level.getCubes(this.bb).size() == 0) {
+				if(this.getClientLevel().getBoxes(this.bb).size() == 0) {
 					break;
 				}
 
@@ -95,8 +84,8 @@ public abstract class Entity {
 			this.xd = 0;
 			this.yd = 0;
 			this.zd = 0;
-			this.yaw = this.level.getSpawn().getYaw();
-			this.pitch = this.level.getSpawn().getPitch();
+			this.pos.setYaw(this.pos.getLevel().getSpawn().getYaw());
+			this.pos.setPitch(this.pos.getLevel().getSpawn().getPitch());
 		}
 	}
 
@@ -113,73 +102,68 @@ public abstract class Entity {
 		if(pos.position) {
 			this.setPos(pos.x, pos.y, pos.z);
 		} else {
-			this.setPos(this.x, this.y, this.z);
+			this.setPos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
 		}
 
 		if(pos.rotation) {
 			this.setRot(pos.yaw, pos.pitch);
 		} else {
-			this.setRot(this.yaw, this.pitch);
+			this.setRot(this.pos.getYaw(), this.pos.getPitch());
 		}
 	}
 
 	protected void setRot(float yaw, float pitch) {
-		this.yaw = yaw;
-		this.pitch = pitch;
+		this.pos.setYaw(yaw);
+		this.pos.setPitch(pitch);
 	}
 
 	public void setPos(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.pos.set(x, y, z);
 		float widthCenter = this.bbWidth / 2;
 		float heightCenter = this.bbHeight / 2;
 		this.bb = new BoundingBox(x - widthCenter, y - heightCenter, z - widthCenter, x + widthCenter, y + heightCenter, z + widthCenter);
 	}
 
 	public void turn(float yaw, float pitch) {
-		float oldPitch = this.pitch;
-		float oldYaw = this.yaw;
-		this.yaw = (float) (this.yaw + yaw * InternalConstants.SENSITIVITY_VALUE[1]);
-		this.pitch = (float) (this.pitch - pitch * InternalConstants.SENSITIVITY_VALUE[1]);
-		if(this.pitch < -90) {
-			this.pitch = -90;
+		//float oldPitch = this.pos.getPitch();
+		//float oldYaw = this.pos.getYaw();
+		this.pos.setYaw((float) (this.pos.getYaw() + yaw * InternalConstants.SENSITIVITY_VALUE[1]));
+		this.pos.setPitch((float) (this.pos.getPitch() - pitch * InternalConstants.SENSITIVITY_VALUE[1]));
+		if(this.pos.getPitch() < -90) {
+			this.pos.setPitch(-90);
 		}
 
-		if(this.pitch > 90) {
-			this.pitch = 90;
+		if(this.pos.getPitch() > 90) {
+			this.pos.setPitch(90);
 		}
 
-		this.oPitch += this.pitch - oldPitch;
-		this.oYaw += this.yaw - oldYaw;
+		//this.oPitch += this.pos.getPitch() - oldPitch;
+		//this.oYaw += this.pos.getYaw() - oldYaw;
 	}
 
 	public void interpolateTurn(float yaw, float pitch) {
-		this.yaw = (float) (this.yaw + yaw * InternalConstants.SENSITIVITY_VALUE[1]);
-		this.pitch = (float) (this.pitch - pitch * InternalConstants.SENSITIVITY_VALUE[1]);
-		if(this.pitch < -90) {
-			this.pitch = -90;
+		this.pos.setYaw((float) (this.pos.getYaw() + yaw * InternalConstants.SENSITIVITY_VALUE[1]));
+		this.pos.setPitch((float) (this.pos.getPitch() - pitch * InternalConstants.SENSITIVITY_VALUE[1]));
+		if(this.pos.getPitch() < -90) {
+			this.pos.setPitch(-90);
 		}
 
-		if(this.pitch > 90) {
-			this.pitch = 90;
+		if(this.pos.getPitch() > 90) {
+			this.pos.setPitch(90);
 		}
 	}
 
 	public void tick() {
+		// Reset previous values by setting pos to itself.
+		this.pos.set(this.pos);
 		this.walkDistO = this.walkDist;
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		this.oPitch = this.pitch;
-		this.oYaw = this.yaw;
 		BlockType block = this.getLiquid();
 		if(block != null && block.getLiquidName() != null && block.getLiquidName().equals("water")) {
 			if(!this.waterSplashed) {
 				this.waterSplashed = true;
 				float volume = (float) Math.sqrt(this.xd * this.xd * 0.2D + this.yd * this.yd + this.zd * this.zd * 0.2D) * 0.2f;
 				if(volume > 1) volume = 1;
-				OpenClassic.getGame().getAudioManager().playSound("random.splash", this.x, this.y, this.z, volume, 1 + (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.4f);
+				OpenClassic.getGame().getAudioManager().playSound("random.splash", this.pos.getX(), this.pos.getY(), this.pos.getZ(), volume, 1 + (this.getClientLevel().getRandom().nextFloat() - this.getClientLevel().getRandom().nextFloat()) * 0.4f);
 			}
 		} else {
 			this.waterSplashed = false;
@@ -188,28 +172,26 @@ public abstract class Entity {
 
 	public boolean isFree(float x, float y, float z, float radius) {
 		BoundingBox grown = this.bb.grow(radius, radius, radius).cloneMove(x, y, z);
-		return this.level.getCubes(grown).size() <= 0 || !this.level.containsAnyLiquid(grown);
+		return this.getClientLevel().getBoxes(grown).size() <= 0 || this.getClientLevel().getLiquid(grown) == null;
 	}
 
 	public boolean isFree(float x, float y, float z) {
 		BoundingBox moved = this.bb.cloneMove(x, y, z);
-		return this.level.getCubes(moved).size() <= 0 || !this.level.containsAnyLiquid(moved);
+		return this.getClientLevel().getBoxes(moved).size() <= 0 || this.getClientLevel().getLiquid(moved) == null;
 	}
 
 	public void move(float x, float y, float z) {
 		if(this.noPhysics) {
 			this.bb.move(x, y, z);
-			this.x = (this.bb.getX1() + this.bb.getX2()) / 2;
-			this.y = this.bb.getY1() + this.heightOffset - this.ySlideOffset;
-			this.z = (this.bb.getZ1() + this.bb.getZ2()) / 2;
+			this.pos.set((this.bb.getX1() + this.bb.getX2()) / 2, this.bb.getY1() + this.heightOffset - this.ySlideOffset, (this.bb.getZ1() + this.bb.getZ2()) / 2);
 		} else {
-			float oldEntityX = this.x;
-			float oldEntityZ = this.z;
+			float oldEntityX = this.pos.getX();
+			float oldEntityZ = this.pos.getZ();
 			float oldX = x;
 			float oldY = y;
 			float oldZ = z;
 			BoundingBox copy = this.bb.clone();
-			ArrayList<BoundingBox> cubes = this.level.getCubes(this.bb.expand(x, y, z));
+			ArrayList<BoundingBox> cubes = this.getClientLevel().getBoxes(this.bb.expand(x, y, z));
 			for(BoundingBox cube : cubes) {
 				y = cube.clipYCollide(this.bb, y);
 			}
@@ -253,7 +235,7 @@ public abstract class Entity {
 				z = oldZ;
 				BoundingBox newCopy = this.bb.clone();
 				this.bb = copy.clone();
-				cubes = this.level.getCubes(this.bb.expand(oldX, y, oldZ));
+				cubes = this.getClientLevel().getBoxes(this.bb.expand(oldX, y, oldZ));
 
 				for(BoundingBox cube : cubes) {
 					y = cube.clipYCollide(this.bb, y);
@@ -322,21 +304,19 @@ public abstract class Entity {
 				this.zd = 0;
 			}
 
-			this.x = (this.bb.getX1() + this.bb.getX2()) / 2;
-			this.y = this.bb.getY1() + this.heightOffset - this.ySlideOffset;
-			this.z = (this.bb.getZ1() + this.bb.getZ2()) / 2;
-			float xDiff = this.x - oldEntityX;
-			float zDiff = this.z - oldEntityZ;
+			this.pos.set((this.bb.getX1() + this.bb.getX2()) / 2, this.bb.getY1() + this.heightOffset - this.ySlideOffset, (this.bb.getZ1() + this.bb.getZ2()) / 2);
+			float xDiff = this.pos.getX() - oldEntityX;
+			float zDiff = this.pos.getZ() - oldEntityZ;
 			if(this.onGround) {
 				this.walkDist = (float) (this.walkDist + (float) Math.sqrt(xDiff * xDiff + zDiff * zDiff) * 0.6D);
 				if(this.makeStepSound) {
-					BlockType type = this.level.getBlockTypeAt((int) this.x, (int) (this.y - 0.2F - this.heightOffset), (int) this.z);
+					BlockType type = this.pos.getLevel().getBlockTypeAt((int) this.pos.getX(), (int) (this.pos.getY() - 0.2F - this.heightOffset), (int) this.pos.getZ());
 					if(this.walkDist > this.nextStep && type != null) {
 						this.nextStep++;
 						if(type != null) {
 							StepSound step = type.getStepSound();
 							if(step != StepSound.NONE) {
-								OpenClassic.getGame().getAudioManager().playSound(step.getSound(), this.x, this.y, this.z, step.getVolume() * 0.75F, step.getPitch());
+								OpenClassic.getGame().getAudioManager().playSound(step.getSound(), this.pos.getX(), this.pos.getY(), this.pos.getZ(), step.getVolume() * 0.75F, step.getPitch());
 							}
 						}
 					}
@@ -351,15 +331,19 @@ public abstract class Entity {
 	}
 	
 	public BlockType getLiquid() {
-		return this.level.getLiquid(this.bb.grow(0, -0.4F, 0));
+		return this.getClientLevel().getLiquid(this.bb.grow(0, -0.4F, 0));
 	}
 	
-	public BlockType getBlockIn() {
-		return this.level.getBlockIn(this.bb.grow(0, -0.4F, 0));
+	public List<BlockType> getBlockIn() {
+		return this.getClientLevel().getBlocksIn(this.bb.grow(0, -0.4F, 0));
 	}
 
 	public boolean isUnderWater() {
-		BlockType block = this.level.getBlockTypeAt((int) this.x, (int) (this.y + 0.12F), (int) this.z);
+		if(this.pos.getLevel() == null) {
+			return false;
+		}
+		
+		BlockType block = this.pos.getLevel().getBlockTypeAt((int) this.pos.getX(), (int) (this.pos.getY() + 0.12F), (int) this.pos.getZ());
 		return block != null && (block.getLiquidName() != null && block.getLiquidName().equals("water"));
 	}
 
@@ -372,8 +356,8 @@ public abstract class Entity {
 
 			float mforward = forward * (speed / len);
 			float mstrafe = strafe * (speed / len);
-			float xangle = MathHelper.cos(this.yaw * MathHelper.DEG_TO_RAD);
-			float zangle = MathHelper.sin(this.yaw * MathHelper.DEG_TO_RAD);
+			float xangle = MathHelper.cos(this.pos.getYaw() * MathHelper.DEG_TO_RAD);
+			float zangle = MathHelper.sin(this.pos.getYaw() * MathHelper.DEG_TO_RAD);
 
 			this.xd += mforward * xangle - mstrafe * zangle;
 			this.zd += mstrafe * xangle + mforward * zangle;
@@ -381,51 +365,46 @@ public abstract class Entity {
 	}
 
 	public boolean isLit() {
-		return this.level.isLit((int) this.x, (int) this.y, (int) this.z);
+		return this.pos.getLevel().isLit((int) this.pos.getX(), (int) this.pos.getY(), (int) this.pos.getZ());
 	}
 
 	public float getBrightness(float dt) {
-		int y = (int) (this.y + this.heightOffset / 2 - 0.5F);
-		return this.level.getBrightness((int) this.x, y, (int) this.z);
+		int y = (int) (this.pos.getY() + this.heightOffset / 2 - 0.5F);
+		return this.pos.getLevel().getBrightness((int) this.pos.getX(), y, (int) this.pos.getZ());
 	}
 
 	public void render(float dt) {
 	}
 
 	public void setLevel(ClientLevel level) {
-		this.level = level;
+		this.pos.setLevel(level);
 	}
 
 	public void moveTo(float x, float y, float z, float yaw, float pitch) {
-		this.xo = x;
-		this.x = x;
-		this.yo = y;
-		this.y = y;
-		this.zo = z;
-		this.z = z;
-		this.yaw = yaw;
-		this.pitch = pitch;
+		this.pos.set(x, y, z);
+		this.pos.setYaw(yaw);
+		this.pos.setPitch(pitch);
 		this.setPos(x, y, z);
 	}
 
 	public float distanceTo(Entity other) {
-		float xDistance = this.x - other.x;
-		float yDistance = this.y - other.y;
-		float zDistance = this.z - other.z;
+		float xDistance = this.pos.getX() - other.pos.getX();
+		float yDistance = this.pos.getY() - other.pos.getY();
+		float zDistance = this.pos.getZ() - other.pos.getZ();
 		return (float) Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
 	}
 
 	public float distanceTo(float x, float y, float z) {
-		float xDistance = this.x - x;
-		float yDistance = this.y - y;
-		float zDistance = this.z - z;
+		float xDistance = this.pos.getX() - x;
+		float yDistance = this.pos.getY() - y;
+		float zDistance = this.pos.getZ() - z;
 		return (float) Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
 	}
 
 	public float distanceToSqr(Entity other) {
-		float xDistance = this.x - other.x;
-		float yDistance = this.y - other.y;
-		float zDistance = this.z - other.z;
+		float xDistance = this.pos.getX() - other.pos.getX();
+		float yDistance = this.pos.getY() - other.pos.getY();
+		float zDistance = this.pos.getZ() - other.pos.getZ();
 		return xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
 	}
 
@@ -433,8 +412,8 @@ public abstract class Entity {
 	}
 
 	public void push(Entity entity) {
-		float xDiff = entity.x - this.x;
-		float zDiff = entity.z - this.z;
+		float xDiff = entity.pos.getX() - this.pos.getX();
+		float zDiff = entity.pos.getZ() - this.pos.getZ();
 		float sqXZDiff = xDiff * xDiff + zDiff * zDiff;
 		if(sqXZDiff >= 0.01F) {
 			float xzDiff = (float) Math.sqrt(sqXZDiff);
@@ -479,23 +458,15 @@ public abstract class Entity {
 	public void awardKillScore(Entity entity, int amount) {
 	}
 
-	public boolean shouldRender(Vector point) {
-		float x = this.x - point.x;
-		float y = this.y - point.y;
-		float z = this.z - point.z;
-		float sqDistance = x * x + y * y + z * z;
-		return this.shouldRenderAtSqrDistance(sqDistance);
-	}
-
-	public boolean shouldRenderAtSqrDistance(float sqDistance) {
-		float size = this.bb.getSize() * 64;
-		return sqDistance < size * size;
-	}
-
 	public boolean isCreativeModeAllowed() {
 		return false;
 	}
 
-	public void renderHover(float dt) {
+	public void renderHoverOver(float dt) {
 	}
+	
+	public ClientLevel getClientLevel() {
+		return (ClientLevel) this.pos.getLevel();
+	}
+	
 }

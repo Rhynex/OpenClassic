@@ -26,7 +26,7 @@ public class SkeletonAI extends BasicAttackAI {
 		int arrows = (int) ((Math.random() + Math.random()) * 3 + 4);
 
 		for(int count = 0; count < arrows; count++) {
-			this.parent.level.addEntity(new Arrow(this.parent.level, GeneralUtils.getMinecraft().player, this.parent.x, this.parent.y - 0.2F, this.parent.z, (float) Math.random() * 360, -((float) Math.random()) * 60, 0.4F));
+			this.parent.getClientLevel().addEntity(new Arrow(this.parent.getClientLevel(), GeneralUtils.getMinecraft().player, this.parent.pos.getX(), this.parent.pos.getY() - 0.2F, this.parent.pos.getZ(), (float) Math.random() * 360, -((float) Math.random()) * 60, 0.4F));
 		}
 	}
 	

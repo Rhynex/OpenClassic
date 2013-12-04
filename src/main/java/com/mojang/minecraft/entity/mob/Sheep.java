@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Item;
@@ -21,7 +21,7 @@ public class Sheep extends QuadrupedMob {
 	public float grazeO;
 
 	public Sheep(ClientLevel level, float x, float y, float z) {
-		super(level, x, y, z, GuiTextures.SHEEP);
+		super(level, x, y, z, Textures.SHEEP);
 		this.setSize(1.4F, 1.72F);
 		this.setPos(x, y, z);
 		this.heightOffset = 1.72F;
@@ -53,9 +53,11 @@ public class Sheep extends QuadrupedMob {
 			cause.awardKillScore(this, 10);
 		}
 
-		int drops = (int) (Math.random() + Math.random() + 1);
-		for(int count = 0; count < drops; count++) {
-			this.level.addEntity(new Item(this.level, this.x, this.y, this.z, VanillaBlock.WHITE_CLOTH.getId()));
+		if(this.hasFur) {
+			int drops = (int) (Math.random() + Math.random() + 1);
+			for(int count = 0; count < drops; count++) {
+				this.getClientLevel().addEntity(new Item(this.getClientLevel(), this.pos.getX(), this.pos.getY(), this.pos.getZ(), VanillaBlock.WHITE_CLOTH.getId()));
+			}
 		}
 
 		super.die(cause);
@@ -67,7 +69,7 @@ public class Sheep extends QuadrupedMob {
 			int wool = (int) (Math.random() * 3 + 1);
 
 			for(int count = 0; count < wool; count++) {
-				this.level.addEntity(new Item(this.level, this.x, this.y, this.z, VanillaBlock.WHITE_CLOTH.getId()));
+				this.getClientLevel().addEntity(new Item(this.getClientLevel(), this.pos.getX(), this.pos.getY(), this.pos.getZ(), VanillaBlock.WHITE_CLOTH.getId()));
 			}
 
 		} else {
@@ -83,7 +85,7 @@ public class Sheep extends QuadrupedMob {
 		model.head.z -= this.grazeO + (this.graze - this.grazeO) * dt;
 		super.renderModel(animStep, dt, runProgress, yaw, pitch, scale);
 		if(this.hasFur) {
-			GuiTextures.FUR.bind();
+			Textures.FUR.bind();
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			AnimalModel fur = (AnimalModel) modelCache.getModel("sheep.fur");
 			fur.head.yaw = model.head.yaw;

@@ -1,5 +1,7 @@
 package com.mojang.minecraft.entity.mob;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.OpenClassic;
@@ -58,7 +60,6 @@ public class Mob extends Entity {
 
 	public Mob(ClientLevel level, Texture texture) {
 		super(level);
-		this.setPos(this.x, this.y, this.z);
 		this.timeOffs = (float) Math.random() * 12398;
 		this.rot = (float) (Math.random() * MathHelper.DTWO_PI);
 		this.speed = 1;
@@ -75,7 +76,7 @@ public class Mob extends Entity {
 		return !this.removed;
 	}
 
-	public final void tick() {
+	public void tick() {
 		super.tick();
 		this.oTilt = this.tilt;
 		if(this.attackTime > 0) {
@@ -134,12 +135,12 @@ public class Mob extends Entity {
 
 		this.animStepO = this.animStep;
 		this.oBodyYaw = this.bodyYaw;
-		this.oYaw = this.yaw;
-		this.oPitch = this.pitch;
+		//this.oYaw = this.yaw;
+		//this.oPitch = this.pitch;
 		this.tickCount++;
 		this.aiStep();
-		float xDistance = this.x - this.xo;
-		float zDistance = this.z - this.zo;
+		float xDistance = this.pos.getX() - this.pos.getPreviousX();
+		float zDistance = this.pos.getZ() - this.pos.getPreviousZ();
 		float xzDistance = (float) Math.sqrt(xDistance * xDistance + zDistance * zDistance);
 		float yaw = this.bodyYaw;
 		float animStep = 0;
@@ -167,7 +168,7 @@ public class Mob extends Entity {
 
 		this.bodyYaw += change * 0.1F;
 
-		change = this.yaw - this.bodyYaw;
+		change = this.pos.getYaw() - this.bodyYaw;
 		while(change < -180) {
 			change += 360;
 		}
@@ -185,18 +186,10 @@ public class Mob extends Entity {
 			change = 75;
 		}
 
-		this.bodyYaw = this.yaw - change;
+		this.bodyYaw = this.pos.getYaw() - change;
 		this.bodyYaw += change * 0.1F;
 		if(negative) {
 			animStep = -animStep;
-		}
-
-		while(this.yaw - this.oYaw < -180) {
-			this.oYaw -= 360;
-		}
-
-		while(this.yaw - this.oYaw >= 180) {
-			this.oYaw += 360;
 		}
 
 		while(this.bodyYaw - this.oBodyYaw < -180) {
@@ -207,20 +200,12 @@ public class Mob extends Entity {
 			this.oBodyYaw += 360;
 		}
 
-		while(this.pitch - this.oPitch < -180) {
-			this.oPitch -= 360;
-		}
-
-		while(this.pitch - this.oPitch >= 180) {
-			this.oPitch += 360;
-		}
-
 		this.animStep += animStep;
 	}
 
 	public void aiStep() {
 		if(this.ai != null) {
-			this.ai.tick(this.level, this);
+			this.ai.tick(this.getClientLevel(), this);
 		}
 	}
 
@@ -243,32 +228,16 @@ public class Mob extends Entity {
 				this.oBodyYaw -= 360;
 			}
 
-			while(this.oPitch - this.pitch < -180) {
-				this.oPitch += 360;
-			}
-
-			while(this.oPitch - this.pitch >= 180) {
-				this.oPitch -= 360;
-			}
-
-			while(this.oYaw - this.yaw < -180) {
-				this.oYaw += 360;
-			}
-
-			while(this.oYaw - this.yaw >= 180) {
-				this.oYaw -= 360;
-			}
-
 			float bodyYaw = this.oBodyYaw + (this.bodyYaw - this.oBodyYaw) * dt;
 			float runProgress = this.oRun + (this.run - this.oRun) * dt;
-			float yaw = (this.oYaw + (this.yaw - this.oYaw) * dt) - bodyYaw;
-			float pitch = this.oPitch + (this.pitch - this.oPitch) * dt;
+			float yaw = this.pos.getInterpolatedYaw(dt) - bodyYaw;
+			float pitch = this.pos.getInterpolatedPitch(dt);
 			float animStep = this.animStepO + (this.animStep - this.animStepO) * dt;
 			float brightness = this.getBrightness(dt);
 			float bob = -Math.abs(MathHelper.cos(animStep * 0.6662F)) * 5 * runProgress * this.bobStrength - 23;
 			GL11.glPushMatrix();
 			GL11.glColor3f(brightness, brightness, brightness);
-			GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt - 1.62F + this.renderOffset, this.zo + (this.z - this.zo) * dt);
+			GL11.glTranslatef(this.pos.getInterpolatedX(dt), this.pos.getInterpolatedY(dt) - 1.62F + this.renderOffset, this.pos.getInterpolatedZ(dt));
 			float hurtRot = this.hurtTime - dt;
 			if(hurtRot > 0 || this.health <= 0) {
 				if(hurtRot < 0) {
@@ -361,9 +330,9 @@ public class Mob extends Entity {
 
 				this.hurtDir = 0;
 				if(cause != null) {
-					float xDistance = cause.x - this.x;
-					float zDistance = cause.z - this.z;
-					this.hurtDir = (float) (Math.atan2(zDistance, xDistance) * 180 / Math.PI) - this.yaw;
+					float xDistance = cause.pos.getX() - this.pos.getX();
+					float zDistance = cause.pos.getZ() - this.pos.getZ();
+					this.hurtDir = (float) (Math.atan2(zDistance, xDistance) * 180 / Math.PI) - this.pos.getYaw();
 					this.knockback(cause, damage, xDistance, zDistance);
 				} else {
 					this.hurtDir = ((int) (Math.random() * 2) * 180);
@@ -410,18 +379,19 @@ public class Mob extends Entity {
 
 	public void travel(float x, float z) {
 		boolean flying = this.ai instanceof BasicAI && ((BasicAI) this.ai).flying;
-		BlockType blockIn = this.getBlockIn();
-		if(blockIn != null && blockIn.isLiquid()) {
+		List<BlockType> blocksIn = this.getBlockIn();
+		BlockType liquid = this.getLiquid();
+		if(liquid != null) {
 			this.moveHeading(x, z, flying ? 0.125F : 0.02F);
 			this.move(this.xd, this.yd, this.zd);
-			this.xd *= blockIn.getSpeedModifier();
-			this.yd *= blockIn.getSpeedModifier();
-			this.zd *= blockIn.getSpeedModifier();
+			this.xd *= liquid.getSpeedModifier();
+			this.yd *= liquid.getSpeedModifier();
+			this.zd *= liquid.getSpeedModifier();
 			if(!flying) {
 				this.yd = (float) (this.yd - 0.02D);
 			}
 
-			if(this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F - this.y + y, this.zd)) {
+			if(this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6F, this.zd)) {
 				this.yd = 0.3F;
 			}
 		} else {
@@ -430,10 +400,10 @@ public class Mob extends Entity {
 			this.xd *= 0.91F;
 			this.yd *= 0.98F;
 			this.zd *= 0.91F;
-			if(blockIn != null) {
-				this.xd *= blockIn.getSpeedModifier();
-				this.yd *= blockIn.getSpeedModifier();
-				this.zd *= blockIn.getSpeedModifier();
+			for(BlockType block : blocksIn) {
+				this.xd *= block.getSpeedModifier();
+				this.yd *= block.getSpeedModifier();
+				this.zd *= block.getSpeedModifier();
 			}
 			
 			if(!flying) {

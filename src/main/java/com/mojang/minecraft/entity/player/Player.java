@@ -4,7 +4,7 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.mob.HumanoidMob;
@@ -45,7 +45,7 @@ public abstract class Player extends HumanoidMob {
 		}
 
 		if(this.skin == null) {
-			GuiTextures.DEFAULT_SKIN.bind();
+			Textures.DEFAULT_SKIN.bind();
 		} else {
 			this.skin.bind();
 		}

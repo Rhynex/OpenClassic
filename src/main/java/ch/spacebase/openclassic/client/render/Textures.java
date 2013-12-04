@@ -7,7 +7,7 @@ import sun.applet.Main;
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.api.block.model.TextureFactory;
 
-public class GuiTextures {
+public class Textures {
 
 	public static final Texture PARTICLES = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/particles.png"));
 	public static final Texture RAIN = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/rain.png"));

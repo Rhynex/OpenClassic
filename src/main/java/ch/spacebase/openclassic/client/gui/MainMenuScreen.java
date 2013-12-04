@@ -6,7 +6,7 @@ import ch.spacebase.openclassic.api.gui.base.Button;
 import ch.spacebase.openclassic.api.gui.base.ButtonCallback;
 import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
 import ch.spacebase.openclassic.api.gui.base.Image;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 
 public class MainMenuScreen extends GuiComponent {
 
@@ -67,7 +67,7 @@ public class MainMenuScreen extends GuiComponent {
 			}
 		}));
 		
-		this.attachComponent(new Image("logo", this.getWidth() / 2 - GuiTextures.LOGO.getWidth() / 2, this.getHeight() / 12 - 40, GuiTextures.LOGO.getSubTexture(0, 0, GuiTextures.LOGO.getWidth(), GuiTextures.LOGO.getHeight())));
+		this.attachComponent(new Image("logo", this.getWidth() / 2 - Textures.LOGO.getWidth() / 2, this.getHeight() / 12 - 40, Textures.LOGO.getSubTexture(0, 0, Textures.LOGO.getWidth(), Textures.LOGO.getHeight())));
 		OpenClassic.getGame().getAudioManager().playMusic("menu", true);
 		if(OpenClassic.getClient().getPlayer().getName() == null || OpenClassic.getClient().getSettings().getIntSetting("options.survival").getValue() > 0) {
 			this.getComponent("multiplayer", Button.class).setActive(false);

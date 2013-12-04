@@ -8,6 +8,4 @@ public interface TextureBase extends Texture {
 
 	public BufferedImage getImage();
 	
-	public void bind(boolean force);
-	
 }

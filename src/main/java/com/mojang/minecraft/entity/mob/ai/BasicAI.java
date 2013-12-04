@@ -15,7 +15,6 @@ public class BasicAI extends AI {
 	public float xxa;
 	public float yya;
 	protected float yawA;
-	public ClientLevel level;
 	public Mob mob;
 	public boolean jumping = false;
 	protected int attackDelay = 0;
@@ -30,11 +29,7 @@ public class BasicAI extends AI {
 
 		Entity player = GeneralUtils.getMinecraft().player;
 		if(this.noActionTime > 600 && this.random.nextInt(800) == 0 && player != null) {
-			float xDistance = player.x - mob.x;
-			float yDistance = player.y - mob.y;
-			float zDistance = player.z - mob.z;
-			float sqDistance = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
-
+			float sqDistance = player.pos.distanceSquared(mob.pos);
 			if(sqDistance < 1024) {
 				this.noActionTime = 0;
 			} else {
@@ -42,7 +37,6 @@ public class BasicAI extends AI {
 			}
 		}
 
-		this.level = level;
 		this.mob = mob;
 		if(this.attackDelay > 0) {
 			this.attackDelay--;
@@ -107,8 +101,8 @@ public class BasicAI extends AI {
 			this.yawA = (this.random.nextFloat() - 0.5F) * 60;
 		}
 
-		this.mob.yaw += this.yawA;
-		this.mob.pitch = this.defaultLookAngle;
+		this.mob.pos.setYaw(this.mob.pos.getYaw() + this.yawA);
+		this.mob.pos.setPitch(this.defaultLookAngle);
 		if(this.attackTarget != null) {
 			this.yya = this.runSpeed;
 			this.jumping = this.random.nextFloat() < 0.04F;

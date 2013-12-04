@@ -3,6 +3,10 @@ package com.mojang.minecraft.entity.particle;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.client.render.Renderer;
+
 public class ParticleManager {
 
 	public List<Particle> particles = new ArrayList<Particle>();
@@ -11,7 +15,7 @@ public class ParticleManager {
 		this.particles.add(particle);
 	}
 
-	public void tickParticles() {
+	public void tick() {
 		for(int index = 0; index < this.particles.size(); index++) {
 			Particle particle = this.particles.get(index);
 			particle.tick();
@@ -19,6 +23,21 @@ public class ParticleManager {
 				this.particles.remove(particle);
 			}
 		}
+	}
+
+	public void render(float delta, Player player) {
+		float xmod = -MathHelper.cos(player.getPosition().getYaw() * MathHelper.DEG_TO_RAD);
+		float zmod = -MathHelper.sin(player.getPosition().getYaw() * MathHelper.DEG_TO_RAD);
+		float xdir = -zmod * MathHelper.sin(player.getPosition().getPitch() * MathHelper.DEG_TO_RAD);
+		float zdir = xmod * MathHelper.sin(player.getPosition().getPitch() * MathHelper.DEG_TO_RAD);
+		float ymod = MathHelper.cos(player.getPosition().getPitch() * MathHelper.DEG_TO_RAD);
+		Renderer.get().begin();
+		for(int index = 0; index < this.particles.size(); index++) {
+			Particle particle = this.particles.get(index);
+			particle.render(delta, xmod, ymod, zmod, xdir, zdir);
+		}
+		
+		Renderer.get().end();
 	}
 	
 }

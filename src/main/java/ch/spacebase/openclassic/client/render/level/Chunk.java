@@ -1,4 +1,4 @@
-package com.mojang.minecraft.render.level;
+package ch.spacebase.openclassic.client.render.level;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -9,28 +9,27 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Texture;
+import ch.spacebase.openclassic.api.player.Player;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.Frustum;
 import ch.spacebase.openclassic.client.render.Renderer;
 import ch.spacebase.openclassic.game.TextureBase;
 
-import com.mojang.minecraft.entity.player.LocalPlayer;
-
 public class Chunk {
 
 	public static int chunkUpdates = 0;
-	public static int PASSES = 2;
+	public static final int PASSES = 2;
 	
+	public int baseListId = -1;
 	private ClientLevel level;
-	private int baseListId = -1;
 	private int x;
 	private int y;
 	private int z;
 	private int width;
 	private int height;
 	private int depth;
-	public boolean visible = false;
 	private boolean[] dirty = new boolean[PASSES];
+	public boolean visible = false;
 	public boolean loaded;
 
 	public Chunk(ClientLevel level, int x, int y, int z, int size, int baseId) {
@@ -45,9 +44,12 @@ public class Chunk {
 		this.setAllDirty();
 	}
 
-	public void update() {
+	public void buildLists() {
 		chunkUpdates++;
 		this.setAllDirty();
+		if(this.baseListId == -1) {
+			this.baseListId = GL11.glGenLists(PASSES);
+		}
 		
 		List<Texture> found = new ArrayList<Texture>();
 		found.add(BlockType.TERRAIN_TEXTURE);
@@ -64,6 +66,10 @@ public class Chunk {
 				for(int x = this.x; x < this.x + this.width; x++) {
 					for(int y = this.y; y < this.y + this.height; y++) {
 						for(int z = this.z; z < this.z + this.depth; z++) {
+							if(this.level == null) {
+								continue;
+							}
+							
 							BlockType block = this.level.getBlockTypeAt(x, y, z);
 							if(block == null) {
 								block = VanillaBlock.STONE;
@@ -99,7 +105,7 @@ public class Chunk {
 					}
 				}
 				
-				((TextureBase) current).bind(true);
+				((TextureBase) current).bind();
 				Renderer.get().end();
 			}
 			
@@ -116,11 +122,8 @@ public class Chunk {
 
 	}
 
-	public float distanceSquared(LocalPlayer player) {
-		float xDistance = player.x - this.x;
-		float yDistance = player.y - this.y;
-		float zDistance = player.z - this.z;
-		return xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
+	public float distanceSquared(Player player) {
+		return player.getPosition().distanceSquared(this.x, this.y, this.z);
 	}
 
 	private void setAllDirty() {
@@ -131,7 +134,6 @@ public class Chunk {
 
 	public void dispose() {
 		this.setAllDirty();
-		this.level = null;
 	}
 
 	public void appendLists(IntBuffer buffer, boolean firstPass) {
@@ -149,7 +151,7 @@ public class Chunk {
 			}
 		}
 	}
-
+	
 	public void clip() {
 		this.visible = Frustum.isBoxInFrustum(this.x, this.y, this.z, this.x + this.width, this.y + this.height, this.z + this.depth);
 	}

@@ -76,7 +76,7 @@ public class ClientPlayer implements Player {
 			return new Position(null, 0, 0, 0);
 		}
 		
-		return new Position(this.handle.level, this.handle.x, this.handle.y, this.handle.z, (byte) this.handle.yaw, (byte) this.handle.pitch);
+		return this.handle.pos;
 	}
 
 	@Override
@@ -110,12 +110,12 @@ public class ClientPlayer implements Player {
 
 	@Override
 	public void moveTo(float x, float y, float z) {
-		this.moveTo(this.handle.level, x, y, z, (byte) 0, (byte) 0);
+		this.moveTo(this.handle.pos.getLevel(), x, y, z, (byte) 0, (byte) 0);
 	}
 
 	@Override
 	public void moveTo(float x, float y, float z, float yaw, float pitch) {
-		this.moveTo(this.handle.level, x, y, z, yaw, pitch);
+		this.moveTo(this.handle.pos.getLevel(), x, y, z, yaw, pitch);
 	}
 
 	@Override
@@ -134,7 +134,7 @@ public class ClientPlayer implements Player {
 			return;
 		}
 
-		if(event.getTo().getLevel() != null && this.handle.level != null && !this.handle.level.getName().equals(event.getTo().getLevel().getName())) {
+		if(event.getTo().getLevel() != null && this.handle.pos.getLevel() != null && !this.handle.pos.getLevel().getName().equals(event.getTo().getLevel().getName())) {
 			this.handle.setLevel((ClientLevel) event.getTo().getLevel());
 			GeneralUtils.getMinecraft().setLevel((ClientLevel) event.getTo().getLevel());
 		}

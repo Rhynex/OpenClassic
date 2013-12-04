@@ -12,7 +12,7 @@ import ch.spacebase.openclassic.api.gui.base.Label;
 import ch.spacebase.openclassic.api.gui.base.TextBox;
 import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
 import ch.spacebase.openclassic.api.gui.base.ComponentHelper;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 
 public class ClientComponentHelper extends ComponentHelper {
@@ -37,12 +37,12 @@ public class ClientComponentHelper extends ComponentHelper {
 	@Override
 	public void renderButton(Button button, int mouseX, int mouseY) {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		Texture texture = GuiTextures.BUTTON;
+		Texture texture = Textures.BUTTON;
 		boolean hover = mouseX >= 0 && mouseY >= 0 && mouseX < button.getWidth() && mouseY < button.getHeight();
 		if (!button.isActive()) {
-			texture = GuiTextures.BUTTON_INACTIVE;
+			texture = Textures.BUTTON_INACTIVE;
 		} else if (hover) {
-			texture = GuiTextures.BUTTON_HOVER;
+			texture = Textures.BUTTON_HOVER;
 		}
 
         Texture topLeft = texture.getSubTexture(0, 0, button.getWidth() / 2, button.getHeight() / 2);

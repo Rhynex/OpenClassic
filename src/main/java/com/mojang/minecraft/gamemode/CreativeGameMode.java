@@ -22,7 +22,7 @@ public class CreativeGameMode extends GameMode {
 
 	public void apply(ClientLevel level) {
 		super.apply(level);
-		level.removeAllNonCreativeModeEntities();
+		level.removeSurvivalEntities();
 	}
 
 	public void apply(LocalPlayer player) {

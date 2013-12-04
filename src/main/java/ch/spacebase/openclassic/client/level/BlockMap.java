@@ -3,22 +3,21 @@ package ch.spacebase.openclassic.client.level;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.client.render.Frustum;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.model.Vector;
 
 public class BlockMap {
 
 	private int width;
 	private int height;
 	private int depth;
-	private BlockMapSlot slot = new BlockMapSlot();
-	private BlockMapSlot slot2 = new BlockMapSlot();
 	public List<Entity>[] entityGrid;
 	public List<Entity> all = new ArrayList<Entity>();
-	private List<Entity> tmp = new ArrayList<Entity>();
 
 	@SuppressWarnings("unchecked")
 	public BlockMap(int width, int height, int depth) {
@@ -46,56 +45,57 @@ public class BlockMap {
 			}
 		}
 	}
-	
-	public int getWidth() {
-		return this.width;
-	}
-	
-	public int getHeight() {
-		return this.height;
-	}
-	
-	public int getDepth() {
-		return this.depth;
-	}
 
 	public void insert(Entity entity) {
+		int sx = this.getSlotX(entity.pos.getBlockX());
+		int sy = this.getSlotY(entity.pos.getBlockY());
+		int sz = this.getSlotZ(entity.pos.getBlockZ());
 		this.all.add(entity);
-		this.slot.init(this, entity.x, entity.y, entity.z).add(entity);
-		entity.xOld = entity.x;
-		entity.yOld = entity.y;
-		entity.zOld = entity.z;
+		this.entityGrid[(sz * this.height + sy) * this.width + sx].add(entity);
+		entity.xOld = entity.pos.getX();
+		entity.yOld = entity.pos.getY();
+		entity.zOld = entity.pos.getZ();
 		entity.blockMap = this;
 	}
 
 	public void remove(Entity entity) {
-		this.slot.init(this, entity.xOld, entity.yOld, entity.zOld).remove(entity);
+		int sx = this.getSlotX((int) entity.xOld);
+		int sy = this.getSlotY((int) entity.yOld);
+		int sz = this.getSlotZ((int) entity.zOld);
+		this.entityGrid[(sz * this.height + sy) * this.width + sx].remove(entity);
 		this.all.remove(entity);
 	}
 
 	public void moved(Entity entity) {
-		BlockMapSlot old = this.slot.init(this, entity.xOld, entity.yOld, entity.zOld);
-		BlockMapSlot newSlot = this.slot2.init(this, entity.x, entity.y, entity.z);
-		if(!old.equals(newSlot)) {
-			old.remove(entity);
-			newSlot.add(entity);
-			entity.xOld = entity.x;
-			entity.yOld = entity.y;
-			entity.zOld = entity.z;
+		int sx = this.getSlotX((int) entity.xOld);
+		int sy = this.getSlotY((int) entity.yOld);
+		int sz = this.getSlotZ((int) entity.zOld);
+		int sx2 = this.getSlotX(entity.pos.getBlockX());
+		int sy2 = this.getSlotY(entity.pos.getBlockY());
+		int sz2 = this.getSlotZ(entity.pos.getBlockZ());
+		if(sx != sx2 || sy != sy2 || sz != sz2) {
+			this.remove(entity);
+			this.insert(entity);
+			entity.xOld = entity.pos.getX();
+			entity.yOld = entity.pos.getY();
+			entity.zOld = entity.pos.getZ();
 		}
 	}
 
 	public List<Entity> getEntities(Entity exclude, float x, float y, float z, float x2, float y2, float z2) {
-		this.tmp.clear();
-		return this.getEntities(exclude, x, y, z, x2, y2, z2, this.tmp);
+		return this.getEntities(exclude, x, y, z, x2, y2, z2, new ArrayList<Entity>());
 	}
 
 	public List<Entity> getEntities(Entity exclude, float x, float y, float z, float x2, float y2, float z2, List<Entity> result) {
-		BlockMapSlot slot = this.slot.init(this, x, y, z);
-		BlockMapSlot slot2 = this.slot2.init(this, x2, y2, z2);
-		for(int ex = slot.getX() - 1; ex <= slot2.getX() + 1; ex++) {
-			for(int ey = slot.getY() - 1; ey <= slot2.getY() + 1; ey++) {
-				for(int ez = slot.getZ() - 1; ez <= slot2.getZ() + 1; ez++) {
+		int sx = this.getSlotX((int) x);
+		int sy = this.getSlotY((int) y);
+		int sz = this.getSlotZ((int) z);
+		int sx2 = this.getSlotX((int) x2);
+		int sy2 = this.getSlotY((int) y2);
+		int sz2 = this.getSlotZ((int) z2);
+		for(int ex = sx - 1; ex <= sx2 + 1; ex++) {
+			for(int ey = sy - 1; ey <= sy2 + 1; ey++) {
+				for(int ez = sz - 1; ez <= sz2 + 1; ez++) {
 					if(ex >= 0 && ey >= 0 && ez >= 0 && ex < this.width && ey < this.height && ez < this.depth) {
 						List<Entity> entities = this.entityGrid[(ez * this.height + ey) * this.width + ex];
 						for(Entity entity : entities) {
@@ -111,28 +111,27 @@ public class BlockMap {
 		return result;
 	}
 
-	public void removeAllNonCreativeModeEntities() {
-		List<Entity> cache = new ArrayList<Entity>();
+	public void removeSurvivalEntities() {
 		for(int x = 0; x < this.width; x++) {
 			for(int y = 0; y < this.height; y++) {
 				for(int z = 0; z < this.depth; z++) {
 					List<Entity> entities = this.entityGrid[(z * this.height + y) * this.width + x];
-					cache.addAll(entities);
-					for(Entity entity : cache) {
+					for(int index = 0; index < entities.size(); index++) {
+						Entity entity = entities.get(index);
 						if(!entity.isCreativeModeAllowed()) {
 							entities.remove(entity);
+							index--;
 						}
 					}
-
-					cache.clear();
 				}
 			}
 		}
 
-		cache.addAll(this.all);
-		for(Entity entity : cache) {
+		for(int index = 0; index < this.all.size(); index++) {
+			Entity entity = this.all.get(index);
 			if(!entity.isCreativeModeAllowed()) {
 				this.all.remove(entity);
+				index--;
 			}
 		}
 	}
@@ -148,8 +147,7 @@ public class BlockMap {
 	}
 
 	public List<Entity> getEntities(Entity exclude, BoundingBox bb) {
-		this.tmp.clear();
-		return this.getEntities(exclude, bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2(), this.tmp);
+		return this.getEntities(exclude, bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2(), new ArrayList<Entity>());
 	}
 
 	public List<Entity> getEntities(Entity exclude, BoundingBox bb, List<Entity> to) {
@@ -161,24 +159,24 @@ public class BlockMap {
 			Entity entity = this.all.get(index);
 			entity.tick();
 			if(entity.removed) {
-				this.all.remove(index--);
-				this.slot.init(this, entity.xOld, entity.yOld, entity.zOld).remove(entity);
+				this.remove(entity);
+				index--;
 			} else {
 				int omx = (int) (entity.xOld / 16.0F);
 				int omy = (int) (entity.yOld / 16.0F);
 				int omz = (int) (entity.zOld / 16.0F);
-				int mx = (int) (entity.x / 16.0F);
-				int my = (int) (entity.y / 16.0F);
-				int mz = (int) (entity.z / 16.0F);
+				int mx = (int) (entity.pos.getX() / 16.0F);
+				int my = (int) (entity.pos.getY() / 16.0F);
+				int mz = (int) (entity.pos.getZ() / 16.0F);
 				if(omx != mx || omy != my || omz != mz) {
 					this.moved(entity);
 				}
 			}
 		}
-
 	}
 
-	public void render(Vector pos, float dt) {
+	public void render(float dt) {
+		RenderHelper.getHelper().setLighting(true);
 		for(int x = 0; x < this.width; x++) {
 			float x1 = (x << 4) - 2;
 			float x2 = (x + 1 << 4) + 2;
@@ -242,12 +240,15 @@ public class BlockMap {
 								plane++;
 							}
 
+							Position pos = OpenClassic.getClient().getPlayer().getPosition();
 							for(int index = 0; index < entities.size(); index++) {
 								Entity entity = entities.get(index);
-								if(entity.shouldRender(pos)) {
+								float sqDistance = entity.pos.distanceSquared(pos);
+								float size = entity.bb != null ? entity.bb.getSize() * 64 : 64;
+								if(sqDistance < size * size) {
 									if(!empty) {
 										BoundingBox bb = entity.bb;
-										if(!Frustum.isBoxInFrustum(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2())) {
+										if(bb != null && !Frustum.isBoxInFrustum(bb.getX1(), bb.getY1(), bb.getZ1(), bb.getX2(), bb.getY2(), bb.getZ2())) {
 											continue;
 										}
 									}
@@ -260,6 +261,47 @@ public class BlockMap {
 				}
 			}
 		}
+		
+		RenderHelper.getHelper().setLighting(false);
+	}
+	
+	private int getSlotX(int entityX) {
+		int ret = entityX / 16;
+		if(ret < 0) {
+			ret = 0;
+		}
+
+		if(ret >= this.width) {
+			ret = this.width - 1;
+		}
+		
+		return ret;
+	}
+	
+	private int getSlotY(int entityY) {
+		int ret = entityY / 16;
+		if(ret < 0) {
+			ret = 0;
+		}
+
+		if(ret >= this.height) {
+			ret = this.height - 1;
+		}
+		
+		return ret;
+	}
+	
+	private int getSlotZ(int entityZ) {
+		int ret = entityZ / 16;
+		if(ret < 0) {
+			ret = 0;
+		}
+
+		if(ret >= this.depth) {
+			ret = this.depth - 1;
+		}
+		
+		return ret;
 	}
 	
 }

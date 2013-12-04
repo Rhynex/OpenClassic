@@ -11,8 +11,6 @@ import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 
 public class Item extends Entity {
-
-	private static ItemModel[] models = new ItemModel[256];
 	
 	public float xd;
 	public float yd;
@@ -23,14 +21,6 @@ public class Item extends Entity {
 	private int age = 0;
 	private int count = 0;
 	public int delay = 10;
-
-	public static void initModels() {
-		for(int id = 1; id < 256; id++) {
-			if(Blocks.fromId(id) != null) {
-				models[id] = new ItemModel(id);
-			}
-		}
-	}
 
 	public Item(ClientLevel level, float x, float y, float z, int block) {
 		this(level, x, y, z, block, 1);
@@ -51,9 +41,8 @@ public class Item extends Entity {
 	}
 
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
+		// Reset previous values by setting pos to itself.
+		this.pos.set(this.pos);
 		this.yd -= 0.04F;
 		this.move(this.xd, this.yd, this.zd);
 		this.xd *= 0.98F;
@@ -73,7 +62,7 @@ public class Item extends Entity {
 		}
 		
 		if(this.getLiquid() != null && this.getLiquid().getLiquidName().equals("lava")) {
-			OpenClassic.getGame().getAudioManager().playSound("random.fizz", this.x, this.y, this.z, 0.4f, 2 + this.level.getRandom().nextFloat() * 0.4f);
+			OpenClassic.getGame().getAudioManager().playSound("random.fizz", this.pos.getX(), this.pos.getY(), this.pos.getZ(), 0.4f, 2 + this.getClientLevel().getRandom().nextFloat() * 0.4f);
 			this.remove();
 		}
 	}
@@ -83,22 +72,17 @@ public class Item extends Entity {
 		GL11.glPushMatrix();
 		float rsin = MathHelper.sin(rot / 10);
 		float bob = rsin * 0.1F + 0.1F;
-		GL11.glTranslatef(this.xo + (this.x - this.xo) * dt, this.yo + (this.y - this.yo) * dt + bob, this.zo + (this.z - this.zo) * dt);
+		GL11.glTranslatef(this.pos.getInterpolatedX(dt), this.pos.getInterpolatedY(dt) + bob, this.pos.getInterpolatedZ(dt));
 		GL11.glRotatef(rot, 0, 1, 0);
-
-		if(models[this.resource] == null && Blocks.fromId(this.resource) != null) {
-			models[this.resource] = new ItemModel(this.resource);
-		}
-
-		models[this.resource].render();
-		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glTranslatef(-0.1F, 0, -0.1F);
+		Blocks.fromId(this.resource).getModel().renderScaled(0, 0, 0, 0.2F, 1);
 		GL11.glPopMatrix();
 	}
 
 	public void playerTouch(LocalPlayer player) {
-		if(this.delay <= 0 && player.inventory.addResource(this.resource, this.count)) {
-			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.x, player.y, player.z, 0.2f, ((this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.7f + 1) * 2);
-			this.level.addEntity(new TakeEntityAnim(this.level, this, player));
+		if(!this.removed && this.delay <= 0 && player.inventory.addResource(this.resource, this.count)) {
+			OpenClassic.getGame().getAudioManager().playSound("random.pop", player.pos.getX(), player.pos.getY(), player.pos.getZ(), 0.2f, ((this.getClientLevel().getRandom().nextFloat() - this.getClientLevel().getRandom().nextFloat()) * 0.7f + 1) * 2);
+			this.getClientLevel().addEntity(new TakeEntityAnim(this.getClientLevel(), this, player));
 			this.remove();
 		}
 	}

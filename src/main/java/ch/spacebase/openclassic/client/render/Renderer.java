@@ -3,6 +3,7 @@ package ch.spacebase.openclassic.client.render;
 import java.nio.*;
 
 import org.lwjgl.BufferUtils;
+
 import static org.lwjgl.opengl.GL11.*;
 
 public class Renderer {
@@ -159,7 +160,7 @@ public class Renderer {
 
 	public void vertex(double x, double y, double z) {
 		this.points++;
-		if(this.mode == 7 && this.points % 4 == 0) {
+		if(this.mode == GL_QUADS && this.points % 4 == 0) {
 			for(int count = 0; count < 2; count++) {
 				int mod = 8 * (3 - count);
 				if(this.textures) {
@@ -170,8 +171,12 @@ public class Renderer {
 				if(this.colors) {
 					this.vertexArray[this.vertexIndex + 5] = this.vertexArray[(this.vertexIndex - mod) + 5];
 				}
+				
+				if(this.normals) {
+					this.vertexArray[this.vertexIndex + 6] = this.vertexArray[(this.vertexIndex - mod) + 6];
+				}
 
-				this.vertexArray[this.vertexIndex + 0] = this.vertexArray[(this.vertexIndex - mod) + 0];
+				this.vertexArray[this.vertexIndex + 0] = this.vertexArray[this.vertexIndex - mod];
 				this.vertexArray[this.vertexIndex + 1] = this.vertexArray[(this.vertexIndex - mod) + 1];
 				this.vertexArray[this.vertexIndex + 2] = this.vertexArray[(this.vertexIndex - mod) + 2];
 				this.vertices++;
@@ -192,7 +197,7 @@ public class Renderer {
 			this.vertexArray[this.vertexIndex + 6] = this.normal;
 		}
 
-		this.vertexArray[this.vertexIndex + 0] = Float.floatToRawIntBits((float) (x + this.mx));
+		this.vertexArray[this.vertexIndex] = Float.floatToRawIntBits((float) (x + this.mx));
 		this.vertexArray[this.vertexIndex + 1] = Float.floatToRawIntBits((float) (y + this.my));
 		this.vertexArray[this.vertexIndex + 2] = Float.floatToRawIntBits((float) (z + this.mz));
 		this.vertexIndex += 8;

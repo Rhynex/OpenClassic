@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,13 +20,9 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Controllers;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
@@ -36,15 +31,17 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.StepSound;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
-import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.api.block.model.TextureFactory;
 import ch.spacebase.openclassic.api.event.block.BlockPlaceEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerKeyChangeEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerQuitEvent;
 import ch.spacebase.openclassic.api.event.player.PlayerRespawnEvent;
 import ch.spacebase.openclassic.api.gui.GuiComponent;
+import ch.spacebase.openclassic.api.input.Keyboard;
+import ch.spacebase.openclassic.api.input.Mouse;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.math.Vector;
 import ch.spacebase.openclassic.api.plugin.Plugin;
 import ch.spacebase.openclassic.api.plugin.RemotePluginInfo;
 import ch.spacebase.openclassic.api.settings.BooleanSetting;
@@ -63,14 +60,15 @@ import ch.spacebase.openclassic.client.gui.MainMenuScreen;
 import ch.spacebase.openclassic.client.gui.IngameMenuScreen;
 import ch.spacebase.openclassic.client.gui.hud.ClientHUDScreen;
 import ch.spacebase.openclassic.client.gui.hud.HeldBlock;
+import ch.spacebase.openclassic.client.input.Input;
+import ch.spacebase.openclassic.client.input.KeyboardEvent;
+import ch.spacebase.openclassic.client.input.MouseEvent;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.ClientTextureFactory;
-import ch.spacebase.openclassic.client.render.Frustum;
-import ch.spacebase.openclassic.client.render.GuiTextures;
 import ch.spacebase.openclassic.client.render.RenderHelper;
-import ch.spacebase.openclassic.client.render.Renderer;
+import ch.spacebase.openclassic.client.render.level.Chunk;
 import ch.spacebase.openclassic.client.settings.MinimapSetting;
 import ch.spacebase.openclassic.client.settings.MusicSetting;
 import ch.spacebase.openclassic.client.settings.NightSetting;
@@ -78,10 +76,9 @@ import ch.spacebase.openclassic.client.settings.SmoothingSetting;
 import ch.spacebase.openclassic.client.settings.SurvivalSetting;
 import ch.spacebase.openclassic.client.settings.TextureRefreshSetting;
 import ch.spacebase.openclassic.client.sound.ClientAudioManager;
-import ch.spacebase.openclassic.client.util.BlockUtils;
-import ch.spacebase.openclassic.client.util.ChunkVisibleAndDistanceComparator;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.LWJGLNatives;
+import ch.spacebase.openclassic.client.util.RayTracer;
 import ch.spacebase.openclassic.client.util.ShaderManager;
 import ch.spacebase.openclassic.game.Main;
 import ch.spacebase.openclassic.game.network.ClassicSession.State;
@@ -93,10 +90,6 @@ import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
-import com.mojang.minecraft.entity.item.Item;
-import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.entity.particle.Particle;
-import com.mojang.minecraft.entity.particle.ParticleManager;
 import com.mojang.minecraft.entity.particle.RainParticle;
 import com.mojang.minecraft.entity.player.InputHandler;
 import com.mojang.minecraft.entity.player.LocalPlayer;
@@ -104,8 +97,6 @@ import com.mojang.minecraft.entity.player.net.NetworkPlayer;
 import com.mojang.minecraft.gamemode.CreativeGameMode;
 import com.mojang.minecraft.gamemode.GameMode;
 import com.mojang.minecraft.gamemode.SurvivalGameMode;
-import com.mojang.minecraft.render.level.Chunk;
-import com.mojang.minecraft.render.level.LevelRenderer;
 import com.mojang.minecraft.util.Intersection;
 import com.mojang.minecraft.util.Timer;
 import com.zachsthings.onevent.EventManager;
@@ -119,9 +110,7 @@ public class Minecraft implements Runnable {
 	public int height;
 	public Timer timer = new Timer(InternalConstants.TICKS_PER_SECOND);
 	public ClientLevel level;
-	public LevelRenderer levelRenderer;
 	public LocalPlayer player;
-	public ParticleManager particleManager;
 	public Canvas canvas;
 	public ClientProgressBar progressBar = new ClientProgressBar();
 	public ClientAudioManager audio;
@@ -143,11 +132,12 @@ public class Minecraft implements Runnable {
 	public List<RemotePluginInfo> serverPlugins = new ArrayList<RemotePluginInfo>();
 	public ClientSession session;
 	public boolean displayActive = false;
+	public boolean wasActive = false;
 	public int rainTicks = 0;
 	public HeldBlock heldBlock = new HeldBlock();
 	public HashMap<Byte, NetworkPlayer> netPlayers = new HashMap<Byte, NetworkPlayer>();
 	private int schedTicks = 0;
-	private long lastUpdate = System.currentTimeMillis();
+	private long lastUpdate = 0;
 	private int fps = 0;
 	public Settings settings;
 	public Settings hackSettings;
@@ -158,11 +148,7 @@ public class Minecraft implements Runnable {
 	public GuiComponent baseGUI;
 	private boolean init = false;
 	private int waterDelay = 200;
-	
-	private float fogEnd;
-	private float fogRed;
-	private float fogGreen;
-	private float fogBlue;
+	public float cracks = 0;
 
 	public Minecraft(Canvas canvas, int width, int height) {
 		this.ticks = 0;
@@ -210,6 +196,8 @@ public class Minecraft implements Runnable {
 			component.clearComponents();
 			component.onAttached(component.getParent());
 		}
+		
+		GL11.glViewport(0, 0, this.width, this.height);
 	}
 
 	public void setLevel(ClientLevel level) {
@@ -230,41 +218,18 @@ public class Minecraft implements Runnable {
 			this.mode.preparePlayer(this.player);
 		}
 
-		if(this.player != null) {
-			this.player.input = new InputHandler(this.bindings);
-			this.mode.apply(this.player);
-		}
-
-		if(this.levelRenderer != null) {
-			if(this.levelRenderer.level != level) {
-				this.levelRenderer.level = level;
-			}
-			
-			if(level != null) {
-				this.levelRenderer.refresh();
-			}
-		}
-
-		if(this.particleManager != null) {
-			this.particleManager.particles.clear();
-		}
+		this.player.input = new InputHandler(this.bindings);
+		this.mode.apply(this.player);
 	}
 	
 	public void initGame() {
 		this.audio.stopMusic();
 		this.audio.setMusicTime(System.currentTimeMillis() + rand.nextInt(900000));
-		if(this.level == null) {
-			ClientLevel level = new ClientLevel();
-			level.setData(8, 8, 8, new byte[512]);
-			this.setLevel(level);
-		}
-		
 		if(this.server != null) {
 			this.session = new ClientSession(this.ocPlayer, this.tempKey, this.server, this.port);
 			this.tempKey = null;
 		}
 
-		this.particleManager = new ParticleManager();
 		this.hud = new ClientHUDScreen();
 		this.hud.onAttached(null);
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 && !this.isInMultiplayer() ? new SurvivalGameMode(this) : new CreativeGameMode(this);
@@ -281,7 +246,6 @@ public class Minecraft implements Runnable {
 		this.serverPlugins.clear();
 		if(menu) OpenClassic.getClient().setActiveComponent(new MainMenuScreen());
 		this.level = null;
-		this.particleManager = null;
 		this.hud = null;
 		if(this.player != null && this.ocPlayer.getData() != null && !this.isInMultiplayer()) {
 			this.ocPlayer.getData().save(OpenClassic.getClient().getDirectory().getPath() + "/player.nbt");
@@ -312,7 +276,7 @@ public class Minecraft implements Runnable {
 		this.hacks = true;
 	}
 	
-	public final void shutdown() {
+	public void shutdown() {
 		if(this.shutdown) {
 			return;
 		}
@@ -324,7 +288,6 @@ public class Minecraft implements Runnable {
 		((ClassicScheduler) OpenClassic.getClient().getScheduler()).shutdown();
 		this.audio.cleanup();
 		OpenClassic.setGame(null);
-		this.destroyRender();
 		System.exit(0);
 	}
 
@@ -470,34 +433,33 @@ public class Minecraft implements Runnable {
 		OpenClassic.getClient().getConfig().save();
 		
 		this.mode = this.settings.getIntSetting("options.survival").getValue() > 0 ? new SurvivalGameMode(this) : new CreativeGameMode(this);
-		Item.initModels();
-		this.initRender();
 
 		((ClassicClient) OpenClassic.getClient()).init();
-		this.baseGUI = new GuiComponent("base", 0, 0, Display.getWidth(), Display.getHeight());
+		this.baseGUI = new GuiComponent("base", 0, 0, this.width, this.height);
 		this.baseGUI.setFocused(true);
-		this.init = true;
-		this.lastUpdate = System.currentTimeMillis();
 		this.fps = 0;
+		
+		this.initRender();
+		this.init = true;
 		if(this.server == null || this.server.equals("") || this.port == 0) {
 			OpenClassic.getClient().setActiveComponent(new LoginScreen());
 		} else {
 			this.initGame();
 		}
 		
-		while(this.running) {
+		while(this.running && !Display.isCloseRequested()) {
 			this.timer.update();
+			Input.update();
 			for(int tick = 0; tick < this.timer.elapsedTicks; tick++) {
 				this.ticks++;
 				this.tick();
 			}
-
-			if(!this.render()) {
-				break;
-			}
+			
+			this.render(this.timer.delta);
 		}
 
 		this.shutdown();
+		this.destroyRender();
 		return;
 	}
 	
@@ -527,31 +489,27 @@ public class Minecraft implements Runnable {
 			this.handleException(e);
 			return;
 		}
-
-		try {
-			Controllers.create();
-		} catch(LWJGLException e) {
-			e.printStackTrace();
-		}
-
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
 		GL11.glShadeModel(GL11.GL_SMOOTH);
 		GL11.glClearDepth(GL11.GL_CLIENT_PIXEL_STORE_BIT);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
 		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+		GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glAlphaFunc(GL11.GL_GREATER, 0);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glCullFace(GL11.GL_BACK);
+		GL11.glLineWidth(2);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glViewport(0, 0, this.width, this.height);
 		
 		RenderHelper.getHelper().init();
-		this.levelRenderer = new LevelRenderer();
 		ShaderManager.setup();
-		GL11.glViewport(0, 0, this.width, this.height);
 	}
 	
 	private void destroyRender() {
@@ -559,325 +517,32 @@ public class Minecraft implements Runnable {
 		Display.destroy();
 	}
 	
-	private boolean render() {
-		if(Display.isCloseRequested()) {
-			return false;
-		}
-
+	private void render(float delta) {
 		if(this.width != Display.getWidth() || this.height != Display.getHeight()) {
 			this.resize();
 		}
 
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		if(this.displayActive && !Display.isActive() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !Mouse.isButtonDown(2)) {
-			this.displayMenu();
-		}
-
 		this.displayActive = Display.isActive();
-		this.mode.applyBlockCracks(this.timer.delta);
-		if(Mouse.isGrabbed()) {
-			int x = Mouse.getDX();
-			int y = Mouse.getDY();
-			byte direction = 1;
-			if(this.settings.getBooleanSetting("options.invert-mouse").getValue()) {
-				direction = -1;
-			}
-
-			this.player.turn(x, (y * direction));
-			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
-		}
-
-		((ClientTextureFactory) TextureFactory.getFactory()).updateTextures();
-		if(this.level != null) {
-			float pitch = this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta;
-			float yaw = this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta;
-			Vector pVec = RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
-			float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
-			float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
-			float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
-			float psin = MathHelper.sin(-pitch * MathHelper.DEG_TO_RAD);
-			float mx = ysin * pcos;
-			float mz = ycos * pcos;
-			float reach = this.mode.getReachDistance();
-			this.selected = this.level.clip(pVec, pVec.add(mx * reach, psin * reach, mz * reach), true);
-			if(this.selected != null) {
-				reach = this.selected.pos.distance(RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta));
-			}
-
-			pVec = RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta);
-			if(this.mode instanceof CreativeGameMode) {
-				reach = 32;
-			}
-
-			Entity selectedEntity = null;
-			List<Entity> entities = this.level.getBlockMap().getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
-
-			float distance = 0;
-			for(int count = 0; count < entities.size(); count++) {
-				Entity entity = entities.get(count);
-				if(entity.isPickable()) {
-					Intersection pos = BlockUtils.clip(entity.bb.grow(0.1F, 0.1F, 0.1F), pVec, pVec.add(mx * reach, psin * reach, mz * reach));
-					if(pos != null && (pVec.distance(pos.pos) < distance || distance == 0)) {
-						selectedEntity = entity;
-						distance = pVec.distance(pos.pos);
-					}
-				}
-			}
-
-			if(selectedEntity != null && !(this.mode instanceof CreativeGameMode)) {
-				this.selected = new Intersection(selectedEntity);
-			}
-
-			int pass = 0;
-			while(true) {
-				if(pass >= 2) {
-					GL11.glColorMask(true, true, true, false);
-					break;
-				}
-
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					if(pass == 0) {
-						GL11.glColorMask(false, true, true, false);
-					} else {
-						GL11.glColorMask(true, false, false, false);
-					}
-				}
-
-				GL11.glViewport(0, 0, this.width, this.height);
-				float fogDensity = 1 - (float) Math.pow(1F / (4 - this.settings.getIntSetting("options.render-distance").getValue()), 0.25);
-				float skyRed = (this.level.getSkyColor() >> 16 & 255) / 255F;
-				float skyGreen = (this.level.getSkyColor() >> 8 & 255) / 255F;
-				float skyBlue = (this.level.getSkyColor() & 255) / 255F;
-				this.fogRed = (this.level.getFogColor() >> 16 & 255) / 255F;
-				this.fogGreen = (this.level.getFogColor() >> 8 & 255) / 255F;
-				this.fogBlue = (this.level.getFogColor() & 255) / 255F;
-				this.fogRed += (skyRed - this.fogRed) * fogDensity;
-				this.fogGreen += (skyGreen - this.fogGreen) * fogDensity;
-				this.fogBlue += (skyBlue - this.fogBlue) * fogDensity;
-				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
-				GL11.glEnable(GL11.GL_CULL_FACE);
-				this.fogEnd = (512 >> (this.settings.getIntSetting("options.render-distance").getValue() << 1));
-				GL11.glMatrixMode(GL11.GL_PROJECTION);
-				GL11.glLoadIdentity();
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					GL11.glTranslatef((-((pass << 1) - 1)) * 0.07F, 0, 0);
-				}
-
-				float fov = 70;
-				if(this.player.health <= 0) {
-					fov /= (1 - 500 / (this.player.deathTime + this.timer.delta + 500)) * 2 + 1;
-				}
-
-				GLU.gluPerspective(fov, (float) this.width / (float) this.height, 0.05F, this.fogEnd);
-				GL11.glMatrixMode(GL11.GL_MODELVIEW);
-				GL11.glLoadIdentity();
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0, 0);
-				}
-
-				RenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
-				if(this.settings.getBooleanSetting("options.view-bobbing").getValue()) {
-					RenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
-				}
-
-				GL11.glTranslatef(0, 0, -0.1F);
-				GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1, 0, 0);
-				GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0, 1, 0);
-				float rx = this.player.xo + (this.player.x - this.player.xo) * this.timer.delta;
-				float ry = this.player.yo + (this.player.y - this.player.yo) * this.timer.delta;
-				float rz = this.player.zo + (this.player.z - this.player.zo) * this.timer.delta;
-				GL11.glTranslatef(-rx, -ry, -rz);
-				Frustum.update();
-				for(int count = 0; count < this.levelRenderer.chunkCache.length; count++) {
-					this.levelRenderer.chunkCache[count].clip();
-				}
-
-				try {
-					Collections.sort(this.levelRenderer.chunks, new ChunkVisibleAndDistanceComparator(this.player));
-				} catch(Exception e) {
-				}
-
-				int max = this.levelRenderer.chunks.size() - 1;
-				int amount = this.levelRenderer.chunks.size();
-				if(amount > 3) {
-					amount = 3;
-				}
-
-				for(int count = 0; count < amount; count++) {
-					Chunk chunk = this.levelRenderer.chunks.remove(max - count);
-					chunk.update();
-					chunk.loaded = false;
-				}
-
-				this.updateFog();
-				GL11.glEnable(GL11.GL_FOG);
-				this.levelRenderer.sortAndRender(this.player, true);
-				if(BlockUtils.preventsRendering(this.level, this.player.x, this.player.y, this.player.z, 0.1F)) {
-					for(int bx = (int) this.player.x - 1; bx <= (int) this.player.x + 1; bx++) {
-						for(int by = (int) this.player.y - 1; by <= (int) this.player.y + 1; by++) {
-							for(int bz = (int) this.player.z - 1; bz <= (int) this.player.z + 1; bz++) {
-								BlockType block = this.levelRenderer.level.getBlockTypeAt(bx, by, bz);
-								if(block != null && block.getPreventsRendering()) {
-									GL11.glColor4f(0.2F, 0.2F, 0.2F, 1);
-									GL11.glDepthFunc(GL11.GL_LESS);
-									GL11.glDisable(GL11.GL_CULL_FACE);
-									block.getModel(this.level, bx, by, bz).renderAll(bx, by, bz, 0.2F);
-									GL11.glEnable(GL11.GL_CULL_FACE);
-									GL11.glDepthFunc(GL11.GL_LEQUAL);
-								}
-							}
-						}
-					}
-				}
-
-				RenderHelper.getHelper().setLighting(true);
-				this.levelRenderer.level.getBlockMap().render(RenderHelper.getHelper().getPlayerVector(this.player, this.timer.delta), this.timer.delta);
-				RenderHelper.getHelper().setLighting(false);
-				this.updateFog();
-				float xmod = -MathHelper.cos(this.player.yaw * MathHelper.DEG_TO_RAD);
-				float zmod = -MathHelper.sin(this.player.yaw * MathHelper.DEG_TO_RAD);
-				float xdir = -zmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
-				float zdir = xmod * MathHelper.sin(this.player.pitch * MathHelper.DEG_TO_RAD);
-				float ymod = MathHelper.cos(this.player.pitch * MathHelper.DEG_TO_RAD);
-
-				Renderer.get().begin();
-				for(Particle particle : this.particleManager.particles) {
-					particle.render(this.timer.delta, xmod, ymod, zmod, xdir, zdir);
-				}
-
-				Renderer.get().end();
-
-				GuiTextures.ROCK.bind();
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-				GL11.glCallList(this.levelRenderer.boundaryList);
-				this.updateFog();
-				GuiTextures.CLOUDS.bind();
-				GL11.glColor4f(1, 1, 1, 1);
-				float cloudRed = (this.levelRenderer.level.getCloudColor() >> 16 & 255) / 255F;
-				float cloudBlue = (this.levelRenderer.level.getCloudColor() >> 8 & 255) / 255F;
-				float cloudGreen = (this.levelRenderer.level.getCloudColor() & 255) / 255F;
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					cloudRed = (cloudRed * 30 + cloudBlue * 59 + cloudGreen * 11) / 100;
-					cloudBlue = (cloudRed * 30 + cloudBlue * 70) / 100;
-					cloudGreen = (cloudRed * 30 + cloudGreen * 70) / 100;
-				}
-
-				float texCoordMod = 1 / 2048f;
-				float cloudHeight = (this.levelRenderer.level.getHeight() + 2);
-				float movement = (this.levelRenderer.ticks + this.timer.delta) * texCoordMod * 0.03F;
-				Renderer.get().begin();
-				Renderer.get().color(cloudRed, cloudBlue, cloudGreen);
-
-				for(int x = -2048; x < this.levelRenderer.level.getWidth() + 2048; x += 512) {
-					for(int z = -2048; z < this.levelRenderer.level.getDepth() + 2048; z += 512) {
-						Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
-						Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
-						Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
-						Renderer.get().vertexuv(x, cloudHeight, z, x * texCoordMod + movement, z * texCoordMod);
-						Renderer.get().vertexuv(x, cloudHeight, z, x * texCoordMod + movement, z * texCoordMod);
-						Renderer.get().vertexuv((x + 512), cloudHeight, z, (x + 512) * texCoordMod + movement, z * texCoordMod);
-						Renderer.get().vertexuv((x + 512), cloudHeight, (z + 512), (x + 512) * texCoordMod + movement, (z + 512) * texCoordMod);
-						Renderer.get().vertexuv(x, cloudHeight, (z + 512), x * texCoordMod + movement, (z + 512) * texCoordMod);
-					}
-				}
-
-				Renderer.get().end();
-				GL11.glDisable(GL11.GL_TEXTURE_2D);
-				Renderer.get().begin();
-				float skRed = (this.levelRenderer.level.getSkyColor() >> 16 & 255) / 255F;
-				float skBlue = (this.levelRenderer.level.getSkyColor() >> 8 & 255) / 255F;
-				float skGreen = (this.levelRenderer.level.getSkyColor() & 255) / 255F;
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					skRed = (skRed * 30 + skBlue * 59 + skGreen * 11) / 100;
-					skBlue = (skRed * 30 + skBlue * 70) / 100;
-					skGreen = (skRed * 30 + skGreen * 70) / 100;
-				}
-
-				Renderer.get().color(skRed, skBlue, skGreen);
-				float skyHeight = (this.levelRenderer.level.getHeight() + 10);
-
-				for(int x = -2048; x < this.levelRenderer.level.getWidth() + 2048; x += 512) {
-					for(int z = -2048; z < this.levelRenderer.level.getDepth() + 2048; z += 512) {
-						Renderer.get().vertex(x, skyHeight, z);
-						Renderer.get().vertex((x + 512), skyHeight, z);
-						Renderer.get().vertex((x + 512), skyHeight, (z + 512));
-						Renderer.get().vertex(x, skyHeight, (z + 512));
-					}
-				}
-
-				Renderer.get().end();
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-				this.updateFog();
-				if(this.selected != null) {
-					GL11.glDisable(GL11.GL_ALPHA_TEST);
-					GL11.glColor4f(1, 1, 1, (MathHelper.sin(System.currentTimeMillis() / 100F) * 0.2F + 0.4F) * 0.5F);
-					if(this.levelRenderer.cracks > 0) {
-						GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR);
-						GL11.glColor4f(1, 1, 1, 0.5F);
-						GL11.glPushMatrix();
-						BlockType btype = this.levelRenderer.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z);
-						GL11.glDepthMask(false);
-						if(btype == null) {
-							btype = VanillaBlock.STONE;
-						}
-
-						Model model = btype.getModel(this.level, this.selected.x, this.selected.y, this.selected.z);
-						for(int count = 0; count < model.getQuads().size(); count++) {
-							RenderHelper.getHelper().drawCracks(model.getQuad(count), this.selected.x, this.selected.y, this.selected.z, 240 + (int) (this.levelRenderer.cracks * 10));
-						}
-
-						GL11.glDepthMask(true);
-						GL11.glPopMatrix();
-						GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-					}
-
-					GL11.glColor4f(0, 0, 0, 0.4F);
-					GL11.glLineWidth(2);
-					GL11.glDisable(GL11.GL_TEXTURE_2D);
-					GL11.glDepthMask(false);
-					BlockType block = this.levelRenderer.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z);
-					if(block != null) {
-						BoundingBox bb = block.getModel(this.level, this.selected.x, this.selected.y, this.selected.z).getSelectionBox(this.selected.x, this.selected.y, this.selected.z);
-						if(bb != null) {
-							bb = bb.grow(0.002F, 0.002F, 0.002F);
-							GL11.glBegin(GL11.GL_LINE_STRIP);
-							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ2());
-							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ2());
-							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
-							GL11.glEnd();
-							GL11.glBegin(GL11.GL_LINE_STRIP);
-							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ2());
-							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ2());
-							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
-							GL11.glEnd();
-							GL11.glBegin(GL11.GL_LINES);
-							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ1());
-							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ1());
-							GL11.glVertex3f(bb.getX2(), bb.getY1(), bb.getZ2());
-							GL11.glVertex3f(bb.getX2(), bb.getY2(), bb.getZ2());
-							GL11.glVertex3f(bb.getX1(), bb.getY1(), bb.getZ2());
-							GL11.glVertex3f(bb.getX1(), bb.getY2(), bb.getZ2());
-							GL11.glEnd();
-							GL11.glEnable(GL11.GL_ALPHA_TEST);
-						}
-					}
-
-					GL11.glDepthMask(true);
-					GL11.glEnable(GL11.GL_TEXTURE_2D);
-					GL11.glEnable(GL11.GL_ALPHA_TEST);
+		this.mode.applyBlockCracks(delta);
+		((ClientTextureFactory) TextureFactory.getFactory()).renderUpdateTextures();
+		if(this.level != null && this.player != null) {
+			ClientLevel level = this.level;
+			LocalPlayer player = this.player;
+			if(Input.isMouseGrabbed()) {
+				int x = Input.getMouseDX();
+				int y = Input.getMouseDY();
+				byte direction = 1;
+				if(this.settings.getBooleanSetting("options.invert-mouse").getValue()) {
+					direction = -1;
 				}
 				
-				VanillaBlock.WATER.getModel().getQuad(0).getTexture().bind();
-				GL11.glCallList(this.levelRenderer.boundaryList + 1);
-				GL11.glColorMask(false, false, false, false);
-				int cy = this.levelRenderer.sortAndRender(this.player, false);
-				GL11.glColorMask(true, true, true, true);
+				player.turn(x, (y * direction));
+				Input.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+			} else {
+				player.turn(0, 0);
+			}
+
+			for(int pass = 0; pass < 2; pass++) {
 				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					if(pass == 0) {
 						GL11.glColorMask(false, true, true, false);
@@ -886,199 +551,68 @@ public class Minecraft implements Runnable {
 					}
 				}
 
-				if(cy > 0) {
-					GL11.glCallLists(this.levelRenderer.listBuffer);
-				}
 
-				GL11.glDepthMask(true);
-				GL11.glDisable(GL11.GL_FOG);
-				if(this.raining) {
-					int x = (int) this.player.x;
-					int y = (int) this.player.y;
-					int z = (int) this.player.z;
-					GL11.glDisable(GL11.GL_CULL_FACE);
-					GL11.glNormal3f(0, 1, 0);
-					GuiTextures.RAIN.bind();
-					for(int cx = x - 5; cx <= x + 5; cx++) {
-						for(int cz = z - 5; cz <= z + 5; cz++) {
-							int highest = this.level.getHighestBlockY(cx, cz);
-							int minRY = y - 5;
-							int maxRY = y + 5;
-							if(minRY < highest) {
-								minRY = highest;
-							}
-
-							if(maxRY < highest) {
-								maxRY = highest;
-							}
-
-							if(minRY != maxRY) {
-								float downfall = (((this.rainTicks + cx * 3121 + cz * 418711) % 32) + this.timer.delta) / 32F;
-								float rax = cx + 0.5F - this.player.x;
-								float raz = cz + 0.5F - this.player.z;
-								float visibility = (float) Math.sqrt(rax * rax + raz * raz) / 5;
-								GL11.glColor4f(1, 1, 1, (1 - visibility * visibility) * 0.7F);
-								Renderer.get().begin();
-								Renderer.get().vertexuv(cx, minRY, cz, 0, minRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv((cx + 1), minRY, (cz + 1), 2, minRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv((cx + 1), maxRY, (cz + 1), 2, maxRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv(cx, maxRY, cz, 0, maxRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv(cx, minRY, (cz + 1), 0, minRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv((cx + 1), minRY, cz, 2, minRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv((cx + 1), maxRY, cz, 2, maxRY * 2 / 8F + downfall * 2);
-								Renderer.get().vertexuv(cx, maxRY, (cz + 1), 0, maxRY * 2 / 8F + downfall * 2);
-								Renderer.get().end();
-							}
-						}
-					}
-
-					GL11.glEnable(GL11.GL_CULL_FACE);
-				}
-
-				if(selectedEntity != null) {
-					selectedEntity.renderHover(this.timer.delta);
-				}
-
+				level.render(delta, pass);
 				GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 				GL11.glLoadIdentity();
 				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					GL11.glTranslatef(((pass << 1) - 1) * 0.1F, 0, 0);
 				}
 
-				RenderHelper.getHelper().hurtEffect(this.player, this.timer.delta);
+				RenderHelper.getHelper().hurtEffect(player.openclassic, delta);
 				if(this.settings.getBooleanSetting("options.view-bobbing").getValue()) {
-					RenderHelper.getHelper().applyBobbing(this.player, this.timer.delta);
+					RenderHelper.getHelper().applyBobbing(player.openclassic, delta);
 				}
-
-				GL11.glPushMatrix();
-				GL11.glRotatef(this.player.oPitch + (this.player.pitch - this.player.oPitch) * this.timer.delta, 1, 0, 0);
-				GL11.glRotatef(this.player.oYaw + (this.player.yaw - this.player.oYaw) * this.timer.delta, 0, 1, 0);
-				RenderHelper.getHelper().setLighting(true);
-				GL11.glPopMatrix();
-				this.heldBlock.render(this.timer.delta);
-				RenderHelper.getHelper().setLighting(false);
+				
+				this.heldBlock.render(delta);
 				if(!this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
 					break;
 				}
-
-				pass++;
 			}
 
+			GL11.glColorMask(true, true, true, false);
 			RenderHelper.getHelper().ortho();
-			int mox = Mouse.getEventX();
-			int moy = Display.getHeight() - Mouse.getEventY();
-			this.hud.render(mox, moy);
+			if(this.hud != null) {
+				this.hud.render(Input.getMouseX(), Display.getHeight() - Input.getMouseY());
+			}
 		} else {
-			GL11.glViewport(0, 0, this.width, this.height);
 			GL11.glClearColor(0, 0, 0, 0);
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			RenderHelper.getHelper().ortho();
 		}
 
-		int mx = Mouse.getEventX();
-		int my = Display.getHeight() - Mouse.getEventY();
-		this.baseGUI.render(mx, my);
+		this.baseGUI.render(Input.getMouseX(), Display.getHeight() - Input.getMouseY());
 		if(this.progressBar.isVisible()) {
 			this.progressBar.render(false);
 		}
 
-		Thread.yield();
 		Display.update();
+		this.fps++;
 		if(this.settings.getBooleanSetting("options.limit-fps").getValue()) {
-			try {
-				Thread.sleep(5);
-			} catch(InterruptedException e) {
-			}
+			Display.sync(Display.getDesktopDisplayMode().getFrequency());
 		}
 
-		this.fps++;
-		while(System.currentTimeMillis() >= this.lastUpdate + 1000) {
+		if(System.currentTimeMillis() - this.lastUpdate >= 1000) {
 			if(this.hud != null) {
 				this.hud.debugInfo = this.fps + " fps, " + Chunk.chunkUpdates + " chunk updates";
 			}
 			
 			Chunk.chunkUpdates = 0;
-			this.lastUpdate += 1000;
 			this.fps = 0;
+			this.lastUpdate = System.currentTimeMillis();
 		}
-		
-		return true;
-	}
-	
-	public void updateFog() {
-		float fogRed = this.fogRed;
-		float fogGreen = this.fogGreen;
-		float fogBlue = this.fogBlue;
-		BlockType type = this.level.getBlockTypeAt((int) this.player.x, (int) (this.player.y + 0.12F), (int) this.player.z);
-		if(type != null && (type.getFogDensity() != -1 || type.getFogRed() != -1 || type.getFogGreen() != -1 || type.getFogBlue() != -1 || type.isLiquid())) {
-			if(type.getFogDensity() != -1) {
-				GL11.glFogf(GL11.GL_FOG_DENSITY, type.getFogDensity());
-			}
-			
-			if(type.getFogRed() != -1) {
-				fogRed = type.getFogRed() / 255f;
-			}
-			
-			if(type.getFogGreen() != -1) {
-				fogGreen = type.getFogGreen() / 255f;
-			}
-			
-			if(type.getFogBlue() != -1) {
-				fogBlue = type.getFogBlue() / 255f;
-			}
-			
-			if(type.isLiquid()) {
-				GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_EXP);
-				float r = type.getFogRed() != -1 ? type.getFogRed() / 255f : 1;
-				float g = type.getFogGreen() != -1 ? type.getFogGreen() / 255f : 1;
-				float b = type.getFogBlue() != -1 ? type.getFogBlue() / 255f : 1;
-				if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-					r = (r * 30 + g * 59 + b * 11) / 100;
-					g = (r * 30 + g * 70) / 100;
-					b = (r * 30 + b * 70) / 100;
-				}
-
-				GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, RenderHelper.getHelper().getParamBuffer(r, g, b, 1));
-			}
-		} else {
-			GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_LINEAR);
-			GL11.glFogf(GL11.GL_FOG_START, 0);
-			GL11.glFogf(GL11.GL_FOG_END, this.fogEnd);
-			GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, RenderHelper.getHelper().getParamBuffer(1, 1, 1, 1));
-		}
-		
-		if(this.settings.getBooleanSetting("options.3d-anaglyph").getValue()) {
-			float fred = (fogRed * 30 + fogBlue * 59 + fogGreen * 11) / 100;
-			float fgreen = (fogRed * 30 + fogGreen * 70) / 100;
-			float fblue = (fogRed * 30 + fogBlue * 70) / 100;
-			fogRed = fred;
-			fogGreen = fgreen;
-			fogBlue = fblue;
-		}
-		
-		GL11.glClearColor(fogRed, fogGreen, fogBlue, 0);
-		GL11.glFog(GL11.GL_FOG_COLOR, RenderHelper.getHelper().getParamBuffer(fogRed, fogGreen, fogBlue, 1));
-		GL11.glNormal3f(0, -1, 0);
-		GL11.glColor4f(1, 1, 1, 1);
-		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-		GL11.glColorMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT);
 	}
 
-	public void grabMouse() {
-		if(!Mouse.isGrabbed()) {
-			Mouse.setGrabbed(true);
+	public void setMouseGrabbed(boolean grabbed) {
+		if(!Input.isMouseGrabbed() && grabbed) {
 			if(OpenClassic.getClient().getActiveComponent() != null) {
 				OpenClassic.getClient().setActiveComponent(null);
 			}
 			
 			this.lastClick = this.ticks + 10000;
 		}
-	}
-
-	public void displayMenu() {
-		if(OpenClassic.getClient().getActiveComponent() == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
-			OpenClassic.getClient().setActiveComponent(new IngameMenuScreen());
-		}
+		
+		Input.setMouseGrabbed(grabbed);
 	}
 
 	private void onMouseClick(int button) {
@@ -1135,7 +669,7 @@ public class Minecraft implements Runnable {
 							this.mode.hitBlock(x, y, z);
 							return;
 						}
-					} else {
+					} else if(this.player.inventory.getSelected() > 0) {
 						BlockType type = Blocks.fromId(this.player.inventory.getSelected());
 						if(type == null) {
 							return;
@@ -1177,34 +711,36 @@ public class Minecraft implements Runnable {
 	}
 
 	private void tick() {
-		this.audio.update(this.player);
+		this.audio.update(this.ocPlayer);
 		((ClassicScheduler) OpenClassic.getGame().getScheduler()).tick(this.schedTicks);
 		if(OpenClassic.getClient().getActiveComponent() != null) {
 			this.lastClick = this.ticks + 10000;
 		}
 		
-		while(Mouse.next()) {
+		MouseEvent mouse = null;
+		while((mouse = Input.nextMouseEvent()) != null) {
 			if(this.ingame && OpenClassic.getClient().getActiveComponent() == null) {
-				if(Mouse.getEventDWheel() != 0) {
-					this.player.inventory.scrollSelection(Mouse.getEventDWheel());
+				ClientLevel level = this.level;
+				if(mouse.getDWheel() != 0) {
+					this.player.inventory.scrollSelection(mouse.getDWheel());
 				}
 
-				if(!Mouse.isGrabbed() && Mouse.getEventButtonState()) {
-					this.grabMouse();
+				if(!Input.isMouseGrabbed() && mouse.getState()) {
+					this.setMouseGrabbed(true);
 				} else {
-					if(Mouse.getEventButtonState()) {
-						if(Mouse.getEventButton() == 0) {
-							this.onMouseClick(0);
+					if(mouse.getState()) {
+						if(mouse.getButton() == 0) {
+							this.onMouseClick(Mouse.LEFT_BUTTON);
 							this.lastClick = this.ticks;
 						}
 
-						if(Mouse.getEventButton() == 1) {
-							this.onMouseClick(1);
+						if(mouse.getButton() == 1) {
+							this.onMouseClick(Mouse.RIGHT_BUTTON);
 							this.lastClick = this.ticks;
 						}
 
-						if(Mouse.getEventButton() == 2 && this.selected != null) {
-							int block = this.level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z).getId();
+						if(mouse.getButton() == 2 && this.selected != null) {
+							int block = level.getBlockTypeAt(this.selected.x, this.selected.y, this.selected.z).getId();
 							if(block == VanillaBlock.GRASS.getId()) {
 								block = VanillaBlock.DIRT.getId();
 							}
@@ -1221,22 +757,25 @@ public class Minecraft implements Runnable {
 						}
 					}
 				}
-			} else if(Mouse.getEventButtonState()) {
-				int x = Mouse.getEventX();
-				int y = Display.getHeight() - Mouse.getEventY();
-				this.baseGUI.onMouseClick(x, y, Mouse.getEventButton());
+			} else if(mouse.getState()) {
+				int x = mouse.getX();
+				int y = Display.getHeight() - mouse.getY();
+				this.baseGUI.onMouseClick(x, y, mouse.getButton());
 			}
 		}
-
-		while(Keyboard.next()) {
+		
+		KeyboardEvent keyboard = null;
+		while((keyboard = Input.nextKeyEvent()) != null) {
 			if(this.ingame && OpenClassic.getClient().getActiveComponent() == null) {
-				this.player.input.setKeyState(Keyboard.getEventKey(), Keyboard.getEventKeyState());
-				if(Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
-					this.player.input.keyPress(Keyboard.getEventKey());
+				ClientLevel level = this.level;
+				this.hud.onKeyPress(keyboard.getCharacter(), keyboard.getKey());
+				this.player.input.setKeyState(keyboard.getKey(), keyboard.getState());
+				if(keyboard.getState() && !keyboard.isRepeat()) {
+					this.player.input.keyPress(keyboard.getKey());
 				}
 				
-				if(Keyboard.getEventKeyState()) {
-					if(Keyboard.getEventKey() == Keyboard.KEY_F6) {
+				if(keyboard.getState()) {
+					if(keyboard.getKey() == Keyboard.KEY_F6) {
 						if(Display.isFullscreen()) {
 							try {
 								Display.setFullscreen(false);
@@ -1256,12 +795,12 @@ public class Minecraft implements Runnable {
 						this.resize();
 					}
 
-					if(Keyboard.getEventKey() == Keyboard.KEY_F1) {
+					if(keyboard.getKey() == Keyboard.KEY_F1) {
 						this.hud.setVisible(!this.hud.isVisible());
 					}
 
 					if(!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME) {
-						if(Keyboard.getEventKey() == Keyboard.KEY_F2) {
+						if(keyboard.getKey() == Keyboard.KEY_F2) {
 							GL11.glReadBuffer(GL11.GL_FRONT);
 
 							int width = Display.getWidth();
@@ -1291,77 +830,91 @@ public class Minecraft implements Runnable {
 							}
 						}
 
-						if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-							this.displayMenu();
+						if(keyboard.getKey() == Keyboard.KEY_ESCAPE) {
+							if(OpenClassic.getClient().getActiveComponent() == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
+								OpenClassic.getClient().setActiveComponent(new IngameMenuScreen());
+							}
 						}
 
 						if(this.mode instanceof CreativeGameMode) {
-							if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.load-loc").getKey()) {
-								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), this.level.getSpawn().getX(), this.level.getSpawn().getY(), this.level.getSpawn().getZ(), this.level.getSpawn().getYaw(), this.level.getSpawn().getPitch()));
+							if(keyboard.getKey() == this.bindings.getBinding("options.keys.load-loc").getKey()) {
+								PlayerRespawnEvent event = new PlayerRespawnEvent(OpenClassic.getClient().getPlayer(), new Position(OpenClassic.getClient().getLevel(), level.getSpawn().getX(), level.getSpawn().getY(), level.getSpawn().getZ(), level.getSpawn().getYaw(), level.getSpawn().getPitch()));
 								if(!event.isCancelled()) {
 									this.player.resetPos(event.getPosition());
 								}
 							}
 
-							if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.save-loc").getKey()) {
-								this.level.setSpawn(new Position(this.level, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch));
+							if(keyboard.getKey() == this.bindings.getBinding("options.keys.save-loc").getKey()) {
+								level.setSpawn(new Position(level, this.player.pos.getX(), this.player.pos.getY(), this.player.pos.getZ(), this.player.pos.getYaw(), this.player.pos.getPitch()));
 								this.player.resetPos();
 							}
 						}
 
-						Keyboard.getEventKey();
-						if(Keyboard.getEventKey() == Keyboard.KEY_F5) {
+						keyboard.getKey();
+						if(keyboard.getKey() == Keyboard.KEY_F5) {
 							this.raining = !this.raining;
 						}
 
-						if(Keyboard.getEventKey() == Keyboard.KEY_TAB && this.mode instanceof SurvivalGameMode && this.player.arrows > 0) {
-							OpenClassic.getGame().getAudioManager().playSound("random.bow", this.player.x, this.player.y, this.player.z, 1, 1 / (rand.nextFloat() * 0.4f + 0.8f));
-							this.level.addEntity(new Arrow(this.level, this.player, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch, 1.2F));
+						if(keyboard.getKey() == Keyboard.KEY_TAB && this.mode instanceof SurvivalGameMode && this.player.arrows > 0) {
+							OpenClassic.getGame().getAudioManager().playSound("random.bow", this.player.pos.getX(), this.player.pos.getY(), this.player.pos.getZ(), 1, 1 / (rand.nextFloat() * 0.4f + 0.8f));
+							level.addEntity(new Arrow(level, this.player, this.player.pos.getX(), this.player.pos.getY(), this.player.pos.getZ(), this.player.pos.getYaw(), this.player.pos.getPitch(), 1.2F));
 							this.player.arrows--;
 						}
 						
-						if(Keyboard.getEventKey() == Keyboard.KEY_Q && this.mode instanceof SurvivalGameMode) {
+						if(keyboard.getKey() == Keyboard.KEY_Q && this.mode instanceof SurvivalGameMode) {
 							this.player.dropHeldItem();
 						}
 
-						if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.blocks").getKey()) {
+						if(keyboard.getKey() == this.bindings.getBinding("options.keys.blocks").getKey()) {
 							this.mode.openInventory();
 						}
 
-						if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.chat").getKey()) {
+						if(keyboard.getKey() == this.bindings.getBinding("options.keys.chat").getKey()) {
 							this.player.input.resetKeys();
 							OpenClassic.getClient().setActiveComponent(new ChatInputScreen());
 						}
 					}
 					
 					for(int selection = 0; selection < 9; selection++) {
-						if(Keyboard.getEventKey() == selection + 2) {
+						if(keyboard.getKey() == selection + 2) {
 							this.player.inventory.selected = selection;
 						}
 					}
 
-					if(Keyboard.getEventKey() == this.bindings.getBinding("options.keys.toggle-fog").getKey()) {
+					if(keyboard.getKey() == this.bindings.getBinding("options.keys.toggle-fog").getKey()) {
 						this.settings.getSetting("options.render-distance").toggle();
 					}
 				}
 
-				EventManager.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), Keyboard.getEventKey(), Keyboard.getEventKeyState()));
+				EventManager.callEvent(new PlayerKeyChangeEvent(OpenClassic.getClient().getPlayer(), keyboard.getKey(), keyboard.getState()));
 				if(this.isInMultiplayer() && this.session.isConnected() && this.openclassicServer) {
-					this.session.send(new KeyChangeMessage(Keyboard.getEventKey(), Keyboard.getEventKeyState()));
+					this.session.send(new KeyChangeMessage(keyboard.getKey(), keyboard.getState()));
 				}
-			} else if(Keyboard.getEventKeyState()) {
-				if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE && this.ingame) {
+			} else if(keyboard.getState()) {
+				if(keyboard.getKey() == Keyboard.KEY_ESCAPE && this.ingame) {
 					OpenClassic.getClient().setActiveComponent(null);
-					return;
+				} else {
+					this.baseGUI.onKeyPress(keyboard.getCharacter(), keyboard.getKey());
 				}
-				
-				this.baseGUI.onKeyPress(Keyboard.getEventCharacter(), Keyboard.getEventKey());
 			}
 		}
-
-		int mx = Mouse.getX();
-		int my = Display.getHeight() - Mouse.getY();
-		this.baseGUI.update(mx, my);
+		
+		this.baseGUI.update(Input.getMouseX(), Display.getHeight() - Input.getMouseY());
+		if(this.hud != null) {
+			this.hud.update(Input.getMouseX(), Display.getHeight() - Input.getMouseY());
+		}
+		
+		if(this.displayActive && !this.wasActive && !Input.isButtonDown(Mouse.LEFT_BUTTON) && !Input.isButtonDown(Mouse.RIGHT_BUTTON) && !Input.isButtonDown(Mouse.MIDDLE_BUTTON)) {
+			if(OpenClassic.getClient().getActiveComponent() == null && this.ingame && (!this.isInMultiplayer() || this.session.isConnected() && this.session.getState() == State.GAME)) {
+				OpenClassic.getClient().setActiveComponent(new IngameMenuScreen());
+			}
+			
+			this.wasActive = true;
+		} else if(!this.displayActive) {
+			this.wasActive = false;
+		}
+		
+		((ClientTextureFactory) TextureFactory.getFactory()).updateTextures();
 		
 		if(!this.ingame) return;
 		if(System.currentTimeMillis() > this.audio.getMusicTime() && this.audio.playMusic("bg")) {
@@ -1369,16 +922,54 @@ public class Minecraft implements Runnable {
 		}
 
 		if(this.level != null) {
+			float pitch = this.player.pos.getInterpolatedPitch(this.timer.delta);
+			float yaw = this.player.pos.getInterpolatedYaw(this.timer.delta);
+			Vector pVec = this.player.pos.toPosVector(this.timer.delta);
+			float ycos = MathHelper.cos(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
+			float ysin = MathHelper.sin(-yaw * MathHelper.DEG_TO_RAD - MathHelper.PI);
+			float pcos = MathHelper.cos(-pitch * MathHelper.DEG_TO_RAD);
+			float psin = MathHelper.sin(-pitch * MathHelper.DEG_TO_RAD);
+			float mx = ysin * pcos;
+			float mz = ycos * pcos;
+			float reach = this.mode.getReachDistance();
+			this.selected = RayTracer.rayTrace(this.level, pVec, pVec.clone().add(mx * reach, psin * reach, mz * reach), true);
+			if(this.selected != null) {
+				reach = this.selected.pos.distance(pVec);
+			}
+
+			if(this.mode instanceof CreativeGameMode) {
+				reach = 32;
+			}
+
+			Entity selectedEntity = null;
+			List<Entity> entities = this.level.getEntities(this.player, this.player.bb.expand(mx * reach, psin * reach, mz * reach));
+
+			float distance = 0;
+			for(int count = 0; count < entities.size(); count++) {
+				Entity entity = entities.get(count);
+				if(entity.isPickable()) {
+					Intersection pos = RayTracer.rayTrace(entity.bb.grow(0.1F, 0.1F, 0.1F), pVec, pVec.clone().add(mx * reach, psin * reach, mz * reach));
+					if(pos != null && (pVec.distance(pos.pos) < distance || distance == 0)) {
+						selectedEntity = entity;
+						distance = pVec.distance(pos.pos);
+					}
+				}
+			}
+
+			if(selectedEntity != null && !(this.mode instanceof CreativeGameMode)) {
+				this.selected = new Intersection(selectedEntity);
+			}
+			
 			this.waterDelay++;
 			if(this.waterDelay > 200 && rand.nextInt(1000) < 250) {
 				this.waterDelay = 0;
 				Block block = null;
 				float dist = 10000;
-				for(int x = (int) this.player.x - 50; x < this.player.x + 50; x++) {
-					for(int y = (int) this.player.y - 20; y < this.player.y + 20; y++) {
-						for(int z = (int) this.player.z - 50; z < this.player.z + 50; z++) {
+				for(int x = this.player.pos.getBlockX() - 50; x < this.player.pos.getBlockX() + 50; x++) {
+					for(int y = this.player.pos.getBlockY() - 20; y < this.player.pos.getBlockY() + 20; y++) {
+						for(int z = this.player.pos.getBlockZ() - 50; z < this.player.pos.getBlockZ() + 50; z++) {
 							BlockType b = this.level.getBlockTypeAt(x, y, z);
-							float d = (float) Math.sqrt((this.player.x - x) * (this.player.x - x) + (this.player.y - y) * (this.player.y - y) + (this.player.z - z) * (this.player.z - z));
+							float d = this.player.pos.distance(x, y, z);
 							if(b != null && b.getLiquidName() != null && b.getLiquidName().equals("water") && d < dist) {
 								block = this.level.getBlockAt(x, y, z);
 								dist = d;
@@ -1394,9 +985,6 @@ public class Minecraft implements Runnable {
 		}
 		
 		this.mode.spawnMobs();
-		int mouseX = Mouse.getX() * this.hud.getWidth() / this.width;
-		int mouseY = this.hud.getHeight() - Mouse.getY() * this.hud.getHeight() / this.height - 1;
-		this.hud.update(mouseX, mouseY);
 		if(this.isInMultiplayer()) {
 			if(OpenClassic.getClient().getActiveComponent() instanceof ErrorScreen) {
 				this.progressBar.setVisible(false);
@@ -1419,7 +1007,7 @@ public class Minecraft implements Runnable {
 					}
 
 					if(this.isInMultiplayer() && this.session.getState() == State.GAME) {
-						this.session.send(new PlayerTeleportMessage((byte) -1, this.player.x, this.player.y, this.player.z, this.player.yaw, this.player.pitch));
+						this.session.send(new PlayerTeleportMessage((byte) -1, this.player.pos.getX(), this.player.pos.getY(), this.player.pos.getZ(), this.player.pos.getYaw(), this.player.pos.getPitch()));
 					}
 				}
 			}
@@ -1435,19 +1023,19 @@ public class Minecraft implements Runnable {
 			}
 
 			if(OpenClassic.getClient().getActiveComponent() == null) {
-				if(Mouse.isButtonDown(0) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && Mouse.isGrabbed()) {
-					this.onMouseClick(0);
+				if(Input.isButtonDown(Mouse.LEFT_BUTTON) && (this.ticks - this.lastClick) >= InternalConstants.TICKS_PER_SECOND / 4 && Input.isMouseGrabbed()) {
+					this.onMouseClick(Mouse.LEFT_BUTTON);
 					this.lastClick = this.ticks;
 				}
 
-				if(Mouse.isButtonDown(1) && (this.ticks - this.lastClick) >= this.timer.tps / 4 && Mouse.isGrabbed()) {
-					this.onMouseClick(1);
+				if(Input.isButtonDown(Mouse.RIGHT_BUTTON) && (this.ticks - this.lastClick) >= InternalConstants.TICKS_PER_SECOND / 4 && Input.isMouseGrabbed()) {
+					this.onMouseClick(Mouse.RIGHT_BUTTON);
 					this.lastClick = this.ticks;
 				}
 			}
 
 			if(!this.mode.creative && this.blockHitTime <= 0) {
-				if(OpenClassic.getClient().getActiveComponent() == null && Mouse.isButtonDown(0) && Mouse.isGrabbed() && this.selected != null && !this.selected.hasEntity) {
+				if(OpenClassic.getClient().getActiveComponent() == null && Input.isButtonDown(Mouse.LEFT_BUTTON) && Input.isMouseGrabbed() && this.selected != null && !this.selected.hasEntity) {
 					this.mode.hitBlock(this.selected.x, this.selected.y, this.selected.z, this.selected.side);
 				} else {
 					this.mode.resetHits();
@@ -1468,24 +1056,18 @@ public class Minecraft implements Runnable {
 			
 			if(this.raining) {
 				for(int count = 0; count < 50; count++) {
-					int x = (int) this.player.x + rand.nextInt(9) - 4;
-					int z = (int) this.player.z + rand.nextInt(9) - 4;
+					int x = this.player.pos.getBlockX() + rand.nextInt(9) - 4;
+					int z = this.player.pos.getBlockZ() + rand.nextInt(9) - 4;
 					int y = this.level.getHighestBlockY(x, z);
-					if(y <= (int) this.player.y + 4 && y >= (int) this.player.y - 4) {
+					if(y <= this.player.pos.getBlockY() + 4 && y >= this.player.pos.getBlockY() - 4) {
 						float xOffset = rand.nextFloat();
 						float zOffset = rand.nextFloat();
-						this.particleManager.spawnParticle(new RainParticle(this.level, x + xOffset, y + 0.1F, z + zOffset));
+						this.level.getParticleManager().spawnParticle(new RainParticle(new Position(this.level, x + xOffset, y + 0.1F, z + zOffset)));
 					}
 				}
 			}
 
-			this.levelRenderer.ticks++;
-			this.level.tickEntities();
-			if(!this.isInMultiplayer()) {
-				this.level.tick();
-			}
-
-			this.particleManager.tickParticles();
+			this.level.tick();
 		}
 
 		for(Plugin plugin : OpenClassic.getClient().getPluginManager().getPlugins()) {

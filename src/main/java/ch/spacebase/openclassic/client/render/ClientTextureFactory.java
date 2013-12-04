@@ -47,6 +47,16 @@ public class ClientTextureFactory extends TextureFactory {
 		}
 	}
 	
+	public void renderUpdateTextures() {
+		for(ClientTexture texture : new ArrayList<ClientTexture>(this.textures)) {
+			if(texture.isDisposed()) {
+				this.textures.remove(texture);
+			}
+			
+			texture.renderUpdate();
+		}
+	}
+	
 	public void resetTextures() {
 		for(ClientTexture texture : this.textures) {
 			texture.resetTextureId();

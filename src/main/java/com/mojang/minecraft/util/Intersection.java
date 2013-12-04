@@ -1,7 +1,8 @@
 package com.mojang.minecraft.util;
 
+import ch.spacebase.openclassic.api.math.Vector;
+
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.model.Vector;
 
 public class Intersection {
 
@@ -19,7 +20,7 @@ public class Intersection {
 		this.y = y;
 		this.z = z;
 		this.side = side;
-		this.pos = new Vector(pos.x, pos.y, pos.z);
+		this.pos = pos.clone();
 	}
 
 	public Intersection(Entity entity) {

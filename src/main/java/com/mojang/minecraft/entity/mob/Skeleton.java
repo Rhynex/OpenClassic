@@ -19,7 +19,7 @@ public class Skeleton extends Zombie {
 	}
 
 	public void shootArrow(ClientLevel level) {
-		level.addEntity(new Arrow(level, this, this.x, this.y, this.z, this.yaw + 180 + (float) (Math.random() * 45 - 22.5), this.pitch - (float) (Math.random() * 45 - 10), 1));
+		level.addEntity(new Arrow(level, this, this.pos.getX(), this.pos.getY(), this.pos.getZ(), this.pos.getYaw() + 180 + (float) (Math.random() * 45 - 22.5), this.pos.getPitch() - (float) (Math.random() * 45 - 10), 1));
 	}
 
 }

@@ -3,323 +3,18 @@ package ch.spacebase.openclassic.client.util;
 import java.util.Random;
 
 import ch.spacebase.openclassic.api.OpenClassic;
+import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
-import ch.spacebase.openclassic.api.block.Blocks;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Model;
-import ch.spacebase.openclassic.api.level.Level;
-import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 
 import com.mojang.minecraft.entity.item.Item;
-import com.mojang.minecraft.entity.model.Vector;
-import com.mojang.minecraft.util.Intersection;
+import com.mojang.minecraft.entity.particle.TerrainParticle;
 
 public class BlockUtils {
 
 	private static Random rand = new Random();
-
-	public static final Intersection clipSelection(int id, Level level, int x, int y, int z, Vector point, Vector other) {
-		Model model = Blocks.fromId(id).getModel(level, x, y, z);
-
-		point = point.add((-x), (-y), (-z));
-		other = other.add((-x), (-y), (-z));
-		BoundingBox box = model.getSelectionBox(0, 0, 0);
-		if(box == null) return null;
-		Vector x1 = point.getXIntersection(other, box.getX1());
-		Vector x2 = point.getXIntersection(other, box.getX2());
-		Vector y1 = point.getYIntersection(other, box.getY1());
-		Vector y2 = point.getYIntersection(other, box.getY2());
-		Vector z1 = point.getZIntersection(other, box.getZ1());
-		Vector z2 = point.getZIntersection(other, box.getZ2());
-		if(x1 != null && !xIntersectsSelection(model.getSelectionBox((int) x1.x, (int) x1.y, (int) x1.z), x1)) {
-			x1 = null;
-		}
-
-		if(x2 != null && !xIntersectsSelection(model.getSelectionBox((int) x2.x, (int) x2.y, (int) x2.z), x2)) {
-			x2 = null;
-		}
-
-		if(y1 != null && !yIntersectsSelection(model.getSelectionBox((int) y1.x, (int) y1.y, (int) y1.z), y1)) {
-			y1 = null;
-		}
-
-		if(y2 != null && !yIntersectsSelection(model.getSelectionBox((int) y2.x, (int) y2.y, (int) y2.z), y2)) {
-			y2 = null;
-		}
-
-		if(z1 != null && !zIntersectsSelection(model.getSelectionBox((int) z1.x, (int) z1.y, (int) z1.z), z1)) {
-			z1 = null;
-		}
-
-		if(z2 != null && !zIntersectsSelection(model.getSelectionBox((int) z2.x, (int) z2.y, (int) z2.z), z2)) {
-			z2 = null;
-		}
-
-		Vector result = null;
-		if(x1 != null) {
-			result = x1;
-		}
-
-		if(x2 != null && (result == null || point.distance(x2) < point.distance(result))) {
-			result = x2;
-		}
-
-		if(y1 != null && (result == null || point.distance(y1) < point.distance(result))) {
-			result = y1;
-		}
-
-		if(y2 != null && (result == null || point.distance(y2) < point.distance(result))) {
-			result = y2;
-		}
-
-		if(z1 != null && (result == null || point.distance(z1) < point.distance(result))) {
-			result = z1;
-		}
-
-		if(z2 != null && (result == null || point.distance(z2) < point.distance(result))) {
-			result = z2;
-		}
-
-		if(result == null) {
-			return null;
-		} else {
-			byte side = -1;
-			if(result == x1) {
-				side = 4;
-			}
-
-			if(result == x2) {
-				side = 5;
-			}
-
-			if(result == y1) {
-				side = 0;
-			}
-
-			if(result == y2) {
-				side = 1;
-			}
-
-			if(result == z1) {
-				side = 2;
-			}
-
-			if(result == z2) {
-				side = 3;
-			}
-
-			return new Intersection(x, y, z, side, result.add(x, y, z));
-		}
-	}
-
-	public static final Intersection clip(int id, Level level, int x, int y, int z, Vector point, Vector other) {
-		Model model = Blocks.fromId(id).getModel(level, x, y, z);
-
-		point = point.add((-x), (-y), (-z));
-		other = other.add((-x), (-y), (-z));
-
-		BoundingBox box = model.getCollisionBox(0, 0, 0);
-		if(box == null) return null;
-		Vector x1 = point.getXIntersection(other, box.getX1());
-		Vector x2 = point.getXIntersection(other, box.getX2());
-		Vector y1 = point.getYIntersection(other, box.getY1());
-		Vector y2 = point.getYIntersection(other, box.getY2());
-		Vector z1 = point.getZIntersection(other, box.getZ1());
-		Vector z2 = point.getZIntersection(other, box.getZ2());
-		if(x1 != null && !xIntersects(model.getCollisionBox((int) x1.x, (int) x1.y, (int) x1.z), x1)) {
-			x1 = null;
-		}
-
-		if(x2 != null && !xIntersects(model.getCollisionBox((int) x2.x, (int) x2.y, (int) x2.z), x2)) {
-			x2 = null;
-		}
-
-		if(y1 != null && !yIntersects(model.getCollisionBox((int) y1.x, (int) y1.y, (int) y1.z), y1)) {
-			y1 = null;
-		}
-
-		if(y2 != null && !yIntersects(model.getCollisionBox((int) y2.x, (int) y2.y, (int) y2.z), y2)) {
-			y2 = null;
-		}
-
-		if(z1 != null && !zIntersects(model.getCollisionBox((int) z1.x, (int) z1.y, (int) z1.z), z1)) {
-			z1 = null;
-		}
-
-		if(z2 != null && !zIntersects(model.getCollisionBox((int) z2.x, (int) z2.y, (int) z2.z), z2)) {
-			z2 = null;
-		}
-
-		Vector result = null;
-		if(x1 != null) {
-			result = x1;
-		}
-
-		if(x2 != null && (result == null || point.distance(x2) < point.distance(result))) {
-			result = x2;
-		}
-
-		if(y1 != null && (result == null || point.distance(y1) < point.distance(result))) {
-			result = y1;
-		}
-
-		if(y2 != null && (result == null || point.distance(y2) < point.distance(result))) {
-			result = y2;
-		}
-
-		if(z1 != null && (result == null || point.distance(z1) < point.distance(result))) {
-			result = z1;
-		}
-
-		if(z2 != null && (result == null || point.distance(z2) < point.distance(result))) {
-			result = z2;
-		}
-
-		if(result == null) {
-			return null;
-		} else {
-			byte side = -1;
-			if(result == x1) {
-				side = 4;
-			}
-
-			if(result == x2) {
-				side = 5;
-			}
-
-			if(result == y1) {
-				side = 0;
-			}
-
-			if(result == y2) {
-				side = 1;
-			}
-
-			if(result == z1) {
-				side = 2;
-			}
-
-			if(result == z2) {
-				side = 3;
-			}
-
-			return new Intersection(x, y, z, side, result.add(x, y, z));
-		}
-	}
-	
-	public static Intersection clip(BoundingBox box, Vector point, Vector other) {
-		Vector x0 = point.getXIntersection(other, box.getX1());
-		Vector x1 = point.getXIntersection(other, box.getX2());
-		Vector y0 = point.getYIntersection(other, box.getY1());
-		Vector y1 = point.getYIntersection(other, box.getY2());
-		Vector z0 = point.getZIntersection(other, box.getZ1());
-		Vector z1 = point.getZIntersection(other, box.getZ2());
-		if(!xIntersects(box, x0)) {
-			x0 = null;
-		}
-
-		if(!xIntersects(box, x1)) {
-			x1 = null;
-		}
-
-		if(!yIntersects(box, y0)) {
-			y0 = null;
-		}
-
-		if(!yIntersects(box, y1)) {
-			y1 = null;
-		}
-
-		if(!zIntersects(box, z0)) {
-			z0 = null;
-		}
-
-		if(!zIntersects(box, z1)) {
-			z1 = null;
-		}
-
-		Vector result = null;
-
-		if(x0 != null) {
-			result = x0;
-		}
-
-		if(x1 != null && (result == null || point.distanceSquared(x1) < point.distanceSquared(result))) {
-			result = x1;
-		}
-
-		if(y0 != null && (result == null || point.distanceSquared(y0) < point.distanceSquared(result))) {
-			result = y0;
-		}
-
-		if(y1 != null && (result == null || point.distanceSquared(y1) < point.distanceSquared(result))) {
-			result = y1;
-		}
-
-		if(z0 != null && (result == null || point.distanceSquared(z0) < point.distanceSquared(result))) {
-			result = z0;
-		}
-
-		if(z1 != null && (result == null || point.distanceSquared(z1) < point.distanceSquared(result))) {
-			result = z1;
-		}
-
-		if(result == null) {
-			return null;
-		} else {
-			byte side = -1;
-			if(result == x0) {
-				side = 4;
-			}
-
-			if(result == x1) {
-				side = 5;
-			}
-
-			if(result == y0) {
-				side = 0;
-			}
-
-			if(result == y1) {
-				side = 1;
-			}
-
-			if(result == z0) {
-				side = 2;
-			}
-
-			if(result == z1) {
-				side = 3;
-			}
-
-			return new Intersection(0, 0, 0, side, result);
-		}
-	}
-
-	private static boolean xIntersectsSelection(BoundingBox box, Vector point) {
-		return point != null && point.y >= box.getY1() && point.y <= box.getY2() && point.z >= box.getZ1() && point.z <= box.getZ2();
-	}
-
-	private static boolean yIntersectsSelection(BoundingBox box, Vector point) {
-		return point != null && point.x >= box.getX1() && point.x <= box.getX2() && point.z >= box.getZ1() && point.z <= box.getZ2();
-	}
-
-	private static boolean zIntersectsSelection(BoundingBox box, Vector point) {
-		return point != null && point.x >= box.getX1() && point.x <= box.getX2() && point.y >= box.getY1() && point.y <= box.getY2();
-	}
-
-	private static boolean xIntersects(BoundingBox box, Vector point) {
-		return point != null && point.y >= box.getY1() && point.y <= box.getY2() && point.z >= box.getZ1() && point.z <= box.getZ2();
-	}
-
-	private static boolean yIntersects(BoundingBox box, Vector point) {
-		return point != null && point.x >= box.getX1() && point.x <= box.getX2() && point.z >= box.getZ1() && point.z <= box.getZ2();
-	}
-
-	private static boolean zIntersects(BoundingBox box, Vector point) {
-		return point != null && point.x >= box.getX1() && point.x <= box.getX2() && point.y >= box.getY1() && point.y <= box.getY2();
-	}
 
 	public static boolean canExplode(BlockType type) {
 		return type != VanillaBlock.STONE && type != VanillaBlock.COBBLESTONE && type != VanillaBlock.BEDROCK && type != VanillaBlock.COAL_ORE && type != VanillaBlock.IRON_ORE && type != VanillaBlock.GOLD_ORE && type != VanillaBlock.GOLD_BLOCK && type != VanillaBlock.IRON_BLOCK && type != VanillaBlock.SLAB && type != VanillaBlock.DOUBLE_SLAB && type != VanillaBlock.BRICK_BLOCK && type != VanillaBlock.MOSSY_COBBLESTONE && type != VanillaBlock.OBSIDIAN;
@@ -402,9 +97,9 @@ public class BlockUtils {
 			int dropCount = getDropCount(block);
 			for(int count = 0; count < dropCount; count++) {
 				if(rand.nextFloat() <= chance) {
-					float xOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
-					float yOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
-					float zOffset = rand.nextFloat() * 0.7F + (1.0F - 0.7F) * 0.5F;
+					float xOffset = rand.nextFloat() * 0.7f + 0.15f;
+					float yOffset = rand.nextFloat() * 0.7f + 0.15f;
+					float zOffset = rand.nextFloat() * 0.7f + 0.15f;
 					level.addEntity(new Item(level, x + xOffset, y + yOffset, z + zOffset, getDrop(block)));
 				}
 			}
@@ -418,6 +113,53 @@ public class BlockUtils {
 	public static boolean preventsRendering(ClientLevel level, float x, float y, float z) {
 		BlockType type = level.getBlockTypeAt((int) x, (int) y, (int) z);
 		return type != null && type.getPreventsRendering();
+	}
+	
+	public static void spawnDestructionParticles(BlockType block, ClientLevel level, int x, int y, int z) {
+		for(int xMod = 0; xMod < 4; xMod++) {
+			for(int yMod = 0; yMod < 4; yMod++) {
+				for(int zMod = 0; zMod < 4; zMod++) {
+					float particleX = x + (xMod + 0.5f) / 4;
+					float particleY = y + (yMod + 0.5f) / 4;
+					float particleZ = z + (zMod + 0.5f) / 4;
+					level.getParticleManager().spawnParticle(new TerrainParticle(new Position(level, particleX, particleY, particleZ), particleX - x - 0.5F, particleY - y - 0.5F, particleZ - z - 0.5F, block));
+				}
+			}
+		}
+	}
+
+	public static void spawnBlockParticles(ClientLevel level, int x, int y, int z, int side) {
+		Model model = level.getBlockTypeAt(x, y, z).getModel();
+		if(model.getSelectionBox(x, y, z) != null) {
+			float particleX = x + rand.nextFloat() * (model.getSelectionBox(x, y, z).getX2() - model.getSelectionBox(x, y, z).getX1() - 0.1F * 2.0F) + 0.1F + model.getSelectionBox(x, y, z).getX1();
+			float particleY = y + rand.nextFloat() * (model.getSelectionBox(x, y, z).getY2() - model.getSelectionBox(x, y, z).getY1() - 0.1F * 2.0F) + 0.1F + model.getSelectionBox(x, y, z).getY1();
+			float particleZ = z + rand.nextFloat() * (model.getSelectionBox(x, y, z).getZ2() - model.getSelectionBox(x, y, z).getZ1() - 0.1F * 2.0F) + 0.1F + model.getSelectionBox(x, y, z).getZ1();
+			if(side == 0) {
+				particleY = y + model.getSelectionBox(x, y, z).getY1() - 0.1f;
+			}
+	
+			if(side == 1) {
+				particleY = y + model.getSelectionBox(x, y, z).getY2() + 0.1f;
+			}
+	
+			if(side == 2) {
+				particleZ = z + model.getSelectionBox(x, y, z).getZ1() - 0.1f;
+			}
+	
+			if(side == 3) {
+				particleZ = z + model.getSelectionBox(x, y, z).getZ2() + 0.1f;
+			}
+	
+			if(side == 4) {
+				particleX = x + model.getSelectionBox(x, y, z).getX1() - 0.1f;
+			}
+	
+			if(side == 5) {
+				particleX = x + model.getSelectionBox(x, y, z).getX2() + 0.1f;
+			}
+	
+			level.getParticleManager().spawnParticle((new TerrainParticle(new Position(level, particleX, particleY, particleZ), 0, 0, 0, level.getBlockTypeAt(x, y, z))).setPower(0.2F).scale(0.6F));
+		}
 	}
 
 }

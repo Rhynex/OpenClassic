@@ -10,8 +10,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import org.lwjgl.input.Mouse;
-
 import ch.spacebase.openclassic.api.Client;
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.ProgressBar;
@@ -275,9 +273,9 @@ public class ClassicClient extends ClassicGame implements Client {
                 this.mc.player.input.resetKeys();
 			}
 			
-			Mouse.setGrabbed(false);
+			this.mc.setMouseGrabbed(false);
 		} else {
-			this.mc.grabMouse();
+			this.mc.setMouseGrabbed(true);
 		}
 	}
 

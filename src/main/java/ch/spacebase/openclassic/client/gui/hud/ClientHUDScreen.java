@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.lwjgl.opengl.Display;
-
 import com.zachsthings.onevent.EventManager;
 
 import ch.spacebase.openclassic.api.Color;
@@ -28,7 +26,8 @@ import ch.spacebase.openclassic.client.gui.ChatInputScreen;
 import ch.spacebase.openclassic.client.gui.ChatLine;
 import ch.spacebase.openclassic.client.gui.Minimap;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 
 public class ClientHUDScreen extends HUDComponent {
 
@@ -39,7 +38,7 @@ public class ClientHUDScreen extends HUDComponent {
 	public String debugInfo = "";
 
 	public ClientHUDScreen() {
-		super("clienthudscreen", 0, 0, Display.getWidth(), Display.getHeight());
+		super("clienthudscreen", 0, 0, RenderHelper.getHelper().getDisplayWidth(), RenderHelper.getHelper().getDisplayHeight());
 	}
 	
 	@Override
@@ -53,11 +52,11 @@ public class ClientHUDScreen extends HUDComponent {
 		this.attachComponent(new Label("position", 4, 44, ""));
 		this.attachComponent(new Label("score", 0, 0, ""));
 		this.attachComponent(new Label("arrows", this.getWidth() / 2 + 64, this.getHeight() - 66, ""));
-		this.attachComponent(new Image("crosshair", this.getWidth() / 2 - 16, this.getHeight() / 2 - 16, GuiTextures.CROSSHAIR));
-		this.attachComponent(new Image("quickbar", this.getWidth() / 2 - 182, this.getHeight() - 44, GuiTextures.QUICK_BAR));
+		this.attachComponent(new Image("crosshair", this.getWidth() / 2 - 16, this.getHeight() / 2 - 16, Textures.CROSSHAIR));
+		this.attachComponent(new Image("quickbar", this.getWidth() / 2 - 182, this.getHeight() - 44, Textures.QUICK_BAR));
 		this.updateSlots();
 		Player player = OpenClassic.getClient().getPlayer();
-		this.attachComponent(new Image("selection", this.getWidth() / 2 - 184 + player.getSelectedSlot() * 40, this.getHeight() - 46, GuiTextures.SELECTION));
+		this.attachComponent(new Image("selection", this.getWidth() / 2 - 184 + player.getSelectedSlot() * 40, this.getHeight() - 46, Textures.SELECTION));
 		this.attachComponent(new PlayerList("tabmenu", this.getWidth() / 2 - 256, this.getHeight() / 2 - 148, 512, 296, this));
 	}
 	
@@ -82,7 +81,7 @@ public class ClientHUDScreen extends HUDComponent {
 			selection.setPos(this.getWidth() / 2 - 184 + player.getSelectedSlot() * 40, this.getHeight() - 46);
 		}
 		
-		for(int count = 0; count < 9; count++) {
+		for(int count = 0; count < player.getInventoryContents().length; count++) {
 			BlockPreview block = this.getComponent("block" + count, BlockPreview.class);
 			Label amount = this.getComponent("amount" + count, Label.class);
 			boolean filled = false;
@@ -196,41 +195,41 @@ public class ClientHUDScreen extends HUDComponent {
 				}
 				
 				if(heartBg == null) {
-					heartBg = new Image("heartbg" + count, heartX, heartY, GuiTextures.EMPTY_HEART);
+					heartBg = new Image("heartbg" + count, heartX, heartY, Textures.EMPTY_HEART);
 					this.attachComponent(heartBg);
 				} else {
 					heartBg.setPos(heartX, heartY);
 				}
 				
 				if(heart == null) {
-					heart = new Image("heart" + count, heartX, heartY, GuiTextures.FULL_HEART);
+					heart = new Image("heart" + count, heartX, heartY, Textures.FULL_HEART);
 					this.attachComponent(heart);
 				} else {
 					heart.setPos(heartX, heartY);
 				}
 				
 				heart.setVisible(true);
-				heartBg.setTexture(flash ? GuiTextures.EMPTY_HEART_FLASH : GuiTextures.EMPTY_HEART, true);
+				heartBg.setTexture(flash ? Textures.EMPTY_HEART_FLASH : Textures.EMPTY_HEART, true);
 				boolean set = false;
 				if(flash) {
 					if(count * 2 + 1 < player.getPreviousHealth()) {
-						heart.setTexture(GuiTextures.FULL_HEART_FLASH, true);
+						heart.setTexture(Textures.FULL_HEART_FLASH, true);
 						set = true;
 					}
 					
 					if(count * 2 + 1 == player.getPreviousHealth()) {
-						heart.setTexture(GuiTextures.HALF_HEART_FLASH, true);
+						heart.setTexture(Textures.HALF_HEART_FLASH, true);
 						set = true;
 					}
 				}
 
 				if(count * 2 + 1 < player.getHealth()) {
-					heart.setTexture(GuiTextures.FULL_HEART, true);
+					heart.setTexture(Textures.FULL_HEART, true);
 					set = true;
 				}
 				
 				if(count * 2 + 1 == player.getHealth()) {
-					heart.setTexture(GuiTextures.HALF_HEART, true);
+					heart.setTexture(Textures.HALF_HEART, true);
 					set = true;
 				}
 				
@@ -251,19 +250,19 @@ public class ClientHUDScreen extends HUDComponent {
 				int pop = (int) Math.ceil(player.getAir() * 10.0D / 300.0D) - full;
 				if(count < full + pop) {
 					if(bubble == null) {
-						bubble = new Image("bubble" + count, this.getWidth() / 2 - 182 + (count << 3) * 2, this.getHeight() - 84, GuiTextures.BUBBLE);
+						bubble = new Image("bubble" + count, this.getWidth() / 2 - 182 + (count << 3) * 2, this.getHeight() - 84, Textures.BUBBLE);
 						this.attachComponent(bubble);
 					}
 					
 					show = true;
 					bubble.setVisible(true);
 					if(count < full) {
-						if(bubble.getTexture() != GuiTextures.BUBBLE) {
-							bubble.setTexture(GuiTextures.BUBBLE, true);
+						if(bubble.getTexture() != Textures.BUBBLE) {
+							bubble.setTexture(Textures.BUBBLE, true);
 						}
 					} else {
-						if(bubble.getTexture() != GuiTextures.POPPING_BUBBLE) {
-							bubble.setTexture(GuiTextures.POPPING_BUBBLE, true);
+						if(bubble.getTexture() != Textures.POPPING_BUBBLE) {
+							bubble.setTexture(Textures.POPPING_BUBBLE, true);
 						}
 					}
 				}

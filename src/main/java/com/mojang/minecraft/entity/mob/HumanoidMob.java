@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.block.model.Texture;
 import ch.spacebase.openclassic.client.level.ClientLevel;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 
 import com.mojang.minecraft.entity.model.HumanoidModel;
 
@@ -14,7 +14,7 @@ public class HumanoidMob extends Mob {
 	public boolean armor = Math.random() < 0.2D;
 
 	public HumanoidMob(ClientLevel level, float x, float y, float z) {
-		this(level, x, y, z, GuiTextures.DEFAULT_SKIN);
+		this(level, x, y, z, Textures.DEFAULT_SKIN);
 	}
 	
 	public HumanoidMob(ClientLevel level, float x, float y, float z, Texture texture) {
@@ -26,17 +26,15 @@ public class HumanoidMob extends Mob {
 	public void renderModel(float animStep, float dt, float runProgress, float yaw, float pitch, float scale) {
 		super.renderModel(animStep, dt, runProgress, yaw, pitch, scale);
 		HumanoidModel model = (HumanoidModel) modelCache.getModel(this.modelName);
+		GL11.glDisable(GL11.GL_CULL_FACE);
 		if(this.hasHair) {
-			GL11.glDisable(GL11.GL_CULL_FACE);
 			model.hair.yaw = model.head.yaw;
 			model.hair.pitch = model.head.pitch;
 			model.hair.render(scale);
-			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 
 		if(this.armor || this.helmet) {
-			GuiTextures.ARMOR.bind();
-			GL11.glDisable(GL11.GL_CULL_FACE);
+			Textures.ARMOR.bind();
 			HumanoidModel armored = (HumanoidModel) modelCache.getModel("humanoid.armor");
 			armored.head.render = this.helmet;
 			armored.body.render = this.armor;
@@ -58,8 +56,9 @@ public class HumanoidMob extends Mob {
 			armored.leftArm.render(scale);
 			armored.rightLeg.render(scale);
 			armored.leftLeg.render(scale);
-			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
+		
+		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 	
 }

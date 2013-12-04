@@ -2,14 +2,14 @@ package ch.spacebase.openclassic.client.util;
 
 import java.util.Comparator;
 
-import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.render.level.Chunk;
+import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.client.render.level.Chunk;
 
 public class ChunkVisibleAndDistanceComparator implements Comparator<Chunk> {
 
-	private LocalPlayer player;
+	private Player player;
 
-	public ChunkVisibleAndDistanceComparator(LocalPlayer player) {
+	public ChunkVisibleAndDistanceComparator(Player player) {
 		this.player = player;
 	}
 

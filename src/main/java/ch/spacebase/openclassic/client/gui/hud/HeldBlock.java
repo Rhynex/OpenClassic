@@ -8,9 +8,9 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-// TODO: fix block rendering multitexture per chunk
 public class HeldBlock {
 
 	private BlockType block = null;
@@ -33,6 +33,11 @@ public class HeldBlock {
 	}
 	
 	public void render(float delta) {
+		if(OpenClassic.getClient().getLevel() == null) {
+			return;
+		}
+		
+		RenderHelper.getHelper().setLighting(true);
 		GL11.glPushMatrix();
 		if(this.moving) {
 			float off = (this.heldOffset + delta) / 7F;
@@ -71,11 +76,13 @@ public class HeldBlock {
 				}
 
 				GL11.glCallList(arm.list);
+				GL11.glColor4f(1, 1, 1, 1);
 			}
 		}
 
 		GL11.glDisable(GL11.GL_NORMALIZE);
 		GL11.glPopMatrix();
+		RenderHelper.getHelper().setLighting(false);
 	}
 
 	public void tick(BlockType held) {

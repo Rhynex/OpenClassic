@@ -1,5 +1,7 @@
 package com.mojang.minecraft.entity.model;
 
+import ch.spacebase.openclassic.api.math.Vector;
+
 public class Vertex {
 
 	public Vector vector;
@@ -10,20 +12,14 @@ public class Vertex {
 		this(new Vector(x, y, z), u, v);
 	}
 
-	private Vertex(Vertex vert, float u, float v) {
-		this.vector = vert.vector;
-		this.u = u;
-		this.v = v;
-	}
-
 	private Vertex(Vector vec, float u, float v) {
 		this.vector = vec;
 		this.u = u;
 		this.v = v;
 	}
 
-	public Vertex create(float u, float v) {
-		return new Vertex(this, u, v);
+	public Vertex clonePosition(float u, float v) {
+		return new Vertex(this.vector.clone(), u, v);
 	}
 
 }

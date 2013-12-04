@@ -2,6 +2,9 @@ package com.mojang.minecraft.entity.model;
 
 import org.lwjgl.opengl.GL11;
 
+import ch.spacebase.openclassic.api.math.Vector;
+import ch.spacebase.openclassic.client.render.Renderer;
+
 public class ModelPart {
 
 	public Vertex[] vertices;
@@ -118,23 +121,23 @@ public class ModelPart {
 
 	public void generateList(float scale) {
 		this.list = GL11.glGenLists(1);
-		GL11.glNewList(this.list, 4864);
-		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glNewList(this.list, GL11.GL_COMPILE);
+		Renderer.get().begin();
 		for(int q = 0; q < this.quads.length; q++) {
 			Quad quad = this.quads[q];
-			Vector min = quad.vertices[1].vector.subtract(quad.vertices[0].vector).normalize();
-			Vector max = quad.vertices[1].vector.subtract(quad.vertices[2].vector).normalize();
-			Vector normal = (new Vector(min.y * max.z - min.z * max.y, min.z * max.x - min.x * max.z, min.x * max.y - min.y * max.x)).normalize();
-			GL11.glNormal3f(normal.x, normal.y, normal.z);
+			Vector min = quad.vertices[1].vector.clone().subtract(quad.vertices[0].vector).normalize();
+			Vector max = quad.vertices[1].vector.clone().subtract(quad.vertices[2].vector).normalize();
+			Vector normal = new Vector(min.getY() * max.getZ() - min.getZ() * max.getY(), min.getZ() * max.getX() - min.getX() * max.getZ(), min.getX() * max.getY() - min.getY() * max.getX()).normalize();
+			Renderer.get().normal(normal.getX(), normal.getY(), normal.getZ());
 			for(int vertex = 0; vertex < 4; vertex++) {
 				Vertex vert = quad.vertices[vertex];
-				GL11.glTexCoord2f(vert.u, vert.v);
-				GL11.glVertex3f(vert.vector.x * scale, vert.vector.y * scale, vert.vector.z * scale);
+				Renderer.get().vertexuv(vert.vector.getX() * scale, vert.vector.getY() * scale, vert.vector.getZ() * scale, vert.u, vert.v);
 			}
 		}
 
-		GL11.glEnd();
+		Renderer.get().end();
 		GL11.glEndList();
 		this.hasList = true;
 	}
+	
 }

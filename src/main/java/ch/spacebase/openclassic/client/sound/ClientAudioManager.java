@@ -13,8 +13,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.zip.ZipFile;
 
+import javax.sound.sampled.AudioSystem;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.lwjgl.openal.AL;
 
 import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
@@ -51,15 +54,8 @@ public class ClientAudioManager implements AudioManager {
 	public ClientAudioManager(Minecraft mc) {
 		this.mc = mc;
 
-		Class<? extends Library> lib = Library.class;
-		if(SoundSystem.libraryCompatible(LibraryLWJGLOpenAL.class)) {
-			lib = LibraryLWJGLOpenAL.class;
-		} else if(SoundSystem.libraryCompatible(LibraryJavaSound.class)) {
-			lib = LibraryJavaSound.class;
-		}
-
 		try {
-			this.system = new SoundSystem(lib);
+			this.system = new SoundSystem(findCompatibleLibrary());
 			SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
 			SoundSystemConfig.setCodec("wav", CodecWav.class);
 			SoundSystemConfig.setCodec("mp3", CodecJLayerMP3.class);
@@ -122,12 +118,49 @@ public class ClientAudioManager implements AudioManager {
 		this.registerSound("step.wood", Main.class.getResource("/audio/sound/step/wood3.ogg"), true);
 		this.registerSound("step.wood", Main.class.getResource("/audio/sound/step/wood4.ogg"), true);
 	}
+	
+	private static Class<? extends Library> findCompatibleLibrary() {
+		Class<? extends Library> ret = Library.class;
+		OpenClassic.getLogger().info("Checking if LWJGL OpenAL is compatible...");
+		boolean al = false;
+		Exception reason = null;
+        if(AL.isCreated()) {
+        	al = true;
+        } else {
+			try {
+				AL.create();
+				al = true;
+				AL.destroy();
+			} catch(Exception e) {
+				reason = e;
+			}
+        }
+        
+		if(al) {
+			ret = LibraryLWJGLOpenAL.class;
+			OpenClassic.getLogger().info("      ...yes, AL was successfully created.");
+		} else {
+			OpenClassic.getLogger().info("      ...no, AL could not be created.");
+			OpenClassic.getLogger().info("Reason:");
+			reason.printStackTrace();
+			
+			OpenClassic.getLogger().info("Checking if Java Sound is compatible...");
+			if(AudioSystem.getMixer(null) != null) {
+				ret = LibraryJavaSound.class;
+				OpenClassic.getLogger().info("      ...yes, default mixer was found.");
+			} else {
+				OpenClassic.getLogger().info("      ...no, default mixer could be found.");
+			}
+		}
+		
+		return ret;
+	}
 
-	public void update(com.mojang.minecraft.entity.player.LocalPlayer player) {
+	public void update(Player player) {
 		if(player != null && OpenClassic.getClient().isInGame()) {
-			this.system.setListenerPosition(player.x, player.y, player.z);
-			Vector vec = MathHelper.toForwardVec(player.yaw, player.pitch);
-			this.system.setListenerOrientation(vec.getX(), vec.getY(), vec.getZ(), (float) Math.sin(Math.toRadians(player.pitch)), (float) Math.sin(Math.toRadians(player.yaw)), 1);
+			this.system.setListenerPosition(player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+			Vector vec = MathHelper.toForwardVec(player.getPosition().getYaw(), player.getPosition().getPitch());
+			this.system.setListenerOrientation(vec.getX(), vec.getY(), vec.getZ(), (float) Math.sin(Math.toRadians(player.getPosition().getPitch())), (float) Math.sin(Math.toRadians(player.getPosition().getYaw())), 1);
 		} else {
 			this.system.setListenerPosition(0, 0, 0);
 			this.system.setListenerOrientation(0, 0, -1, 0, 1, 0);
@@ -221,9 +254,7 @@ public class ClientAudioManager implements AudioManager {
 				}
 				
 				p = p.startsWith("/") ? p.substring(1, p.length()) : p;
-				System.out.println(p);
 				if(zip.getEntry(p) != null) {
-					System.out.println(p);
 					url = new URL("zip:" + f.toURI().toURL().toString() + "!/" + p);
 				}
 			} catch(IOException e) {

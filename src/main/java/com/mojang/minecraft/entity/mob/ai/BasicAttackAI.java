@@ -1,11 +1,12 @@
 package com.mojang.minecraft.entity.mob.ai;
 
 import ch.spacebase.openclassic.api.math.MathHelper;
+import ch.spacebase.openclassic.api.math.Vector;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
+import ch.spacebase.openclassic.client.util.RayTracer;
 
 import com.mojang.minecraft.entity.Entity;
 import com.mojang.minecraft.entity.item.Arrow;
-import com.mojang.minecraft.entity.model.Vector;
 
 public class BasicAttackAI extends BasicAI {
 
@@ -25,20 +26,16 @@ public class BasicAttackAI extends BasicAI {
 		}
 
 		if(player != null && this.attackTarget == null) {
-			float xDistance = player.x - mob.x;
-			float yDistance = player.y - mob.y;
-			float zDistance = player.z - mob.z;
-			float sqDistance = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
-
+			float sqDistance = player.pos.distanceSquared(mob.pos);
 			if(sqDistance < 256) {
 				this.attackTarget = player;
 			}
 		}
 
 		if(this.attackTarget != null) {
-			float xDistance = player.x - mob.x;
-			float yDistance = player.y - mob.y;
-			float zDistance = player.z - mob.z;
+			float xDistance = player.pos.getX() - mob.pos.getX();
+			float yDistance = player.pos.getY() - mob.pos.getY();
+			float zDistance = player.pos.getZ() - mob.pos.getZ();
 			float sqDistance = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
 
 			if(sqDistance > 1024 && this.random.nextInt(100) == 0) {
@@ -47,8 +44,8 @@ public class BasicAttackAI extends BasicAI {
 
 			if(this.attackTarget != null) {
 				float distance = (float) Math.sqrt(sqDistance);
-				this.mob.yaw = (float) (Math.atan2(zDistance, xDistance) * MathHelper.DRAD_TO_DEG) - 90;
-				this.mob.pitch = -((float) (Math.atan2(yDistance, (float) Math.sqrt(distance)) * MathHelper.DRAD_TO_DEG));
+				this.mob.pos.setYaw((float) (Math.atan2(zDistance, xDistance) * MathHelper.DRAD_TO_DEG) - 90);
+				this.mob.pos.setPitch(-((float) (Math.atan2(yDistance, (float) Math.sqrt(distance)) * MathHelper.DRAD_TO_DEG)));
 				if((float) Math.sqrt(sqDistance) < 2 && this.attackDelay == 0) {
 					this.attack(this.attackTarget);
 				}
@@ -58,7 +55,7 @@ public class BasicAttackAI extends BasicAI {
 	}
 
 	public boolean attack(Entity entity) {
-		if(this.level.clip(new Vector(this.mob.x, this.mob.y, this.mob.z), new Vector(entity.x, entity.y, entity.z)) != null) {
+		if(RayTracer.rayTrace(entity.getClientLevel(), new Vector(this.mob.pos.getZ(), this.mob.pos.getY(), this.mob.pos.getZ()), new Vector(entity.pos.getX(), entity.pos.getY(), entity.pos.getZ()), false) != null) {
 			return false;
 		} else {
 			this.mob.attackTime = 5;

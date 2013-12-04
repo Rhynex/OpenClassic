@@ -13,8 +13,8 @@ import ch.spacebase.openclassic.api.gui.base.ButtonListCallback;
 import ch.spacebase.openclassic.api.gui.base.DefaultBackground;
 import ch.spacebase.openclassic.api.gui.base.Label;
 import ch.spacebase.openclassic.api.gui.base.TranslucentBackground;
+import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.ClientTextureFactory;
-import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class ResourcePackScreen extends GuiComponent {
 
@@ -48,7 +48,10 @@ public class ResourcePackScreen extends GuiComponent {
 				OpenClassic.getClient().getConfig().save();
 				((ClientTextureFactory) TextureFactory.getFactory()).reloadTextures();
 				if(OpenClassic.getClient().isInGame()) {
-					GeneralUtils.getMinecraft().levelRenderer.refresh();
+					ClientLevel level = (ClientLevel) OpenClassic.getClient().getLevel();
+					if(level != null) {
+						level.refreshRenderer();
+					}
 				}
 			}
 		});

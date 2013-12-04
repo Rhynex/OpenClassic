@@ -18,8 +18,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.game.GameTexture;
 
 public class ClientTexture extends GameTexture {
-
-	protected static int bound = -1;
 	
 	private int textureId = -1;
 	private boolean disposed = false;
@@ -27,6 +25,7 @@ public class ClientTexture extends GameTexture {
 	private int frameTimer = 0;
 	private int currentFrame = 0;
 	private BufferedImage frames[];
+	private boolean dirty = false;
 	
 	public ClientTexture(URL url) {
 		super(url);
@@ -65,12 +64,7 @@ public class ClientTexture extends GameTexture {
 	}
 	
 	@Override
-	public boolean isBound() {
-		return this.textureId != -1 && bound == this.textureId;
-	}
-	
-	@Override
-	public void bind(boolean force) {
+	public void bind() {
 		if(this.isDisposed()) {
 			return;
 		}
@@ -78,12 +72,7 @@ public class ClientTexture extends GameTexture {
 		if(this.textureId == -1) {
 			this.textureId = this.generateTextureId();
 		}
-		
-		if(this.isBound() && !force) {
-			return;
-		}
 
-		bound = this.textureId;
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textureId);
 	}
 	
@@ -161,11 +150,17 @@ public class ClientTexture extends GameTexture {
 					this.currentFrame = 0;
 				}
 				
-				if(this.textureId == -1) {
-					this.textureId = this.generateTextureId();
-				} else {
-					this.bind(this.getCurrentImage(), this.textureId);
-				}
+				this.dirty = true;
+			}
+		}
+	}
+	
+	public void renderUpdate() {
+		if(this.dirty) {
+			if(this.textureId == -1) {
+				this.textureId = this.generateTextureId();
+			} else {
+				this.bind(this.getCurrentImage(), this.textureId);
 			}
 		}
 	}
@@ -198,9 +193,7 @@ public class ClientTexture extends GameTexture {
 				}
 				
 				p = p.startsWith("/") ? p.substring(1, p.length()) : p;
-				System.out.println(p);
 				if(zip.getEntry(p) != null) {
-					System.out.println(p);
 					url = new URL("zip:" + f.toURI().toURL().toString() + "!/" + p);
 				}
 			} catch(IOException e) {

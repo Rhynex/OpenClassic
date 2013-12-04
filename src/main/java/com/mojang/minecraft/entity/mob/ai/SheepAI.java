@@ -14,17 +14,17 @@ public class SheepAI extends BasicAI {
 	}
 
 	public void update() {
-		float xDiff = -0.7F * MathHelper.sin(this.parent.yaw * MathHelper.DEG_TO_RAD);
-		float zDiff = 0.7F * MathHelper.cos(this.parent.yaw * MathHelper.DEG_TO_RAD);
-		int x = (int) (this.mob.x + xDiff);
-		int y = (int) (this.mob.y - 2);
-		int z = (int) (this.mob.z + zDiff);
+		float xDiff = -0.7F * MathHelper.sin(this.parent.pos.getYaw() * MathHelper.DEG_TO_RAD);
+		float zDiff = 0.7F * MathHelper.cos(this.parent.pos.getYaw() * MathHelper.DEG_TO_RAD);
+		int x = (int) (this.mob.pos.getX() + xDiff);
+		int y = (int) (this.mob.pos.getY() - 2);
+		int z = (int) (this.mob.pos.getZ() + zDiff);
 		if(this.parent.grazing) {
-			if(this.level.getBlockTypeAt(x, y, z) != VanillaBlock.GRASS) {
+			if(this.mob.getClientLevel().getBlockTypeAt(x, y, z) != VanillaBlock.GRASS) {
 				this.parent.grazing = false;
 			} else {
 				if(this.parent.grazingTime++ == 60) {
-					this.level.setBlockAt(x, y, z, VanillaBlock.DIRT);
+					this.mob.getClientLevel().setBlockAt(x, y, z, VanillaBlock.DIRT);
 					if(this.random.nextInt(5) == 0) {
 						this.parent.hasFur = true;
 					}
@@ -32,10 +32,10 @@ public class SheepAI extends BasicAI {
 
 				this.xxa = 0;
 				this.yya = 0;
-				this.mob.pitch = 40 + this.parent.grazingTime / 2 % 2 * 10;
+				this.mob.pos.setPitch(40 + this.parent.grazingTime / 2 % 2 * 10);
 			}
 		} else {
-			if(this.level.getBlockTypeAt(x, y, z) == VanillaBlock.GRASS) {
+			if(this.mob.getClientLevel().getBlockTypeAt(x, y, z) == VanillaBlock.GRASS) {
 				this.parent.grazing = true;
 				this.parent.grazingTime = 0;
 			}

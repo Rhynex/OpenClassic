@@ -4,7 +4,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 import ch.spacebase.openclassic.api.ProgressBar;
-import ch.spacebase.openclassic.client.render.GuiTextures;
+import ch.spacebase.openclassic.client.render.Textures;
 import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.render.Renderer;
 
@@ -86,15 +86,15 @@ public class ClientProgressBar implements ProgressBar {
 		if(this.isVisible()) {
 			int width = Display.getWidth();
 			int height = Display.getHeight();
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			if(fresh) {
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 				RenderHelper.getHelper().ortho();
 			}
 
 			RenderHelper.getHelper().drawDefaultBG(0, 0, width, height);
 			this.renderBar(false);
 			RenderHelper.getHelper().drawBlackBG(0, height - 56, width, height - (height - 56));
-			RenderHelper.getHelper().drawTexture(GuiTextures.LOGO, 20, 20, 0, 0.5625f, 1);
+			RenderHelper.getHelper().drawTexture(Textures.LOGO, 20, 20, 0, 0.5625f, 1);
 			RenderHelper.getHelper().renderScaledText(this.title, width - 20 - RenderHelper.getHelper().getStringWidth(this.title), 20, true);
 			if(this.isSubtitleScaled()) {
 				RenderHelper.getHelper().renderScaledText(this.subtitle, width / 2, height / 2 - 64, true);
@@ -104,7 +104,7 @@ public class ClientProgressBar implements ProgressBar {
 			
 			RenderHelper.getHelper().renderText(this.text, width / 2, height - 38, true);
 			if(fresh) {
-				Display.update();
+				Display.update(false);
 			}
 		}
 	}
@@ -136,7 +136,7 @@ public class ClientProgressBar implements ProgressBar {
 		Renderer.get().end();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(fresh) {
-			Display.update();
+			Display.update(false);
 		}
 	}
 
