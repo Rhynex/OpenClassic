@@ -7,9 +7,9 @@ import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.Textures;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.mob.ai.SheepAI;
 import com.mojang.minecraft.entity.model.AnimalModel;
+import com.mojang.minecraft.entity.object.Item;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 
 public class Sheep extends QuadrupedMob {

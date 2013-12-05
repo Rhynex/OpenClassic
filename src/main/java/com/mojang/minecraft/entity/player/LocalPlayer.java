@@ -12,8 +12,8 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.item.Item;
 import com.mojang.minecraft.entity.model.HumanoidModel;
+import com.mojang.minecraft.entity.object.Item;
 import com.zachsthings.onevent.EventManager;
 
 public class LocalPlayer extends Player {

@@ -1,7 +1,7 @@
 package ch.spacebase.openclassic.client.render;
 
-import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.mob.Sheep;
+import com.mojang.minecraft.entity.object.Arrow;
 
 import sun.applet.Main;
 import ch.spacebase.openclassic.api.block.model.Texture;
@@ -9,7 +9,17 @@ import ch.spacebase.openclassic.api.block.model.TextureFactory;
 
 public class Textures {
 
-	public static final Texture PARTICLES = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/particles.png"));
+	public static final Texture SMOKE_PARTICLE = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/smokeparticle.png"), 8, 8, 1);
+	public static final Texture SMOKE_PARTICLE_1 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_2 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_3 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_4 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_5 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_6 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_7 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	public static final Texture SMOKE_PARTICLE_8 = SMOKE_PARTICLE.getSubTexture(0, 8, 8);
+	
+	public static final Texture RAIN_PARTICLE = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/rainparticle.png"));
 	public static final Texture RAIN = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/rain.png"));
 	public static final Texture WATER = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/water.png"));
 	public static final Texture CLOUDS = TextureFactory.getFactory().newTexture(Main.class.getResource("/textures/level/clouds.png"));

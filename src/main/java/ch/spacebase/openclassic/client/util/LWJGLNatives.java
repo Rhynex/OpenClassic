@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.lwjgl.LWJGLUtil;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 
@@ -14,20 +15,14 @@ import com.mojang.minecraft.Minecraft;
 public class LWJGLNatives {
 
 	public static void load(File dir) {
-		String os = System.getProperty("os.name").toLowerCase();
-		if(os.contains("linux")) {
+		if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_LINUX) {
 			load(dir.getPath(), "libjinput-linux.so", "86");
 			load(dir.getPath(), "libjinput-linux64.so", "64");
 			load(dir.getPath(), "liblwjgl.so", "86");
 			load(dir.getPath(), "liblwjgl64.so", "64");
 			load(dir.getPath(), "libopenal.so", "86");
 			load(dir.getPath(), "libopenal64.so", "64");
-		} else if(os.contains("solaris")) {
-			load(dir.getPath(), "liblwjgl.so", "86");
-			load(dir.getPath(), "liblwjgl64.so", "64");
-			load(dir.getPath(), "libopenal.so", "86");
-			load(dir.getPath(), "libopenal64.so", "64");
-		} else if(os.contains("win")) {
+		} else if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_WINDOWS) {
 			load(dir.getPath(), "OpenAL64.dll", "64");
 			load(dir.getPath(), "OpenAL32.dll", "86");
 			load(dir.getPath(), "lwjgl64.dll", "64");
@@ -36,7 +31,7 @@ public class LWJGLNatives {
 			load(dir.getPath(), "jinput-raw.dll", "86");
 			load(dir.getPath(), "jinput-dx8_64.dll", "64");
 			load(dir.getPath(), "jinput-dx8.dll", "86");
-		} else if(os.contains("mac")) {
+		} else if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_MACOSX) {
 			load(dir.getPath(), "openal.dylib", "both");
 			load(dir.getPath(), "liblwjgl.jnilib", "both");
 			load(dir.getPath(), "libjinput-osx.jnilib", "both");

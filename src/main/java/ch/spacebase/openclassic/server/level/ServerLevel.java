@@ -17,6 +17,7 @@ public class ServerLevel extends ClassicLevel {
 	private List<Player> players = new ArrayList<Player>();
 
 	public ServerLevel() {
+		super();
 	}
 
 	public ServerLevel(LevelInfo info) {

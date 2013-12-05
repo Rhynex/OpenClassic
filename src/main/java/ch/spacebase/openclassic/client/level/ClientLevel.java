@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.item.PrimedTnt;
-import com.mojang.minecraft.entity.particle.ParticleManager;
+import com.mojang.minecraft.entity.object.PrimedTnt;
 
 import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.block.BlockType;
@@ -14,6 +13,7 @@ import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.level.LevelInfo;
 import ch.spacebase.openclassic.api.math.BoundingBox;
 import ch.spacebase.openclassic.api.player.Player;
+import ch.spacebase.openclassic.client.level.particle.ParticleManager;
 import ch.spacebase.openclassic.client.render.level.LevelRenderer;
 import ch.spacebase.openclassic.client.util.BlockUtils;
 import ch.spacebase.openclassic.game.level.ClassicLevel;

@@ -1,4 +1,4 @@
-package com.mojang.minecraft.entity.item;
+package com.mojang.minecraft.entity.object;
 
 import java.util.Random;
 
@@ -7,10 +7,10 @@ import org.lwjgl.opengl.GL11;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.math.MathHelper;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.level.particle.SmokeParticle;
+import ch.spacebase.openclassic.client.level.particle.TerrainParticle;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.particle.SmokeParticle;
-import com.mojang.minecraft.entity.particle.TerrainParticle;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 
 public class PrimedTnt extends Entity {
@@ -32,8 +32,6 @@ public class PrimedTnt extends Entity {
 		this.zd = -MathHelper.cos(motion * MathHelper.DEG_TO_RAD) * 0.02F;
 		this.makeStepSound = false;
 		this.life = 40;
-		// Reset previous values by setting pos to itself.
-		this.pos.set(this.pos);
 	}
 
 	public void hurt(Entity damager, int health) {

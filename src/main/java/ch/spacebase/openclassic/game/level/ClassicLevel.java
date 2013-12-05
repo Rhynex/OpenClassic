@@ -52,25 +52,26 @@ public abstract class ClassicLevel implements Level {
 	private NBTData data;
 	
 	public ClassicLevel() {
-		this.highest = new int[this.width * this.depth];
-		Arrays.fill(this.highest, this.height);
-		this.calcHighest(0, 0, this.width, this.depth);
+		this.highest = new int[0];
 	}
 	
 	public ClassicLevel(LevelInfo info) {
-		this();
 		this.name = info.getName();
 		this.author = "";
 		this.creationTime = System.currentTimeMillis();
 
 		this.spawn = info.getSpawn();
-		if(this.spawn != null) this.spawn.setLevel(this);
+		if(this.spawn != null) {
+			this.spawn.setLevel(this);
+		}
 
 		this.width = info.getWidth();
 		this.height = info.getHeight();
 		this.depth = info.getDepth();
 		this.waterLevel = (short) (this.height / 2);
 		this.blocks = new byte[this.width * this.depth * this.height];
+		this.highest = new int[this.width * this.depth];
+		Arrays.fill(this.highest, this.height);
 
 		this.data = new NBTData(this.name);
 		this.data.load(OpenClassic.getGame().getDirectory().getPath() + "/levels/" + this.name + ".nbt");
@@ -164,31 +165,27 @@ public abstract class ClassicLevel implements Level {
 		this.waterLevel = (short) (this.height / 2);
 
 		this.blocks = blocks;
-		this.highest = new int[width * height];
+		this.highest = new int[width * depth];
 		Arrays.fill(this.highest, this.height);
-		this.calcHighest(0, 0, width, height);
+		this.calcHighest(0, 0, width, depth);
 	}
 	
-	private void calcHighest(int x1, int z1, int x2, int z2) {
-		for(int x = x1; x < x1 + x2; x++) {
-			for(int z = z1; z < z1 + z2; z++) {
-				int highest = this.highest[x + z * this.width];
-
-				int blocker = this.height - 1;
-				while(blocker > 0) {
-					BlockType block = this.getBlockTypeAt(x, blocker, z);
+	private void calcHighest(int x, int z, int width, int depth) {
+		for(int cx = x; cx < x + width; cx++) {
+			for(int cz = z; cz < z + depth; cz++) {
+				int highest = this.highest[cx + cz * this.width];
+				for(int blocker = this.height - 1; blocker > 0; blocker--) {
+					BlockType block = this.getBlockTypeAt(cx, blocker, cz);
 					if(block != null && block.isOpaque()) {
+						this.highest[cx + cz * this.width] = blocker;
+						if(highest != blocker) {
+							int lower = highest < blocker ? highest : blocker;
+							highest = highest > blocker ? highest : blocker;
+							this.highestUpdated(cx, cz, lower, highest);
+						}
+						
 						break;
 					}
-					
-					blocker--;
-				}
-
-				this.highest[x + z * this.width] = blocker;
-				if(highest != blocker) {
-					int lower = highest < blocker ? highest : blocker;
-					highest = highest > blocker ? highest : blocker;
-					this.highestUpdated(x, z, lower, highest);
 				}
 			}
 		}
@@ -305,7 +302,9 @@ public abstract class ClassicLevel implements Level {
 
 	@Override
 	public boolean setBlockIdAt(int x, int y, int z, byte type, boolean physics) {
-		if(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth) return false;
+		if(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth) {
+			return false;
+		}
 
 		if(!this.generating && type == VanillaBlock.AIR.getId() && (x == 0 || x == this.getWidth() - 1 || z == 0 || z == this.getDepth() - 1) && y <= this.getWaterLevel() - 1 && y > this.getWaterLevel() - 3) {
 			type = VanillaBlock.WATER.getId();
@@ -321,6 +320,7 @@ public abstract class ClassicLevel implements Level {
 			}
 		}
 
+		this.calcHighest(x, z, 1, 1);
 		return true;
 	}
 
@@ -352,7 +352,9 @@ public abstract class ClassicLevel implements Level {
 	@Override
 	public int getHighestBlockY(int x, int z, int max) {
 		for(int y = max; y >= 0; y--) {
-			if(this.getBlockIdAt(x, y, z) != 0) return y;
+			if(this.getBlockIdAt(x, y, z) != 0) {
+				return y;
+			}
 		}
 
 		return -1;
@@ -360,8 +362,7 @@ public abstract class ClassicLevel implements Level {
 
 	@Override
 	public boolean isHighest(int x, int y, int z) {
-		if(this.getHighestBlockY(x, z) <= y) return true;
-		return false;
+		return this.getHighestBlockY(x, z) <= y;
 	}
 	
 	@Override
@@ -371,14 +372,11 @@ public abstract class ClassicLevel implements Level {
 
 	@Override
 	public boolean isLit(int x, int y, int z) {
-		for(int curr = y + 1; curr <= this.getHeight(); curr++) {
-			BlockType block = this.getBlockTypeAt(x, curr, z);
-			if(block != null && block.isOpaque()) {
-				return false;
-			}
+		if(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.depth) {
+			return true;
 		}
-
-		return true;
+		
+		return y >= this.highest[x + z * this.width];
 	}
 	
 	@Override

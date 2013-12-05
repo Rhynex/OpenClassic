@@ -6,7 +6,7 @@ import ch.spacebase.openclassic.client.util.GeneralUtils;
 import ch.spacebase.openclassic.client.util.RayTracer;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.item.Arrow;
+import com.mojang.minecraft.entity.object.Arrow;
 
 public class BasicAttackAI extends BasicAI {
 

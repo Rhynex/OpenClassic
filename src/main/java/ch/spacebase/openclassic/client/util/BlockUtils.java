@@ -8,16 +8,16 @@ import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.block.VanillaBlock;
 import ch.spacebase.openclassic.api.block.model.Model;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.level.particle.TerrainParticle;
 
-import com.mojang.minecraft.entity.item.Item;
-import com.mojang.minecraft.entity.particle.TerrainParticle;
+import com.mojang.minecraft.entity.object.Item;
 
 public class BlockUtils {
 
 	private static Random rand = new Random();
 
 	public static boolean canExplode(BlockType type) {
-		return type != VanillaBlock.STONE && type != VanillaBlock.COBBLESTONE && type != VanillaBlock.BEDROCK && type != VanillaBlock.COAL_ORE && type != VanillaBlock.IRON_ORE && type != VanillaBlock.GOLD_ORE && type != VanillaBlock.GOLD_BLOCK && type != VanillaBlock.IRON_BLOCK && type != VanillaBlock.SLAB && type != VanillaBlock.DOUBLE_SLAB && type != VanillaBlock.BRICK_BLOCK && type != VanillaBlock.MOSSY_COBBLESTONE && type != VanillaBlock.OBSIDIAN;
+		return type != VanillaBlock.AIR && type != VanillaBlock.STONE && type != VanillaBlock.COBBLESTONE && type != VanillaBlock.BEDROCK && type != VanillaBlock.COAL_ORE && type != VanillaBlock.IRON_ORE && type != VanillaBlock.GOLD_ORE && type != VanillaBlock.GOLD_BLOCK && type != VanillaBlock.IRON_BLOCK && type != VanillaBlock.SLAB && type != VanillaBlock.DOUBLE_SLAB && type != VanillaBlock.BRICK_BLOCK && type != VanillaBlock.MOSSY_COBBLESTONE && type != VanillaBlock.OBSIDIAN;
 	}
 
 	public static int getHardness(BlockType type) {
@@ -73,7 +73,7 @@ public class BlockUtils {
 	}
 
 	public static int getDropCount(BlockType type) {
-		if(type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER || type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA || type == VanillaBlock.TNT || type == VanillaBlock.BOOKSHELF) {
+		if(type == VanillaBlock.AIR || type == VanillaBlock.WATER || type == VanillaBlock.STATIONARY_WATER || type == VanillaBlock.LAVA || type == VanillaBlock.STATIONARY_LAVA || type == VanillaBlock.TNT || type == VanillaBlock.BOOKSHELF) {
 			return 0;
 		} else if(type == VanillaBlock.DOUBLE_SLAB) {
 			return 2;
@@ -158,7 +158,7 @@ public class BlockUtils {
 				particleX = x + model.getSelectionBox(x, y, z).getX2() + 0.1f;
 			}
 	
-			level.getParticleManager().spawnParticle((new TerrainParticle(new Position(level, particleX, particleY, particleZ), 0, 0, 0, level.getBlockTypeAt(x, y, z))).setPower(0.2F).scale(0.6F));
+			level.getParticleManager().spawnParticle((new TerrainParticle(new Position(level, particleX, particleY, particleZ), 0, 0, 0, level.getBlockTypeAt(x, y, z))).setPower(0.2f).scale(0.6f));
 		}
 	}
 

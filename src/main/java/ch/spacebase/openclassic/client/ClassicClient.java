@@ -123,6 +123,7 @@ public class ClassicClient extends ClassicGame implements Client {
 			this.exitGameSession();
 		}
 		
+		VanillaBlock.registerAll();
 		ClientLevel level = new ClientLevel(info);
 		byte[] data = new byte[info.getWidth() * info.getHeight() * info.getDepth()];
 		level.setData(info.getWidth(), info.getHeight(), info.getDepth(), data);
@@ -170,6 +171,7 @@ public class ClassicClient extends ClassicGame implements Client {
 		OpenClassic.getClient().getProgressBar().setProgress(-1);
 		OpenClassic.getClient().getProgressBar().render();
 		ClientLevel level = null;
+		VanillaBlock.registerAll();
 		try {
 			level = new ClientLevel();
 			level = (ClientLevel) OpenClassicLevelFormat.load(level, name, false);
@@ -178,6 +180,7 @@ public class ClassicClient extends ClassicGame implements Client {
 			OpenClassic.getClient().getProgressBar().setVisible(false);
 			return level;
 		} catch(IOException e) {
+			VanillaBlock.unregisterAll();
 			OpenClassic.getClient().getProgressBar().setText(String.format(OpenClassic.getGame().getTranslator().translate("level.load-fail"), name));
 			e.printStackTrace();
 			try {
@@ -199,7 +202,6 @@ public class ClassicClient extends ClassicGame implements Client {
 			this.exitGameSession();
 		}
 
-		VanillaBlock.registerAll();
 		this.mc.setLevel(level);
 		this.mc.initGame();
 		this.setActiveComponent(null);

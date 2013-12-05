@@ -570,7 +570,7 @@ public class LevelRenderer {
 			Textures.RAIN.bind();
 			for(int cx = player.getPosition().getBlockX() - 5; cx <= player.getPosition().getBlockX() + 5; cx++) {
 				for(int cz = player.getPosition().getBlockZ() - 5; cz <= player.getPosition().getBlockZ() + 5; cz++) {
-					int highest = this.level.getHighestBlockY(cx, cz);
+					int highest = this.level.getHighestBlockY(cx, cz) + 1;
 					int minRY = player.getPosition().getBlockY() - 5;
 					int maxRY = player.getPosition().getBlockY() + 5;
 					if(minRY < highest) {

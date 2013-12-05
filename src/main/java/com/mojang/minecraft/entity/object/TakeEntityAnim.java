@@ -1,4 +1,4 @@
-package com.mojang.minecraft.entity.item;
+package com.mojang.minecraft.entity.object;
 
 import ch.spacebase.openclassic.client.level.ClientLevel;
 
@@ -41,4 +41,5 @@ public class TakeEntityAnim extends Entity {
 	public void render(float dt) {
 		this.taking.render(dt);
 	}
+	
 }

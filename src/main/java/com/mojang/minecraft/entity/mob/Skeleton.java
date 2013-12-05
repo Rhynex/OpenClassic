@@ -2,9 +2,9 @@ package com.mojang.minecraft.entity.mob;
 
 import ch.spacebase.openclassic.client.level.ClientLevel;
 
-import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.mob.ai.BasicAttackAI;
 import com.mojang.minecraft.entity.mob.ai.SkeletonAI;
+import com.mojang.minecraft.entity.object.Arrow;
 
 public class Skeleton extends Zombie {
 

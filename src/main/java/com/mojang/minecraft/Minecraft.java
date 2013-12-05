@@ -64,6 +64,7 @@ import ch.spacebase.openclassic.client.input.Input;
 import ch.spacebase.openclassic.client.input.KeyboardEvent;
 import ch.spacebase.openclassic.client.input.MouseEvent;
 import ch.spacebase.openclassic.client.level.ClientLevel;
+import ch.spacebase.openclassic.client.level.particle.RainParticle;
 import ch.spacebase.openclassic.client.network.ClientSession;
 import ch.spacebase.openclassic.client.player.ClientPlayer;
 import ch.spacebase.openclassic.client.render.ClientTextureFactory;
@@ -89,8 +90,7 @@ import ch.spacebase.openclassic.game.scheduler.ClassicScheduler;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.item.Arrow;
-import com.mojang.minecraft.entity.particle.RainParticle;
+import com.mojang.minecraft.entity.object.Arrow;
 import com.mojang.minecraft.entity.player.InputHandler;
 import com.mojang.minecraft.entity.player.LocalPlayer;
 import com.mojang.minecraft.entity.player.net.NetworkPlayer;
@@ -638,7 +638,12 @@ public class Minecraft implements Runnable {
 					int x = this.selected.x;
 					int y = this.selected.y;
 					int z = this.selected.z;
-					if(button != 0) {
+					if(button == 0) {
+						if(this.level != null && (!this.level.getBlockTypeAt(x, y, z).isUnbreakable() || this.ocPlayer.canBreakUnbreakables())) {
+							this.mode.hitBlock(x, y, z);
+							return;
+						}
+					} else if(this.player.inventory.getSelected() > 0) {
 						if(this.selected.side == 0) {
 							y--;
 						}
@@ -662,14 +667,7 @@ public class Minecraft implements Runnable {
 						if(this.selected.side == 5) {
 							x++;
 						}
-					}
-
-					if(button == 0) {
-						if(this.level != null && (!this.level.getBlockTypeAt(x, y, z).isUnbreakable() || this.ocPlayer.canBreakUnbreakables())) {
-							this.mode.hitBlock(x, y, z);
-							return;
-						}
-					} else if(this.player.inventory.getSelected() > 0) {
+						
 						BlockType type = Blocks.fromId(this.player.inventory.getSelected());
 						if(type == null) {
 							return;
@@ -688,9 +686,7 @@ public class Minecraft implements Runnable {
 
 							if(this.isInMultiplayer()) {
 								this.session.send(new PlayerSetBlockMessage((short) x, (short) y, (short) z, button == 1, type.getId()));
-							}
-
-							if(!this.isInMultiplayer() && EventManager.callEvent(new BlockPlaceEvent(this.level.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.heldBlock.getBlock())).isCancelled()) {
+							} else if(EventManager.callEvent(new BlockPlaceEvent(this.level.getBlockAt(x, y, z), OpenClassic.getClient().getPlayer(), this.heldBlock.getBlock())).isCancelled()) {
 								return;
 							}
 
@@ -1058,11 +1054,11 @@ public class Minecraft implements Runnable {
 				for(int count = 0; count < 50; count++) {
 					int x = this.player.pos.getBlockX() + rand.nextInt(9) - 4;
 					int z = this.player.pos.getBlockZ() + rand.nextInt(9) - 4;
-					int y = this.level.getHighestBlockY(x, z);
+					int y = this.level.getHighestBlockY(x, z) + 1;
 					if(y <= this.player.pos.getBlockY() + 4 && y >= this.player.pos.getBlockY() - 4) {
 						float xOffset = rand.nextFloat();
 						float zOffset = rand.nextFloat();
-						this.level.getParticleManager().spawnParticle(new RainParticle(new Position(this.level, x + xOffset, y + 0.1F, z + zOffset)));
+						this.level.getParticleManager().spawnParticle(new RainParticle(new Position(this.level, x + xOffset, y + 0.1f, z + zOffset)));
 					}
 				}
 			}

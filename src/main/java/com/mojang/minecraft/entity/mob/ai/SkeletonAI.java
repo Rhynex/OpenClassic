@@ -3,9 +3,9 @@ package com.mojang.minecraft.entity.mob.ai;
 import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
-import com.mojang.minecraft.entity.item.Arrow;
 import com.mojang.minecraft.entity.mob.Mob;
 import com.mojang.minecraft.entity.mob.Skeleton;
+import com.mojang.minecraft.entity.object.Arrow;
 
 public class SkeletonAI extends BasicAttackAI {
 

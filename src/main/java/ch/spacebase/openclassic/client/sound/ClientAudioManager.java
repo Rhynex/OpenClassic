@@ -1,10 +1,14 @@
 package ch.spacebase.openclassic.client.sound;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +21,7 @@ import javax.sound.sampled.AudioSystem;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.lwjgl.LWJGLUtil;
 import org.lwjgl.openal.AL;
 
 import paulscode.sound.Library;
@@ -123,17 +128,28 @@ public class ClientAudioManager implements AudioManager {
 		Class<? extends Library> ret = Library.class;
 		OpenClassic.getLogger().info("Checking if LWJGL OpenAL is compatible...");
 		boolean al = false;
-		Exception reason = null;
+		String debug = "";
         if(AL.isCreated()) {
         	al = true;
         } else {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			PrintStream stream = new PrintStream(out);
+			PrintStream old = System.err;
+			System.setErr(stream);
+			setLWJGLDebug(true);
 			try {
 				AL.create();
 				al = true;
 				AL.destroy();
-			} catch(Exception e) {
-				reason = e;
+			} catch(Throwable t) {
+				System.err.println("");
+				t.printStackTrace();
 			}
+			
+			setLWJGLDebug(false);
+			System.setErr(old);
+			stream.close();
+			debug = out.toString();
         }
         
 		if(al) {
@@ -141,8 +157,8 @@ public class ClientAudioManager implements AudioManager {
 			OpenClassic.getLogger().info("      ...yes, AL was successfully created.");
 		} else {
 			OpenClassic.getLogger().info("      ...no, AL could not be created.");
-			OpenClassic.getLogger().info("Reason:");
-			reason.printStackTrace();
+			OpenClassic.getLogger().info("Debug:");
+			OpenClassic.getLogger().info(debug);
 			
 			OpenClassic.getLogger().info("Checking if Java Sound is compatible...");
 			if(AudioSystem.getMixer(null) != null) {
@@ -154,6 +170,19 @@ public class ClientAudioManager implements AudioManager {
 		}
 		
 		return ret;
+	}
+	
+	private static void setLWJGLDebug(boolean debug) {
+		try {
+			Field f = LWJGLUtil.class.getDeclaredField("DEBUG");
+			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+			modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+			f.set(null, debug);
+		} catch(Exception e) {
+			OpenClassic.getLogger().warning("Failed to set LWJGL debug value for audio compatibility checks!");
+			e.printStackTrace();
+		}
 	}
 
 	public void update(Player player) {

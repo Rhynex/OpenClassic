@@ -5,7 +5,7 @@ import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.client.render.Textures;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.item.Item;
+import com.mojang.minecraft.entity.object.Item;
 
 public class Pig extends QuadrupedMob {
 

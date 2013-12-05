@@ -1,9 +1,9 @@
 package com.mojang.minecraft.entity.mob.ai;
 
 import ch.spacebase.openclassic.api.block.VanillaBlock;
+import ch.spacebase.openclassic.client.level.particle.TerrainParticle;
 
 import com.mojang.minecraft.entity.Entity;
-import com.mojang.minecraft.entity.particle.TerrainParticle;
 
 public class CreeperAI extends BasicAttackAI {
 
