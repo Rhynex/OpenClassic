@@ -15,26 +15,26 @@ import com.mojang.minecraft.Minecraft;
 public class LWJGLNatives {
 
 	public static void load(File dir) {
-		if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_LINUX) {
-			load(dir.getPath(), "libjinput-linux.so", "86");
-			load(dir.getPath(), "libjinput-linux64.so", "64");
-			load(dir.getPath(), "liblwjgl.so", "86");
-			load(dir.getPath(), "liblwjgl64.so", "64");
-			load(dir.getPath(), "libopenal.so", "86");
-			load(dir.getPath(), "libopenal64.so", "64");
-		} else if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_WINDOWS) {
-			load(dir.getPath(), "OpenAL64.dll", "64");
-			load(dir.getPath(), "OpenAL32.dll", "86");
-			load(dir.getPath(), "lwjgl64.dll", "64");
-			load(dir.getPath(), "lwjgl.dll", "86");
-			load(dir.getPath(), "jinput-raw_64.dll", "64");
-			load(dir.getPath(), "jinput-raw.dll", "86");
-			load(dir.getPath(), "jinput-dx8_64.dll", "64");
-			load(dir.getPath(), "jinput-dx8.dll", "86");
+		if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_WINDOWS) {
+			extract(dir, "lwjgl.dll", "86");
+			extract(dir, "lwjgl64.dll", "64");
+			extract(dir, "OpenAL32.dll", "86");
+			extract(dir, "OpenAL64.dll", "64");
+			extract(dir, "jinput-raw.dll", "86");
+			extract(dir, "jinput-raw_64.dll", "64");
+			extract(dir, "jinput-dx8.dll", "86");
+			extract(dir, "jinput-dx8_64.dll", "64");
+		} else if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_LINUX) {
+			extract(dir, "liblwjgl.so", "86");
+			extract(dir, "liblwjgl64.so", "64");
+			extract(dir, "libopenal.so", "86");
+			extract(dir, "libopenal64.so", "64");
+			extract(dir, "libjinput-linux.so", "86");
+			extract(dir, "libjinput-linux64.so", "64");
 		} else if(LWJGLUtil.getPlatform() == LWJGLUtil.PLATFORM_MACOSX) {
-			load(dir.getPath(), "openal.dylib", "both");
-			load(dir.getPath(), "liblwjgl.jnilib", "both");
-			load(dir.getPath(), "libjinput-osx.jnilib", "both");
+			extract(dir, "liblwjgl.jnilib", "both");
+			extract(dir, "openal.dylib", "both");
+			extract(dir, "libjinput-osx.jnilib", "both");
 		} else {
 			throw new RuntimeException(OpenClassic.getGame().getTranslator().translate("core.no-lwjgl"));
 		}
@@ -44,39 +44,42 @@ public class LWJGLNatives {
 		System.setProperty("net.java.games.input.librarypath", dir.getPath());
 	}
 
-	private static void load(String dir, String lib, String arch) {
-		File file = new File(dir + "/" + lib);
-
-		try {
-			if(file.exists()) {
-				InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
-				InputStream fin = new FileInputStream(file);
-				try {
-					if(IOUtils.contentEquals(in, fin)) {
-						if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
-							System.load(file.getPath());
+	private static void extract(File dir, String lib, String arch) {
+		if(arch.equals("both") || System.getProperty("os.arch").contains(arch)) {
+			File file = new File(dir, lib);
+			boolean writing = false;
+			OpenClassic.getLogger().info("Checking for " + lib + " at " + file.getPath());
+			try {
+				if(file.exists()) {
+					InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
+					InputStream fin = new FileInputStream(file);
+					try {
+						if(IOUtils.contentEquals(in, fin)) {
+							OpenClassic.getLogger().info(lib + " is up to date at " + file.getPath());
+							return;
 						}
-
-						return;
+					} finally {
+						IOUtils.closeQuietly(in);
+						IOUtils.closeQuietly(fin);
 					}
-				} finally {
-					IOUtils.closeQuietly(in);
-					IOUtils.closeQuietly(fin);
 				}
+	
+				writing = true;
+				InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
+				OpenClassic.getLogger().info("Writing " + lib + " to " + file.getPath());
+				FileOutputStream out = new FileOutputStream(file);
+				IOUtils.copy(in, out);
+				IOUtils.closeQuietly(in);
+				IOUtils.closeQuietly(out);
+			} catch(Exception e) {
+				if(writing) {
+					OpenClassic.getLogger().severe("Failed to write library " + lib + " to " + file.getPath());
+				} else {
+					OpenClassic.getLogger().severe("Failed to check for library " + lib + " at " + file.getPath());
+				}
+				
+				e.printStackTrace();
 			}
-
-			InputStream in = Minecraft.class.getResourceAsStream("/" + lib);
-			OpenClassic.getLogger().info("Writing " + lib + " to " + file.getPath());
-			FileOutputStream out = new FileOutputStream(file);
-			IOUtils.copy(in, out);
-			IOUtils.closeQuietly(in);
-			IOUtils.closeQuietly(out);
-			if(System.getProperty("os.arch").contains(arch) || arch.equals("both")) {
-				System.load(file.getPath());
-			}
-		} catch(Exception e) {
-			OpenClassic.getLogger().severe(String.format(OpenClassic.getGame().getTranslator().translate("core.fail-unpack"), lib));
-			e.printStackTrace();
 		}
 	}
 

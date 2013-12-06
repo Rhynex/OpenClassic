@@ -1,7 +1,8 @@
 core:
     fail-working-dir: Failed to create working directory!
     no-lwjgl: Your system does not support LWJGL.
-    fail-unpack: Failed to unpack native "%s"!
+    fail-check-library: Failed to check for library "%s"!
+    fail-unpack-library: Failed to unpack library "%s"!
     exception: Exception occured
     client-error: Client error
     game-broke: The game broke! [%s]
