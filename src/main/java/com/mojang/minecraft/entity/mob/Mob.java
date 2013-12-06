@@ -135,8 +135,6 @@ public class Mob extends Entity {
 
 		this.animStepO = this.animStep;
 		this.oBodyYaw = this.bodyYaw;
-		//this.oYaw = this.yaw;
-		//this.oPitch = this.pitch;
 		this.tickCount++;
 		this.aiStep();
 		float xDistance = this.pos.getX() - this.pos.getPreviousX();

@@ -48,6 +48,20 @@ public class NetworkPlayer extends Player {
 
 		this.onGround = true;
 	}
+	
+	public void setPos(PositionUpdate pos) {
+		if(pos.position) {
+			this.setPos(pos.x, pos.y, pos.z);
+		} else {
+			this.setPos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+		}
+
+		if(pos.rotation) {
+			this.setRot(pos.yaw, pos.pitch);
+		} else {
+			this.setRot(this.pos.getYaw(), this.pos.getPitch());
+		}
+	}
 
 	public void renderHoverOver(float dt) {
 		GL11.glPushMatrix();
@@ -71,57 +85,28 @@ public class NetworkPlayer extends Player {
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glPopMatrix();
 	}
-
-	public void queue(byte xChange, byte yChange, byte zChange, float yawChange, float pitchChange) {
-		float yaw = yawChange - this.pos.getYaw();
-		float pitch = pitchChange - this.pos.getPitch();
-
-		while(yaw >= 180) {
-			yaw -= 360;
-		}
-
-		while(yaw < -180) {
-			yaw += 360;
-		}
-
-		while(pitch >= 180) {
-			pitch -= 360;
-		}
-
-		while(pitch < -180) {
-			pitch += 360;
-		}
-
-		yaw = this.pos.getYaw() + yaw * 0.5F;
-		pitch = this.pos.getPitch() + pitch * 0.5F;
-		this.moveQueue.add(new PositionUpdate((this.xp + xChange / 2.0F) / 32.0F, (this.yp + yChange / 2.0F) / 32.0F, (this.zp + zChange / 2.0F) / 32.0F, yaw, pitch));
-		this.xp += xChange;
-		this.yp += yChange;
-		this.zp += zChange;
-		this.moveQueue.add(new PositionUpdate(this.xp / 32.0F, this.yp / 32.0F, this.zp / 32.0F, yawChange, pitchChange));
-	}
-
+	
 	public void teleport(short x, short y, short z, float yaw, float pitch) {
-		float newYaw = yaw - this.pos.getYaw();
-		float newPitch = pitch - this.pos.getPitch();
-		while(newYaw >= 180) {
-			newYaw -= 360;
+		float diffYaw = yaw - this.pos.getYaw();
+		float diffPitch = pitch - this.pos.getPitch();
+		while(diffYaw >= 180) {
+			diffYaw -= 360;
 		}
 
-		while(newYaw < -180) {
-			newYaw += 360;
+		while(diffYaw < -180) {
+			diffYaw += 360;
 		}
 
-		while(newPitch >= 180) {
-			newPitch -= 360;
+		while(diffPitch >= 180) {
+			diffPitch -= 360;
 		}
 
-		while(newPitch < -180) {
-			newPitch += 360;
+		while(diffPitch < -180) {
+			diffPitch += 360;
 		}
 
-		newYaw = this.pos.getYaw() + newYaw * 0.5F;
-		newPitch = this.pos.getPitch() + newPitch * 0.5F;
+		float newYaw = this.pos.getYaw() + diffYaw * 0.5F;
+		float newPitch = this.pos.getPitch() + diffPitch * 0.5F;
 		this.moveQueue.add(new PositionUpdate((this.xp + x) / 64.0F, (this.yp + y) / 64.0F, (this.zp + z) / 64.0F, newYaw, newPitch));
 		this.xp = x;
 		this.yp = y;
@@ -129,11 +114,39 @@ public class NetworkPlayer extends Player {
 		this.moveQueue.add(new PositionUpdate(this.xp / 32.0F, this.yp / 32.0F, this.zp / 32.0F, yaw, pitch));
 	}
 
-	public void queue(byte x, byte y, byte z) {
-		this.moveQueue.add(new PositionUpdate((this.xp + x / 2.0F) / 32.0F, (this.yp + y / 2.0F) / 32.0F, (this.zp + z / 2.0F) / 32.0F));
-		this.xp += x;
-		this.yp += y;
-		this.zp += z;
+	public void queue(byte xChange, byte yChange, byte zChange, float yaw, float pitch) {
+		float diffYaw = yaw - this.pos.getYaw();
+		float diffPitch = pitch - this.pos.getPitch();
+		while(diffYaw >= 180) {
+			diffYaw -= 360;
+		}
+
+		while(diffYaw < -180) {
+			diffYaw += 360;
+		}
+
+		while(diffPitch >= 180) {
+			diffPitch -= 360;
+		}
+
+		while(diffPitch < -180) {
+			diffPitch += 360;
+		}
+
+		float newYaw = this.pos.getYaw() + diffYaw * 0.5F;
+		float newPitch = this.pos.getPitch() + diffPitch * 0.5F;
+		this.moveQueue.add(new PositionUpdate((this.xp + xChange / 2.0F) / 32.0F, (this.yp + yChange / 2.0F) / 32.0F, (this.zp + zChange / 2.0F) / 32.0F, newYaw, newPitch));
+		this.xp += xChange;
+		this.yp += yChange;
+		this.zp += zChange;
+		this.moveQueue.add(new PositionUpdate(this.xp / 32.0F, this.yp / 32.0F, this.zp / 32.0F, yaw, pitch));
+	}
+
+	public void queue(byte xChange, byte yChange, byte zChange) {
+		this.moveQueue.add(new PositionUpdate((this.xp + xChange / 2.0F) / 32.0F, (this.yp + yChange / 2.0F) / 32.0F, (this.zp + zChange / 2.0F) / 32.0F));
+		this.xp += xChange;
+		this.yp += yChange;
+		this.zp += zChange;
 		this.moveQueue.add(new PositionUpdate(this.xp / 32.0F, this.yp / 32.0F, this.zp / 32.0F));
 	}
 

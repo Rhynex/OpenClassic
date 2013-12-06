@@ -377,7 +377,8 @@ public class RenderHelper {
 			
 			Level level = OpenClassic.getClient().getLevel();
 			if(batch && level != null) {
-				if(againstSurface && !this.canRenderSide(level, level.getBlockTypeAt((int) x, (int) y, (int) z), quad.getParent(), (int) x, (int) y, (int) z, face)) {
+				BlockType block = level.getBlockTypeAt((int) x, (int) y, (int) z);
+				if(againstSurface && !this.canRenderSide(level, block, quad.getParent(), (int) x, (int) y, (int) z, face)) {
 					return;
 				}
 				
@@ -405,6 +406,14 @@ public class RenderHelper {
 			brightness = brightness * mod;
 		}
 		
+		Level level = OpenClassic.getClient().getLevel();
+		if(batch && level != null) {
+			BlockType block = level.getBlockTypeAt((int) x, (int) y, (int) z);
+			if(block != null && block.getBrightness() > 0) {
+				brightness = block.getBrightness();
+			}
+		}
+		
 		if(brightness >= 0) {
 			Renderer.get().color(brightness, brightness, brightness);
 		}
@@ -417,11 +426,10 @@ public class RenderHelper {
 		Renderer.get().vertexuv(x + quad.getVertex(3).getX(), y + quad.getVertex(3).getY(), z + quad.getVertex(3).getZ(), x1 / width, y2 / height);
 
 		if(!batch) {
+			Renderer.get().end();
 			if(!quad.getParent().useCulling()) {
 				GL11.glEnable(GL11.GL_CULL_FACE);
 			}
-			
-			Renderer.get().end();
 		}
 	}
 
@@ -657,7 +665,6 @@ public class RenderHelper {
 		if(block != null && block.getModel() != null) {
 			GL11.glPushMatrix();
 			GL11.glTranslatef(x, y, -50);
-
 			if(popTime > 0) {
 				float off = (popTime - GeneralUtils.getMinecraft().timer.delta) / 5;
 				GL11.glTranslatef(10, (-MathHelper.sin(off * off * MathHelper.PI) * 8) + 10, 0);

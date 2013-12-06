@@ -14,7 +14,6 @@ import ch.spacebase.openclassic.client.level.ClientLevel;
 import ch.spacebase.openclassic.game.util.InternalConstants;
 
 import com.mojang.minecraft.entity.player.LocalPlayer;
-import com.mojang.minecraft.entity.player.net.PositionUpdate;
 
 public abstract class Entity {
 
@@ -96,20 +95,6 @@ public abstract class Entity {
 	public void setSize(float width, float height) {
 		this.bbWidth = width;
 		this.bbHeight = height;
-	}
-
-	public void setPos(PositionUpdate pos) {
-		if(pos.position) {
-			this.setPos(pos.x, pos.y, pos.z);
-		} else {
-			this.setPos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
-		}
-
-		if(pos.rotation) {
-			this.setRot(pos.yaw, pos.pitch);
-		} else {
-			this.setRot(this.pos.getYaw(), this.pos.getPitch());
-		}
 	}
 
 	protected void setRot(float yaw, float pitch) {

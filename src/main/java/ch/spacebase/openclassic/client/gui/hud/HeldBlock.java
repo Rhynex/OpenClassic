@@ -8,7 +8,6 @@ import ch.spacebase.openclassic.api.OpenClassic;
 import ch.spacebase.openclassic.api.Position;
 import ch.spacebase.openclassic.api.block.BlockType;
 import ch.spacebase.openclassic.api.math.MathHelper;
-import ch.spacebase.openclassic.client.render.RenderHelper;
 import ch.spacebase.openclassic.client.util.GeneralUtils;
 
 public class HeldBlock {
@@ -37,7 +36,6 @@ public class HeldBlock {
 			return;
 		}
 		
-		RenderHelper.getHelper().setLighting(true);
 		GL11.glPushMatrix();
 		if(this.moving) {
 			float off = (this.heldOffset + delta) / 7F;
@@ -82,7 +80,6 @@ public class HeldBlock {
 
 		GL11.glDisable(GL11.GL_NORMALIZE);
 		GL11.glPopMatrix();
-		RenderHelper.getHelper().setLighting(false);
 	}
 
 	public void tick(BlockType held) {
